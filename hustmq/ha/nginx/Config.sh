@@ -1,0 +1,1 @@
+./configure --with-debug --prefix=/data/hustmqha --add-module=src/addon

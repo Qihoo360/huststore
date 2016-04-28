@@ -1,0 +1,13 @@
+{
+    "structs": [
+        {
+            "name": "HustmqWorker",
+            "members": [
+                ["json_str_t", "w"],
+                ["json_int_t", "t"]
+            ],
+            "methods" : ["dispose", "deserialize", "loads"],
+            "array_methods": ["dispose", "deserialize", "loads"]
+        }
+    ]
+}

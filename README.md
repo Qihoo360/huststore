@@ -138,5 +138,5 @@
 
 ## Authors ##
 
-* hustxrb (hustxrb@163.com)  
-* jobs (yao050421103@163.com)  
+* XuRuibo（hustxrb，hustxrb@163.com)  
+* ChengZhuo（jobs，yao050421103@163.com)  

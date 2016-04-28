@@ -1,0 +1,442 @@
+{
+    "module": "hustdb",
+    "handlers":
+    [
+        {
+            "uri": "/hustdb/exist",
+            "methods": ["GET"],
+            "args":
+            [
+                ["c_str_t", "key"]
+            ],
+            "required": ["key"],
+            "check": "!request || !ctx || !ctx->db->ok()"
+        },
+        {
+            "uri": "/hustdb/get",
+            "methods": ["GET"],
+            "args":
+            [
+                ["c_str_t", "key"]
+            ],
+            "required": ["key"],
+            "check": "!request || !ctx || !ctx->db->ok()"
+        },
+        {
+            "uri": "/hustdb/put",
+            "methods": ["GET", "POST"],
+            "args":
+            [
+                ["c_str_t", "key"],
+                ["c_str_t", "val"],
+                ["uint32_t", "ttl", "0"],
+                ["uint32_t", "ver", "0"],
+                ["bool", "is_dup", "false"]
+            ],
+            "required": ["key", "val"],
+            "post": { "arg": "val" },
+            "check": "!request || !ctx || !ctx->db->ok()"
+        },
+        {
+            "uri": "/hustdb/del",
+            "methods": ["GET"],
+            "args":
+            [
+                ["c_str_t", "key"],
+                ["uint32_t", "ver", "0"],
+                ["bool", "is_dup", "false"]
+            ],
+            "required": ["key"],
+            "check": "!request || !ctx || !ctx->db->ok()"
+        },
+        {
+            "uri": "/hustdb/keys",
+            "methods": ["GET"],
+            "args":
+            [
+                ["int32_t", "offset", "-1"],
+                ["int32_t", "size", "-1"],
+                ["int32_t", "file", "-1"],
+                ["int32_t", "start", "0"],
+                ["int32_t", "end", "MAX_BUCKET_NUM"],
+                ["bool", "noval", "true"],
+                ["bool", "async", "false"]
+            ],
+            "required": ["offset", "size", "file"],
+            "check": "!request || !ctx || !ctx->db->ok()"
+        },
+        {
+            "uri": "/hustdb/stat",
+            "methods": ["GET"],
+            "args":
+            [
+                ["c_str_t", "tb"]
+            ],
+            "check": "!request || !ctx || !ctx->db->ok()"
+        },
+        {
+            "uri": "/hustdb/stat_all",
+            "methods": ["GET"],
+            "check": "!request || !ctx || !ctx->db->ok()"
+        },
+        {
+            "uri": "/hustdb/hexist",
+            "methods": ["GET"],
+            "args":
+            [
+                ["c_str_t", "tb"],
+                ["c_str_t", "key"]
+            ],
+            "required": ["tb", "key"],
+            "check": "!request || !ctx || !ctx->db->ok()"
+        },
+        {
+            "uri": "/hustdb/hget",
+            "methods": ["GET"],
+            "args":
+            [
+                ["c_str_t", "tb"],
+                ["c_str_t", "key"]
+            ],
+            "required": ["tb", "key"],
+            "check": "!request || !ctx || !ctx->db->ok()"
+        },
+        {
+            "uri": "/hustdb/hset",
+            "methods": ["GET", "POST"],
+            "args":
+            [
+                ["c_str_t", "tb"],
+                ["c_str_t", "key"],
+                ["c_str_t", "val"],
+                ["uint32_t", "ttl", "0"],
+                ["uint32_t", "ver", "0"],
+                ["bool", "is_dup", "false"]
+            ],
+            "required": ["tb", "key", "val"],
+            "post": { "arg": "val" },
+            "check": "!request || !ctx || !ctx->db->ok()"
+        },
+        {
+            "uri": "/hustdb/hdel", 
+            "methods": ["GET"],
+            "args":
+            [
+                ["c_str_t", "tb"],
+                ["c_str_t", "key"],
+                ["uint32_t", "ver", "0"],
+                ["bool", "is_dup", "false"]
+            ],
+            "required": ["tb", "key"],
+            "check": "!request || !ctx || !ctx->db->ok()"
+        },
+        {
+            "uri": "/hustdb/hkeys",
+            "methods": ["GET"],
+            "args":
+            [
+                ["c_str_t", "tb"],
+                ["int32_t", "offset", "-1"],
+                ["int32_t", "size", "-1"],
+                ["int32_t", "start", "0"],
+                ["int32_t", "end", "MAX_BUCKET_NUM"],
+                ["bool", "noval", "true"],
+                ["bool", "async", "false"]
+            ],
+            "required": ["tb", "offset", "size"],
+            "check": "!request || !ctx || !ctx->db->ok()"
+        },
+        {
+            "uri": "/hustdb/sismember",
+            "methods": ["GET", "POST"],
+            "args":
+            [
+                ["c_str_t", "tb"],
+                ["c_str_t", "key"]
+            ],
+            "required": ["tb", "key"],
+            "post": { "arg": "key" },
+            "check": "!request || !ctx || !ctx->db->ok()"
+        },
+        {
+            "uri": "/hustdb/sadd",
+            "methods": ["GET", "POST"],
+            "args":
+            [
+                ["c_str_t", "tb"],
+                ["c_str_t", "key"],
+                ["uint32_t", "ver", "0"],
+                ["bool", "is_dup", "false"]
+            ],
+            "required": ["tb", "key"],
+            "post": { "arg": "key" },
+            "check": "!request || !ctx || !ctx->db->ok()"
+        },
+        {
+            "uri": "/hustdb/srem",
+            "methods": ["GET", "POST"],
+            "args":
+            [
+                ["c_str_t", "tb"],
+                ["c_str_t", "key"],
+                ["uint32_t", "ver", "0"],
+                ["bool", "is_dup", "false"]
+            ],
+            "required": ["tb", "key"],
+            "post": { "arg": "key" },
+            "check": "!request || !ctx || !ctx->db->ok()"
+        },
+        {
+            "uri": "/hustdb/smembers", 
+            "methods": ["GET"],
+            "args":
+            [
+                ["c_str_t", "tb"],
+                ["int32_t", "offset", "-1"],
+                ["int32_t", "size", "-1"],
+                ["int32_t", "start", "0"],
+                ["int32_t", "end", "MAX_BUCKET_NUM"],
+                ["bool", "noval", "true"],
+                ["bool", "async", "false"]
+            ],
+            "required": ["tb", "offset", "size"],
+            "check": "!request || !ctx || !ctx->db->ok()"
+        },
+        {
+            "uri": "/hustdb/file_count", 
+            "methods": ["GET"],
+            "check": "!request || !ctx || !ctx->db->ok()"
+        },
+        {
+            "uri": "/hustdb/export", 
+            "methods": ["GET"],
+            "args":
+            [
+                ["c_str_t", "tb"],
+                ["int32_t", "file", "-1"],
+                ["int32_t", "start", "0"],
+                ["int32_t", "end", "MAX_BUCKET_NUM"],
+                ["int32_t", "offset", "0"],
+                ["int32_t", "size", "0"],
+                ["bool", "noval", "true"],
+                ["bool", "cover", "false"]
+            ],
+            "required_one": ["tb", "file"],
+            "check": "!request || !ctx || !ctx->db->ok()"
+        },
+        {
+            "uri": "/hustmq/put", 
+            "methods": ["GET", "POST"],
+            "args":
+            [
+                ["c_str_t", "queue"],
+                ["c_str_t", "item"],
+                ["uint32_t", "priori", "0"]
+            ],
+            "required": ["queue", "item"],
+            "post": { "arg": "item" },
+            "check": "!request || !ctx || !ctx->db->ok()"
+        },
+        {
+            "uri": "/hustmq/get",
+            "methods": ["GET"],
+            "args":
+            [
+                ["c_str_t", "queue"],
+                ["c_str_t", "worker"]
+            ],
+            "required": ["queue", "worker"],
+            "check": "!request || !ctx || !ctx->db->ok()"
+        },
+        {
+            "uri": "/hustmq/worker",
+            "methods": ["GET"],
+            "args":
+            [
+                ["c_str_t", "queue"]
+            ],
+            "required": ["queue"],
+            "check": "!request || !ctx || !ctx->db->ok()"
+        },
+        {
+            "uri": "/hustmq/stat", 
+            "methods": ["GET"],
+            "args":
+            [
+                ["c_str_t", "queue"]
+            ],
+            "required": ["queue"],
+            "check": "!request || !ctx || !ctx->db->ok()"
+        },
+        {
+            "uri": "/hustmq/stat_all",
+            "methods": ["GET"],
+            "check": "!request || !ctx || !ctx->db->ok()"
+        },
+        {
+            "uri": "/hustmq/max",
+            "methods": ["GET"],
+            "args":
+            [
+                ["c_str_t", "queue"],
+                ["uint32_t", "num", "0"]
+            ],
+            "required": ["queue", "num"],
+            "check": "!request || !ctx || !ctx->db->ok()"
+        },
+        {
+            "uri": "/hustmq/lock",
+            "methods": ["GET"],
+            "args":
+            [
+                ["c_str_t", "queue"],
+                ["bool", "on", "0"]
+            ],
+            "required": ["queue", "on"],
+            "check": "!request || !ctx || !ctx->db->ok()"
+        },
+        {
+            "uri": "/hustmq/purge",
+            "methods": ["GET"],
+            "args":
+            [
+                ["c_str_t", "queue"],
+                ["uint32_t", "priori", "-1"]
+            ],
+            "required": ["queue", "priori"],
+            "check": "!request || !ctx || !ctx->db->ok()"
+        },
+        {
+            "uri": "/hustmq/pub",
+            "methods": ["GET", "POST"],
+            "args":
+            [
+                ["c_str_t", "queue"],
+                ["c_str_t", "item"],
+                ["uint32_t", "idx", "CYCLE_QUEUE_ITEM_NUM"],
+                ["uint32_t", "ttl", "DEF_MSG_TTL"]
+            ],
+            "required": ["queue", "item"],
+            "post": { "arg": "item" },
+            "check": "!request || !ctx || !ctx->db->ok()"
+        },
+        {
+            "uri": "/hustmq/sub",
+            "methods": ["GET", "POST"],
+            "args":
+            [
+                ["c_str_t", "queue"],
+                ["uint32_t", "idx", "CYCLE_QUEUE_ITEM_NUM"]
+            ],
+            "required": ["queue", "idx"],
+            "check": "!request || !ctx || !ctx->db->ok()"
+        },
+        {
+            "uri": "/hustdb/info",
+            "methods": ["GET"],
+            "check": "!request || !ctx || !ctx->db->ok()"
+        },
+        {
+            "uri": "/hustdb/task_info",
+            "methods": ["GET"],
+            "check": "!request || !ctx || !ctx->db->ok()"
+        },
+        {
+            "uri": "/hustdb/task_status",
+            "methods": ["GET"],
+            "args":
+            [
+                ["c_str_t", "token"]
+            ],
+            "required": ["token"],
+            "check": "!request || !ctx || !ctx->db->ok()"
+        },
+        {
+            "uri": "/hustdb/zismember",
+            "methods": ["GET", "POST"],
+            "args":
+            [
+                ["c_str_t", "tb"],
+                ["c_str_t", "key"]
+            ],
+            "required": ["tb", "key"],
+            "post": { "arg": "key" },
+            "check": "!request || !ctx || !ctx->db->ok()"
+        },
+        {
+            "uri": "/hustdb/zscore",
+            "methods": ["GET", "POST"],
+            "args":
+            [
+                ["c_str_t", "tb"],
+                ["c_str_t", "key"]
+            ],
+            "required": ["tb", "key"],
+            "post": { "arg": "key" },
+            "check": "!request || !ctx || !ctx->db->ok()"
+        },
+        {
+            "uri": "/hustdb/zadd",
+            "methods": ["GET", "POST"],
+            "args":
+            [
+                ["c_str_t", "tb"],
+                ["uint64_t", "score", "0"],
+                ["int32_t", "opt", "0"],
+                ["c_str_t", "key"],
+                ["uint32_t", "ver", "0"],
+                ["bool", "is_dup", "false"]
+            ],
+            "required": ["tb", "score", "key"],
+            "post": { "arg": "key" },
+            "check": "!request || !ctx || !ctx->db->ok()"
+        },
+        {
+            "uri": "/hustdb/zrem",
+            "methods": ["GET", "POST"],
+            "args":
+            [
+                ["c_str_t", "tb"],
+                ["c_str_t", "key"],
+                ["uint32_t", "ver", "0"],
+                ["bool", "is_dup", "false"]
+            ],
+            "required": ["tb", "key"],
+            "post": { "arg": "key" },
+            "check": "!request || !ctx || !ctx->db->ok()"
+        },
+        {
+            "uri": "/hustdb/zrangebyrank",
+            "methods": ["GET"],
+            "args":
+            [
+                ["c_str_t", "tb"],
+                ["int32_t", "offset", "-1"],
+                ["int32_t", "size", "-1"],
+                ["int32_t", "start", "0"],
+                ["int32_t", "end", "MAX_BUCKET_NUM"],
+                ["bool", "noval", "true"],
+                ["bool", "async", "false"]
+            ],
+            "required": ["tb", "offset", "size"],
+            "check": "!request || !ctx || !ctx->db->ok()"
+        },
+        {
+            "uri": "/hustdb/zrangebyscore",
+            "methods": ["GET"],
+            "args":
+            [
+                ["c_str_t", "tb"],
+                ["uint64_t", "min", "0"],
+                ["uint64_t", "max", "0"],
+                ["int32_t", "offset", "-1"],
+                ["int32_t", "size", "-1"],
+                ["int32_t", "start", "0"],
+                ["int32_t", "end", "MAX_BUCKET_NUM"],
+                ["bool", "noval", "true"]
+            ],
+            "required": ["tb", "offset", "size"],
+            "check": "!request || !ctx || !ctx->db->ok()"
+        }
+    ]
+}

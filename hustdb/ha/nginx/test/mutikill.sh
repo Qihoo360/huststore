@@ -1,0 +1,1 @@
+ps aux | grep mutitest.py | awk 'BEGIN {FS=" "} NF>12 {print $2}' | xargs kill -9

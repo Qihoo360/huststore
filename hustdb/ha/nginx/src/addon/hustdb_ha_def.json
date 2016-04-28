@@ -1,0 +1,45 @@
+{
+    "structs": [
+        {
+            "name": "HustDbHaTablePair",
+            "members": [
+                ["IntegerArray", "key"],
+                ["StringArray", "val"]
+            ],
+            "methods" : ["dispose", "deserialize"]
+        },
+        {
+            "name": "HustDbHaTableIncr",
+            "members": [
+                ["HustDbHaTablePair", "low"],
+                ["HustDbHaTablePair", "high"]
+            ],
+            "methods" : ["dispose", "deserialize"]
+        },
+        {
+            "name": "HustDbHaTableDecr",
+            "members": [
+                ["json_str_t", "remove"],
+                ["json_str_t", "replace_by"]
+            ],
+            "methods" : ["dispose", "deserialize"]
+        },
+        {
+            "name": "HustDbHaTableElem",
+            "members": [
+                ["HustDbHaTablePair", "item"],
+                ["HustDbHaTableIncr", "increase"],
+                ["HustDbHaTableDecr", "decrease"]
+            ],
+            "methods" : ["dispose", "deserialize"],
+            "array_methods" : ["dispose", "deserialize"]
+        },
+        {
+            "name": "HustDbHaTable",
+            "members": [
+                ["HustDbHaTableElemArray", "table"]
+            ],
+            "methods" : ["dispose", "deserialize", "load"]
+        }
+    ]
+}

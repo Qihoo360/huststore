@@ -1,0 +1,29 @@
+{
+    "table":
+    [
+        {
+            "item": { "key": [0, 128], "val": ["h1", "ha"] },
+            "decrease": { "remove": "ha", "replace_by": "h2" }
+        },
+        {
+            "item": { "key": [128, 256], "val": ["ha", "h2"] },
+            "decrease": { "remove": "ha", "replace_by": "h1" }
+        },
+        {
+            "item": { "key": [256, 384], "val": ["h2", "hb"] },
+            "decrease": { "remove": "hb", "replace_by": "h3" }
+        },
+        {
+            "item": { "key": [384, 512], "val": ["hb", "h3"] },
+            "decrease": { "remove": "hb", "replace_by": "h2" }
+        },
+        {
+            "item": { "key": [512, 768], "val": ["h3", "hc"] },
+            "decrease": { "remove": "hc", "replace_by": "h1" }
+        },
+        {
+            "item": { "key": [768, 1024], "val": ["hc", "h1"] },
+            "decrease": { "remove": "hc", "replace_by": "h3" }
+        }
+    ]
+}

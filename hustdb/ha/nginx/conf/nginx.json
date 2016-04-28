@@ -1,0 +1,93 @@
+{
+    "module": "hustdb_ha",
+    "worker_connections": 1048576,
+    "listen": 8082,
+    "keepalive_timeout": 540,
+    "keepalive": 32768,
+    "http_basic_auth_file": "/data/hustdbha/conf/htpasswd",
+    "nginx_root": "/data/hustdbha/html",
+    "main_conf":
+    [
+        ["sync_threads", 4],
+        ["sync_release_interval", "5s"],
+        ["sync_checkdb_interval", "5s"],
+        ["sync_checklog_interval", "60s"],
+        ["zlog_mdc", "sync_dir"],
+        ["hustdbtable_file", "hustdbtable.json"],
+        ["hustdb_ha_shm_name", "hustdb_ha_share_memory"],
+        ["hustdb_ha_shm_size", "10m"],
+        ["public_pem", "public.pem"],
+        ["identifier_cache_size", 128],
+        ["identifier_timeout", "10s"]
+    ],
+    "auth_filter": [],
+    "local_cmds": 
+    [
+        "put",
+        "get",
+        "del",
+        "exist",
+        "keys",
+        "hset",
+        "hget",
+        "hdel",
+        "hexist",
+        "hkeys",
+        "sadd",
+        "srem",
+        "sismember",
+        "smembers",
+        "stat",
+        "stat_all",
+        "export",
+        "file_count",
+        "peer_count",
+        "sync_status",
+        "get_table",
+        "set_table"
+    ],
+    "proxy":
+    {
+        "health_check": 
+        [
+            "check interval=5000 rise=1 fall=3 timeout=5000 type=http",
+            "check_http_send \"GET /status.html HTTP/1.1\\r\\n\\r\\n\"",
+            "check_http_expect_alive http_2xx"
+        ],
+        "auth": "aHVzdHN0b3JlOmh1c3RzdG9yZQ==",
+        "proxy_connect_timeout": "2s",
+        "proxy_send_timeout": "60s",
+        "proxy_read_timeout": "60s",
+        "proxy_buffer_size": "64m",
+        "backends": 
+        [
+            "192.168.1.101:9999", 
+            "192.168.1.102:9999", 
+            "192.168.1.103:9999", 
+            "192.168.1.104:9999", 
+            "192.168.1.105:9999", 
+            "192.168.1.106:9999"
+        ],
+        "proxy_cmds":
+        [
+            "/hustdb/put",
+            "/hustdb/get", 
+            "/hustdb/del", 
+            "/hustdb/exist",
+            "/hustdb/keys", 
+            "/hustdb/hset", 
+            "/hustdb/hget", 
+            "/hustdb/hdel", 
+            "/hustdb/hexist", 
+            "/hustdb/hkeys",
+            "/hustdb/sadd", 
+            "/hustdb/srem", 
+            "/hustdb/sismember", 
+            "/hustdb/smembers",
+            "/hustdb/stat",
+            "/hustdb/stat_all",
+            "/hustdb/export", 
+            "/hustdb/file_count"
+        ]
+    }
+}

@@ -60,7 +60,7 @@
  */
 
 /* defaults */
-static void settings_init ( unsigned int );
+static void settings_init ( size_t );
 
 /** exported globals **/
 struct settings settings;
@@ -101,10 +101,9 @@ static rel_time_t realtime ( const time_t exptime )
     }
 }
 
-static void settings_init ( unsigned int size )
+static void settings_init ( size_t size )
 {
     settings.use_cas = false;
-    /* By default this string should be NULL for getaddrinfo() */
     settings.maxbytes = size * 1024 * 1024; /* default is 64MB */
     settings.verbose = 0;
     settings.oldest_live = 0;
@@ -115,7 +114,6 @@ static void settings_init ( unsigned int size )
     settings.prefix_delimiter = ':';
     settings.detail_enabled = 0;
     settings.backlog = 1024;
-    //settings.binding_protocol = negotiating_prot;
     settings.item_size_max = 1024 * 1024; /* The famous 1MB upper limit. */
     settings.lru_crawler = true;
     settings.lru_crawler_sleep = 100;
@@ -132,8 +130,6 @@ static void settings_init ( unsigned int size )
     settings.flush_enabled = true;
     settings.crawls_persleep = 1000;
 }
-
-
 
 /*
  * We keep the current time of day in a global variable that's updated by a
@@ -496,7 +492,7 @@ enum store_item_type do_store_item ( item *it, int comm, const uint32_t hv )
     return stored;
 }
 
-int init ( unsigned int size )
+int init ( size_t size )
 {
     enum hashfunc_type hash_type = JENKINS_HASH;
     bool preallocate = false;
@@ -520,7 +516,6 @@ int init ( unsigned int size )
     slabs_init (settings.maxbytes, settings.factor, preallocate);
 
     memcached_thread_init ();
-
 
     if ( start_assoc_maintenance_thread () == - 1 )
     {

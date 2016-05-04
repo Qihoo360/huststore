@@ -202,13 +202,6 @@ extern "C"
      * NOTE: If you modify this table you _MUST_ update the function state_text
      */
 
-    enum protocol
-    {
-        ascii_prot = 3, /* arbitrary value. */
-        binary_prot,
-        negotiating_prot /* Discovering the protocol */
-    };
-
     enum pause_thread_types
     {
         PAUSE_WORKER_THREADS = 0,
@@ -258,7 +251,6 @@ extern "C"
         char prefix_delimiter; /* character that marks a key prefix (for stats) */
         int detail_enabled; /* nonzero if we're collecting detailed stats */
         bool use_cas;
-        enum protocol binding_protocol;
         int backlog;
         int item_size_max; /* Maximum item size, and upper end for slabs */
         bool lru_crawler; /* Whether or not to enable the autocrawler thread */
@@ -423,7 +415,7 @@ extern "C"
     int process_touch_command ( char *key, size_t nkey, int32_t exptime_int );
     int process_get_command ( char *key, size_t nkey, char *dst, int *len );
     int process_update_command ( char *key, size_t nkey, uint32_t flags, char *value, size_t nbytes, int32_t exptime_int, int comm );
-    int init ( unsigned int size );
+    int init ( size_t size );
     unsigned int get_maxbytes ( );
     uint32_t mdb_timestamp ( );
     bool is_memory_over_threshold ( );

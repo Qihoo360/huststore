@@ -13,18 +13,22 @@
 * 高可用性  
 `huststore` 整体架构支持 `Replication` (master-master)，支持 `load balance` 。   
 `HA` 的可用性由`nginx` 的 `master-worker` 架构所保证。当某一个 `worker` 意外挂掉时， `master` 会自动再启动一个 `worker` 进程，而且多个 `worker` 之间是相互独立的，从而保证了 `HA` 的高可用性。  
-`huststore` 的高可用性由其整体架构特点保证。由于 `hustdb` 的存储节点采用了 `master-master` 的结构，当某一个存储节点挂掉时，`HA` 会自动将请求打到另外一台 `master`，同时 `HA` 会按照自动进行负载均衡，将数据分布存储在多个 `hustdb`节点上，因此存储引擎不存在单点限制。  
+`huststore` 的高可用性由其整体架构特点保证。由于 `hustdb` 的存储节点采用了 `master-master` 的结构，当某一个存储节点挂掉时，`HA` 会自动将请求打到另外一台 `master`；同时 `HA` 会自动进行负载均衡，将数据分散存储在多个 `hustdb`节点上，因此存储引擎不存在单点限制。  
 同时 `HA` 集群本身也是分布式的设计，而且每个 `HA` 节点都是独立的，当某一台 `HA` 挂掉时， LVS 会自动将请求打到其他可用的 `HA` 节点，从而解决了 `HA` 得单点限制。
 * 通用性的接口   
 `huststore` 使用 `http` 作为通用协议，因此客户端的实现不限制于语言。
 * 支持二进制的 `key-value`
 
-## 架构设计 ##
+## 运维 ##
 
-### 运维架构 ###
+### 架构 ###
 ![architect](res/architect.png)
 
-### 存储引擎设计 ###
+### 部署 ###
+* 分布式KV存储 = HA（hustdb ha） + DB（hustdb）
+* 分布式消息队列 = HA（hustmq ha） + DB（hustdb）
+
+## 存储引擎(fastdb) ##
 ![hustdb](res/hustdb.png)
 
 ## 依赖 ##
@@ -57,7 +61,7 @@
 * [hustdb](hustdb/doc/doc/appendix/faq.md)
 * [hustmq](hustmq/doc/doc/appendix/faq.md)
 
-## 目录结构 ##
+## 目录 ##
 
 项目目录结构如下：
 

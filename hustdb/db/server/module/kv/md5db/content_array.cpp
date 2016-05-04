@@ -244,20 +244,20 @@ namespace md5db
                                    uint32_t            data_len
                                    )
     {
-        if ( file_id >= m_contents.size () )
+        if ( unlikely ( file_id >= m_contents.size () ) )
         {
             LOG_ERROR ( "[md5db][content_db_array]invalid file_id: %d", file_id );
             return false;
         }
 
         content_t * p = m_contents[ file_id ];
-        if ( NULL == p )
+        if ( unlikely ( NULL == p ) )
         {
             LOG_ERROR ( "[md5db][content_db_array]p is NULL, file_id: %d", file_id );
             return false;
         }
 
-        if ( ! p->update ( data_id, old_data_len, data, data_len ) )
+        if ( unlikely ( ! p->update ( data_id, old_data_len, data, data_len ) ) )
         {
             LOG_ERROR ( "[md5db][content_db_array]update failed, file_id: %d, data_id: %d, old_data_len: %d, data_len: %d", file_id, data_id, old_data_len, data_len );
             return false;
@@ -273,35 +273,45 @@ namespace md5db
                                   uint32_t &          data_id
                                   )
     {
+        content_t *   p       = NULL;
+        uint32_t      size    = 0;
+        uint32_t      offset  = 0;
+        
         file_id = 0;
         data_id = 0;
 
-        if ( m_contents.empty () )
+        if ( unlikely ( m_contents.empty () ) )
         {
             return false;
         }
-
-        file_id = ( uint32_t ) ( m_token % m_contents.size () );
-        content_t * p = m_contents[ file_id ];
-        if ( NULL == p )
+        
+        size = m_contents.size ();
+        
+        for ( int i = 0; i < size / 2; i ++ )
         {
-            LOG_ERROR ( "[md5db][content_db_array]p is NULL, file_id: %d", file_id );
-            file_id = 0;
-            return false;
+            file_id = ++ m_token % size;
+            p = m_contents[ file_id ];
+            
+            if ( unlikely ( NULL == p ) )
+            {
+                LOG_ERROR ( "[md5db][content_db_array]p is NULL, file_id: %d", file_id );
+                file_id = 0;
+                continue;
+            }
+
+            if ( unlikely ( ! p->write ( data, data_len, offset ) ) )
+            {
+                LOG_ERROR ( "[md5db][content_db_array]write failed, file_id: %d, data_len: %d", file_id, data_len );
+                file_id = 0;
+                continue;
+            }
+
+            data_id = offset;
+            
+            return true;
         }
-
-        uint32_t offset;
-        if ( ! p->write ( data, data_len, offset ) )
-        {
-            LOG_ERROR ( "[md5db][content_db_array]write failed, file_id: %d, data_id: %d, data_len: %d", file_id, data_id, data_len );
-            file_id = 0;
-            return false;
-        }
-
-        data_id = offset;
-        ++ m_token;
-
-        return true;
+        
+        return false;
     }
 
     bool content_array_t::get (
@@ -311,14 +321,14 @@ namespace md5db
                                 char *              result
                                 )
     {
-        if ( file_id >= m_contents.size () )
+        if ( unlikely ( file_id >= m_contents.size () ) )
         {
             LOG_ERROR ( "[md5db][content_db_array]invalid file_id, file_id: %d", file_id );
             return false;
         }
 
         content_t * p = m_contents[ file_id ];
-        if ( NULL == p )
+        if ( unlikely ( NULL == p ) )
         {
             LOG_ERROR ( "[md5db][content_db_array]p is NULL, file_id: %d", file_id );
             return false;
@@ -333,14 +343,14 @@ namespace md5db
                                 uint32_t            data_len
                                 )
     {
-        if ( file_id >= m_contents.size () )
+        if ( unlikely ( file_id >= m_contents.size () ) )
         {
             LOG_ERROR ( "[md5db][content_db_array]invalid file_id, file_id: %d", file_id );
             return false;
         }
 
         content_t * p = m_contents[ file_id ];
-        if ( NULL == p )
+        if ( unlikely ( NULL == p ) )
         {
             LOG_ERROR ( "[md5db][content_db_array]p is NULL, file_id: %d", file_id );
             return false;

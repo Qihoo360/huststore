@@ -163,7 +163,7 @@ bool kv_md5db_t::check_inner_key (
         LOG_ERROR ( "[md5db][db]m_inner is NULL" );
         return false;
     }
-    if ( NULL == inner_key || 16 != inner_key_len )
+    if ( unlikely ( NULL == inner_key || 16 != inner_key_len ) )
     {
         LOG_INFO ( "[md5db][db]invalid key" );
         return false;
@@ -183,7 +183,7 @@ bool kv_md5db_t::check_user_key (
         return false;
     }
 
-    if ( NULL == user_key || 0 == user_key_len || user_key_len > 0xFFFFFF )
+    if ( unlikely ( NULL == user_key || 0 == user_key_len || user_key_len > 0xFFFFFF ) )
     {
         LOG_INFO ( "[md5db][db][user_key_ptr=%p][user_key_len=%d]invalid user_key",
                   user_key, user_key_len );
@@ -365,7 +365,7 @@ int kv_md5db_t::get_conflict_block_id (
         scope_perf_target_t perf ( m_perf_conflict_get );
         r = m_inner->m_conflicts.get ( inner_key, ( unsigned int ) inner_key_len, block_id, version );
     }
-    if ( 0 != r )
+    if ( unlikely ( 0 != r ) )
     {
         if ( r != ENOENT )
         {
@@ -495,7 +495,7 @@ int kv_md5db_t::add_data_with_content_db (
                                        content_file_id,
                                        content_data_id );
     }
-    if ( ! b || 0 == content_data_id )
+    if ( unlikely ( ! b || 0 == content_data_id ) )
     {
         LOG_ERROR ( "[md5db][db]m_contents.write failed, content_file_id:%d, content_data_id: %d, size: %d",
                    content_file_id, content_data_id, ( uint32_t ) tmp_ctxt->value.size () );
@@ -517,7 +517,7 @@ int kv_md5db_t::add_data_with_content_db (
                                             ctxt );
     }
 
-    if ( 0 != r )
+    if ( unlikely ( 0 != r ) )
     {
         LOG_ERROR ( "[md5db][db][user_file=%d][inner_file=%d]m_data.put_from_md5db"
                    "( %d.%u ) return %d",
@@ -783,7 +783,7 @@ int kv_md5db_t::add_conflict_data (
 
     version     = 0;
 
-    if ( ! from_binlog && 0 != user_version )
+    if ( unlikely ( ! from_binlog && 0 != user_version ) )
     {
         LOG_ERROR ( "[md5db][db][user_version=%d] user_version must be 0", user_version );
         return EINVAL;
@@ -796,7 +796,7 @@ int kv_md5db_t::add_conflict_data (
     fullkey_t *     fullkey = bucket.get_fullkey ();
     bool            b;
 
-    if ( NULL == fullkey )
+    if ( unlikely ( NULL == fullkey ) )
     {
         LOG_ERROR ( "[md5db][db]fullkey is NULL" );
         return EFAULT;
@@ -812,7 +812,7 @@ int kv_md5db_t::add_conflict_data (
         scope_perf_target_t perf ( m_perf_fullkey_get );
         b = fullkey->get ( first_block_id, & first_inner_key[ 3 ] );
     }
-    if ( ! b )
+    if ( unlikely ( ! b ) )
     {
         LOG_ERROR ( "[md5db][db]fullkey->get() failed" );
         return EFAULT;
@@ -823,7 +823,7 @@ int kv_md5db_t::add_conflict_data (
         scope_perf_target_t perf ( m_perf_fullkey_write );
         b = fullkey->write ( inner_key, inner_key_len, user_key, user_key_len, second_block_id );
     }
-    if ( ! b )
+    if ( unlikely ( ! b ) )
     {
         LOG_ERROR ( "[md5db][db]fullkey->write() failed" );
         return EFAULT;
@@ -835,7 +835,7 @@ int kv_md5db_t::add_conflict_data (
     }
     else
     {
-        version             = user_version;
+        version         = user_version;
     }
 
     // fast conflict
@@ -882,7 +882,7 @@ int kv_md5db_t::add_conflict_data (
                                     conn,
                                     ctxt );
     }
-    if ( 0 != r )
+    if ( unlikely ( 0 != r ) )
     {
         version = 0;
         LOG_ERROR ( "[md5db][db]set_data return %d", r );
@@ -921,7 +921,7 @@ int kv_md5db_t::new_data (
 
     version = 0;
 
-    if ( ! from_binlog && 0 != user_version )
+    if ( unlikely ( ! from_binlog && 0 != user_version ) )
     {
         LOG_DEBUG ( "[md5db][db][user_version=%d] user_version must be 0", user_version );
         return EINVAL;
@@ -929,7 +929,7 @@ int kv_md5db_t::new_data (
 
     // second block_id
     fullkey_t * fullkey = bucket.get_fullkey ();
-    if ( NULL == fullkey )
+    if ( unlikely ( NULL == fullkey ) )
     {
         LOG_ERROR ( "[md5db][db]fullkey is NULL" );
         return EFAULT;
@@ -938,7 +938,7 @@ int kv_md5db_t::new_data (
         scope_perf_target_t perf ( m_perf_fullkey_write );
         b = fullkey->write ( inner_key, inner_key_len, user_key, user_key_len, block_id );
     }
-    if ( ! b )
+    if ( unlikely ( ! b ) )
     {
         LOG_ERROR ( "[md5db][db]fullkey->write() failed" );
         return EFAULT;
@@ -966,7 +966,7 @@ int kv_md5db_t::new_data (
                                     conn,
                                     ctxt );
     }
-    if ( 0 != r )
+    if ( unlikely ( 0 != r ) )
     {
         LOG_ERROR ( "[md5db][db]set_data return %d", r );
         scope_perf_target_t perf ( m_perf_fullkey_del );
@@ -1506,7 +1506,7 @@ int kv_md5db_t::exists (
     size_t      inner_key_len   = 16;
     block_id_t block_id;
 
-    if ( ! check_user_key ( user_key, user_key_len ) )
+    if ( unlikely ( ! check_user_key ( user_key, user_key_len ) ) )
     {
         LOG_INFO ( "[md5db][db]invalid user key" );
         return EINVAL;
@@ -1520,7 +1520,7 @@ int kv_md5db_t::exists (
 
     bucket_data_item_t *    item    = NULL;
     int r = bucket.find ( inner_key, inner_key_len, item );
-    if ( NULL == item )
+    if ( unlikely ( NULL == item ) )
     {
         LOG_ERROR ( "[md5db][db]find return %d, NULL", r );
         if ( 0 == r )
@@ -1623,7 +1623,7 @@ int kv_md5db_t::get (
     size_t      inner_key_len   = 16;
     block_id_t  block_id;
 
-    if ( ! check_user_key ( user_key, user_key_len ) )
+    if ( unlikely ( ! check_user_key ( user_key, user_key_len ) ) )
     {
         LOG_INFO ( "[md5db][db]invalid user key" );
         PERF_GET_CANCEL ();
@@ -1653,7 +1653,7 @@ int kv_md5db_t::get (
         r = m_inner->m_data.hash_with_md5db ( tmp_ctxt->tbkey.c_str (), tmp_ctxt->table_len, conn, ctxt );
     }
 
-    if ( r < 0 )
+    if ( unlikely ( r < 0 ) )
     {
         LOG_ERROR ( "[md5db][db]hash failed" );
         PERF_GET_FAIL ();
@@ -1667,7 +1667,7 @@ int kv_md5db_t::get (
 
     bucket_data_item_t *    item    = NULL;
     r = bucket.find ( inner_key, inner_key_len, item );
-    if ( NULL == item )
+    if ( unlikely ( NULL == item ) )
     {
         LOG_ERROR ( "[md5db][db]find return %d, NULL", r );
         if ( 0 == r )
@@ -1797,7 +1797,7 @@ int kv_md5db_t::delete_conflict_data (
                                block_id,
                                version,
                                from_binlog );
-    if ( 0 != r )
+    if ( unlikely ( 0 != r ) )
     {
         if ( ENOENT != r )
         {
@@ -2055,7 +2055,7 @@ int kv_md5db_t::delete_direct_data (
     bool    b;
 
     fullkey_t * fullkey = bucket.get_fullkey ();
-    if ( NULL == fullkey )
+    if ( unlikely ( NULL == fullkey ) )
     {
         LOG_ERROR ( "[md5db][db]fullkey is NULL" );
         ctxt = NULL;
@@ -2065,7 +2065,7 @@ int kv_md5db_t::delete_direct_data (
         scope_perf_target_t perf ( m_perf_fullkey_del );
         b = fullkey->del ( block_id );
     }
-    if ( ! b )
+    if ( unlikely ( ! b ) )
     {
         LOG_ERROR ( "[md5db][db]fullkey->del(%u) failed", block_id.data_id () );
         ctxt = NULL;
@@ -2080,11 +2080,12 @@ int kv_md5db_t::delete_direct_data (
     int r;
     if ( m_inner->m_contents.is_open () )
     {
-
-        std::string * rsp = NULL;
+        bool found          = false;
+        std::string * rsp   = NULL;
+        
         data_item_for_content_db_t  addr;
         memset ( & addr, 0, sizeof ( addr ) );
-        bool                        found = false;
+        
         do
         {
             {
@@ -2283,7 +2284,7 @@ int kv_md5db_t::del_inner (
     uint32_t user_version = version;
     version = 0;
 
-    if ( user_version > BUCKET_DATA_MAX_VERSION )
+    if ( unlikely ( user_version > BUCKET_DATA_MAX_VERSION ) )
     {
         LOG_ERROR ( "[md5db][db]invalid version %u, max=%u", user_version, BUCKET_DATA_MAX_VERSION );
         PERF_DEL_CANCEL ();
@@ -2293,7 +2294,7 @@ int kv_md5db_t::del_inner (
     char        inner_key[ 16 ]  = { };
     size_t      inner_key_len    = 16;
 
-    if ( ! check_user_key ( user_key, user_key_len ) )
+    if ( unlikely ( ! check_user_key ( user_key, user_key_len ) ) )
     {
         LOG_INFO ( "[md5db][db]invalid user key" );
         PERF_DEL_CANCEL ();
@@ -2323,7 +2324,7 @@ int kv_md5db_t::del_inner (
         r = m_inner->m_data.hash_with_md5db ( tmp_ctxt->tbkey.c_str (), tmp_ctxt->table_len, conn, ctxt );
     }
 
-    if ( r < 0 )
+    if ( unlikely ( r < 0 ) )
     {
         LOG_ERROR ( "[md5db][db]hash failed" );
         PERF_DEL_FAIL ();
@@ -2337,7 +2338,7 @@ int kv_md5db_t::del_inner (
 
     bucket_data_item_t *    item    = NULL;
     r = bucket.find ( inner_key, inner_key_len, item );
-    if ( NULL == item )
+    if ( unlikely ( NULL == item ) )
     {
         LOG_ERROR ( "[md5db][db]find return %d, NULL", r );
         if ( 0 == r )
@@ -2558,14 +2559,14 @@ int kv_md5db_t::put_inner (
     version = 0;
     ctxt    = NULL;
 
-    if ( user_version > BUCKET_DATA_MAX_VERSION )
+    if ( unlikely ( user_version > BUCKET_DATA_MAX_VERSION ) )
     {
         LOG_ERROR ( "[md5db][db]invalid version %u, max=%u", user_version, BUCKET_DATA_MAX_VERSION );
         PERF_PUT_CANCEL ();
         return EINVAL;
     }
 
-    if ( from_binlog && 0 == user_version )
+    if ( unlikely ( from_binlog && 0 == user_version ) )
     {
         LOG_DEBUG ( "[md5db][db]from_binlog is true, so version must not 0" );
         PERF_PUT_CANCEL ();
@@ -2582,7 +2583,7 @@ int kv_md5db_t::put_inner (
     size_t      inner_key_len = 16;
     bool        found;
 
-    if ( ! check_user_key ( user_key, user_key_len ) )
+    if ( unlikely ( ! check_user_key ( user_key, user_key_len ) ) )
     {
         LOG_ERROR ( "[md5db][db]invalid user key[user_key=%p][user_key_len=%d]", user_key, ( int ) user_key_len );
         PERF_PUT_CANCEL ();
@@ -2912,7 +2913,8 @@ void kv_md5db_t::hash (
 {
     char inner_key[ 16 ];
     size_t inner_key_len = 16;
-    if ( ! check_user_key ( user_key, user_key_len ) )
+    
+    if ( unlikely ( ! check_user_key ( user_key, user_key_len ) ) )
     {
         LOG_INFO ( "[md5db][db]invalid user key" );
         ctxt = NULL;
@@ -3279,7 +3281,7 @@ int kv_md5db_t::hash_info (
                             int &                       inner_file_id
                             )
 {
-    if ( NULL == m_inner )
+    if ( unlikely ( NULL == m_inner ) )
     {
         inner_file_id = - 1;
         LOG_ERROR ( "[md5db][export]m_inner is NULL" );
@@ -3296,7 +3298,7 @@ int kv_md5db_t::get_user_file_count ( )
 
 i_kv_t * kv_md5db_t::get_conflict ( int file_id )
 {
-    if ( NULL == m_inner )
+    if ( unlikely ( NULL == m_inner ) )
     {
         LOG_ERROR ( "[slow_task][export_conflict]m_inner is NULL" );
         return NULL;
@@ -3304,7 +3306,7 @@ i_kv_t * kv_md5db_t::get_conflict ( int file_id )
 
     conflict_array_t & ca = m_inner->m_conflicts;
 
-    if ( file_id < 0 || file_id >= ca.size () )
+    if ( unlikely ( file_id < 0 || file_id >= ca.size () ) )
     {
         LOG_ERROR ( "[slow_task][export_conflict]invalid file_id %d/%d",
                    file_id, ca.size () );
@@ -3312,7 +3314,7 @@ i_kv_t * kv_md5db_t::get_conflict ( int file_id )
     }
 
     conflict_t * c = ca.item ( file_id );
-    if ( NULL == c )
+    if ( unlikely ( NULL == c ) )
     {
         LOG_ERROR ( "[slow_task][export_conflict]invalid item" );
         return NULL;

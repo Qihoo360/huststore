@@ -15,7 +15,7 @@
 
 **使用范例:**
 
-    curl -i -X POST "http://localhost:8080/get?queue=test_queue" -d "test_item"
+    curl -i -X POST "http://localhost:8080/put?queue=test_queue" -d "test_item"
 
 **动画效果:**
 ![put](put.gif)

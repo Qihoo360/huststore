@@ -20,14 +20,14 @@ PASSWD = 'huststore'
 def manual(): 
     print """
     usage:
-        python autotest [option] [action]
-            [option]
-                host: ip or domain
+        python autotest [uri] [action]
+            [uri]
+                ip:port
             [action]
                 loop
                 stat_all
-                bput
-                bget
+                put
+                get
                 evget
                 evput
                 evsub
@@ -37,9 +37,9 @@ def manual():
                 do_get_status
                 do_post_status
     sample:
-        python autotest.py loop
-        python autotest.py stat_all
-        python autotest.py 192.168.1.101 stat_all
+        python autotest.py 192.168.1.101:8080 stat_all
+        python autotest.py 192.168.1.101:8080 put
+        python autotest.py 192.168.1.101:8080 get
         """
 
 def log_err(str):
@@ -67,8 +67,9 @@ class HATester:
             'purge': self.__purge,
             'loopst': self.__loopst,
             'stat_all': self.__stat_all,
-            'bput': self.__bput,
-            'bget': self.__bget,
+            'put': self.__put,
+            'get': self.__get,
+            'queue_hash': self.__queue_hash,
             'evget': self.__evget,
             'evput': self.__evput,
             'evsub': self.__evsub,
@@ -127,29 +128,41 @@ class HATester:
             r = requests.get(cmd, auth=(USER, PASSWD))
             if 200 != r.status_code:
                 print '%s: %d' % (cmd, r.status_code)
-    def __bput(self):
+    def __put(self):
         cmd = '%s/put?queue=hustmqhaqueue' % self.__host
-        print 'generate string...'
-        body = gen_body(self.__blen)
-        print 'put...'
-        r = requests.put(cmd, body, headers={'content-type':'text/plain'}, timeout=5, auth=(USER, PASSWD))
+        r = requests.put(cmd, 'test_body', headers={'content-type':'text/plain'}, auth=(USER, PASSWD))
         if 200 != r.status_code:
             print '%s: %d' % (cmd, r.status_code)
         else:
             print 'pass'
-    def __bget(self):
+    def __get(self):
         cmd = '%s/get?queue=hustmqhaqueue&worker=testworker' % self.__host
         r = requests.get(cmd, auth=(USER, PASSWD))
         if 200 != r.status_code:
             print '%s: %d' % (cmd, r.status_code)
-            return
-        size = len(r.content)
-        if size != self.__blen:
-            print 'error, len %d' % size
-            with open('des.txt', 'w') as f:
-                f.writelines(r.content)
         else:
-            print 'pass'
+            print r.content
+    def __queue_hash(self):
+        get_body = lambda i: 'test_body_%d' % i
+        print 'put...'
+        for i in xrange(100):
+            cmd = '%s/put?queue=hustmqhaqueue' % self.__host
+            r = requests.put(cmd, get_body(i), headers={'content-type':'text/plain'}, auth=(USER, PASSWD))
+            if 200 != r.status_code:
+                print '%s: %d' % (cmd, r.status_code)
+                return
+        print 'get...'
+        for i in xrange(100):
+            cmd = '%s/get?queue=hustmqhaqueue&worker=testworker' % self.__host
+            r = requests.get(cmd, auth=(USER, PASSWD))
+            if 200 != r.status_code:
+                print '%s: %d' % (cmd, r.status_code)
+                return
+            body = get_body(i)
+            if r.content != body:
+                print 'bad body: %s' % (cmd)
+                return
+        print 'pass'
     def __evput(self):
         for i in xrange(LOOPS):
             if i % 100 == 0:
@@ -401,12 +414,11 @@ def loop(obj):
 
 def test(argv):
     size = len(argv)
-    if size < 2 or size > 3:
+    if 3 != size:
         return False
-    host = 'http://localhost:8080' if 2 == size else 'http://%s:8080' % argv[1]
-    cmd = argv[1] if 2 == size else argv[2]
+    cmd = argv[2]
     size = len(argv)
-    obj = HATester(host)
+    obj = HATester('http://%s' % argv[1])
     if cmd in obj.dict:
         obj.dict[cmd]()
     elif 'loop' == cmd:

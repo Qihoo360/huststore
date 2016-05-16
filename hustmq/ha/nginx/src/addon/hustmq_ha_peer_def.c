@@ -4,6 +4,7 @@
 
 static ngx_http_peer_dict_t g_peer_dict;
 static ngx_http_subrequest_peer_t * g_peer_list = NULL;
+static ngx_http_upstream_rr_peer_t ** g_hash_table = NULL;
 
 static ngx_bool_t __inconsistent(const hustmq_ha_idx_t * host_item, const hustmq_ha_idx_t * merge_item)
 {
@@ -143,3 +144,31 @@ ngx_bool_t hustmq_ha_init_peer_list(ngx_pool_t * pool, ngx_http_upstream_rr_peer
     return !!g_peer_list;
 }
 
+ngx_bool_t hustmq_ha_init_hash(ngx_pool_t * pool, ngx_http_upstream_rr_peers_t * peers)
+{
+    if (!pool || !peers || !peers->peer)
+    {
+        return false;
+    }
+    size_t backends = ngx_http_get_backend_count();
+    g_hash_table = ngx_palloc(pool, backends * sizeof(ngx_http_upstream_rr_peer_t *));
+    if (!g_hash_table)
+    {
+        return false;
+    }
+    size_t i = 0;
+    ngx_http_upstream_rr_peer_t * peer = peers->peer;
+    while (peer)
+    {
+        g_hash_table[i++] = peer;
+        peer = peer->next;
+    }
+    return true;
+}
+
+ngx_http_upstream_rr_peer_t * hustmq_ha_get_peer(ngx_str_t * queue)
+{
+    ngx_uint_t hash = ngx_hash_key(queue->data, queue->len);
+    hash = hash % ngx_http_get_backend_count();
+    return g_hash_table[hash];
+}

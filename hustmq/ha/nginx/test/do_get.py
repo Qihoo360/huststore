@@ -36,7 +36,7 @@ def test(argv):
     if 1 == size:
         do_get('http://localhost:8080')
         return
-    host = 'http://localhost:8080' if 2 == size else 'http://%s:8080' % argv[1]
+    host = 'http://localhost:8080' if 2 == size else 'http://%s' % argv[1]
     if 2 == size:
         if 'loop' == argv[1]:
             loop_do_get(host)

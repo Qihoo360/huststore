@@ -18,6 +18,7 @@
     "main_conf":
     [
         ["max_queue_size", 8192],
+        ["queue_hash", "on"],
         ["long_polling_timeout", "180s"],
         ["subscribe_timeout", "180s"],
         ["publish_timeout", "180s"],

@@ -34,6 +34,7 @@ typedef struct
     ngx_log_t * log;
     ngx_str_t prefix;
     ssize_t max_queue_size;
+    ngx_bool_t queue_hash;
     ngx_int_t long_polling_timeout;
     ngx_int_t subscribe_timeout;
     ngx_int_t publish_timeout;

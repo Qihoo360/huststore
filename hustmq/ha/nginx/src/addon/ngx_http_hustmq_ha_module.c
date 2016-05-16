@@ -13,6 +13,7 @@ static ngx_int_t ngx_http_hustmq_ha_init_process(ngx_cycle_t * cycle);
 static void ngx_http_hustmq_ha_exit_process(ngx_cycle_t * cycle);
 static void ngx_http_hustmq_ha_exit_master(ngx_cycle_t * cycle);
 static char * ngx_http_max_queue_size(ngx_conf_t * cf, ngx_command_t * cmd, void * conf);
+static char * ngx_http_queue_hash(ngx_conf_t * cf, ngx_command_t * cmd, void * conf);
 static char * ngx_http_long_polling_timeout(ngx_conf_t * cf, ngx_command_t * cmd, void * conf);
 static char * ngx_http_subscribe_timeout(ngx_conf_t * cf, ngx_command_t * cmd, void * conf);
 static char * ngx_http_publish_timeout(ngx_conf_t * cf, ngx_command_t * cmd, void * conf);
@@ -142,6 +143,7 @@ static ngx_command_t ngx_http_hustmq_ha_commands[] =
         NULL
     },
     APPEND_MCF_ITEM("max_queue_size", ngx_http_max_queue_size),
+    APPEND_MCF_ITEM("queue_hash", ngx_http_queue_hash),
     APPEND_MCF_ITEM("long_polling_timeout", ngx_http_long_polling_timeout),
     APPEND_MCF_ITEM("subscribe_timeout", ngx_http_subscribe_timeout),
     APPEND_MCF_ITEM("publish_timeout", ngx_http_publish_timeout),
@@ -208,6 +210,23 @@ static char * ngx_http_max_queue_size(ngx_conf_t * cf, ngx_command_t * cmd, void
     {
         return "ngx_http_max_queue_size error";
     }
+    // TODO: you can modify the value here
+    return NGX_CONF_OK;
+}
+
+static char * ngx_http_queue_hash(ngx_conf_t * cf, ngx_command_t * cmd, void * conf)
+{
+    ngx_http_hustmq_ha_main_conf_t * mcf = ngx_http_conf_get_module_main_conf(cf, ngx_http_hustmq_ha_module);
+    if (!mcf || 2 != cf->args->nelts)
+    {
+        return "ngx_http_queue_hash error";
+    }
+    int val = ngx_http_get_flag_slot(cf);
+    if (NGX_ERROR == val)
+    {
+        return "ngx_http_queue_hash error";
+    }
+    mcf->queue_hash = val;
     // TODO: you can modify the value here
     return NGX_CONF_OK;
 }
@@ -642,6 +661,10 @@ char * ngx_http_hustmq_ha_init_main_conf(ngx_conf_t * cf, void * conf)
 	{
 	    return NGX_CONF_ERROR;
 	}
+	if (!hustmq_ha_init_hash(cf->pool, peers))
+    {
+        return NGX_CONF_ERROR;
+    }
 
 	ngx_http_fetch_essential_conf_t ecf = { mcf->fetch_req_pool_size, mcf->keepalive_cache_size, mcf->connection_cache_size, cf, peers };
 	ngx_http_fetch_upstream_conf_t ucf = {

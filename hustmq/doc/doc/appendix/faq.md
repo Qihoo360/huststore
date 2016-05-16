@@ -18,6 +18,9 @@ FAQ
 **Q** :  `hustmq ha` 如何使用 `http push` 实现数据的流式推送？  
 **A** :  参考 [这里](../api/ha.md)。
 
+**Q** :  `hustmq ha` 如何保证队列数据的先进先出？  
+**A** :  参考 [这一节](../advanced/ha/nginx.md) 关于 `queue_hash` 的配置。
+
 [上一级](index.md)
 
 [根目录](../index.md)

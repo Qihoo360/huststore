@@ -27,6 +27,7 @@ nginx 配置文件
         "main_conf":
         [
             ["max_queue_size", 8192],
+            ["queue_hash", "on"],
             ["long_polling_timeout", "180s"],
             ["subscribe_timeout", "180s"],
             ["publish_timeout", "180s"],
@@ -58,7 +59,7 @@ nginx 配置文件
                 "check_http_send \"GET /status.html HTTP/1.1\\r\\n\\r\\n\"",
                 "check_http_expect_alive http_2xx"
             ],
-            "auth": "aHVzdGRieGM6cWlob29odXN0eHJiY3pkYg==",
+            "auth": "aHVzdHN0b3JlOmh1c3RzdG9yZQ==",
             "proxy_connect_timeout": "2s",
             "proxy_send_timeout": "60s",
             "proxy_read_timeout": "60s",
@@ -101,6 +102,21 @@ nginx 配置文件
 * `fetch_timeout`：`ngx_http_fetch` 和 `hustmq` 进行网络通讯的最大超时时间，可根据网络环境配置合适的值
 * `fetch_buffer_size`：`ngx_http_fetch` 收发数据包的缓冲区大小，建议保持默认值
 * `autost_interval`：`hustmq ha` 自动更新集群状态的时间间隔，该字段建议保持默认值
+
+**`queue_hash` 参数详解**  
+
+`main_conf` 中 `queue_hash` 字段用于配置负载均衡的方式，用于 [`put`](../../api/ha/put.md) 接口。
+
+配置为 `on`，表示根据队列名称计算 `hash` 来进行负载均衡。
+
+* 优势：可以保证当存储节点正常工作时，取队列数据的顺序是固定的（先进先出）。  
+* 劣势：当针对一个固定队列写入数据时，`QPS` 将受限于单个存储节点。  
+
+配置为 `off`，将以默认的 `round robin` （轮询）实现来进行负载均衡。  
+
+* 优势：当针对一个固定队列写入数据时，`QPS` 不会受限于单个存储节点。  
+* 劣势：取队列数据的顺序不是固定的。  
+
 
 **除此之外的其他字段均建议保持默认值**。
 
@@ -168,6 +184,7 @@ nginx 配置文件
             chunked_transfer_encoding off;
             keepalive_requests        32768;
             max_queue_size            8192;
+            queue_hash                on;
             long_polling_timeout      180s;
             subscribe_timeout         180s;
             publish_timeout           180s;
@@ -268,7 +285,7 @@ nginx 配置文件
                 proxy_pass http://backend;
                 proxy_http_version 1.1;
                 proxy_set_header Connection "Keep-Alive";
-                proxy_set_header Authorization "Basic aHVzdGRieGM6cWlob29odXN0eHJiY3pkYg==";
+                proxy_set_header Authorization "Basic aHVzdHN0b3JlOmh1c3RzdG9yZQ==";
                 proxy_connect_timeout 2s;
                 proxy_send_timeout 60s;
                 proxy_read_timeout 60s;
@@ -280,7 +297,7 @@ nginx 配置文件
                 proxy_pass http://backend;
                 proxy_http_version 1.1;
                 proxy_set_header Connection "Keep-Alive";
-                proxy_set_header Authorization "Basic aHVzdGRieGM6cWlob29odXN0eHJiY3pkYg==";
+                proxy_set_header Authorization "Basic aHVzdHN0b3JlOmh1c3RzdG9yZQ==";
                 proxy_connect_timeout 2s;
                 proxy_send_timeout 60s;
                 proxy_read_timeout 60s;
@@ -292,7 +309,7 @@ nginx 配置文件
                 proxy_pass http://backend;
                 proxy_http_version 1.1;
                 proxy_set_header Connection "Keep-Alive";
-                proxy_set_header Authorization "Basic aHVzdGRieGM6cWlob29odXN0eHJiY3pkYg==";
+                proxy_set_header Authorization "Basic aHVzdHN0b3JlOmh1c3RzdG9yZQ==";
                 proxy_connect_timeout 2s;
                 proxy_send_timeout 60s;
                 proxy_read_timeout 60s;
@@ -304,7 +321,7 @@ nginx 配置文件
                 proxy_pass http://backend;
                 proxy_http_version 1.1;
                 proxy_set_header Connection "Keep-Alive";
-                proxy_set_header Authorization "Basic aHVzdGRieGM6cWlob29odXN0eHJiY3pkYg==";
+                proxy_set_header Authorization "Basic aHVzdHN0b3JlOmh1c3RzdG9yZQ==";
                 proxy_connect_timeout 2s;
                 proxy_send_timeout 60s;
                 proxy_read_timeout 60s;
@@ -316,7 +333,7 @@ nginx 配置文件
                 proxy_pass http://backend;
                 proxy_http_version 1.1;
                 proxy_set_header Connection "Keep-Alive";
-                proxy_set_header Authorization "Basic aHVzdGRieGM6cWlob29odXN0eHJiY3pkYg==";
+                proxy_set_header Authorization "Basic aHVzdHN0b3JlOmh1c3RzdG9yZQ==";
                 proxy_connect_timeout 2s;
                 proxy_send_timeout 60s;
                 proxy_read_timeout 60s;
@@ -328,7 +345,7 @@ nginx 配置文件
                 proxy_pass http://backend;
                 proxy_http_version 1.1;
                 proxy_set_header Connection "Keep-Alive";
-                proxy_set_header Authorization "Basic aHVzdGRieGM6cWlob29odXN0eHJiY3pkYg==";
+                proxy_set_header Authorization "Basic aHVzdHN0b3JlOmh1c3RzdG9yZQ==";
                 proxy_connect_timeout 2s;
                 proxy_send_timeout 60s;
                 proxy_read_timeout 60s;
@@ -340,7 +357,7 @@ nginx 配置文件
                 proxy_pass http://backend;
                 proxy_http_version 1.1;
                 proxy_set_header Connection "Keep-Alive";
-                proxy_set_header Authorization "Basic aHVzdGRieGM6cWlob29odXN0eHJiY3pkYg==";
+                proxy_set_header Authorization "Basic aHVzdHN0b3JlOmh1c3RzdG9yZQ==";
                 proxy_connect_timeout 2s;
                 proxy_send_timeout 60s;
                 proxy_read_timeout 60s;
@@ -352,7 +369,7 @@ nginx 配置文件
                 proxy_pass http://backend;
                 proxy_http_version 1.1;
                 proxy_set_header Connection "Keep-Alive";
-                proxy_set_header Authorization "Basic aHVzdGRieGM6cWlob29odXN0eHJiY3pkYg==";
+                proxy_set_header Authorization "Basic aHVzdHN0b3JlOmh1c3RzdG9yZQ==";
                 proxy_connect_timeout 2s;
                 proxy_send_timeout 60s;
                 proxy_read_timeout 60s;
@@ -364,7 +381,7 @@ nginx 配置文件
                 proxy_pass http://backend;
                 proxy_http_version 1.1;
                 proxy_set_header Connection "Keep-Alive";
-                proxy_set_header Authorization "Basic aHVzdGRieGM6cWlob29odXN0eHJiY3pkYg==";
+                proxy_set_header Authorization "Basic aHVzdHN0b3JlOmh1c3RzdG9yZQ==";
                 proxy_connect_timeout 2s;
                 proxy_send_timeout 60s;
                 proxy_read_timeout 60s;

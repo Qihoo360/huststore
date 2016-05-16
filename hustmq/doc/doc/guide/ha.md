@@ -27,6 +27,7 @@ hustmq ha
         "main_conf":
         [
             ["max_queue_size", 8192],
+            ["queue_hash", "on"],
             ["long_polling_timeout", "180s"],
             ["subscribe_timeout", "180s"],
             ["publish_timeout", "180s"],
@@ -58,7 +59,7 @@ hustmq ha
                 "check_http_send \"GET /status.html HTTP/1.1\\r\\n\\r\\n\"",
                 "check_http_expect_alive http_2xx"
             ],
-            "auth": "aHVzdGRieGM6cWlob29odXN0eHJiY3pkYg==",
+            "auth": "aHVzdHN0b3JlOmh1c3RzdG9yZQ==",
             "proxy_connect_timeout": "2s",
             "proxy_send_timeout": "60s",
             "proxy_read_timeout": "60s",

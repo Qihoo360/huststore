@@ -23,9 +23,14 @@ ha
 * [srem](ha/srem.md)
 * [sismember](ha/sismember.md)
 * [smembers](ha/smembers.md)
+* [zadd](ha/zadd.md)
+* [zscore](ha/zscore.md)
+* [zrem](ha/zrem.md)
+* [zismember](ha/zismember.md)
+* [zrangebyrank](ha/zrangebyrank.md)
+* [zrangebyscore](ha/zrangebyscore.md)
 * [stat](ha/stat.md)
 * [stat_all](ha/stat_all.md)
-* [export](ha/export.md)
 * [file_count](ha/file_count.md)
 
 ### 常见问题 ###

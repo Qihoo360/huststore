@@ -40,6 +40,7 @@ SVR_OBJECTS=                                \
 	$(BIN)hustdb_handler.o \
 	$(BIN)hustdb_handler_def.o \
 	$(BIN)hustdb_network_utils.o \
+	$(BIN)libevhtp_utils.o \
 	$(BIN)hustdb_utils.o
 
 MODULE_OBJECTS=  					        \
@@ -113,6 +114,9 @@ $(BIN)hustdb_handler_def.o:	$(NETWORK)hustdb_handler_def.cpp
 
 $(BIN)hustdb_network_utils.o:	$(NETWORK)hustdb_network_utils.cpp
 	$(CPPC) -c $(CFLAGS)  $(INCS) -o $(BIN)hustdb_network_utils.o $(NETWORK)hustdb_network_utils.cpp
+
+$(BIN)libevhtp_utils.o:	$(NETWORK)libevhtp_utils.cpp
+	$(CPPC) -c $(CFLAGS)  $(INCS) -o $(BIN)libevhtp_utils.o $(NETWORK)libevhtp_utils.cpp
 
 $(BIN)hustdb_utils.o:	$(NETWORK)hustdb_utils.cpp
 	$(CPPC) -c $(CFLAGS)  $(INCS) -o $(BIN)hustdb_utils.o $(NETWORK)hustdb_utils.cpp

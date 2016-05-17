@@ -21,6 +21,15 @@ ngx_int_t hustdb_ha_send_response(
     return ngx_http_send_response_imp(status, response, r);
 }
 
+static ngx_str_t __make_str(ngx_str_t * val, ngx_http_request_t * r)
+{
+    u_char * tmp = ngx_palloc(r->pool, val->len + 1);
+    memcpy(tmp, val->data, val->len);
+    tmp[val->len] = '\0';
+    ngx_str_t rc = { val->len, tmp };
+    return rc;
+}
+
 ngx_int_t hustdb_ha_on_subrequest_complete(ngx_http_request_t * r, void * data, ngx_int_t rc)
 {
     hustdb_ha_ctx_t * ctx = data;
@@ -36,23 +45,36 @@ ngx_int_t hustdb_ha_on_subrequest_complete(ngx_http_request_t * r, void * data, 
         ctx->base.response.data = r->upstream->buffer.pos;
 
         ngx_str_t * val = ngx_http_find_head_value(&r->headers_out.headers, &VERSION_KEY);
-        if (!ctx->version)
+        if (val)
         {
-            ctx->version = val;
-        }
-        else
-        {
-            ngx_int_t src = ngx_atoi(ctx->version->data, ctx->version->len);
-            ngx_int_t des = ngx_atoi(val->data, val->len);
-            if (des > src)
+            if (!ctx->version.data)
             {
-                ctx->version = val;
+                ctx->version = __make_str(val, r->parent);
+            }
+            else
+            {
+                ngx_int_t src = ngx_atoi(ctx->version.data, ctx->version.len);
+                ngx_int_t dst = ngx_atoi(val->data, val->len);
+                if (dst > src)
+                {
+                    ctx->version = __make_str(val, r->parent);
+                }
             }
         }
 
     } while (0);
 
     return ngx_http_finish_subrequest(r);
+}
+
+ngx_str_t * hustdb_ha_get_keys_from_header(ngx_http_request_t * r)
+{
+    return ngx_http_find_head_value(&r->headers_out.headers, &KEYS_KEY);
+}
+
+ngx_bool_t hustdb_ha_add_keys_to_header(const ngx_str_t * keys, ngx_http_request_t * r)
+{
+    return ngx_http_add_field_to_headers_out(&KEYS_KEY, keys, r);
 }
 
 static ngx_int_t __on_subrequest_complete(ngx_http_request_t * r, void * data, ngx_int_t rc)
@@ -62,7 +84,7 @@ static ngx_int_t __on_subrequest_complete(ngx_http_request_t * r, void * data, n
     {
         ctx->base.response.len = ngx_http_get_buf_size(&r->upstream->buffer);
         ctx->base.response.data = r->upstream->buffer.pos;
-        ctx->keys = ngx_http_find_head_value(&r->headers_out.headers, &KEYS_KEY);
+        ctx->keys = hustdb_ha_get_keys_from_header(r);
     }
     return ngx_http_finish_subrequest(r);
 }
@@ -108,14 +130,14 @@ ngx_int_t hustdb_ha_post_peer(
 
     if (ctx->keys)
     {
-        if (!ngx_http_add_field_to_headers_out(&KEYS_KEY, ctx->keys, r))
+        if (!hustdb_ha_add_keys_to_header(ctx->keys, r))
         {
             return ngx_http_send_response_imp(NGX_HTTP_NOT_FOUND, NULL, r);
         }
     }
     return (NGX_HTTP_OK == r->headers_out.status) ? ngx_http_send_response_imp(
         r->headers_out.status, &ctx->base.response, r) : ngx_http_send_response_imp(
-            NGX_HTTP_NOT_FOUND, NULL, r);;
+            NGX_HTTP_NOT_FOUND, NULL, r);
 }
 
 

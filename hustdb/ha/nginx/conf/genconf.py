@@ -25,7 +25,7 @@ def manual():
 
 def gen(conf, path):
     __global = [
-        'worker_processes  1;',
+        'worker_processes  %d;' % (conf['worker_processes'] if 'worker_processes' in conf else 1),
         'daemon on;',
         'master_process on;',
         ''

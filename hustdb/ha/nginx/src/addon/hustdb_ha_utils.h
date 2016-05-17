@@ -98,7 +98,7 @@ ngx_bool_t hustdb_ha_check_tb(ngx_str_t * backend_uri, ngx_http_request_t *r);
 ngx_bool_t hustdb_ha_check_keys(ngx_str_t * backend_uri, ngx_http_request_t *r);
 
 char * hustdb_ha_get_key_from_body(ngx_http_request_t * r);
-ngx_bool_t hustdb_ha_check_body(ngx_http_request_t *r);
+char * hustdb_ha_get_key(ngx_http_request_t * r);
 
 char * hustdb_ha_get_status();
 void hustdb_ha_dispose_status(char * status);

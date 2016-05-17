@@ -1,6 +1,9 @@
 #include "../lib/message.h"
 
-Message::Message ( std::string _data, int _pos, void *_file ) : data ( _data ), pos ( _pos ), file ( _file )
+Message::Message ( std::string _data, int _pos, void *_file )
+: data ( _data )
+, pos ( _pos )
+, file ( _file )
 {
 }
 

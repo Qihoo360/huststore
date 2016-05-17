@@ -1,18 +1,40 @@
 #include "hustdb_ha_write_handler.h"
 
-// |----------------------------------------------------------------------------------------------------------------------------
-// |4 bytes  | 1 byte | 1 byte  | 4 bytes | 4 bytes | n bytes |  4 bytes   |  4 bytes   |  4 bytes   |  n bytes   |  4 bytes   |
-// |---------|--------|---------|---------|---------|---------|------------|------------|------------|------------|------------|
-// |head len | method | proto   |   ver   | key len |   key   | key crc    |  ttl       |  tblen     |  tb        |  tb crc    |
-// |----------------------------------------------------------------------------------------------------------------------------
+// |------------------------------|
+// |uint32_t | head_len | 4 bytes |
+// |------------------------------|
+// |uint8_t  | method   | 1 byte  |
+// |------------------------------|
+// |uint32_t | ver      | 4 bytes |
+// |------------------------------|
+// |uint32_t | key_len  | 4 bytes |
+// |------------------------------|
+// |char *   | key      | n bytes |
+// |------------------------------|
+// |uint32_t | key_crc  | 4 bytes |
+// |------------------------------|
+// |uint32_t | ttl      | 4 bytes |
+// |------------------------------|
+// |uint32_t | tb_len   | 4 bytes |
+// |------------------------------|
+// |char *   | tb       | n bytes |
+// |------------------------------|
+// |uint32_t | tb_crc   | 4 bytes |
+// |------------------------------|
+// |uint64_t | score    | 8 bytes |
+// |------------------------------|
+// |int8_t   | opt      | 1 bytes |
+// |------------------------------|
+
 static ngx_buf_t * __encode_head(
     uint8_t method,
-    uint8_t proto,
     ngx_bool_t has_tb,
     const ngx_str_t * version,
     const char * key,
     const char * tb,
     uint32_t ttl,
+    uint64_t score,
+    int8_t opt,
     ngx_pool_t * pool)
 {
     if (!key || !pool || !version)
@@ -35,7 +57,6 @@ static ngx_buf_t * __encode_head(
     head_item_t heads[] = {
         { &head_len, sizeof(head_len) },
         { &method,   sizeof(method)   },
-        { &proto,    sizeof(proto)    },
         { &ver,      sizeof(ver)      },
         { &key_len,  sizeof(key_len)  },
         { key,       (size_t) key_len },
@@ -43,7 +64,9 @@ static ngx_buf_t * __encode_head(
         { &ttl,      sizeof(ttl)      },
         { &tb_len,   sizeof(tb_len)   },
         { tb,        (size_t) tb_len  },
-        { &tb_crc,   sizeof(tb_crc)   }
+        { &tb_crc,   sizeof(tb_crc)   },
+        { &score,    sizeof(score)    },
+        { &opt,      sizeof(opt)      }
     };
     size_t size = sizeof(heads) / sizeof(head_item_t);
 
@@ -71,15 +94,15 @@ static ngx_buf_t * __encode_head(
     return buf;
 }
 
-static ngx_http_hustdb_ha_write_ctx_t * __create_write_ctx(ngx_http_request_t *r)
+static hustdb_ha_write_ctx_t * __create_write_ctx(ngx_http_request_t *r)
 {
-    ngx_http_hustdb_ha_write_ctx_t * ctx = ngx_palloc(r->pool, sizeof(ngx_http_hustdb_ha_write_ctx_t));
+    hustdb_ha_write_ctx_t * ctx = ngx_palloc(r->pool, sizeof(hustdb_ha_write_ctx_t));
     if (!ctx)
     {
         return NULL;
     }
     ngx_http_set_addon_module_ctx(r, ctx);
-    memset(ctx, 0, sizeof(ngx_http_hustdb_ha_write_ctx_t));
+    memset(ctx, 0, sizeof(hustdb_ha_write_ctx_t));
     return ctx;
 }
 
@@ -91,11 +114,22 @@ typedef struct
 	hustdb_write_state_t state;
 	const char * key;
 	const char * tb;
-	uint8_t proto;
+	uint64_t score;
+    int8_t opt;
 	uint32_t ttl;
 } write_ctx_t;
 
-static ngx_bool_t __set_write_context(const char * key, ngx_bool_t has_tb, ngx_http_request_t *r, write_ctx_t * ctx)
+static ngx_bool_t __parse_args(
+    ngx_bool_t has_tb,
+    ngx_bool_t hash_by_tb,
+    ngx_http_request_t *r,
+    write_ctx_t * ctx);
+
+static ngx_bool_t __set_write_context(
+    const char * key,
+    ngx_bool_t has_tb,
+    ngx_http_request_t *r,
+    write_ctx_t * ctx)
 {
     if (key)
     {
@@ -109,70 +143,74 @@ static ngx_bool_t __set_write_context(const char * key, ngx_bool_t has_tb, ngx_h
             return false;
         }
     }
+    return __parse_args(has_tb, false, r, ctx);
+}
 
-    ctx->proto = HUSTDB_PROTO_BINARY;
-    char * proto = ngx_http_get_param_val(&r->args, "proto", r->pool);
-    if (proto)
+static ngx_bool_t __parse_args(
+    ngx_bool_t has_tb,
+    ngx_bool_t hash_by_tb,
+    ngx_http_request_t *r,
+    write_ctx_t * ctx)
+{
+    ctx->tb = ngx_http_get_param_val(&r->args, "tb", r->pool);
+    if (has_tb && !ctx->tb)
     {
-        int tmp = atoi(proto);
-        if (HUSTDB_PROTO_JSON == tmp)
-        {
-            ctx->proto = HUSTDB_PROTO_JSON;
-        }
-        else if (HUSTDB_PROTO_BINARY == tmp)
-        {
-            ctx->proto = HUSTDB_PROTO_BINARY;
-        }
-        else
+        return false;
+    }
+
+    ctx->ttl = 0;
+    char * val = ngx_http_get_param_val(&r->args, "ttl", r->pool);
+    if (val)
+    {
+        ctx->ttl = atoi(val);
+    }
+
+    ctx->score = 0;
+    val = ngx_http_get_param_val(&r->args, "score", r->pool);
+    if (val)
+    {
+        char * endptr;
+        ctx->score = strtoull(val, &endptr, 10);
+    }
+
+    ctx->opt = 0;
+    val = ngx_http_get_param_val(&r->args, "opt", r->pool);
+    if (val)
+    {
+        ctx->opt = atoi(val);
+    }
+
+    ngx_http_hustdb_ha_main_conf_t * mcf = hustdb_ha_get_module_main_conf(r);
+    if (!mcf)
+    {
+        return false;
+    }
+
+    ctx->peer = hustdb_ha_get_writelist(hash_by_tb ? ctx->tb : ctx->key);
+    if (!ctx->peer)
+    {
+        return false;
+    }
+
+    ctx->error_count = 0;
+    ctx->error_peer = NULL;
+    ctx->state = STATE_WRITE_MASTER1;
+
+    ngx_bool_t alive = ngx_http_peer_is_alive(ctx->peer->peer);
+    if (!alive) // master1
+    {
+        ++ctx->error_count;
+        ctx->error_peer = ctx->peer;
+
+        ctx->peer = ctx->peer->next;
+        ctx->state = STATE_WRITE_MASTER2;
+        alive = ngx_http_peer_is_alive(ctx->peer->peer);
+        if (!alive) // master2
         {
             return false;
         }
     }
-
-	ctx->tb = ngx_http_get_param_val(&r->args, "tb", r->pool);
-	if (has_tb && !ctx->tb)
-	{
-	    return false;
-	}
-
-	ctx->ttl = 0;
-	char * val = ngx_http_get_param_val(&r->args, "ttl", r->pool);
-	if (val)
-	{
-	    ctx->ttl = atoi(val);
-	}
-
-	ngx_http_hustdb_ha_main_conf_t * mcf = hustdb_ha_get_module_main_conf(r);
-	if (!mcf)
-	{
-		return false;
-	}
-
-	ctx->peer = hustdb_ha_get_writelist(ctx->key);
-	if (!ctx->peer)
-	{
-		return false;
-	}
-
-	ctx->error_count = 0;
-	ctx->error_peer = NULL;
-	ctx->state = STATE_WRITE_MASTER1;
-
-	ngx_bool_t alive = ngx_http_peer_is_alive(ctx->peer->peer);
-	if (!alive) // master1
-	{
-		++ctx->error_count;
-		ctx->error_peer = ctx->peer;
-
-		ctx->peer = ctx->peer->next;
-		ctx->state = STATE_WRITE_MASTER2;
-		alive = ngx_http_peer_is_alive(ctx->peer->peer);
-		if (!alive) // master2
-		{
-			return false;
-		}
-	}
-	return true;
+    return true;
 }
 
 static void __copy_data(write_ctx_t * tmp, ngx_http_hustdb_ha_write_ctx_t * ctx)
@@ -180,15 +218,16 @@ static void __copy_data(write_ctx_t * tmp, ngx_http_hustdb_ha_write_ctx_t * ctx)
     ctx->base.peer = tmp->peer;
     ctx->base.key = tmp->key;
     ctx->base.tb = tmp->tb;
+    ctx->base.score = tmp->score;
+    ctx->base.opt = tmp->opt;
 
     ctx->state = tmp->state;
     ctx->error_count = tmp->error_count;
     ctx->error_peer = tmp->error_peer;
-    ctx->proto = tmp->proto;
     ctx->ttl = tmp->ttl;
 }
 
-static ngx_bool_t __init_write_ctx_by_body(ngx_http_request_t *r, ngx_http_hustdb_ha_write_ctx_t * ctx)
+static ngx_bool_t __init_write_ctx_by_body(ngx_http_request_t *r, hustdb_ha_write_ctx_t * ctx)
 {
     do
     {
@@ -204,7 +243,7 @@ static ngx_bool_t __init_write_ctx_by_body(ngx_http_request_t *r, ngx_http_hustd
             break;
         }
 
-        __copy_data(&tmp, ctx);
+        __copy_data(&tmp, &ctx->base);
 
         return true;
     } while (0);
@@ -217,7 +256,7 @@ static void __post_handler(ngx_http_request_t *r)
 {
     --r->main->count;
 
-    ngx_http_hustdb_ha_write_ctx_t * ctx = ngx_http_get_addon_module_ctx(r);
+    hustdb_ha_write_ctx_t * ctx = ngx_http_get_addon_module_ctx(r);
 
     ngx_bool_t rc = true;
     if (ctx->key_in_body)
@@ -225,13 +264,6 @@ static void __post_handler(ngx_http_request_t *r)
         if (!__init_write_ctx_by_body(r, ctx))
         {
             rc = false;
-        }
-    }
-    else
-    {
-        if (ctx->check_body_len)
-        {
-            rc = hustdb_ha_check_body(r);
         }
     }
 
@@ -242,10 +274,10 @@ static void __post_handler(ngx_http_request_t *r)
     }
 
     ngx_http_gen_subrequest(
-            ctx->base.base.backend_uri,
+            ctx->base.base.base.backend_uri,
             r,
-            ctx->base.peer->peer,
-            &ctx->base.base,
+            ctx->base.base.peer->peer,
+            &ctx->base.base.base,
             hustdb_ha_on_subrequest_complete);
 }
 
@@ -253,17 +285,15 @@ ngx_int_t hustdb_ha_start_post(
     ngx_bool_t support_post_only,
     ngx_bool_t key_in_body,
     ngx_bool_t has_tb,
-    ngx_bool_t check_body_len,
     ngx_str_t * backend_uri,
     ngx_http_request_t *r)
 {
-    ngx_http_hustdb_ha_write_ctx_t * ctx = __create_write_ctx(r);
+    hustdb_ha_write_ctx_t * ctx = __create_write_ctx(r);
     if (!ctx)
     {
         return hustdb_ha_send_response(NGX_HTTP_NOT_FOUND, NULL, NULL, r);
     }
-    ctx->check_body_len = check_body_len;
-    ctx->base.base.backend_uri = backend_uri;
+    ctx->base.base.base.backend_uri = backend_uri;
 
     if (support_post_only && !(r->method & NGX_HTTP_POST))
     {
@@ -282,7 +312,7 @@ ngx_int_t hustdb_ha_start_post(
         {
             return hustdb_ha_send_response(NGX_HTTP_NOT_FOUND, NULL, NULL, r);
         }
-        __copy_data(&tmp, ctx);
+        __copy_data(&tmp, &ctx->base);
     }
 
     ngx_int_t rc = ngx_http_read_client_request_body(r, __post_handler);
@@ -297,20 +327,20 @@ ngx_int_t hustdb_ha_start_del(
     ngx_bool_t support_post_only,
     ngx_bool_t key_in_body,
     ngx_bool_t has_tb,
-    ngx_bool_t check_body_len,
     ngx_str_t * backend_uri,
     ngx_http_request_t *r)
 {
     if (key_in_body)
     {
-        return hustdb_ha_start_post(support_post_only, key_in_body, has_tb, check_body_len, backend_uri, r);
+        return hustdb_ha_start_post(support_post_only, key_in_body, has_tb, backend_uri, r);
     }
 
-    ngx_http_hustdb_ha_write_ctx_t * ctx = __create_write_ctx(r);
-    if (!ctx)
+    hustdb_ha_write_ctx_t * args = __create_write_ctx(r);
+    if (!args)
     {
         return NGX_ERROR;
     }
+    ngx_http_hustdb_ha_write_ctx_t * ctx = &args->base;
     ctx->base.base.backend_uri = backend_uri;
     write_ctx_t tmp;
     if (!__set_write_context(NULL, has_tb, r, &tmp))
@@ -339,7 +369,7 @@ static ngx_int_t __write_sync_data(
         uint32_t ttl = (0 == ctx->ttl) ? 0 : (uint32_t) (now + ctx->ttl);
 
         ngx_buf_t * value = NULL;
-        ngx_buf_t * head = __encode_head(method, ctx->proto, has_tb, ctx->base.version, ctx->base.key, ctx->base.tb, ttl, r->pool);
+        ngx_buf_t * head = __encode_head(method, has_tb, &ctx->base.version, ctx->base.key, ctx->base.tb, ttl, ctx->base.score, ctx->base.opt, r->pool);
         if (r->request_body)
         {
             if (!ngx_http_insert_head_to_body(head, r))
@@ -371,7 +401,7 @@ static ngx_int_t __write_sync_data(
             break;
         }
 
-        return hustdb_ha_send_response(NGX_HTTP_OK, ctx->base.version, NULL, r);
+        return hustdb_ha_send_response(NGX_HTTP_OK, &ctx->base.version, NULL, r);
     } while (0);
 
     return hustdb_ha_send_response(NGX_HTTP_NOT_FOUND, NULL, NULL, r);
@@ -399,7 +429,8 @@ static ngx_bool_t __skip_not_found_error(uint8_t method, ngx_uint_t status)
     static uint8_t methods[] = {
         HUSTDB_METHOD_DEL,
         HUSTDB_METHOD_HDEL,
-        HUSTDB_METHOD_SREM
+        HUSTDB_METHOD_SREM,
+        HUSTDB_METHOD_ZREM,
     };
     static size_t size = sizeof(methods) / sizeof(uint8_t);
     return __match_method(methods, size, method);
@@ -415,8 +446,10 @@ static ngx_bool_t __skip_precondition_error(uint8_t method, ngx_uint_t status)
         HUSTDB_METHOD_DEL,
         HUSTDB_METHOD_HDEL,
         HUSTDB_METHOD_SREM,
+        HUSTDB_METHOD_ZREM,
         HUSTDB_METHOD_HSET,
-        HUSTDB_METHOD_SADD
+        HUSTDB_METHOD_SADD,
+        HUSTDB_METHOD_ZADD
     };
     static size_t size = sizeof(methods) / sizeof(uint8_t);
     return __match_method(methods, size, method);
@@ -494,7 +527,7 @@ static ngx_int_t __on_write_master2_complete(
 	{
 	    return hustdb_ha_send_response(NGX_HTTP_NOT_FOUND, NULL, NULL, r);
 	}
-	return hustdb_ha_send_response(NGX_HTTP_OK, ctx->base.version, NULL, r);
+	return hustdb_ha_send_response(NGX_HTTP_OK, &ctx->base.version, NULL, r);
 }
 
 ngx_int_t hustdb_ha_write_handler(
@@ -502,23 +535,100 @@ ngx_int_t hustdb_ha_write_handler(
     ngx_bool_t support_post_only,
     ngx_bool_t key_in_body,
     ngx_bool_t has_tb,
-    ngx_bool_t check_body_len,
     ngx_str_t * backend_uri,
     ngx_http_request_t *r,
     hustdb_ha_start_write_t start_write)
 {
+    hustdb_ha_write_ctx_t * ctx = ngx_http_get_addon_module_ctx(r);
+    if (!ctx)
+    {
+        return start_write(support_post_only, key_in_body, has_tb, backend_uri, r);
+    }
+    if (STATE_WRITE_MASTER1 == ctx->base.state)
+    {
+        return __on_write_master1_complete(method, has_tb, r, &ctx->base);
+    }
+    else if (STATE_WRITE_MASTER2 == ctx->base.state)
+    {
+        return __on_write_master2_complete(method, has_tb, r, &ctx->base);
+    }
+    return NGX_ERROR;
+}
+
+static ngx_http_hustdb_ha_write_ctx_t * __create_zwrite_ctx(ngx_http_request_t *r)
+{
+    ngx_http_hustdb_ha_write_ctx_t * ctx = ngx_palloc(r->pool, sizeof(ngx_http_hustdb_ha_write_ctx_t));
+    if (!ctx)
+    {
+        return NULL;
+    }
+    ngx_http_set_addon_module_ctx(r, ctx);
+    memset(ctx, 0, sizeof(ngx_http_hustdb_ha_write_ctx_t));
+    return ctx;
+}
+
+static void __post_body_handler(ngx_http_request_t *r)
+{
+    --r->main->count;
+
+    ngx_http_hustdb_ha_write_ctx_t * ctx = ngx_http_get_addon_module_ctx(r);
+
+    ctx->base.key = hustdb_ha_get_key(r);
+    if (!ctx->base.key)
+    {
+        hustdb_ha_send_response(NGX_HTTP_NOT_FOUND, NULL, NULL, r);
+        return;
+    }
+
+    ngx_http_gen_subrequest(
+        ctx->base.base.backend_uri,
+        r,
+        ctx->base.peer->peer,
+        &ctx->base.base,
+        hustdb_ha_on_subrequest_complete);
+}
+
+static ngx_int_t __start_zwrite(ngx_str_t * backend_uri, ngx_http_request_t *r)
+{
+    ngx_http_hustdb_ha_write_ctx_t * ctx = __create_zwrite_ctx(r);
+    if (!ctx)
+    {
+        return hustdb_ha_send_response(NGX_HTTP_NOT_FOUND, NULL, NULL, r);
+    }
+    ctx->base.base.backend_uri = backend_uri;
+
+    write_ctx_t tmp;
+    if (!__parse_args(true, true, r, &tmp))
+    {
+        return hustdb_ha_send_response(NGX_HTTP_NOT_FOUND, NULL, NULL, r);
+    }
+    __copy_data(&tmp, ctx);
+
+    ngx_int_t rc = ngx_http_read_client_request_body(r, __post_body_handler);
+    if ( rc >= NGX_HTTP_SPECIAL_RESPONSE )
+    {
+        return rc;
+    }
+    return NGX_DONE;
+}
+
+ngx_int_t hustdb_ha_zwrite_handler(
+    uint8_t method,
+    ngx_str_t * backend_uri,
+    ngx_http_request_t *r)
+{
     ngx_http_hustdb_ha_write_ctx_t * ctx = ngx_http_get_addon_module_ctx(r);
     if (!ctx)
     {
-        return start_write(support_post_only, key_in_body, has_tb, check_body_len, backend_uri, r);
+        return __start_zwrite(backend_uri, r);
     }
     if (STATE_WRITE_MASTER1 == ctx->state)
     {
-        return __on_write_master1_complete(method, has_tb, r, ctx);
+        return __on_write_master1_complete(method, true, r, ctx);
     }
     else if (STATE_WRITE_MASTER2 == ctx->state)
     {
-        return __on_write_master2_complete(method, has_tb, r, ctx);
+        return __on_write_master2_complete(method, true, r, ctx);
     }
     return NGX_ERROR;
 }

@@ -154,6 +154,12 @@ static void construct_file_queues ( const char *status_dir, const char *dir )
     if ( dirp == NULL )
         return;
     struct stat sb;
+
+    std::string path;
+    std::string log_path;
+    std::string status_path;
+    std::string status_total_file;
+
     for ( ; ; )
     {
         dp = readdir (dirp);
@@ -166,16 +172,16 @@ static void construct_file_queues ( const char *status_dir, const char *dir )
         {
             continue;
         }
-        std::string path (dir);
+        path = dir;
         path.append (dp->d_name);
         lstat (path.c_str (), &sb);
         if ( ! S_ISDIR (sb.st_mode) )
         {
             continue;
         }
-        std::string log_path (dir);
+        log_path = dir;
         log_path.append (dp->d_name);
-        std::string status_path (status_dir);
+        status_path = status_dir;
         status_path.append (dp->d_name);
 
         hosts.push_back (dp->d_name);
@@ -184,7 +190,7 @@ static void construct_file_queues ( const char *status_dir, const char *dir )
         mkdir (status_path.c_str (), S_IRWXU | S_IRWXG | S_IRWXO);
         status_dirs.push_back (status_path);
 
-        std::string status_total_file (status_path);
+        status_total_file = status_path;
         status_total_file.append ("/total_status.log");
         int fd = open (status_total_file.c_str (), O_RDWR | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
         fstat (fd, &sb);

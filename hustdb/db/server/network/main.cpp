@@ -22,24 +22,24 @@ int main(int argc, const char* argv[])
     
     server_conf_t cf = db.get_server_conf();
     
-    hustdb_network::http_basic_auth_t auth(cf.http_security_user.c_str(), cf.http_security_passwd.c_str());
+    evhtp::http_basic_auth_t auth(cf.http_security_user.c_str(), cf.http_security_passwd.c_str());
     
     hustdb_network::ip_allow_t ip_allow_map = {0};
     hustdb_network::get_ip_allow_map ((char *) cf.http_access_allow.c_str(), cf.http_access_allow.size(), &ip_allow_map);
     
     hustdb_network_ctx_t ctx;
-    ctx.threads = cf.tcp_worker_count;
-    ctx.port = cf.tcp_port;
-    ctx.backlog = cf.tcp_backlog;
-    ctx.max_body_size = cf.tcp_max_body_size;
-    ctx.max_keepalive_requests = cf.tcp_max_keepalive_requests;
-    ctx.auth = auth.c_str();
-    ctx.disable_100_cont = cf.disable_100_cont;
-    ctx.enable_defer_accept = cf.tcp_enable_defer_accept;
-    ctx.enable_nodelay  = cf.tcp_enable_nodelay;
-    ctx.enable_reuseport = cf.tcp_enable_reuseport;
-    ctx.recv_timeout.tv_sec = cf.tcp_recv_timeout;
-    ctx.send_timeout.tv_sec = cf.tcp_send_timeout;
+    ctx.base.threads = cf.tcp_worker_count;
+    ctx.base.port = cf.tcp_port;
+    ctx.base.backlog = cf.tcp_backlog;
+    ctx.base.max_body_size = cf.tcp_max_body_size;
+    ctx.base.max_keepalive_requests = cf.tcp_max_keepalive_requests;
+    ctx.base.auth = auth.c_str();
+    ctx.base.disable_100_cont = cf.disable_100_cont;
+    ctx.base.enable_defer_accept = cf.tcp_enable_defer_accept;
+    ctx.base.enable_nodelay  = cf.tcp_enable_nodelay;
+    ctx.base.enable_reuseport = cf.tcp_enable_reuseport;
+    ctx.base.recv_timeout.tv_sec = cf.tcp_recv_timeout;
+    ctx.base.send_timeout.tv_sec = cf.tcp_send_timeout;
     ctx.ip_allow_map = &ip_allow_map;
     ctx.db = &db;
 

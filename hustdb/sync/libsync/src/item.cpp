@@ -1,6 +1,8 @@
 #include "../lib/item.h"
 
-Item::Item ( uint32_t pos, File *_file ) : bitmap_index ( pos ), file ( _file )
+Item::Item ( uint32_t pos, File *_file )
+: bitmap_index ( pos )
+, file ( _file )
 {
 }
 

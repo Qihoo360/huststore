@@ -1,13 +1,13 @@
 # huststore - 高性能分布式存储服务 #
 ![huststore logo](res/logo.png)
 
-`huststore` 是一个高性能的分布式存储服务，不但提供了 **`10w QPS`** 级别的 `kv` 存储的功能，还提供了 `hash`、`set` 等一系列数据结构的支持，并且支持 **二进制** 的 kv 存储，可以替代 `Redis` 相关的功能。此外，`huststore` 还结合特有的 `HA` 模块实现了分布式消息队列的功能，包括消息的流式推送，以及消息的 `发布-订阅` 等功能，可以替代 `RabbitMQ` 相关的功能。
+`huststore` 是一个高性能的分布式存储服务，不但提供了 **`100 thousand QPS`** 级别的 `kv` 存储的功能，还提供了 `hash`、`set`、`sort set` 等一系列数据结构的支持，并且支持 **二进制** 的 kv 存储，可以替代 `Redis` 相关的功能。此外，`huststore` 还结合特有的 `HA` 模块实现了分布式消息队列的功能，包括消息的流式推送，以及消息的 `发布-订阅` 等功能，可以替代 `rabbitmq or gearman` 相关的功能。
 
 ## 特性 ##
-`huststore` 分为 `hustdb` 以及 `HA` 模块两大部分。`hustdb` （存储引擎）的底层设计采用了自主开发的 `fastdb`，通过一套独特的 `md5 db` 将`QPS` 提升至 `10w` 级别的水准（含网络层的开销）。`HA` 以 `nginx` 模块的方式开发。`nginx` 是工业级的 `http server` 标准，得益于此，`huststore` 具备以下特性：
+`huststore` 分为 `hustdb` 以及 `HA` 模块两大部分。`hustdb` （存储引擎）的底层设计采用了自主开发的 `fastdb`。`HA` 以 `nginx` 模块的方式开发。`nginx` 是工业级的 `http server` 标准，得益于此，`huststore` 具备以下特性：
   
 * 高吞吐量  
-`hustdb` 的网络层采用了开源的 [libevhtp](https://github.com/ellzey/libevhtp) 来实现，结合自主研发的高性能 `fastdb` 存储引擎，性能测试 `QPS` 在 **10w** 以上。  
+`hustdb` 的网络层采用了开源的 [libevhtp](https://github.com/ellzey/libevhtp) 来实现，结合自主研发的高性能 `fastdb` 存储引擎，性能测试 `QPS` 在 **100 thousand** 以上。
 * 高并发  
 参考 `nginx` 的并发能力。  
 * 高可用性  
@@ -83,58 +83,56 @@
 
 **机器配置:** `24core，64gb，1tb sata(7200rpm)`
 
-**压测参数:** `100 concurrent，100w query`
+**压测参数:** `100 concurrent，1000 thousand querys`
 
-**DB CONF:** `single instance，thread model，10 worker`
+**DB CONF:** `single instance，thread model，10 workers`
 
 **测试结果:**
 
     （1）PUT
-    	<1>value：256B；     qps：9.5w
-	    <2>value：1KB；      qps：8.5w
-	    <3>value：4KB；      qps：2.5w
-	    <4>value：16KB；     qps：7k
-	    <5>value：64KB；     qps：2k
+    	<1>value：256B；     qps：95 thousand
+	    <2>value：1KB；      qps：85 thousand
+	    <3>value：4KB；      qps：25 thousand
+	    <4>value：16KB；     qps：7 thousand
+	    <5>value：64KB；     qps：2 thousand
 
 	（2）GET
-	    <1>value：256B；     qps：10w
-	    <2>value：1KB；      qps：10w
-	    <3>value：4KB；      qps：2.5w
-	    <4>value：16KB；     qps：7k
-	    <5>value：64KB；     qps：2k
+	    <1>value：256B；     qps：100 thousand
+	    <2>value：1KB；      qps：10 thousand
+	    <3>value：4KB；      qps：25 thousand
+	    <4>value：16KB；     qps：7 thousand
+	    <5>value：64KB；     qps：2 thousand
 
 	（3）DEL
-    	<1>value：256B；     qps：10w
-	    <2>value：1KB；      qps：10w
-    	<3>value：4KB；      qps：10w
-    	<4>value：16KB；     qps：10w
-    	<5>value：64KB；     qps：10w
+    	<1>value：256B；     qps：100 thousand
+	    <2>value：1KB；      qps：100 thousand
+    	<3>value：4KB；      qps：100 thousand
+    	<4>value：16KB；     qps：100 thousand
+    	<5>value：64KB；     qps：100 thousand
 
 ### `hustmq` ###
 
 **机器配置:** `24core，64gb，1tb sata(7200rpm)`
 
-**压测参数:** `100 concurrent，100w query，single queue`
+**压测参数:** `100 concurrent，1000 thousand querys，single queue`
 
-**DB CONF:** `single instance，thread model，10 worker`
+**DB CONF:** `single instance，thread model，10 workers`
 
 **测试结果:**
 
     （1）PUT
-	    <1>item：256B；     qps：3w
-	    <2>item：1KB；      qps：2.5w
-	    <3>item：4KB；      qps：2w
-	    <4>item：16KB；     qps：7k
-	    <5>item：64KB；     qps：2k
+	    <1>item：256B；     qps：30 thousand
+	    <2>item：1KB；      qps：25 thousand
+	    <3>item：4KB；      qps：20 thousand
+	    <4>item：16KB；     qps：7 thousand
+	    <5>item：64KB；     qps：2 thousand
 
 	（2）GET
-	    <1>item：256B；     qps：2.5w
-	    <2>item：1KB；      qps：2w
-	    <3>item：4KB；      qps：1.8w
-	    <4>item：16KB；     qps：7k
-	    <5>item：64KB；     qps：2k
-
-	（3）STAT_ALL           qps：9.5w
+	    <1>item：256B；     qps：25 thousand
+	    <2>item：1KB；      qps：20 thousand
+	    <3>item：4KB；      qps：18 thousand
+	    <4>item：16KB；     qps：7 thousand
+	    <5>item：64KB；     qps：2 thousand
 
 ## LICENSE ##
 

@@ -20,6 +20,7 @@ hustdb ha
 
     {
         "module": "hustdb_ha",
+        "worker_processes": 4,
         "worker_connections": 1048576,
         "listen": 8082,
         "keepalive_timeout": 540,
@@ -54,9 +55,14 @@ hustdb ha
             "srem",
             "sismember",
             "smembers",
+            "zadd",
+            "zrem",
+            "zismember",
+            "zscore",
+            "zrangebyrank",
+            "zrangebyscore",
             "stat",
             "stat_all",
-            "export",
             "file_count",
             "peer_count",
             "sync_status",
@@ -97,9 +103,14 @@ hustdb ha
                 "/hustdb/srem", 
                 "/hustdb/sismember", 
                 "/hustdb/smembers",
+                "/hustdb/zadd",
+                "/hustdb/zrem",
+                "/hustdb/zismember",
+                "/hustdb/zscore",
+                "/hustdb/zrangebyrank",
+                "/hustdb/zrangebyscore",
                 "/hustdb/stat",
                 "/hustdb/stat_all",
-                "/hustdb/export", 
                 "/hustdb/file_count"
             ]
         }

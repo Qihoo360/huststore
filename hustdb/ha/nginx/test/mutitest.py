@@ -21,14 +21,11 @@ gen_body = lambda n: map(gen_char, xrange(n))
 def manual(): 
     print """
     usage:
-        mutitest [number] [host]
-            [number]
-                required: number of process
-            [host]
-                optional: test host name
+        python mutitest [number] [uri]
+            number : number of process
+            uri    : ip:port
     sample:
-        python mutitest.py 2
-        python mutitest.py 2 192.168.1.101
+        python mutitest.py 2 localhost:8082
         """
     
 def log_err(str):
@@ -56,29 +53,34 @@ def write_vals(loop, sess, gen_cmd, host, body, blen):
             log_err('loop %s {%s: %s}' % (loop, cmd, str(e)))
             time.sleep(1)
 
-def sadd(loop, sess, cmd, body):
+def post_value(loop, sess, cmd, body):
     r = sess.post(cmd, body, headers = {'content-type':'text/plain'}, timeout=5, auth=(USER, PASSWD))
     if 200 == r.status_code:
         if 'sync' in r.headers:
             print 'sync: %s' % r.headers['sync']
     else:
         print '%s: %d' % (cmd, r.status_code)
-def sadd_values(loop, sess, host, body, blen):
+def post_values(loop, sess, host, body, blen):
+    def __post_value(loop, sess, cmd, key):
+        try:
+            post_value(loop, sess, cmd, key)
+        except requests.exceptions.RequestException as e:
+            log_err('loop %s {%s: %s}' % (loop, cmd, str(e)))
+            time.sleep(1)
     for case in test_cases:
         index = random.randint(0, blen - 1)
         body[index] = gen_char(index)
         key = ''.join(body)
         cmd = '%s/sadd?tb=%s' % (host, case['tb'])
-        try:
-            sadd(loop, sess, cmd, case['key'])
-        except requests.exceptions.RequestException as e:
-            log_err('loop %s {%s: %s}' % (loop, cmd, str(e)))
-            time.sleep(1)
+        __post_value(loop, sess, cmd, key)
+        cmd = '%s/zadd?tb=%s&score=60' % (host, case['tb'])
+        __post_value(loop, sess, cmd, key)
+        
     
 def write_values(loop, sess, host, body, blen):
     write_vals(loop, sess, lambda host, case: '%s/put?key=%s' % (host, case['key']), host, body, blen)
     write_vals(loop, sess, lambda host, case: '%s/hset?tb=%s&key=%s' % (host, case['tb'], case['key']), host, body, blen)
-    sadd_values(loop, sess, host, body, blen)
+    post_values(loop, sess, host, body, blen)
 
 def gloop(arg, **kwarg):
     return MutiLoop.loop(*arg, **kwarg)
@@ -106,10 +108,10 @@ class MutiLoop:
     
 def test(argv):
     size = len(argv)
-    if size < 2 or size > 3:
+    if 3 != size:
         return False
     number = int(argv[1])
-    host = 'http://localhost:8082' if 2 == size else 'http://%s:8082' % argv[2]
+    host = 'http://%s' % argv[2]
     print 'generate string...'
     blen = 1024 * 1024
     body = gen_body(blen)

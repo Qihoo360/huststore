@@ -12,8 +12,8 @@
 *  **offset** （必选） 
 *  **size** （必选）
 *  **file** （必选）
-*  **start** （必选）
-*  **end** （必选）
+*  **start** （可选）
+*  **end** （可选）
 *  **async** （可选）
 
 该接口是 `/hustdb/keys` 的代理接口，参数详情可参考 [这里](../hustdb/hustdb/keys.md) 。

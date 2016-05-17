@@ -8,7 +8,7 @@ hustdb_exist_ctx_t::hustdb_exist_ctx_t(evhtp_query_t * htp_query)
     // reset
     has_key = false;
 
-    memset(&key, 0, sizeof(c_str_t));
+    memset(&key, 0, sizeof(evhtp::c_str_t));
 
     if (!htp_query)
     {
@@ -18,7 +18,7 @@ hustdb_exist_ctx_t::hustdb_exist_ctx_t(evhtp_query_t * htp_query)
     evhtp_kv_s * kv = htp_query->tqh_first;
     while (kv)
     {
-        static c_str_t __key = c_make_str("key");
+        static evhtp::c_str_t __key = evhtp_make_str("key");
 
         if (kv->klen == __key.len && 0 == strncmp(__key.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
@@ -34,7 +34,7 @@ hustdb_get_ctx_t::hustdb_get_ctx_t(evhtp_query_t * htp_query)
     // reset
     has_key = false;
 
-    memset(&key, 0, sizeof(c_str_t));
+    memset(&key, 0, sizeof(evhtp::c_str_t));
 
     if (!htp_query)
     {
@@ -44,7 +44,7 @@ hustdb_get_ctx_t::hustdb_get_ctx_t(evhtp_query_t * htp_query)
     evhtp_kv_s * kv = htp_query->tqh_first;
     while (kv)
     {
-        static c_str_t __key = c_make_str("key");
+        static evhtp::c_str_t __key = evhtp_make_str("key");
 
         if (kv->klen == __key.len && 0 == strncmp(__key.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
@@ -64,8 +64,8 @@ hustdb_put_ctx_t::hustdb_put_ctx_t(evhtp_query_t * htp_query)
     has_ver = false;
     has_is_dup = false;
 
-    memset(&key, 0, sizeof(c_str_t));
-    memset(&val, 0, sizeof(c_str_t));
+    memset(&key, 0, sizeof(evhtp::c_str_t));
+    memset(&val, 0, sizeof(evhtp::c_str_t));
     ttl = 0;
     ver = 0;
     is_dup = false;
@@ -78,11 +78,11 @@ hustdb_put_ctx_t::hustdb_put_ctx_t(evhtp_query_t * htp_query)
     evhtp_kv_s * kv = htp_query->tqh_first;
     while (kv)
     {
-        static c_str_t __key = c_make_str("key");
-        static c_str_t __val = c_make_str("val");
-        static c_str_t __ttl = c_make_str("ttl");
-        static c_str_t __ver = c_make_str("ver");
-        static c_str_t __is_dup = c_make_str("is_dup");
+        static evhtp::c_str_t __key = evhtp_make_str("key");
+        static evhtp::c_str_t __val = evhtp_make_str("val");
+        static evhtp::c_str_t __ttl = evhtp_make_str("ttl");
+        static evhtp::c_str_t __ver = evhtp_make_str("ver");
+        static evhtp::c_str_t __is_dup = evhtp_make_str("is_dup");
 
         if (kv->klen == __key.len && 0 == strncmp(__key.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
@@ -97,12 +97,12 @@ hustdb_put_ctx_t::hustdb_put_ctx_t(evhtp_query_t * htp_query)
         else if (kv->klen == __ttl.len && 0 == strncmp(__ttl.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
             has_ttl = true;
-            ttl = hustdb_network::cast <uint32_t> (std::string(kv->val, kv->vlen));
+            ttl = evhtp::cast <uint32_t> (std::string(kv->val, kv->vlen));
         }
         else if (kv->klen == __ver.len && 0 == strncmp(__ver.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
             has_ver = true;
-            ver = hustdb_network::cast <uint32_t> (std::string(kv->val, kv->vlen));
+            ver = evhtp::cast <uint32_t> (std::string(kv->val, kv->vlen));
         }
         else if (kv->klen == __is_dup.len && 0 == strncmp(__is_dup.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
@@ -121,7 +121,7 @@ hustdb_del_ctx_t::hustdb_del_ctx_t(evhtp_query_t * htp_query)
     has_ver = false;
     has_is_dup = false;
 
-    memset(&key, 0, sizeof(c_str_t));
+    memset(&key, 0, sizeof(evhtp::c_str_t));
     ver = 0;
     is_dup = false;
 
@@ -133,9 +133,9 @@ hustdb_del_ctx_t::hustdb_del_ctx_t(evhtp_query_t * htp_query)
     evhtp_kv_s * kv = htp_query->tqh_first;
     while (kv)
     {
-        static c_str_t __key = c_make_str("key");
-        static c_str_t __ver = c_make_str("ver");
-        static c_str_t __is_dup = c_make_str("is_dup");
+        static evhtp::c_str_t __key = evhtp_make_str("key");
+        static evhtp::c_str_t __ver = evhtp_make_str("ver");
+        static evhtp::c_str_t __is_dup = evhtp_make_str("is_dup");
 
         if (kv->klen == __key.len && 0 == strncmp(__key.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
@@ -145,7 +145,7 @@ hustdb_del_ctx_t::hustdb_del_ctx_t(evhtp_query_t * htp_query)
         else if (kv->klen == __ver.len && 0 == strncmp(__ver.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
             has_ver = true;
-            ver = hustdb_network::cast <uint32_t> (std::string(kv->val, kv->vlen));
+            ver = evhtp::cast <uint32_t> (std::string(kv->val, kv->vlen));
         }
         else if (kv->klen == __is_dup.len && 0 == strncmp(__is_dup.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
@@ -184,38 +184,38 @@ hustdb_keys_ctx_t::hustdb_keys_ctx_t(evhtp_query_t * htp_query)
     evhtp_kv_s * kv = htp_query->tqh_first;
     while (kv)
     {
-        static c_str_t __offset = c_make_str("offset");
-        static c_str_t __size = c_make_str("size");
-        static c_str_t __file = c_make_str("file");
-        static c_str_t __start = c_make_str("start");
-        static c_str_t __end = c_make_str("end");
-        static c_str_t __noval = c_make_str("noval");
-        static c_str_t __async = c_make_str("async");
+        static evhtp::c_str_t __offset = evhtp_make_str("offset");
+        static evhtp::c_str_t __size = evhtp_make_str("size");
+        static evhtp::c_str_t __file = evhtp_make_str("file");
+        static evhtp::c_str_t __start = evhtp_make_str("start");
+        static evhtp::c_str_t __end = evhtp_make_str("end");
+        static evhtp::c_str_t __noval = evhtp_make_str("noval");
+        static evhtp::c_str_t __async = evhtp_make_str("async");
 
         if (kv->klen == __offset.len && 0 == strncmp(__offset.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
             has_offset = true;
-            offset = hustdb_network::cast <int32_t> (std::string(kv->val, kv->vlen));
+            offset = evhtp::cast <int32_t> (std::string(kv->val, kv->vlen));
         }
         else if (kv->klen == __size.len && 0 == strncmp(__size.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
             has_size = true;
-            size = hustdb_network::cast <int32_t> (std::string(kv->val, kv->vlen));
+            size = evhtp::cast <int32_t> (std::string(kv->val, kv->vlen));
         }
         else if (kv->klen == __file.len && 0 == strncmp(__file.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
             has_file = true;
-            file = hustdb_network::cast <int32_t> (std::string(kv->val, kv->vlen));
+            file = evhtp::cast <int32_t> (std::string(kv->val, kv->vlen));
         }
         else if (kv->klen == __start.len && 0 == strncmp(__start.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
             has_start = true;
-            start = hustdb_network::cast <int32_t> (std::string(kv->val, kv->vlen));
+            start = evhtp::cast <int32_t> (std::string(kv->val, kv->vlen));
         }
         else if (kv->klen == __end.len && 0 == strncmp(__end.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
             has_end = true;
-            end = hustdb_network::cast <int32_t> (std::string(kv->val, kv->vlen));
+            end = evhtp::cast <int32_t> (std::string(kv->val, kv->vlen));
         }
         else if (kv->klen == __noval.len && 0 == strncmp(__noval.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
@@ -238,7 +238,7 @@ hustdb_stat_ctx_t::hustdb_stat_ctx_t(evhtp_query_t * htp_query)
     // reset
     has_tb = false;
 
-    memset(&tb, 0, sizeof(c_str_t));
+    memset(&tb, 0, sizeof(evhtp::c_str_t));
 
     if (!htp_query)
     {
@@ -248,7 +248,7 @@ hustdb_stat_ctx_t::hustdb_stat_ctx_t(evhtp_query_t * htp_query)
     evhtp_kv_s * kv = htp_query->tqh_first;
     while (kv)
     {
-        static c_str_t __tb = c_make_str("tb");
+        static evhtp::c_str_t __tb = evhtp_make_str("tb");
 
         if (kv->klen == __tb.len && 0 == strncmp(__tb.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
@@ -265,8 +265,8 @@ hustdb_hexist_ctx_t::hustdb_hexist_ctx_t(evhtp_query_t * htp_query)
     has_tb = false;
     has_key = false;
 
-    memset(&tb, 0, sizeof(c_str_t));
-    memset(&key, 0, sizeof(c_str_t));
+    memset(&tb, 0, sizeof(evhtp::c_str_t));
+    memset(&key, 0, sizeof(evhtp::c_str_t));
 
     if (!htp_query)
     {
@@ -276,8 +276,8 @@ hustdb_hexist_ctx_t::hustdb_hexist_ctx_t(evhtp_query_t * htp_query)
     evhtp_kv_s * kv = htp_query->tqh_first;
     while (kv)
     {
-        static c_str_t __tb = c_make_str("tb");
-        static c_str_t __key = c_make_str("key");
+        static evhtp::c_str_t __tb = evhtp_make_str("tb");
+        static evhtp::c_str_t __key = evhtp_make_str("key");
 
         if (kv->klen == __tb.len && 0 == strncmp(__tb.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
@@ -299,8 +299,8 @@ hustdb_hget_ctx_t::hustdb_hget_ctx_t(evhtp_query_t * htp_query)
     has_tb = false;
     has_key = false;
 
-    memset(&tb, 0, sizeof(c_str_t));
-    memset(&key, 0, sizeof(c_str_t));
+    memset(&tb, 0, sizeof(evhtp::c_str_t));
+    memset(&key, 0, sizeof(evhtp::c_str_t));
 
     if (!htp_query)
     {
@@ -310,8 +310,8 @@ hustdb_hget_ctx_t::hustdb_hget_ctx_t(evhtp_query_t * htp_query)
     evhtp_kv_s * kv = htp_query->tqh_first;
     while (kv)
     {
-        static c_str_t __tb = c_make_str("tb");
-        static c_str_t __key = c_make_str("key");
+        static evhtp::c_str_t __tb = evhtp_make_str("tb");
+        static evhtp::c_str_t __key = evhtp_make_str("key");
 
         if (kv->klen == __tb.len && 0 == strncmp(__tb.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
@@ -337,9 +337,9 @@ hustdb_hset_ctx_t::hustdb_hset_ctx_t(evhtp_query_t * htp_query)
     has_ver = false;
     has_is_dup = false;
 
-    memset(&tb, 0, sizeof(c_str_t));
-    memset(&key, 0, sizeof(c_str_t));
-    memset(&val, 0, sizeof(c_str_t));
+    memset(&tb, 0, sizeof(evhtp::c_str_t));
+    memset(&key, 0, sizeof(evhtp::c_str_t));
+    memset(&val, 0, sizeof(evhtp::c_str_t));
     ttl = 0;
     ver = 0;
     is_dup = false;
@@ -352,12 +352,12 @@ hustdb_hset_ctx_t::hustdb_hset_ctx_t(evhtp_query_t * htp_query)
     evhtp_kv_s * kv = htp_query->tqh_first;
     while (kv)
     {
-        static c_str_t __tb = c_make_str("tb");
-        static c_str_t __key = c_make_str("key");
-        static c_str_t __val = c_make_str("val");
-        static c_str_t __ttl = c_make_str("ttl");
-        static c_str_t __ver = c_make_str("ver");
-        static c_str_t __is_dup = c_make_str("is_dup");
+        static evhtp::c_str_t __tb = evhtp_make_str("tb");
+        static evhtp::c_str_t __key = evhtp_make_str("key");
+        static evhtp::c_str_t __val = evhtp_make_str("val");
+        static evhtp::c_str_t __ttl = evhtp_make_str("ttl");
+        static evhtp::c_str_t __ver = evhtp_make_str("ver");
+        static evhtp::c_str_t __is_dup = evhtp_make_str("is_dup");
 
         if (kv->klen == __tb.len && 0 == strncmp(__tb.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
@@ -377,12 +377,12 @@ hustdb_hset_ctx_t::hustdb_hset_ctx_t(evhtp_query_t * htp_query)
         else if (kv->klen == __ttl.len && 0 == strncmp(__ttl.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
             has_ttl = true;
-            ttl = hustdb_network::cast <uint32_t> (std::string(kv->val, kv->vlen));
+            ttl = evhtp::cast <uint32_t> (std::string(kv->val, kv->vlen));
         }
         else if (kv->klen == __ver.len && 0 == strncmp(__ver.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
             has_ver = true;
-            ver = hustdb_network::cast <uint32_t> (std::string(kv->val, kv->vlen));
+            ver = evhtp::cast <uint32_t> (std::string(kv->val, kv->vlen));
         }
         else if (kv->klen == __is_dup.len && 0 == strncmp(__is_dup.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
@@ -402,8 +402,8 @@ hustdb_hdel_ctx_t::hustdb_hdel_ctx_t(evhtp_query_t * htp_query)
     has_ver = false;
     has_is_dup = false;
 
-    memset(&tb, 0, sizeof(c_str_t));
-    memset(&key, 0, sizeof(c_str_t));
+    memset(&tb, 0, sizeof(evhtp::c_str_t));
+    memset(&key, 0, sizeof(evhtp::c_str_t));
     ver = 0;
     is_dup = false;
 
@@ -415,10 +415,10 @@ hustdb_hdel_ctx_t::hustdb_hdel_ctx_t(evhtp_query_t * htp_query)
     evhtp_kv_s * kv = htp_query->tqh_first;
     while (kv)
     {
-        static c_str_t __tb = c_make_str("tb");
-        static c_str_t __key = c_make_str("key");
-        static c_str_t __ver = c_make_str("ver");
-        static c_str_t __is_dup = c_make_str("is_dup");
+        static evhtp::c_str_t __tb = evhtp_make_str("tb");
+        static evhtp::c_str_t __key = evhtp_make_str("key");
+        static evhtp::c_str_t __ver = evhtp_make_str("ver");
+        static evhtp::c_str_t __is_dup = evhtp_make_str("is_dup");
 
         if (kv->klen == __tb.len && 0 == strncmp(__tb.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
@@ -433,7 +433,7 @@ hustdb_hdel_ctx_t::hustdb_hdel_ctx_t(evhtp_query_t * htp_query)
         else if (kv->klen == __ver.len && 0 == strncmp(__ver.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
             has_ver = true;
-            ver = hustdb_network::cast <uint32_t> (std::string(kv->val, kv->vlen));
+            ver = evhtp::cast <uint32_t> (std::string(kv->val, kv->vlen));
         }
         else if (kv->klen == __is_dup.len && 0 == strncmp(__is_dup.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
@@ -456,7 +456,7 @@ hustdb_hkeys_ctx_t::hustdb_hkeys_ctx_t(evhtp_query_t * htp_query)
     has_noval = false;
     has_async = false;
 
-    memset(&tb, 0, sizeof(c_str_t));
+    memset(&tb, 0, sizeof(evhtp::c_str_t));
     offset = -1;
     size = -1;
     start = 0;
@@ -472,13 +472,13 @@ hustdb_hkeys_ctx_t::hustdb_hkeys_ctx_t(evhtp_query_t * htp_query)
     evhtp_kv_s * kv = htp_query->tqh_first;
     while (kv)
     {
-        static c_str_t __tb = c_make_str("tb");
-        static c_str_t __offset = c_make_str("offset");
-        static c_str_t __size = c_make_str("size");
-        static c_str_t __start = c_make_str("start");
-        static c_str_t __end = c_make_str("end");
-        static c_str_t __noval = c_make_str("noval");
-        static c_str_t __async = c_make_str("async");
+        static evhtp::c_str_t __tb = evhtp_make_str("tb");
+        static evhtp::c_str_t __offset = evhtp_make_str("offset");
+        static evhtp::c_str_t __size = evhtp_make_str("size");
+        static evhtp::c_str_t __start = evhtp_make_str("start");
+        static evhtp::c_str_t __end = evhtp_make_str("end");
+        static evhtp::c_str_t __noval = evhtp_make_str("noval");
+        static evhtp::c_str_t __async = evhtp_make_str("async");
 
         if (kv->klen == __tb.len && 0 == strncmp(__tb.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
@@ -488,22 +488,22 @@ hustdb_hkeys_ctx_t::hustdb_hkeys_ctx_t(evhtp_query_t * htp_query)
         else if (kv->klen == __offset.len && 0 == strncmp(__offset.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
             has_offset = true;
-            offset = hustdb_network::cast <int32_t> (std::string(kv->val, kv->vlen));
+            offset = evhtp::cast <int32_t> (std::string(kv->val, kv->vlen));
         }
         else if (kv->klen == __size.len && 0 == strncmp(__size.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
             has_size = true;
-            size = hustdb_network::cast <int32_t> (std::string(kv->val, kv->vlen));
+            size = evhtp::cast <int32_t> (std::string(kv->val, kv->vlen));
         }
         else if (kv->klen == __start.len && 0 == strncmp(__start.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
             has_start = true;
-            start = hustdb_network::cast <int32_t> (std::string(kv->val, kv->vlen));
+            start = evhtp::cast <int32_t> (std::string(kv->val, kv->vlen));
         }
         else if (kv->klen == __end.len && 0 == strncmp(__end.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
             has_end = true;
-            end = hustdb_network::cast <int32_t> (std::string(kv->val, kv->vlen));
+            end = evhtp::cast <int32_t> (std::string(kv->val, kv->vlen));
         }
         else if (kv->klen == __noval.len && 0 == strncmp(__noval.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
@@ -527,8 +527,8 @@ hustdb_sismember_ctx_t::hustdb_sismember_ctx_t(evhtp_query_t * htp_query)
     has_tb = false;
     has_key = false;
 
-    memset(&tb, 0, sizeof(c_str_t));
-    memset(&key, 0, sizeof(c_str_t));
+    memset(&tb, 0, sizeof(evhtp::c_str_t));
+    memset(&key, 0, sizeof(evhtp::c_str_t));
 
     if (!htp_query)
     {
@@ -538,8 +538,8 @@ hustdb_sismember_ctx_t::hustdb_sismember_ctx_t(evhtp_query_t * htp_query)
     evhtp_kv_s * kv = htp_query->tqh_first;
     while (kv)
     {
-        static c_str_t __tb = c_make_str("tb");
-        static c_str_t __key = c_make_str("key");
+        static evhtp::c_str_t __tb = evhtp_make_str("tb");
+        static evhtp::c_str_t __key = evhtp_make_str("key");
 
         if (kv->klen == __tb.len && 0 == strncmp(__tb.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
@@ -563,8 +563,8 @@ hustdb_sadd_ctx_t::hustdb_sadd_ctx_t(evhtp_query_t * htp_query)
     has_ver = false;
     has_is_dup = false;
 
-    memset(&tb, 0, sizeof(c_str_t));
-    memset(&key, 0, sizeof(c_str_t));
+    memset(&tb, 0, sizeof(evhtp::c_str_t));
+    memset(&key, 0, sizeof(evhtp::c_str_t));
     ver = 0;
     is_dup = false;
 
@@ -576,10 +576,10 @@ hustdb_sadd_ctx_t::hustdb_sadd_ctx_t(evhtp_query_t * htp_query)
     evhtp_kv_s * kv = htp_query->tqh_first;
     while (kv)
     {
-        static c_str_t __tb = c_make_str("tb");
-        static c_str_t __key = c_make_str("key");
-        static c_str_t __ver = c_make_str("ver");
-        static c_str_t __is_dup = c_make_str("is_dup");
+        static evhtp::c_str_t __tb = evhtp_make_str("tb");
+        static evhtp::c_str_t __key = evhtp_make_str("key");
+        static evhtp::c_str_t __ver = evhtp_make_str("ver");
+        static evhtp::c_str_t __is_dup = evhtp_make_str("is_dup");
 
         if (kv->klen == __tb.len && 0 == strncmp(__tb.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
@@ -594,7 +594,7 @@ hustdb_sadd_ctx_t::hustdb_sadd_ctx_t(evhtp_query_t * htp_query)
         else if (kv->klen == __ver.len && 0 == strncmp(__ver.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
             has_ver = true;
-            ver = hustdb_network::cast <uint32_t> (std::string(kv->val, kv->vlen));
+            ver = evhtp::cast <uint32_t> (std::string(kv->val, kv->vlen));
         }
         else if (kv->klen == __is_dup.len && 0 == strncmp(__is_dup.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
@@ -614,8 +614,8 @@ hustdb_srem_ctx_t::hustdb_srem_ctx_t(evhtp_query_t * htp_query)
     has_ver = false;
     has_is_dup = false;
 
-    memset(&tb, 0, sizeof(c_str_t));
-    memset(&key, 0, sizeof(c_str_t));
+    memset(&tb, 0, sizeof(evhtp::c_str_t));
+    memset(&key, 0, sizeof(evhtp::c_str_t));
     ver = 0;
     is_dup = false;
 
@@ -627,10 +627,10 @@ hustdb_srem_ctx_t::hustdb_srem_ctx_t(evhtp_query_t * htp_query)
     evhtp_kv_s * kv = htp_query->tqh_first;
     while (kv)
     {
-        static c_str_t __tb = c_make_str("tb");
-        static c_str_t __key = c_make_str("key");
-        static c_str_t __ver = c_make_str("ver");
-        static c_str_t __is_dup = c_make_str("is_dup");
+        static evhtp::c_str_t __tb = evhtp_make_str("tb");
+        static evhtp::c_str_t __key = evhtp_make_str("key");
+        static evhtp::c_str_t __ver = evhtp_make_str("ver");
+        static evhtp::c_str_t __is_dup = evhtp_make_str("is_dup");
 
         if (kv->klen == __tb.len && 0 == strncmp(__tb.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
@@ -645,7 +645,7 @@ hustdb_srem_ctx_t::hustdb_srem_ctx_t(evhtp_query_t * htp_query)
         else if (kv->klen == __ver.len && 0 == strncmp(__ver.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
             has_ver = true;
-            ver = hustdb_network::cast <uint32_t> (std::string(kv->val, kv->vlen));
+            ver = evhtp::cast <uint32_t> (std::string(kv->val, kv->vlen));
         }
         else if (kv->klen == __is_dup.len && 0 == strncmp(__is_dup.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
@@ -668,7 +668,7 @@ hustdb_smembers_ctx_t::hustdb_smembers_ctx_t(evhtp_query_t * htp_query)
     has_noval = false;
     has_async = false;
 
-    memset(&tb, 0, sizeof(c_str_t));
+    memset(&tb, 0, sizeof(evhtp::c_str_t));
     offset = -1;
     size = -1;
     start = 0;
@@ -684,13 +684,13 @@ hustdb_smembers_ctx_t::hustdb_smembers_ctx_t(evhtp_query_t * htp_query)
     evhtp_kv_s * kv = htp_query->tqh_first;
     while (kv)
     {
-        static c_str_t __tb = c_make_str("tb");
-        static c_str_t __offset = c_make_str("offset");
-        static c_str_t __size = c_make_str("size");
-        static c_str_t __start = c_make_str("start");
-        static c_str_t __end = c_make_str("end");
-        static c_str_t __noval = c_make_str("noval");
-        static c_str_t __async = c_make_str("async");
+        static evhtp::c_str_t __tb = evhtp_make_str("tb");
+        static evhtp::c_str_t __offset = evhtp_make_str("offset");
+        static evhtp::c_str_t __size = evhtp_make_str("size");
+        static evhtp::c_str_t __start = evhtp_make_str("start");
+        static evhtp::c_str_t __end = evhtp_make_str("end");
+        static evhtp::c_str_t __noval = evhtp_make_str("noval");
+        static evhtp::c_str_t __async = evhtp_make_str("async");
 
         if (kv->klen == __tb.len && 0 == strncmp(__tb.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
@@ -700,22 +700,22 @@ hustdb_smembers_ctx_t::hustdb_smembers_ctx_t(evhtp_query_t * htp_query)
         else if (kv->klen == __offset.len && 0 == strncmp(__offset.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
             has_offset = true;
-            offset = hustdb_network::cast <int32_t> (std::string(kv->val, kv->vlen));
+            offset = evhtp::cast <int32_t> (std::string(kv->val, kv->vlen));
         }
         else if (kv->klen == __size.len && 0 == strncmp(__size.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
             has_size = true;
-            size = hustdb_network::cast <int32_t> (std::string(kv->val, kv->vlen));
+            size = evhtp::cast <int32_t> (std::string(kv->val, kv->vlen));
         }
         else if (kv->klen == __start.len && 0 == strncmp(__start.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
             has_start = true;
-            start = hustdb_network::cast <int32_t> (std::string(kv->val, kv->vlen));
+            start = evhtp::cast <int32_t> (std::string(kv->val, kv->vlen));
         }
         else if (kv->klen == __end.len && 0 == strncmp(__end.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
             has_end = true;
-            end = hustdb_network::cast <int32_t> (std::string(kv->val, kv->vlen));
+            end = evhtp::cast <int32_t> (std::string(kv->val, kv->vlen));
         }
         else if (kv->klen == __noval.len && 0 == strncmp(__noval.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
@@ -745,7 +745,7 @@ hustdb_export_ctx_t::hustdb_export_ctx_t(evhtp_query_t * htp_query)
     has_noval = false;
     has_cover = false;
 
-    memset(&tb, 0, sizeof(c_str_t));
+    memset(&tb, 0, sizeof(evhtp::c_str_t));
     file = -1;
     start = 0;
     end = MAX_BUCKET_NUM;
@@ -762,14 +762,14 @@ hustdb_export_ctx_t::hustdb_export_ctx_t(evhtp_query_t * htp_query)
     evhtp_kv_s * kv = htp_query->tqh_first;
     while (kv)
     {
-        static c_str_t __tb = c_make_str("tb");
-        static c_str_t __file = c_make_str("file");
-        static c_str_t __start = c_make_str("start");
-        static c_str_t __end = c_make_str("end");
-        static c_str_t __offset = c_make_str("offset");
-        static c_str_t __size = c_make_str("size");
-        static c_str_t __noval = c_make_str("noval");
-        static c_str_t __cover = c_make_str("cover");
+        static evhtp::c_str_t __tb = evhtp_make_str("tb");
+        static evhtp::c_str_t __file = evhtp_make_str("file");
+        static evhtp::c_str_t __start = evhtp_make_str("start");
+        static evhtp::c_str_t __end = evhtp_make_str("end");
+        static evhtp::c_str_t __offset = evhtp_make_str("offset");
+        static evhtp::c_str_t __size = evhtp_make_str("size");
+        static evhtp::c_str_t __noval = evhtp_make_str("noval");
+        static evhtp::c_str_t __cover = evhtp_make_str("cover");
 
         if (kv->klen == __tb.len && 0 == strncmp(__tb.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
@@ -779,27 +779,27 @@ hustdb_export_ctx_t::hustdb_export_ctx_t(evhtp_query_t * htp_query)
         else if (kv->klen == __file.len && 0 == strncmp(__file.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
             has_file = true;
-            file = hustdb_network::cast <int32_t> (std::string(kv->val, kv->vlen));
+            file = evhtp::cast <int32_t> (std::string(kv->val, kv->vlen));
         }
         else if (kv->klen == __start.len && 0 == strncmp(__start.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
             has_start = true;
-            start = hustdb_network::cast <int32_t> (std::string(kv->val, kv->vlen));
+            start = evhtp::cast <int32_t> (std::string(kv->val, kv->vlen));
         }
         else if (kv->klen == __end.len && 0 == strncmp(__end.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
             has_end = true;
-            end = hustdb_network::cast <int32_t> (std::string(kv->val, kv->vlen));
+            end = evhtp::cast <int32_t> (std::string(kv->val, kv->vlen));
         }
         else if (kv->klen == __offset.len && 0 == strncmp(__offset.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
             has_offset = true;
-            offset = hustdb_network::cast <int32_t> (std::string(kv->val, kv->vlen));
+            offset = evhtp::cast <int32_t> (std::string(kv->val, kv->vlen));
         }
         else if (kv->klen == __size.len && 0 == strncmp(__size.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
             has_size = true;
-            size = hustdb_network::cast <int32_t> (std::string(kv->val, kv->vlen));
+            size = evhtp::cast <int32_t> (std::string(kv->val, kv->vlen));
         }
         else if (kv->klen == __noval.len && 0 == strncmp(__noval.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
@@ -824,8 +824,8 @@ hustmq_put_ctx_t::hustmq_put_ctx_t(evhtp_query_t * htp_query)
     has_item = false;
     has_priori = false;
 
-    memset(&queue, 0, sizeof(c_str_t));
-    memset(&item, 0, sizeof(c_str_t));
+    memset(&queue, 0, sizeof(evhtp::c_str_t));
+    memset(&item, 0, sizeof(evhtp::c_str_t));
     priori = 0;
 
     if (!htp_query)
@@ -836,9 +836,9 @@ hustmq_put_ctx_t::hustmq_put_ctx_t(evhtp_query_t * htp_query)
     evhtp_kv_s * kv = htp_query->tqh_first;
     while (kv)
     {
-        static c_str_t __queue = c_make_str("queue");
-        static c_str_t __item = c_make_str("item");
-        static c_str_t __priori = c_make_str("priori");
+        static evhtp::c_str_t __queue = evhtp_make_str("queue");
+        static evhtp::c_str_t __item = evhtp_make_str("item");
+        static evhtp::c_str_t __priori = evhtp_make_str("priori");
 
         if (kv->klen == __queue.len && 0 == strncmp(__queue.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
@@ -853,7 +853,7 @@ hustmq_put_ctx_t::hustmq_put_ctx_t(evhtp_query_t * htp_query)
         else if (kv->klen == __priori.len && 0 == strncmp(__priori.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
             has_priori = true;
-            priori = hustdb_network::cast <uint32_t> (std::string(kv->val, kv->vlen));
+            priori = evhtp::cast <uint32_t> (std::string(kv->val, kv->vlen));
         }
         kv = kv->next.tqe_next;
     }
@@ -865,8 +865,8 @@ hustmq_get_ctx_t::hustmq_get_ctx_t(evhtp_query_t * htp_query)
     has_queue = false;
     has_worker = false;
 
-    memset(&queue, 0, sizeof(c_str_t));
-    memset(&worker, 0, sizeof(c_str_t));
+    memset(&queue, 0, sizeof(evhtp::c_str_t));
+    memset(&worker, 0, sizeof(evhtp::c_str_t));
 
     if (!htp_query)
     {
@@ -876,8 +876,8 @@ hustmq_get_ctx_t::hustmq_get_ctx_t(evhtp_query_t * htp_query)
     evhtp_kv_s * kv = htp_query->tqh_first;
     while (kv)
     {
-        static c_str_t __queue = c_make_str("queue");
-        static c_str_t __worker = c_make_str("worker");
+        static evhtp::c_str_t __queue = evhtp_make_str("queue");
+        static evhtp::c_str_t __worker = evhtp_make_str("worker");
 
         if (kv->klen == __queue.len && 0 == strncmp(__queue.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
@@ -898,7 +898,7 @@ hustmq_worker_ctx_t::hustmq_worker_ctx_t(evhtp_query_t * htp_query)
     // reset
     has_queue = false;
 
-    memset(&queue, 0, sizeof(c_str_t));
+    memset(&queue, 0, sizeof(evhtp::c_str_t));
 
     if (!htp_query)
     {
@@ -908,7 +908,7 @@ hustmq_worker_ctx_t::hustmq_worker_ctx_t(evhtp_query_t * htp_query)
     evhtp_kv_s * kv = htp_query->tqh_first;
     while (kv)
     {
-        static c_str_t __queue = c_make_str("queue");
+        static evhtp::c_str_t __queue = evhtp_make_str("queue");
 
         if (kv->klen == __queue.len && 0 == strncmp(__queue.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
@@ -924,7 +924,7 @@ hustmq_stat_ctx_t::hustmq_stat_ctx_t(evhtp_query_t * htp_query)
     // reset
     has_queue = false;
 
-    memset(&queue, 0, sizeof(c_str_t));
+    memset(&queue, 0, sizeof(evhtp::c_str_t));
 
     if (!htp_query)
     {
@@ -934,7 +934,7 @@ hustmq_stat_ctx_t::hustmq_stat_ctx_t(evhtp_query_t * htp_query)
     evhtp_kv_s * kv = htp_query->tqh_first;
     while (kv)
     {
-        static c_str_t __queue = c_make_str("queue");
+        static evhtp::c_str_t __queue = evhtp_make_str("queue");
 
         if (kv->klen == __queue.len && 0 == strncmp(__queue.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
@@ -951,7 +951,7 @@ hustmq_max_ctx_t::hustmq_max_ctx_t(evhtp_query_t * htp_query)
     has_queue = false;
     has_num = false;
 
-    memset(&queue, 0, sizeof(c_str_t));
+    memset(&queue, 0, sizeof(evhtp::c_str_t));
     num = 0;
 
     if (!htp_query)
@@ -962,8 +962,8 @@ hustmq_max_ctx_t::hustmq_max_ctx_t(evhtp_query_t * htp_query)
     evhtp_kv_s * kv = htp_query->tqh_first;
     while (kv)
     {
-        static c_str_t __queue = c_make_str("queue");
-        static c_str_t __num = c_make_str("num");
+        static evhtp::c_str_t __queue = evhtp_make_str("queue");
+        static evhtp::c_str_t __num = evhtp_make_str("num");
 
         if (kv->klen == __queue.len && 0 == strncmp(__queue.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
@@ -973,7 +973,7 @@ hustmq_max_ctx_t::hustmq_max_ctx_t(evhtp_query_t * htp_query)
         else if (kv->klen == __num.len && 0 == strncmp(__num.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
             has_num = true;
-            num = hustdb_network::cast <uint32_t> (std::string(kv->val, kv->vlen));
+            num = evhtp::cast <uint32_t> (std::string(kv->val, kv->vlen));
         }
         kv = kv->next.tqe_next;
     }
@@ -985,7 +985,7 @@ hustmq_lock_ctx_t::hustmq_lock_ctx_t(evhtp_query_t * htp_query)
     has_queue = false;
     has_on = false;
 
-    memset(&queue, 0, sizeof(c_str_t));
+    memset(&queue, 0, sizeof(evhtp::c_str_t));
     on = 0;
 
     if (!htp_query)
@@ -996,8 +996,8 @@ hustmq_lock_ctx_t::hustmq_lock_ctx_t(evhtp_query_t * htp_query)
     evhtp_kv_s * kv = htp_query->tqh_first;
     while (kv)
     {
-        static c_str_t __queue = c_make_str("queue");
-        static c_str_t __on = c_make_str("on");
+        static evhtp::c_str_t __queue = evhtp_make_str("queue");
+        static evhtp::c_str_t __on = evhtp_make_str("on");
 
         if (kv->klen == __queue.len && 0 == strncmp(__queue.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
@@ -1020,7 +1020,7 @@ hustmq_purge_ctx_t::hustmq_purge_ctx_t(evhtp_query_t * htp_query)
     has_queue = false;
     has_priori = false;
 
-    memset(&queue, 0, sizeof(c_str_t));
+    memset(&queue, 0, sizeof(evhtp::c_str_t));
     priori = -1;
 
     if (!htp_query)
@@ -1031,8 +1031,8 @@ hustmq_purge_ctx_t::hustmq_purge_ctx_t(evhtp_query_t * htp_query)
     evhtp_kv_s * kv = htp_query->tqh_first;
     while (kv)
     {
-        static c_str_t __queue = c_make_str("queue");
-        static c_str_t __priori = c_make_str("priori");
+        static evhtp::c_str_t __queue = evhtp_make_str("queue");
+        static evhtp::c_str_t __priori = evhtp_make_str("priori");
 
         if (kv->klen == __queue.len && 0 == strncmp(__queue.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
@@ -1042,7 +1042,7 @@ hustmq_purge_ctx_t::hustmq_purge_ctx_t(evhtp_query_t * htp_query)
         else if (kv->klen == __priori.len && 0 == strncmp(__priori.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
             has_priori = true;
-            priori = hustdb_network::cast <uint32_t> (std::string(kv->val, kv->vlen));
+            priori = evhtp::cast <uint32_t> (std::string(kv->val, kv->vlen));
         }
         kv = kv->next.tqe_next;
     }
@@ -1056,8 +1056,8 @@ hustmq_pub_ctx_t::hustmq_pub_ctx_t(evhtp_query_t * htp_query)
     has_idx = false;
     has_ttl = false;
 
-    memset(&queue, 0, sizeof(c_str_t));
-    memset(&item, 0, sizeof(c_str_t));
+    memset(&queue, 0, sizeof(evhtp::c_str_t));
+    memset(&item, 0, sizeof(evhtp::c_str_t));
     idx = CYCLE_QUEUE_ITEM_NUM;
     ttl = DEF_MSG_TTL;
 
@@ -1069,10 +1069,10 @@ hustmq_pub_ctx_t::hustmq_pub_ctx_t(evhtp_query_t * htp_query)
     evhtp_kv_s * kv = htp_query->tqh_first;
     while (kv)
     {
-        static c_str_t __queue = c_make_str("queue");
-        static c_str_t __item = c_make_str("item");
-        static c_str_t __idx = c_make_str("idx");
-        static c_str_t __ttl = c_make_str("ttl");
+        static evhtp::c_str_t __queue = evhtp_make_str("queue");
+        static evhtp::c_str_t __item = evhtp_make_str("item");
+        static evhtp::c_str_t __idx = evhtp_make_str("idx");
+        static evhtp::c_str_t __ttl = evhtp_make_str("ttl");
 
         if (kv->klen == __queue.len && 0 == strncmp(__queue.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
@@ -1087,12 +1087,12 @@ hustmq_pub_ctx_t::hustmq_pub_ctx_t(evhtp_query_t * htp_query)
         else if (kv->klen == __idx.len && 0 == strncmp(__idx.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
             has_idx = true;
-            idx = hustdb_network::cast <uint32_t> (std::string(kv->val, kv->vlen));
+            idx = evhtp::cast <uint32_t> (std::string(kv->val, kv->vlen));
         }
         else if (kv->klen == __ttl.len && 0 == strncmp(__ttl.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
             has_ttl = true;
-            ttl = hustdb_network::cast <uint32_t> (std::string(kv->val, kv->vlen));
+            ttl = evhtp::cast <uint32_t> (std::string(kv->val, kv->vlen));
         }
         kv = kv->next.tqe_next;
     }
@@ -1104,7 +1104,7 @@ hustmq_sub_ctx_t::hustmq_sub_ctx_t(evhtp_query_t * htp_query)
     has_queue = false;
     has_idx = false;
 
-    memset(&queue, 0, sizeof(c_str_t));
+    memset(&queue, 0, sizeof(evhtp::c_str_t));
     idx = CYCLE_QUEUE_ITEM_NUM;
 
     if (!htp_query)
@@ -1115,8 +1115,8 @@ hustmq_sub_ctx_t::hustmq_sub_ctx_t(evhtp_query_t * htp_query)
     evhtp_kv_s * kv = htp_query->tqh_first;
     while (kv)
     {
-        static c_str_t __queue = c_make_str("queue");
-        static c_str_t __idx = c_make_str("idx");
+        static evhtp::c_str_t __queue = evhtp_make_str("queue");
+        static evhtp::c_str_t __idx = evhtp_make_str("idx");
 
         if (kv->klen == __queue.len && 0 == strncmp(__queue.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
@@ -1126,7 +1126,7 @@ hustmq_sub_ctx_t::hustmq_sub_ctx_t(evhtp_query_t * htp_query)
         else if (kv->klen == __idx.len && 0 == strncmp(__idx.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
             has_idx = true;
-            idx = hustdb_network::cast <uint32_t> (std::string(kv->val, kv->vlen));
+            idx = evhtp::cast <uint32_t> (std::string(kv->val, kv->vlen));
         }
         kv = kv->next.tqe_next;
     }
@@ -1137,7 +1137,7 @@ hustdb_task_status_ctx_t::hustdb_task_status_ctx_t(evhtp_query_t * htp_query)
     // reset
     has_token = false;
 
-    memset(&token, 0, sizeof(c_str_t));
+    memset(&token, 0, sizeof(evhtp::c_str_t));
 
     if (!htp_query)
     {
@@ -1147,7 +1147,7 @@ hustdb_task_status_ctx_t::hustdb_task_status_ctx_t(evhtp_query_t * htp_query)
     evhtp_kv_s * kv = htp_query->tqh_first;
     while (kv)
     {
-        static c_str_t __token = c_make_str("token");
+        static evhtp::c_str_t __token = evhtp_make_str("token");
 
         if (kv->klen == __token.len && 0 == strncmp(__token.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
@@ -1164,8 +1164,8 @@ hustdb_zismember_ctx_t::hustdb_zismember_ctx_t(evhtp_query_t * htp_query)
     has_tb = false;
     has_key = false;
 
-    memset(&tb, 0, sizeof(c_str_t));
-    memset(&key, 0, sizeof(c_str_t));
+    memset(&tb, 0, sizeof(evhtp::c_str_t));
+    memset(&key, 0, sizeof(evhtp::c_str_t));
 
     if (!htp_query)
     {
@@ -1175,8 +1175,8 @@ hustdb_zismember_ctx_t::hustdb_zismember_ctx_t(evhtp_query_t * htp_query)
     evhtp_kv_s * kv = htp_query->tqh_first;
     while (kv)
     {
-        static c_str_t __tb = c_make_str("tb");
-        static c_str_t __key = c_make_str("key");
+        static evhtp::c_str_t __tb = evhtp_make_str("tb");
+        static evhtp::c_str_t __key = evhtp_make_str("key");
 
         if (kv->klen == __tb.len && 0 == strncmp(__tb.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
@@ -1198,8 +1198,8 @@ hustdb_zscore_ctx_t::hustdb_zscore_ctx_t(evhtp_query_t * htp_query)
     has_tb = false;
     has_key = false;
 
-    memset(&tb, 0, sizeof(c_str_t));
-    memset(&key, 0, sizeof(c_str_t));
+    memset(&tb, 0, sizeof(evhtp::c_str_t));
+    memset(&key, 0, sizeof(evhtp::c_str_t));
 
     if (!htp_query)
     {
@@ -1209,8 +1209,8 @@ hustdb_zscore_ctx_t::hustdb_zscore_ctx_t(evhtp_query_t * htp_query)
     evhtp_kv_s * kv = htp_query->tqh_first;
     while (kv)
     {
-        static c_str_t __tb = c_make_str("tb");
-        static c_str_t __key = c_make_str("key");
+        static evhtp::c_str_t __tb = evhtp_make_str("tb");
+        static evhtp::c_str_t __key = evhtp_make_str("key");
 
         if (kv->klen == __tb.len && 0 == strncmp(__tb.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
@@ -1236,10 +1236,10 @@ hustdb_zadd_ctx_t::hustdb_zadd_ctx_t(evhtp_query_t * htp_query)
     has_ver = false;
     has_is_dup = false;
 
-    memset(&tb, 0, sizeof(c_str_t));
+    memset(&tb, 0, sizeof(evhtp::c_str_t));
     score = 0;
     opt = 0;
-    memset(&key, 0, sizeof(c_str_t));
+    memset(&key, 0, sizeof(evhtp::c_str_t));
     ver = 0;
     is_dup = false;
 
@@ -1251,12 +1251,12 @@ hustdb_zadd_ctx_t::hustdb_zadd_ctx_t(evhtp_query_t * htp_query)
     evhtp_kv_s * kv = htp_query->tqh_first;
     while (kv)
     {
-        static c_str_t __tb = c_make_str("tb");
-        static c_str_t __score = c_make_str("score");
-        static c_str_t __opt = c_make_str("opt");
-        static c_str_t __key = c_make_str("key");
-        static c_str_t __ver = c_make_str("ver");
-        static c_str_t __is_dup = c_make_str("is_dup");
+        static evhtp::c_str_t __tb = evhtp_make_str("tb");
+        static evhtp::c_str_t __score = evhtp_make_str("score");
+        static evhtp::c_str_t __opt = evhtp_make_str("opt");
+        static evhtp::c_str_t __key = evhtp_make_str("key");
+        static evhtp::c_str_t __ver = evhtp_make_str("ver");
+        static evhtp::c_str_t __is_dup = evhtp_make_str("is_dup");
 
         if (kv->klen == __tb.len && 0 == strncmp(__tb.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
@@ -1266,12 +1266,12 @@ hustdb_zadd_ctx_t::hustdb_zadd_ctx_t(evhtp_query_t * htp_query)
         else if (kv->klen == __score.len && 0 == strncmp(__score.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
             has_score = true;
-            score = hustdb_network::cast <uint64_t> (std::string(kv->val, kv->vlen));
+            score = evhtp::cast <uint64_t> (std::string(kv->val, kv->vlen));
         }
         else if (kv->klen == __opt.len && 0 == strncmp(__opt.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
             has_opt = true;
-            opt = hustdb_network::cast <int32_t> (std::string(kv->val, kv->vlen));
+            opt = evhtp::cast <int32_t> (std::string(kv->val, kv->vlen));
         }
         else if (kv->klen == __key.len && 0 == strncmp(__key.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
@@ -1281,7 +1281,7 @@ hustdb_zadd_ctx_t::hustdb_zadd_ctx_t(evhtp_query_t * htp_query)
         else if (kv->klen == __ver.len && 0 == strncmp(__ver.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
             has_ver = true;
-            ver = hustdb_network::cast <uint32_t> (std::string(kv->val, kv->vlen));
+            ver = evhtp::cast <uint32_t> (std::string(kv->val, kv->vlen));
         }
         else if (kv->klen == __is_dup.len && 0 == strncmp(__is_dup.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
@@ -1301,8 +1301,8 @@ hustdb_zrem_ctx_t::hustdb_zrem_ctx_t(evhtp_query_t * htp_query)
     has_ver = false;
     has_is_dup = false;
 
-    memset(&tb, 0, sizeof(c_str_t));
-    memset(&key, 0, sizeof(c_str_t));
+    memset(&tb, 0, sizeof(evhtp::c_str_t));
+    memset(&key, 0, sizeof(evhtp::c_str_t));
     ver = 0;
     is_dup = false;
 
@@ -1314,10 +1314,10 @@ hustdb_zrem_ctx_t::hustdb_zrem_ctx_t(evhtp_query_t * htp_query)
     evhtp_kv_s * kv = htp_query->tqh_first;
     while (kv)
     {
-        static c_str_t __tb = c_make_str("tb");
-        static c_str_t __key = c_make_str("key");
-        static c_str_t __ver = c_make_str("ver");
-        static c_str_t __is_dup = c_make_str("is_dup");
+        static evhtp::c_str_t __tb = evhtp_make_str("tb");
+        static evhtp::c_str_t __key = evhtp_make_str("key");
+        static evhtp::c_str_t __ver = evhtp_make_str("ver");
+        static evhtp::c_str_t __is_dup = evhtp_make_str("is_dup");
 
         if (kv->klen == __tb.len && 0 == strncmp(__tb.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
@@ -1332,7 +1332,7 @@ hustdb_zrem_ctx_t::hustdb_zrem_ctx_t(evhtp_query_t * htp_query)
         else if (kv->klen == __ver.len && 0 == strncmp(__ver.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
             has_ver = true;
-            ver = hustdb_network::cast <uint32_t> (std::string(kv->val, kv->vlen));
+            ver = evhtp::cast <uint32_t> (std::string(kv->val, kv->vlen));
         }
         else if (kv->klen == __is_dup.len && 0 == strncmp(__is_dup.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
@@ -1355,7 +1355,7 @@ hustdb_zrangebyrank_ctx_t::hustdb_zrangebyrank_ctx_t(evhtp_query_t * htp_query)
     has_noval = false;
     has_async = false;
 
-    memset(&tb, 0, sizeof(c_str_t));
+    memset(&tb, 0, sizeof(evhtp::c_str_t));
     offset = -1;
     size = -1;
     start = 0;
@@ -1371,13 +1371,13 @@ hustdb_zrangebyrank_ctx_t::hustdb_zrangebyrank_ctx_t(evhtp_query_t * htp_query)
     evhtp_kv_s * kv = htp_query->tqh_first;
     while (kv)
     {
-        static c_str_t __tb = c_make_str("tb");
-        static c_str_t __offset = c_make_str("offset");
-        static c_str_t __size = c_make_str("size");
-        static c_str_t __start = c_make_str("start");
-        static c_str_t __end = c_make_str("end");
-        static c_str_t __noval = c_make_str("noval");
-        static c_str_t __async = c_make_str("async");
+        static evhtp::c_str_t __tb = evhtp_make_str("tb");
+        static evhtp::c_str_t __offset = evhtp_make_str("offset");
+        static evhtp::c_str_t __size = evhtp_make_str("size");
+        static evhtp::c_str_t __start = evhtp_make_str("start");
+        static evhtp::c_str_t __end = evhtp_make_str("end");
+        static evhtp::c_str_t __noval = evhtp_make_str("noval");
+        static evhtp::c_str_t __async = evhtp_make_str("async");
 
         if (kv->klen == __tb.len && 0 == strncmp(__tb.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
@@ -1387,22 +1387,22 @@ hustdb_zrangebyrank_ctx_t::hustdb_zrangebyrank_ctx_t(evhtp_query_t * htp_query)
         else if (kv->klen == __offset.len && 0 == strncmp(__offset.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
             has_offset = true;
-            offset = hustdb_network::cast <int32_t> (std::string(kv->val, kv->vlen));
+            offset = evhtp::cast <int32_t> (std::string(kv->val, kv->vlen));
         }
         else if (kv->klen == __size.len && 0 == strncmp(__size.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
             has_size = true;
-            size = hustdb_network::cast <int32_t> (std::string(kv->val, kv->vlen));
+            size = evhtp::cast <int32_t> (std::string(kv->val, kv->vlen));
         }
         else if (kv->klen == __start.len && 0 == strncmp(__start.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
             has_start = true;
-            start = hustdb_network::cast <int32_t> (std::string(kv->val, kv->vlen));
+            start = evhtp::cast <int32_t> (std::string(kv->val, kv->vlen));
         }
         else if (kv->klen == __end.len && 0 == strncmp(__end.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
             has_end = true;
-            end = hustdb_network::cast <int32_t> (std::string(kv->val, kv->vlen));
+            end = evhtp::cast <int32_t> (std::string(kv->val, kv->vlen));
         }
         else if (kv->klen == __noval.len && 0 == strncmp(__noval.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
@@ -1432,7 +1432,7 @@ hustdb_zrangebyscore_ctx_t::hustdb_zrangebyscore_ctx_t(evhtp_query_t * htp_query
     has_end = false;
     has_noval = false;
 
-    memset(&tb, 0, sizeof(c_str_t));
+    memset(&tb, 0, sizeof(evhtp::c_str_t));
     min = 0;
     max = 0;
     offset = -1;
@@ -1449,14 +1449,14 @@ hustdb_zrangebyscore_ctx_t::hustdb_zrangebyscore_ctx_t(evhtp_query_t * htp_query
     evhtp_kv_s * kv = htp_query->tqh_first;
     while (kv)
     {
-        static c_str_t __tb = c_make_str("tb");
-        static c_str_t __min = c_make_str("min");
-        static c_str_t __max = c_make_str("max");
-        static c_str_t __offset = c_make_str("offset");
-        static c_str_t __size = c_make_str("size");
-        static c_str_t __start = c_make_str("start");
-        static c_str_t __end = c_make_str("end");
-        static c_str_t __noval = c_make_str("noval");
+        static evhtp::c_str_t __tb = evhtp_make_str("tb");
+        static evhtp::c_str_t __min = evhtp_make_str("min");
+        static evhtp::c_str_t __max = evhtp_make_str("max");
+        static evhtp::c_str_t __offset = evhtp_make_str("offset");
+        static evhtp::c_str_t __size = evhtp_make_str("size");
+        static evhtp::c_str_t __start = evhtp_make_str("start");
+        static evhtp::c_str_t __end = evhtp_make_str("end");
+        static evhtp::c_str_t __noval = evhtp_make_str("noval");
 
         if (kv->klen == __tb.len && 0 == strncmp(__tb.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
@@ -1466,32 +1466,32 @@ hustdb_zrangebyscore_ctx_t::hustdb_zrangebyscore_ctx_t(evhtp_query_t * htp_query
         else if (kv->klen == __min.len && 0 == strncmp(__min.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
             has_min = true;
-            min = hustdb_network::cast <uint64_t> (std::string(kv->val, kv->vlen));
+            min = evhtp::cast <uint64_t> (std::string(kv->val, kv->vlen));
         }
         else if (kv->klen == __max.len && 0 == strncmp(__max.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
             has_max = true;
-            max = hustdb_network::cast <uint64_t> (std::string(kv->val, kv->vlen));
+            max = evhtp::cast <uint64_t> (std::string(kv->val, kv->vlen));
         }
         else if (kv->klen == __offset.len && 0 == strncmp(__offset.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
             has_offset = true;
-            offset = hustdb_network::cast <int32_t> (std::string(kv->val, kv->vlen));
+            offset = evhtp::cast <int32_t> (std::string(kv->val, kv->vlen));
         }
         else if (kv->klen == __size.len && 0 == strncmp(__size.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
             has_size = true;
-            size = hustdb_network::cast <int32_t> (std::string(kv->val, kv->vlen));
+            size = evhtp::cast <int32_t> (std::string(kv->val, kv->vlen));
         }
         else if (kv->klen == __start.len && 0 == strncmp(__start.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
             has_start = true;
-            start = hustdb_network::cast <int32_t> (std::string(kv->val, kv->vlen));
+            start = evhtp::cast <int32_t> (std::string(kv->val, kv->vlen));
         }
         else if (kv->klen == __end.len && 0 == strncmp(__end.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
             has_end = true;
-            end = hustdb_network::cast <int32_t> (std::string(kv->val, kv->vlen));
+            end = evhtp::cast <int32_t> (std::string(kv->val, kv->vlen));
         }
         else if (kv->klen == __noval.len && 0 == strncmp(__noval.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {

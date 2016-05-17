@@ -25,5 +25,11 @@ ngx_int_t hustdb_ha_peer_count_handler(ngx_str_t * backend_uri, ngx_http_request
 ngx_int_t hustdb_ha_sync_status_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
 ngx_int_t hustdb_ha_get_table_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
 ngx_int_t hustdb_ha_set_table_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
+ngx_int_t hustdb_ha_zismember_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
+ngx_int_t hustdb_ha_zscore_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
+ngx_int_t hustdb_ha_zadd_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
+ngx_int_t hustdb_ha_zrem_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
+ngx_int_t hustdb_ha_zrangebyrank_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
+ngx_int_t hustdb_ha_zrangebyscore_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
 
 #endif // __hustdb_ha_handler_20150601202210_h__

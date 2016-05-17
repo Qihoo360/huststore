@@ -114,6 +114,68 @@ def fetch_tbkeys(debug, func, host, key, peer, tb, block, f):
         return __get_tbkeys(debug, func, host, key, peer, tb, block, __record(peer, tb, f))
     return __fetch_tbkeys(debug, func, host, key, peer, tb, block, f)
 
+def fetch_zkeys_byscore(debug, func, host, tb, block, min, max, f):
+    def __get_zkeys(debug, func, host, tb, block, min, max, record):
+        offset = 0
+        while 1:
+            cmd = '%s/zrangebyscore?tb=%s&offset=%d&size=%d&min=%d&max=%d' % (host, tb, offset, block, min, max)
+            r = func(cmd, auth=(USER, PASSWD))
+            if 200 != r.status_code:
+                print '[tb-%s] %d' % (tb, r.status_code)
+                break
+            if debug:
+                print 'tb: %s, keys: %s' % (tb, r.headers['keys'])
+            # [{"key":"aHVzdGRiaGFrZXk=","ver":1,"tb":"hustdbhatb"}]
+            keys = [base64.b64decode(item['key']) for item in filter(lambda item: 'ver' in item and item['ver'] > 0, json.loads(r.content))]
+            record(keys)
+            __size = int(r.headers['keys'])
+            offset = offset + __size
+            if __size < block:
+                break
+        return offset
+    def __fetch_zkeys(debug, func, host, tb, block, min, max, f):
+        def __record(tb, f):
+            def __record_imp(keys):
+                f.write('[table %s]\n' % tb)
+                for key in keys:
+                    f.write(key)
+                    f.write('\n')
+                f.write('\n')
+            return __record_imp
+        return __get_zkeys(debug, func, host, tb, block, min, max, __record(tb, f))
+    return __fetch_zkeys(debug, func, host, tb, block, min, max, f)
+
+def fetch_zkeys_byrank(debug, func, host, tb, block, f):
+    def __get_zkeys(debug, func, host, tb, block, record):
+        offset = 0
+        while 1:
+            cmd = '%s/zrangebyrank?tb=%s&offset=%d&size=%d' % (host, tb, offset, block)
+            r = func(cmd, auth=(USER, PASSWD))
+            if 200 != r.status_code:
+                print '[tb-%s] %d' % (tb, r.status_code)
+                break
+            if debug:
+                print 'tb: %s, keys: %s' % (tb, r.headers['keys'])
+            # [{"key":"aHVzdGRiaGFrZXk=","ver":1,"tb":"hustdbhatb"}]
+            keys = [base64.b64decode(item['key']) for item in filter(lambda item: 'ver' in item and item['ver'] > 0, json.loads(r.content))]
+            record(keys)
+            __size = int(r.headers['keys'])
+            offset = offset + __size
+            if __size < block:
+                break
+        return offset
+    def __fetch_zkeys(debug, func, host, tb, block, f):
+        def __record(tb, f):
+            def __record_imp(keys):
+                f.write('[table %s]\n' % tb)
+                for key in keys:
+                    f.write(key)
+                    f.write('\n')
+                f.write('\n')
+            return __record_imp
+        return __get_zkeys(debug, func, host, tb, block, __record(tb, f))
+    return __fetch_zkeys(debug, func, host, tb, block, f)
+
 def fetch(debug, host, block):
     def __fetch_keys(debug, func, host, peer, stat, block, output):
         with open(os.path.join(output, 'peer-%d.keys' % peer), 'a+') as f:
@@ -131,15 +193,43 @@ def fetch(debug, host, block):
                 size = fetch_tbkeys(debug, func, host, key, peer, tb, block, f)
                 if size != number_of_tbs:
                     print '[peer-%d] number of tbs: %d, size: %d' % (peer, number_of_tbs, size)
+    def __fetch_zkeys_byrank(debug, func, host, stats, block, output):
+        with open(os.path.join(output, 'zrangebyrank'), 'a+') as f:
+            for stat in stats:
+                tb = stat['table']
+                number_of_tbs = stat['size']
+                size = fetch_zkeys_byrank(debug, func, host, tb, block, f)
+                if size != number_of_tbs:
+                    print 'number of tbs: %d, size: %d' % (number_of_tbs, size)
+    def __fetch_zkeys_byscore(debug, func, host, stats, block, min, max, output):
+        with open(os.path.join(output, 'zrangebyscore'), 'a+') as f:
+            for stat in stats:
+                tb = stat['table']
+                number_of_tbs = stat['size']
+                size = fetch_zkeys_byscore(debug, func, host, tb, block, min, max, f)
+                if size != number_of_tbs:
+                    print 'number of tbs: %d, size: %d' % (number_of_tbs, size)
+    def __extend_zset(stats, zset):
+        for item in filter(lambda stat: 'Z' == stat['type'], stats): 
+            found = False
+            for elem in zset:
+                if item['table'] == elem['table']:
+                    found = True
+            if not found:
+                zset.append(item)
     def __fetch(debug, func, host, block, output):
+        zset = []
         for peer in xrange(get_count(sess.get, host, 'peer_count')):
             print 'fetch peer %d...' % peer
             stats = stat_all(func, host, peer)
+            __extend_zset(stats, zset)
             __fetch_keys(debug, func, host, peer, stats[0], block, output)
             __fetch_tb_keys(debug, func, host, 'hkeys', peer, filter(
                 lambda stat: 'H' == stat['type'], stats), block, output)
             __fetch_tb_keys(debug, func, host, 'smembers', peer, filter(
                 lambda stat: 'S' == stat['type'], stats), block, output)
+        __fetch_zkeys_byrank(debug, func, host, zset, block, output)
+        __fetch_zkeys_byscore(debug, func, host, zset, block, 0, 100, output)
     output = os.path.join(os.path.abspath('.'), 'keys')
     if os.path.exists(output):
         shutil.rmtree(output)
@@ -153,7 +243,7 @@ def fetch(debug, host, block):
 def get_host(argv):
     size = len(argv)
     if 2 == size:
-        return 'http://%s:8082' % argv[1]
+        return 'http://%s' % argv[1]
     return 'http://localhost:8082'
                 
 if __name__ == "__main__":

@@ -5,15 +5,6 @@
 #define CURL_STATICLIB
 #include <curl/curl.h>
 
-#ifdef _MSC_VER
-/*#ifdef _DEBUG
-    #pragma comment( lib, "../../../third_party/curl/windows/libcurld.lib" )
-#else
-    #pragma comment( lib, "../../../third_party/curl/windows/libcurl.lib" )
-#endif*/
-#pragma comment( lib, "wldap32.lib" )
-#endif // #ifdef _MSC_VER
-
 #define HEADER_MAX  100
 #define QUERY_MAX   100
 #define FORM_MAX    100

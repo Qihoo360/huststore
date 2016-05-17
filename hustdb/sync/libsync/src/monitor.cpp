@@ -172,10 +172,6 @@ static void handle_monitor_event ( struct inotify_event *event, int *wds, int si
             file_map[path] = file;
             file_queue[index].push_back (file);
         }
-        else
-        {
-            //file_queue[index].push_back(file_map[path]);
-        }
         pthread_mutex_unlock (&file_queue_mutex);
     }
 }

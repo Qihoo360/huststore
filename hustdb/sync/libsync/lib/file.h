@@ -1,3 +1,5 @@
+#pragma once
+
 #include <string>
 #include <stdint.h>
 #include <bitset>
@@ -21,7 +23,9 @@ public:
     std::string get_path ( );
 
     void set_bitmap ( uint32_t );
-    std::bitset<FILE_BIT_MAX> get_bitmap ( );
+
+    uint32_t fetch_accomplish_cnt ( );
+    bool has_synced ( uint32_t );
 
     void set_index ( int );
     int get_index ( );

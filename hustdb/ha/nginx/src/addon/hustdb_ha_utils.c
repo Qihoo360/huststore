@@ -338,20 +338,14 @@ char * hustdb_ha_get_key_from_body(ngx_http_request_t * r)
     return key;
 }
 
-ngx_bool_t hustdb_ha_check_body(ngx_http_request_t *r)
+char * hustdb_ha_get_key(ngx_http_request_t * r)
 {
-    ngx_buf_t * buf = ngx_http_get_request_body(r);
-    if (!buf)
+    char * key = hustdb_ha_get_key_from_body(r);
+    if (key)
     {
-        return false;
+        return key;
     }
-
-    size_t buf_size = ngx_http_get_buf_size(buf);
-    if (buf_size < 1)
-    {
-        return false;
-    }
-    return true;
+    return ngx_http_get_param_val(&r->args, "key", r->pool);
 }
 
 char * hustdb_ha_read_file(const char * path, ngx_pool_t * pool)

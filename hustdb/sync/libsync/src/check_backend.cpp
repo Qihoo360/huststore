@@ -67,10 +67,10 @@ void *check_db_thread ( void *arg )
     memset (&tv, 0, sizeof (tv ));
     memset (&check_tv, 0, sizeof (check_tv ));
 
-    tv.it_value.tv_sec = 1;
-    tv.it_interval.tv_sec = release_interval;
+    tv.it_value.tv_sec 			= 1;
+    tv.it_interval.tv_sec 		= release_interval;
 
-    check_tv.it_value.tv_sec = 1;
+    check_tv.it_value.tv_sec 	= 1;
     check_tv.it_interval.tv_sec = checkdb_interval;
 
     if ( timerfd_settime (timerfd, 0, &tv, NULL) == - 1
@@ -80,20 +80,25 @@ void *check_db_thread ( void *arg )
     }
 
     struct pollfd *pfd;
-    pfd = ( struct pollfd * ) calloc (3, sizeof (struct pollfd ));
+    pfd = ( struct pollfd * ) calloc ( 3, sizeof ( struct pollfd ) );
 
-    pfd[0].fd = timerfd;
-    pfd[0].events = POLLIN;
-    pfd[1].fd = check_db_fd;
-    pfd[1].events = POLLIN;
-    pfd[2].fd = stop_pipe[0];
-    pfd[2].events = POLLIN;
+    if ( pfd == NULL )
+    {
+        return ( void * ) NULL;
+    }
+
+    pfd[0].fd 		= timerfd;
+    pfd[0].events 	= POLLIN;
+    pfd[1].fd 		= check_db_fd;
+    pfd[1].events 	= POLLIN;
+    pfd[2].fd 		= stop_pipe[0];
+    pfd[2].events 	= POLLIN;
 
     int ret;
     uint64_t val;
     while ( is_running )
     {
-        ret = poll (pfd, 3, - 1);
+        ret = poll ( pfd, 3, - 1 );
         if ( ret == - 1 )
         {
             if ( errno == EINTR )
@@ -104,22 +109,22 @@ void *check_db_thread ( void *arg )
         }
         if ( pfd[0].revents & POLLIN )
         {
-            read (timerfd, &val, sizeof (val ));
+            read ( timerfd, &val, sizeof ( val ) );
             release_file ();
         }
         if ( pfd[1].revents & POLLIN )
         {
-            read (check_db_fd, &val, sizeof (val ));
-            check_db (hosts);
+            read ( check_db_fd, &val, sizeof ( val ) );
+            check_db ( hosts );
         }
         if ( pfd[2].revents & POLLIN )
         {
             char buf;
-            read (stop_pipe[0], &buf, 1);
+            read ( stop_pipe[0], &buf, 1 );
         }
     }
-    close (timerfd);
-    close (check_db_fd);
+    close ( timerfd );
+    close ( check_db_fd );
     delete client;
     return ( void * ) NULL;
 }
@@ -135,12 +140,13 @@ static void check_db ( std::vector<std::string> &hosts )
 
     int size = hosts.size ();
     int passwd_size = strlen (passwd);
+
+    std::string url;
     for ( int i = 0; i < size; i ++ )
     {
-        std::string url (passwd, passwd_size - 1);
+        url.assign (passwd, passwd_size - 1);
         url.push_back ('@');
         url.append (hosts[i]);
-        //client->set_host(hosts[i].c_str(), hosts[i].size());
         client->set_host (url.c_str (), url.size ());
         client->open2 (method, path, query_string, data, 1, 3);
         int tmp;
@@ -157,25 +163,26 @@ static void check_db ( std::vector<std::string> &hosts )
 static void release_file ( )
 {
     File *file = NULL;
-    pthread_mutex_lock (&release_lock);
+    pthread_mutex_lock ( &release_lock );
     if ( ! release_queue.empty () )
     {
         file = release_queue.front ();
         release_queue.pop_front ();
     }
-    pthread_mutex_unlock (&release_lock);
+    pthread_mutex_unlock ( &release_lock );
     if ( file )
     {
         struct stat sb;
-        int fd = open (file->get_path ().c_str (), O_RDONLY);
+        int fd = open ( file->get_path ().c_str (), O_RDONLY );
         if ( fd == - 1 )
             return;
         fstat (fd, &sb);
         close (fd);
-        uint32_t read_size = * ( uint32_t * ) ( file->get_addr () );
+
+        uint32_t read_size 	= * ( uint32_t * ) ( file->get_addr () );
         uint32_t read_count = * ( uint32_t * ) ( ( char * ) file->get_addr () + sizeof (uint32_t ) );
 
-        if ( sb.st_size == read_size && read_count == file->get_bitmap ().count () )
+        if ( sb.st_size == read_size && read_count == file->fetch_accomplish_cnt ( ) )
         {
             std::map<std::string, File *>::iterator it;
             it = file_map.find (file->get_path ().c_str ());

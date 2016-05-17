@@ -9,6 +9,7 @@ nginx 配置文件
 
     {
         "module": "hustdb_ha",
+        "worker_processes": 4,
         "worker_connections": 1048576,
         "listen": 8082,
         "keepalive_timeout": 540,
@@ -46,9 +47,14 @@ nginx 配置文件
             "srem",
             "sismember",
             "smembers",
+            "zadd",
+            "zrem",
+            "zismember",
+            "zscore",
+            "zrangebyrank",
+            "zrangebyscore",
             "stat",
             "stat_all",
-            "export",
             "file_count",
             "peer_count",
             "sync_status",
@@ -93,9 +99,14 @@ nginx 配置文件
                 "/hustdb/srem", 
                 "/hustdb/sismember", 
                 "/hustdb/smembers",
+                "/hustdb/zadd",
+                "/hustdb/zrem",
+                "/hustdb/zismember",
+                "/hustdb/zscore",
+                "/hustdb/zrangebyrank",
+                "/hustdb/zrangebyscore",
                 "/hustdb/stat",
                 "/hustdb/stat_all",
-                "/hustdb/export", 
                 "/hustdb/file_count"
             ]
         }
@@ -125,6 +136,7 @@ nginx 配置文件
 
 大部分字段的含义以及配置方法和 nginx 官方的配置文件的含义一致，例如：
 
+* `worker_processes`
 * `keepalive_timeout`
 * `keepalive`
 * `proxy_connect_timeout`
@@ -144,32 +156,32 @@ nginx 配置文件
 
 生成之后的 `nginx.conf` 内容如下：
 
-    worker_processes  1;
+    worker_processes  4;
     daemon on;
     master_process on;
-
+    
     events {
         use epoll;
         multi_accept on;
         worker_connections  1048576;
     }
-
+    
     http {
         include                      mime.types;
         default_type                 application/octet-stream;
-
+    
         sendfile                     on;
         keepalive_timeout            540;
-
+    
         client_body_timeout          10;
         client_header_timeout        10;
-
+    
         client_header_buffer_size    1k;
         large_client_header_buffers  4  4k;
         output_buffers               1  32k;
         client_max_body_size         64m;
         client_body_buffer_size      2m;
-
+    
         upstream backend {
             customized_selector;
             server 192.168.1.101:9999;
@@ -183,7 +195,7 @@ nginx 配置文件
             check_http_expect_alive http_2xx;
             keepalive 32768;
         }
-
+    
         server {
             listen                    8082;
             #server_name              hostname;
@@ -202,11 +214,11 @@ nginx 配置文件
             public_pem                public.pem;
             identifier_cache_size     128;
             identifier_timeout        10s;
-
+    
             location /status.html {
                 root /data/hustdbha/html;
             }
-
+    
             location /put {
                 hustdb_ha;
                 http_basic_auth_file /data/hustdbha/conf/htpasswd;
@@ -263,15 +275,35 @@ nginx 配置文件
                 hustdb_ha;
                 http_basic_auth_file /data/hustdbha/conf/htpasswd;
             }
+            location /zadd {
+                hustdb_ha;
+                http_basic_auth_file /data/hustdbha/conf/htpasswd;
+            }
+            location /zrem {
+                hustdb_ha;
+                http_basic_auth_file /data/hustdbha/conf/htpasswd;
+            }
+            location /zismember {
+                hustdb_ha;
+                http_basic_auth_file /data/hustdbha/conf/htpasswd;
+            }
+            location /zscore {
+                hustdb_ha;
+                http_basic_auth_file /data/hustdbha/conf/htpasswd;
+            }
+            location /zrangebyrank {
+                hustdb_ha;
+                http_basic_auth_file /data/hustdbha/conf/htpasswd;
+            }
+            location /zrangebyscore {
+                hustdb_ha;
+                http_basic_auth_file /data/hustdbha/conf/htpasswd;
+            }
             location /stat {
                 hustdb_ha;
                 http_basic_auth_file /data/hustdbha/conf/htpasswd;
             }
             location /stat_all {
-                hustdb_ha;
-                http_basic_auth_file /data/hustdbha/conf/htpasswd;
-            }
-            location /export {
                 hustdb_ha;
                 http_basic_auth_file /data/hustdbha/conf/htpasswd;
             }
@@ -295,7 +327,7 @@ nginx 配置文件
                 hustdb_ha;
                 http_basic_auth_file /data/hustdbha/conf/htpasswd;
             }
-
+    
             location /hustdb/put {
                 proxy_pass http://backend;
                 proxy_http_version 1.1;
@@ -464,6 +496,78 @@ nginx 配置文件
                 proxy_buffers 2 64m;
                 proxy_busy_buffers_size 64m;
             }
+            location /hustdb/zadd {
+                proxy_pass http://backend;
+                proxy_http_version 1.1;
+                proxy_set_header Connection "Keep-Alive";
+                proxy_set_header Authorization "Basic aHVzdHN0b3JlOmh1c3RzdG9yZQ==";
+                proxy_connect_timeout 2s;
+                proxy_send_timeout 60s;
+                proxy_read_timeout 60s;
+                proxy_buffer_size 64m;
+                proxy_buffers 2 64m;
+                proxy_busy_buffers_size 64m;
+            }
+            location /hustdb/zrem {
+                proxy_pass http://backend;
+                proxy_http_version 1.1;
+                proxy_set_header Connection "Keep-Alive";
+                proxy_set_header Authorization "Basic aHVzdHN0b3JlOmh1c3RzdG9yZQ==";
+                proxy_connect_timeout 2s;
+                proxy_send_timeout 60s;
+                proxy_read_timeout 60s;
+                proxy_buffer_size 64m;
+                proxy_buffers 2 64m;
+                proxy_busy_buffers_size 64m;
+            }
+            location /hustdb/zismember {
+                proxy_pass http://backend;
+                proxy_http_version 1.1;
+                proxy_set_header Connection "Keep-Alive";
+                proxy_set_header Authorization "Basic aHVzdHN0b3JlOmh1c3RzdG9yZQ==";
+                proxy_connect_timeout 2s;
+                proxy_send_timeout 60s;
+                proxy_read_timeout 60s;
+                proxy_buffer_size 64m;
+                proxy_buffers 2 64m;
+                proxy_busy_buffers_size 64m;
+            }
+            location /hustdb/zscore {
+                proxy_pass http://backend;
+                proxy_http_version 1.1;
+                proxy_set_header Connection "Keep-Alive";
+                proxy_set_header Authorization "Basic aHVzdHN0b3JlOmh1c3RzdG9yZQ==";
+                proxy_connect_timeout 2s;
+                proxy_send_timeout 60s;
+                proxy_read_timeout 60s;
+                proxy_buffer_size 64m;
+                proxy_buffers 2 64m;
+                proxy_busy_buffers_size 64m;
+            }
+            location /hustdb/zrangebyrank {
+                proxy_pass http://backend;
+                proxy_http_version 1.1;
+                proxy_set_header Connection "Keep-Alive";
+                proxy_set_header Authorization "Basic aHVzdHN0b3JlOmh1c3RzdG9yZQ==";
+                proxy_connect_timeout 2s;
+                proxy_send_timeout 60s;
+                proxy_read_timeout 60s;
+                proxy_buffer_size 64m;
+                proxy_buffers 2 64m;
+                proxy_busy_buffers_size 64m;
+            }
+            location /hustdb/zrangebyscore {
+                proxy_pass http://backend;
+                proxy_http_version 1.1;
+                proxy_set_header Connection "Keep-Alive";
+                proxy_set_header Authorization "Basic aHVzdHN0b3JlOmh1c3RzdG9yZQ==";
+                proxy_connect_timeout 2s;
+                proxy_send_timeout 60s;
+                proxy_read_timeout 60s;
+                proxy_buffer_size 64m;
+                proxy_buffers 2 64m;
+                proxy_busy_buffers_size 64m;
+            }
             location /hustdb/stat {
                 proxy_pass http://backend;
                 proxy_http_version 1.1;
@@ -477,18 +581,6 @@ nginx 配置文件
                 proxy_busy_buffers_size 64m;
             }
             location /hustdb/stat_all {
-                proxy_pass http://backend;
-                proxy_http_version 1.1;
-                proxy_set_header Connection "Keep-Alive";
-                proxy_set_header Authorization "Basic aHVzdHN0b3JlOmh1c3RzdG9yZQ==";
-                proxy_connect_timeout 2s;
-                proxy_send_timeout 60s;
-                proxy_read_timeout 60s;
-                proxy_buffer_size 64m;
-                proxy_buffers 2 64m;
-                proxy_busy_buffers_size 64m;
-            }
-            location /hustdb/export {
                 proxy_pass http://backend;
                 proxy_http_version 1.1;
                 proxy_set_header Connection "Keep-Alive";

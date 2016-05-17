@@ -7,7 +7,7 @@ void on_evhtp_thread_init(evhtp_t * htp, evthr_t * thr, void * arg)
     {
         return;
     }
-    ctx->append(thr);
+    ctx->base.append(thr);
 }
 
 void on_evhtp_thread_exit(evhtp_t * htp, evthr_t * thr, void * arg)
@@ -17,7 +17,7 @@ void on_evhtp_thread_exit(evhtp_t * htp, evthr_t * thr, void * arg)
 
 void hustdb_status_handler(evhtp_request_t * request, void * data)
 {
-    static const c_str_t reply = c_make_str("ok\n");
+    static const evhtp::c_str_t reply = evhtp_make_str("ok\n");
     evbuffer_add_reference(request->buffer_out, reply.data, reply.len, 0, 0);
     evhtp_send_reply(request, EVHTP_RES_200);
 }
@@ -48,17 +48,17 @@ bool hustdb_loop(hustdb_network_ctx_t * ctx)
     }
 
     //evhtp_set_parser_flags(htp, EVHTP_PARSE_QUERY_FLAG_LENIENT);
-    evhtp_set_max_keepalive_requests(htp, ctx->max_keepalive_requests);
-    evhtp_set_max_body_size(htp, ctx->max_body_size);
-    evhtp_set_timeouts(htp, &ctx->recv_timeout, &ctx->send_timeout);
-    if (ctx->disable_100_cont)
+    evhtp_set_max_keepalive_requests(htp, ctx->base.max_keepalive_requests);
+    evhtp_set_max_body_size(htp, ctx->base.max_body_size);
+    evhtp_set_timeouts(htp, &ctx->base.recv_timeout, &ctx->base.send_timeout);
+    if (ctx->base.disable_100_cont)
     {
         evhtp_disable_100_continue(htp);
     }
 
-    htp->enable_nodelay      = ctx->enable_nodelay;
-    htp->enable_defer_accept = ctx->enable_defer_accept;
-    htp->enable_reuseport    = ctx->enable_reuseport;
+    htp->enable_nodelay      = ctx->base.enable_nodelay;
+    htp->enable_defer_accept = ctx->base.enable_defer_accept;
+    htp->enable_reuseport    = ctx->base.enable_reuseport;
 
     if (!evhtp_set_cb(htp, "/status.html", hustdb_status_handler, ctx))
     {
@@ -72,11 +72,11 @@ bool hustdb_loop(hustdb_network_ctx_t * ctx)
 
     evhtp_set_post_accept_cb(htp, on_post_accept, ctx);
 
-    if (evhtp_use_threads_wexit(htp, on_evhtp_thread_init, on_evhtp_thread_exit, ctx->threads, ctx) < 0)
+    if (evhtp_use_threads_wexit(htp, on_evhtp_thread_init, on_evhtp_thread_exit, ctx->base.threads, ctx) < 0)
     {
         return false;
     }
-    if (evhtp_bind_socket(htp, "0.0.0.0", ctx->port, ctx->backlog) < 0)
+    if (evhtp_bind_socket(htp, "0.0.0.0", ctx->base.port, ctx->base.backlog) < 0)
     {
         return false;
     }

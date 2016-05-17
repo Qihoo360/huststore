@@ -53,6 +53,7 @@ void *read_log ( void *arg )
     size_t file_size, size;
     int fd;
     struct pollfd *pfd;
+    File *file;
 
     int hosts_size = hosts.size ();
     pfd = ( struct pollfd * ) calloc (hosts_size + 1, sizeof (struct pollfd ));
@@ -83,7 +84,6 @@ void *read_log ( void *arg )
         {
             continue;
         }
-        File *file;
         for ( int i = 0; i < hosts_size; i ++ )
         {
             if ( pfd[i].revents & POLLIN )
@@ -100,7 +100,10 @@ void *read_log ( void *arg )
                 {
                     file = file_queue[i].front ();
                     pthread_mutex_unlock (&file_queue_mutex);
-
+                    if ( file == NULL )
+                    {
+                        continue;
+                    }
                     std::string path = file->get_path ();
                     fd = open (path.c_str (), O_RDWR);
                     if ( fd == - 1 )
@@ -126,8 +129,6 @@ void *read_log ( void *arg )
                     }
                     pthread_mutex_unlock (&file_queue_mutex);
 
-
-
                     file_size = sb.st_size;
                     size = ( int ) file_size;
                     addr = ( char * ) mmap (NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
@@ -143,12 +144,13 @@ void *read_log ( void *arg )
                     file_size                   -= last_read_pos;
                     int index                   = file->get_index ();
 
+                    std::string str;
                     while ( ( item_ptr = ( char * ) memchr (addr, '\n', file_size) ) != NULL )
                     {
                         int len     = item_ptr - addr;
-                        if ( ! file->get_bitmap ().test (last_read_count) )
+                        if ( ! file->has_synced (last_read_count) )
                         {
-                            std::string str (addr + 32, len - 32);
+                            str.assign (addr + 32, len - 32);
                             make_message_and_deliver (str, last_read_count, file);
                             uint64_t read_total                     = * ( uint64_t * ) total_status_addr;
                             *( uint64_t * ) total_status_addr          = read_total + 1;

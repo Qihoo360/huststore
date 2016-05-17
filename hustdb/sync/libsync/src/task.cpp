@@ -36,9 +36,9 @@ bool Task::operator() ( void *param )
             delete item;
             return false;
         case 1:
-            delete item;
             delete msg;
             item->get_file ()->set_bitmap (item->get_bitmap_index ());
+            delete item;
             return true;
     }
 
@@ -98,7 +98,7 @@ static bool do_sync ( husthttp_t *client, Item *item )
     {
         return false;
     }
-    if ( http_code != 200 )
+    if ( http_code != 200 && http_code != 400 && http_code != 412 )
     {
         return false;
     }
@@ -122,7 +122,6 @@ static int construct_item ( Message *msg, Item *item )
 
     uint32_t head_len;
     uint8_t method;
-    uint8_t proto;
     uint32_t ver;
     uint32_t key_len;
     const char *key;
@@ -131,6 +130,8 @@ static int construct_item ( Message *msg, Item *item )
     uint32_t tb_len;
     const char *tb;
     uint32_t tb_crc;
+    uint64_t score;
+    int8_t opt;
 
     typedef struct
     {
@@ -138,16 +139,30 @@ static int construct_item ( Message *msg, Item *item )
         size_t len;
     } head_item_t;
 
+    typedef struct
+    {
+        const char *data;
+        uint32_t *len;
+    } key_tb_t;
+
     head_item_t heads[] = {
         {&head_len,  sizeof (head_len ) },
         {&method,    sizeof (method ) },
-        {&proto,     sizeof (proto ) },
         {&ver,       sizeof (ver ) },
         {&key_len,   sizeof (key_len ) },
         {NULL,       0 },
         {&key_crc,   sizeof (key_crc ) },
         {&ttl,       sizeof (ttl ) },
-        {&tb_len,     sizeof (tb_len ) }
+        {&tb_len,     sizeof (tb_len ) },
+        {NULL,       0 },
+        {&tb_crc,    sizeof (tb_crc ) },
+        {&score,     sizeof (score ) },
+        {&opt,       sizeof (opt ) }
+    };
+
+    key_tb_t kt[] = {
+        {NULL, &key_len },
+        {NULL, &tb_len }
     };
 
     size_t size = sizeof (heads ) / sizeof (head_item_t );
@@ -155,12 +170,13 @@ static int construct_item ( Message *msg, Item *item )
     const char *pos = ( const char * ) dec_str.data;
     size_t binlog_len = ( size_t ) dec_str.len;
 
-    for ( size_t i = 0; i < size; i ++ )
+    for ( size_t i = 0, j = 0; i < size; i ++ )
     {
         if ( ! heads[i].data )
         {
-            key = pos;
-            pos += key_len;
+            kt[j].data = pos;
+            pos += * ( kt[j].len );
+            j ++;
         }
         else
         {
@@ -181,16 +197,14 @@ static int construct_item ( Message *msg, Item *item )
         }
     }
 
+    key = kt[0].data;
     if ( fast_crc32 (key, key_len) != key_crc )
     {
         return - 1;
     }
     if ( tb_len != 0 )
     {
-        tb = pos;
-        pos += tb_len;
-        memcpy (( void * ) ( &tb_crc ), pos, sizeof (tb_crc ));
-        pos += sizeof (tb_crc );
+        tb = kt[1].data;
         if ( fast_crc32 (tb, tb_len) != tb_crc )
         {
             return - 1;
@@ -202,7 +216,6 @@ static int construct_item ( Message *msg, Item *item )
     uint32_t value_len;
 
     if ( method == HUSTDB_METHOD_PUT ||
-         method == HUSTDB_METHOD_SADD ||
          method == HUSTDB_METHOD_HSET ||
          method == HUSTDB_METHOD_TB_PUT ||
          method == HUSTDB_METHOD_TB_UPDATE )
@@ -245,13 +258,17 @@ static int construct_item ( Message *msg, Item *item )
             _path = "/hustdb/sadd";
             sprintf (query_string, "key=%s&ver=%d&ttl=%d&tb=%s&is_dup=true", key_safe, ver, ttl, tb_str.c_str ());
             break;
+        case HUSTDB_METHOD_ZADD:
+            _path = "/hustdb/zadd";
+            sprintf (query_string, "key=%s&ver=%d&tb=%s&score=%ld&opt=%d&is_dup=true", key_safe, ver, tb_str.c_str (), score, opt);
+            break;
         case HUSTDB_METHOD_TB_PUT:
             _path = "/husttb/put";
-            sprintf (query_string, "key=%s&ver=%d&tb=%s&proto=%d&is_dup=true", key_safe, ver, tb_str.c_str (), proto);
+            sprintf (query_string, "key=%s&ver=%d&tb=%s&is_dup=true", key_safe, ver, tb_str.c_str ());
             break;
         case HUSTDB_METHOD_TB_UPDATE:
             _path = "/husttb/update";
-            sprintf (query_string, "key=%s&ver=%d&tb=%s&proto=%d&is_dup=true", key_safe, ver, tb_str.c_str (), proto);
+            sprintf (query_string, "key=%s&ver=%d&tb=%s&is_dup=true", key_safe, ver, tb_str.c_str ());
             break;
         case HUSTDB_METHOD_DEL:
             _path = "/hustdb/del";
@@ -263,6 +280,10 @@ static int construct_item ( Message *msg, Item *item )
             break;
         case HUSTDB_METHOD_SREM:
             _path = "/hustdb/srem";
+            sprintf (query_string, "key=%s&ver=%d&tb=%s&is_dup=true", key_safe, ver, tb_str.c_str ());
+            break;
+        case HUSTDB_METHOD_ZREM:
+            _path = "/hustdb/zrem";
             sprintf (query_string, "key=%s&ver=%d&tb=%s&is_dup=true", key_safe, ver, tb_str.c_str ());
             break;
         case HUSTDB_METHOD_TB_DELETE:

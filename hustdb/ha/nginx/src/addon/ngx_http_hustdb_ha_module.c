@@ -101,11 +101,6 @@ static ngx_http_request_item_t hustdb_ha_handler_dict[] =
         hustdb_ha_smembers_handler
     },
     {
-        ngx_string("/export"),
-        ngx_string("/hustdb/export"),
-        hustdb_ha_export_handler
-    },
-    {
         ngx_string("/file_count"),
         ngx_string("/hustdb/file_count"),
         hustdb_ha_file_count_handler
@@ -139,6 +134,36 @@ static ngx_http_request_item_t hustdb_ha_handler_dict[] =
         ngx_string("/set_table"),
         ngx_null_string,
         hustdb_ha_set_table_handler
+    },
+    {
+        ngx_string("/zismember"),
+        ngx_string("/hustdb/zismember"),
+        hustdb_ha_zismember_handler
+    },
+    {
+        ngx_string("/zscore"),
+        ngx_string("/hustdb/zscore"),
+        hustdb_ha_zscore_handler
+    },
+    {
+        ngx_string("/zadd"),
+        ngx_string("/hustdb/zadd"),
+        hustdb_ha_zadd_handler
+    },
+    {
+        ngx_string("/zrem"),
+        ngx_string("/hustdb/zrem"),
+        hustdb_ha_zrem_handler
+    },
+    {
+        ngx_string("/zrangebyrank"),
+        ngx_string("/hustdb/zrangebyrank"),
+        hustdb_ha_zrangebyrank_handler
+    },
+    {
+        ngx_string("/zrangebyscore"),
+        ngx_string("/hustdb/zrangebyscore"),
+        hustdb_ha_zrangebyscore_handler
     }
 };
 

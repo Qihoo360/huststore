@@ -17,9 +17,12 @@ extern std::vector<std::string> hosts;
 #define HUSTDB_METHOD_HDEL 4
 #define HUSTDB_METHOD_SADD 5
 #define HUSTDB_METHOD_SREM 6
-#define HUSTDB_METHOD_TB_PUT 7
-#define HUSTDB_METHOD_TB_UPDATE 8
-#define HUSTDB_METHOD_TB_DELETE 9
+#define HUSTDB_METHOD_ZADD 7
+#define HUSTDB_METHOD_ZREM 8
+
+#define HUSTDB_METHOD_TB_PUT    17 
+#define HUSTDB_METHOD_TB_UPDATE 18
+#define HUSTDB_METHOD_TB_DELETE 19
 
 class Task
 {

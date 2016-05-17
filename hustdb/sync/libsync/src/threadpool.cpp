@@ -8,13 +8,13 @@ typedef struct
     int client_id;
 } Thread;
 
-ThreadPool::ThreadPool ( )	\
- : _size ( DEFAULT_POOL_SIZE )
+ThreadPool::ThreadPool ( )
+: _size ( DEFAULT_POOL_SIZE )
 {
 }
 
-ThreadPool::ThreadPool ( int size )	\
- : _size ( size )
+ThreadPool::ThreadPool ( int size )
+: _size ( size )
 {
 }
 
@@ -69,7 +69,7 @@ int ThreadPool::destroy_threadpool ( )
     _state = STOPPED;
     _task_mutex.unlock ();
 
-    //std::cout << "Broadcasting STOP signal to all threads." << std::endl;
+    //Broadcasting STOP signal to all threads.
     _task_cond.broadcast ();
 
     int ret = - 1;
@@ -78,7 +78,6 @@ int ThreadPool::destroy_threadpool ( )
         void *result;
         ret = pthread_join (_threads[i], &result);
         delete clients[i];
-        //std::cout << "pthread_join returned" << ret << ": " << strerror(errno) << std::endl;
         _task_cond.broadcast ();
     }
     return 0;

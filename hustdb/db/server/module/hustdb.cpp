@@ -18,6 +18,7 @@ hustdb_t::hustdb_t ( )
 , m_mdb ( NULL )
 , m_mdb_ok ( false )
 , m_slow_tasks ( )
+, m_redelivery_timeout ( 0 )
 , m_def_msg_ttl ( 0 )
 , m_max_msg_ttl ( 0 )
 , m_max_kv_ttl ( 0 )
@@ -83,8 +84,14 @@ void hustdb_t::destroy ( )
 
     for ( queue_map_t::iterator it = m_queue_map.begin (); it != m_queue_map.end (); it ++ )
     {
-        delete it->second.wlocker;
+        delete it->second.unacked;
+        it->second.unacked = NULL;
+        
+        delete it->second.redelivery;
+        it->second.redelivery = NULL;
+        
         delete it->second.worker;
+        it->second.worker = NULL;
     }
 
     G_APPTOOL->fmap_close ( & m_queue_index );
@@ -215,9 +222,12 @@ bool hustdb_t::open ( )
         if ( qstat->flag > 0 )
         {
             queue_info_t t;
-            t.offset = i;
-            t.wlocker = new lockable_t ();
-            t.worker = new worker_t ();
+            
+            t.offset        = i;
+            t.unacked       = new unacked_t ();
+            t.redelivery    = new redelivery_t ();
+            t.worker        = new worker_t ();
+            
             m_queue_map.insert (std::pair<std::string, queue_info_t>( qstat->qname, t ));
         }
     }
@@ -366,6 +376,13 @@ bool hustdb_t::init_server_config ( )
     s = m_appini->ini_get_string ( m_ini, "server", "http.access.allow", "" );
     m_server_conf.http_access_allow = s ? s : "";
 
+    m_redelivery_timeout = m_appini->ini_get_int ( m_ini, "server", "redelivery.timeout", DEF_REDELIVERY_TIMEOUT ) / 60;
+    if ( m_redelivery_timeout <= 0 || m_redelivery_timeout > 255 )
+    {
+        LOG_ERROR ( "[hustdb][init_server_config]server redelivery.timeout invalid, redelivery_timeout: %d", m_redelivery_timeout );
+        return false;
+    }
+    
     m_def_msg_ttl = m_appini->ini_get_int ( m_ini, "server", "ttl.def_msg", DEF_MSG_TTL );
 
     m_max_msg_ttl = m_appini->ini_get_int ( m_ini, "server", "ttl.max_msg", MAX_MSG_TTL );
@@ -782,17 +799,20 @@ int hustdb_t::find_queue_offset (
                                   std::string & queue,
                                   bool create,
                                   uint8_t type,
+                                  queue_info_t * & queue_info,
                                   const char * worker,
                                   size_t worker_len
                                   )
 {
     uint32_t                 i            = 0;
-    uint32_t                 tm          = 0;
+    uint32_t                 tm           = 0;
     queue_stat_t *           qstat        = NULL;
 
     queue_map_t::iterator it = m_queue_map.find ( queue );
     if ( it != m_queue_map.end () )
     {
+        queue_info = & it->second;
+        
         do
         {
             if ( ! worker || worker_len <= 0 )
@@ -800,30 +820,25 @@ int hustdb_t::find_queue_offset (
                 break;
             }
 
-            lockable_t * wlock = it->second.wlocker;
-            worker_t * wmap = it->second.worker;
+            std::string inner_worker ( worker, worker_len );
 
+            worker_t * wmap = it->second.worker;
+            
             tm = m_mdb->current_timestamp ();
 
+            worker_t::iterator wit = wmap->find ( inner_worker );
+            if ( wit != wmap->end () )
             {
-                std::string inner_worker ( worker, worker_len );
-
-                scope_lock_t qlocker ( * wlock );
-
-                worker_t::iterator wit = wmap->find ( inner_worker );
-                if ( wit != wmap->end () )
+                wit->second = tm;
+            }
+            else
+            {
+                if ( unlikely ( wmap->size () > 1024 ) )
                 {
-                    wit->second = tm;
+                    break;
                 }
-                else
-                {
-                    if ( unlikely ( wmap->size () > 1024 ) )
-                    {
-                        break;
-                    }
 
-                    wmap->insert (std::pair<std::string, uint32_t>( inner_worker, tm ));
-                }
+                wmap->insert (std::pair<std::string, uint32_t>( inner_worker, tm ));
             }
         }
         while ( 0 );
@@ -842,7 +857,7 @@ int hustdb_t::find_queue_offset (
         return - 1;
     }
 
-    scope_lock_t qlocker ( m_mq_locker );
+    scope_lock_t mqlocker ( m_mq_locker );
 
     for ( i = 0; i < QUEUE_INDEX_FILE_LEN; i += QUEUE_STAT_LEN )
     {
@@ -863,14 +878,18 @@ int hustdb_t::find_queue_offset (
             memset ( qstat, 0, QUEUE_STAT_LEN );
 
             queue_info_t t;
-            t.offset = i;
-            t.wlocker = new lockable_t ();
-            t.worker = new worker_t ();
+
+            t.offset             = i;
+            t.unacked            = new unacked_t ();
+            t.redelivery         = new redelivery_t ();
+            t.worker             = new worker_t ();
+            
             m_queue_map.insert (std::pair<std::string, queue_info_t>( queue, t ));
 
-            qstat->flag = 1;
-            qstat->type = type;
-            qstat->ctime = m_mdb->current_timestamp ();
+            qstat->flag          = 1;
+            qstat->type          = type;
+            qstat->timeout       = m_redelivery_timeout;
+            qstat->ctime         = m_mdb->current_timestamp ();
             fast_memcpy ( qstat->qname, queue.c_str (), queue.size () );
 
             return i;
@@ -2425,6 +2444,7 @@ int hustdb_t::hustmq_put (
     lockable_t *    qlkt                    = NULL;
     queue_stat_t *  qstat                   = NULL;
     unsigned char * qstat_val               = NULL;
+    queue_info_t *  queue_info              = NULL;
     item_ctxt_t *   ctxt                    = NULL;
 
     if ( unlikely ( ! tb_name_check ( queue, queue_len ) ||
@@ -2440,22 +2460,22 @@ int hustdb_t::hustmq_put (
         LOG_DEBUG ( "[hustdb][mq_put]memory over threshold" );
         return EINVAL;
     }
+    
+    qhash = m_apptool->locker_hash ( queue, queue_len );
+    qlkt = m_lockers.at ( qhash );
+    scope_lock_t qlocker ( * qlkt );
 
     std::string inner_queue ( queue, queue_len );
 
-    offset = find_queue_offset ( inner_queue, true, QUEUE_TB, NULL, 0 );
+    offset = find_queue_offset ( inner_queue, true, QUEUE_TB, queue_info );
     if ( unlikely ( offset < 0 ) )
     {
-        LOG_ERROR ( "[hustdb][mq_put]find_queue_offset failed" );
+        LOG_ERROR ( "[hustdb][mq_put][queue=%s]has not found ", inner_queue.c_str () );
         return EPERM;
     }
 
     qstat = ( queue_stat_t * ) ( m_queue_index.ptr + offset );
     qstat_val = ( unsigned char * ) ( m_queue_index.ptr + offset );
-
-    qhash = m_apptool->locker_hash ( queue, queue_len );
-    qlkt = m_lockers.at ( qhash );
-    scope_lock_t qlocker ( * qlkt );
 
     fast_memcpy ( & tag, qstat_val + SIZEOF_UNIT32 * ( priori * 2 + 1 ), SIZEOF_UNIT32 );
     tag = ( tag + 1 ) % CYCLE_QUEUE_ITEM_NUM;
@@ -2473,7 +2493,6 @@ int hustdb_t::hustmq_put (
     m_storage->set_inner_ttl ( 0, conn );
     m_storage->set_inner_table ( NULL, 0, QUEUE_TB, conn );
 
-    ver = 0;
     r = m_storage->put ( qkey, qkey_len, item, item_len, ver, false, conn, ctxt );
     if ( unlikely ( 0 != r ) )
     {
@@ -2491,12 +2510,15 @@ int hustdb_t::hustmq_get (
                            size_t queue_len,
                            const char * worker,
                            size_t worker_len,
+                           bool is_ack,
                            std::string & ack,
+                           std::string & unacked,
                            std::string * & rsp,
                            conn_ctxt_t conn
                            )
 {
     int             r                       = 0;
+    uint32_t        tm                      = 0;
     size_t          qkey_len                = 0;
     char            qkey[ MAX_QKEY_LEN ]    = { };
     uint32_t        priori                  = 0;
@@ -2507,6 +2529,7 @@ int hustdb_t::hustmq_get (
     lockable_t *    qlkt                    = NULL;
     queue_stat_t *  qstat                   = NULL;
     unsigned char * qstat_val               = NULL;
+    queue_info_t *  queue_info              = NULL;
     item_ctxt_t *   ctxt                    = NULL;
 
     if ( unlikely ( ! tb_name_check ( queue, queue_len ) ||
@@ -2517,70 +2540,173 @@ int hustdb_t::hustmq_get (
         return EKEYREJECTED;
     }
 
+    qhash = m_apptool->locker_hash ( queue, queue_len );
+    qlkt = m_lockers.at ( qhash );
+    scope_lock_t qlocker ( * qlkt );
+
     std::string inner_queue ( queue, queue_len );
 
-    offset = find_queue_offset ( inner_queue, false, QUEUE_TB, worker, worker_len );
+    offset = find_queue_offset ( inner_queue, false, QUEUE_TB, queue_info, worker, worker_len );
     if ( unlikely ( offset < 0 ) )
     {
-        LOG_ERROR ( "[hustdb][mq_get]find_queue_offset failed" );
+        LOG_ERROR ( "[hustdb][mq_get][queue=%s]has not found ", inner_queue.c_str () );
         return EPERM;
     }
 
     qstat = ( queue_stat_t * ) ( m_queue_index.ptr + offset );
     qstat_val = ( unsigned char * ) ( m_queue_index.ptr + offset );
 
-    qhash = m_apptool->locker_hash ( queue, queue_len );
-    qlkt = m_lockers.at ( qhash );
-    scope_lock_t qlocker ( * qlkt );
+    tm = m_mdb->current_timestamp ();
+    redelivery_t::iterator rit = queue_info->redelivery->begin ();
 
-    if ( clac_real_item ( qstat->sp2, qstat->ep2 ) > 0 )
-    {
-        priori = 2;
-        tag = ( qstat->sp2 + 1 ) % CYCLE_QUEUE_ITEM_NUM;
-    }
-    else if ( clac_real_item ( qstat->sp1, qstat->ep1 ) > 0 )
-    {
-        priori = 1;
-        tag = ( qstat->sp1 + 1 ) % CYCLE_QUEUE_ITEM_NUM;
-    }
-    else if ( clac_real_item ( qstat->sp, qstat->ep ) > 0 )
-    {
-        priori = 0;
-        tag = ( qstat->sp + 1 ) % CYCLE_QUEUE_ITEM_NUM;
+    if ( unlikely ( rit != queue_info->redelivery->end () &&
+                   tm - rit->first >= qstat->timeout * 60 )
+         )
+    {        
+        sprintf ( qkey, "%s|%s", inner_queue.c_str (), rit->second.c_str () );
+        qkey_len = strlen ( qkey );
+
+        queue_info->redelivery->erase ( rit );
     }
     else
     {
-        return ENOENT;
+        if ( clac_real_item ( qstat->sp2, qstat->ep2 ) > 0 )
+        {
+            priori = 2;
+            tag = ( qstat->sp2 + 1 ) % CYCLE_QUEUE_ITEM_NUM;
+        }
+        else if ( clac_real_item ( qstat->sp1, qstat->ep1 ) > 0 )
+        {
+            priori = 1;
+            tag = ( qstat->sp1 + 1 ) % CYCLE_QUEUE_ITEM_NUM;
+        }
+        else if ( clac_real_item ( qstat->sp, qstat->ep ) > 0 )
+        {
+            priori = 0;
+            tag = ( qstat->sp + 1 ) % CYCLE_QUEUE_ITEM_NUM;
+        }
+        else
+        {
+            return ENOENT;
+        }
+
+        fast_memcpy ( qstat_val + SIZEOF_UNIT32 * priori * 2, & tag, SIZEOF_UNIT32 );
+
+        sprintf ( qkey, "%s|%d:%d", inner_queue.c_str (), priori, tag );
+        qkey_len = strlen ( qkey );
     }
-
-    fast_memcpy ( qstat_val + SIZEOF_UNIT32 * priori * 2, & tag, SIZEOF_UNIT32 );
-
-    sprintf ( qkey, "%s|%d:%d", inner_queue.c_str (), priori, tag );
-    qkey_len = strlen ( qkey );
 
     ack = qkey;
 
     m_storage->set_inner_table ( NULL, 0, QUEUE_TB, conn );
 
-    ver = 0;
     r = m_storage->get ( qkey, qkey_len, ver, conn, rsp, ctxt );
     if ( unlikely ( 0 != r ) )
     {
         LOG_ERROR ( "[hustdb][mq_get]get failed, return:%d, key:%s", r, qkey );
+        return r;
+    }
+    
+    if ( ! is_ack )
+    {
+        unacked = qkey + queue_len + 1;
+        
+        queue_info->unacked->insert ( std::pair<std::string, uint32_t>( unacked, tm ) );
+        queue_info->redelivery->insert ( std::pair<uint32_t, std::string>( tm, unacked ) );
     }
 
-    return r;
+    return 0;
 }
 
-int hustdb_t::hustmq_ack (
-                           std::string & ack,
-                           conn_ctxt_t conn
-                           )
+int hustdb_t::hustmq_ack_inner (
+                                 std::string & ack,
+                                 conn_ctxt_t conn
+                                 )
 {
     uint32_t        ver                     = 0;
     item_ctxt_t *   ctxt                    = NULL;
 
+    m_storage->set_inner_table ( NULL, 0, QUEUE_TB, conn );
+    
     return m_storage->del ( ack.c_str (), ack.size (), ver, false, conn, ctxt );
+}
+
+int hustdb_t::hustmq_ack (
+                           const char * queue,
+                           size_t queue_len,
+                           const char * ack,
+                           size_t ack_len,
+                           conn_ctxt_t conn
+                           )
+{
+    int             offset                  = - 1;
+    size_t          qkey_len                = 0;
+    char            qkey[ MAX_QKEY_LEN ]    = { };
+    uint32_t        ver                     = 0;
+    uint16_t        qhash                   = 0;
+    lockable_t *    qlkt                    = NULL;
+    queue_info_t *  queue_info              = NULL;
+    item_ctxt_t *   ctxt                    = NULL;
+
+    if ( unlikely ( ! tb_name_check ( queue, queue_len ) ||
+                   ! tb_name_check ( ack, ack_len ) )
+         )
+    {
+        LOG_DEBUG ( "[hustdb][mq_ack]params error" );
+        return EKEYREJECTED;
+    }
+
+    do
+    {
+        qhash = m_apptool->locker_hash ( queue, queue_len );
+        qlkt = m_lockers.at ( qhash );
+        scope_lock_t qlocker ( * qlkt );
+
+        std::string inner_queue ( queue, queue_len );
+
+        offset = find_queue_offset ( inner_queue, false, QUEUE_TB, queue_info );
+        if ( unlikely ( offset < 0 ) )
+        {
+            LOG_ERROR ( "[hustdb][mq_ack][queue=%s]has not found ", inner_queue.c_str () );
+            return EPERM;
+        }
+
+        std::string inner_ack ( ack, ack_len );
+        
+        unacked_t::iterator ait = queue_info->unacked->find ( inner_ack );
+        if ( ait == queue_info->unacked->end () )
+        {
+            LOG_ERROR ( "[hustdb][mq_ack][queue=%s][ack=%s]has not found ", inner_queue.c_str (), inner_ack.c_str () );
+            return EPERM;
+        }
+        
+        redelivery_t::iterator rit = queue_info->redelivery->find ( ait->second );
+        while ( rit != queue_info->redelivery->end () )
+        {
+            if ( rit->first != ait->second )
+            {
+                break;
+            }
+            
+            if ( rit->second == inner_ack )
+            {
+                queue_info->redelivery->erase ( rit );
+                break;
+            }
+            
+            rit ++;
+        }
+        
+        queue_info->unacked->erase ( ait );
+        
+        sprintf ( qkey, "%s|%s", inner_queue.c_str (), inner_ack.c_str () );
+        qkey_len = strlen ( qkey );
+    }
+    while ( 0 );
+
+    m_storage->set_inner_table ( NULL, 0, QUEUE_TB, conn );
+    
+    return m_storage->del ( qkey, qkey_len, ver, false, conn, ctxt );
 }
 
 int hustdb_t::hustmq_worker (
@@ -2590,59 +2716,60 @@ int hustdb_t::hustmq_worker (
                               )
 {
     uint32_t        tm                      = 0;
-    lockable_t *    wlock                   = NULL;
+    int             offset                  = - 1;
     worker_t *      wmap                    = NULL;
     char            wt[ 64 ]                = { };
+    uint16_t        qhash                   = 0;
+    lockable_t *    qlkt                    = NULL;
+    queue_info_t *  queue_info              = NULL;
 
     if ( unlikely ( ! tb_name_check ( queue, queue_len ) ) )
     {
         LOG_DEBUG ( "[hustdb][mq_worker]params error" );
         return EKEYREJECTED;
     }
+    
+    qhash = m_apptool->locker_hash ( queue, queue_len );
+    qlkt = m_lockers.at ( qhash );
+    scope_lock_t qlocker ( * qlkt );
 
     std::string inner_queue ( queue, queue_len );
 
-    queue_map_t::iterator it = m_queue_map.find ( inner_queue );
-    if ( it == m_queue_map.end () )
+    offset = find_queue_offset ( inner_queue, false, QUEUE_TB, queue_info );
+    if ( unlikely ( offset < 0 ) )
     {
         LOG_ERROR ( "[hustdb][mq_worker][queue=%s]has not found ", inner_queue.c_str () );
-        return ENOENT;
+        return EPERM;
     }
+    wmap = queue_info->worker;
 
-    wlock = it->second.wlocker;
-    wmap = it->second.worker;
+    tm = m_mdb->current_timestamp ();
 
     workers.resize ( 0 );
     workers.reserve ( 4096 );
     workers += "[";
 
+    worker_t::iterator wit = wmap->begin ();
+    while ( wit != wmap->end () )
     {
-        scope_lock_t qlocker ( * wlock );
-
-        tm = m_mdb->current_timestamp ();
-
-        worker_t::iterator wit = wmap->begin ();
-        while ( wit != wmap->end () )
+        if ( wit->second < tm - WORKER_TIMEOUT )
         {
-            if ( wit->second < tm - WORKER_TIMEOUT )
-            {
-                worker_t::iterator twit = wit;
-                wit ++;
-                wmap->erase ( twit );
-
-                continue;
-            }
-
-            memset ( wt, 0, sizeof ( wt ) );
-            sprintf ( wt,
-                     "{\"w\":\"%s\",\"t\":%d},",
-                     wit->first.c_str (),
-                     wit->second
-                     );
-            workers += wt;
-
+            worker_t::iterator twit = wit;
             wit ++;
+            wmap->erase ( twit );
+
+            continue;
         }
+
+        memset ( wt, 0, sizeof ( wt ) );
+        sprintf ( wt,
+                 "{\"w\":\"%s\",\"t\":%d},",
+                 wit->first.c_str (),
+                 wit->second
+                 );
+        workers += wt;
+
+        wit ++;
     }
 
     if ( workers.size () > 2 )
@@ -2663,6 +2790,9 @@ int hustdb_t::hustmq_stat (
     int             offset                  = - 1;
     queue_stat_t *  qstat                   = NULL;
     char            st[ 1024 ]              = { };
+    uint16_t        qhash                   = 0;
+    lockable_t *    qlkt                    = NULL;
+    queue_info_t *  queue_info              = NULL;
 
     if ( unlikely ( ! tb_name_check ( queue, queue_len ) ) )
     {
@@ -2670,26 +2800,32 @@ int hustdb_t::hustmq_stat (
         return EKEYREJECTED;
     }
 
+    qhash = m_apptool->locker_hash ( queue, queue_len );
+    qlkt = m_lockers.at ( qhash );
+    scope_lock_t qlocker ( * qlkt );
+    
     std::string inner_queue ( queue, queue_len );
 
-    offset = find_queue_offset ( inner_queue, false, COMMON_TB, NULL, 0 );
+    offset = find_queue_offset ( inner_queue, false, COMMON_TB, queue_info );
     if ( unlikely ( offset < 0 ) )
     {
-        LOG_ERROR ( "[hustdb][mq_stat]find_queue_offset failed" );
+        LOG_ERROR ( "[hustdb][mq_stat][queue=%s]has not found ", inner_queue.c_str () );
         return EPERM;
     }
 
     qstat = ( queue_stat_t * ) ( m_queue_index.ptr + offset );
 
     sprintf ( st,
-             "{\"queue\":\"%s\",\"ready\":[%d,%d,%d],\"max\":%d,\"lock\":%d,\"type\":%d,\"si\":%d,\"ci\":%d,\"tm\":%d}",
+             "{\"queue\":\"%s\",\"ready\":[%d,%d,%d],\"unacked\":%d,\"max\":%d,\"lock\":%d,\"type\":%d,\"timeout\":%d,\"si\":%d,\"ci\":%d,\"tm\":%d}",
              inner_queue.c_str (),
              clac_real_item ( qstat->sp, qstat->ep ),
              clac_real_item ( qstat->sp1, qstat->ep1 ),
              clac_real_item ( qstat->sp2, qstat->ep2 ),
+             queue_info->unacked->size (),
              qstat->max,
              qstat->lock,
              qstat->type,
+             qstat->timeout * 60,
              qstat->sp,
              qstat->ep,
              qstat->ctime
@@ -2706,25 +2842,32 @@ void hustdb_t::hustmq_stat_all (
 {
     queue_stat_t *  qstat                   = NULL;
     char            stat[ 1024 ]            = { };
+    queue_info_t *  queue_info              = NULL;
 
+    scope_lock_t mqlocker ( m_mq_locker );
+    
     stats.resize ( 0 );
     stats.reserve ( 1048576 );
     stats += "[";
 
     for ( queue_map_t::iterator it = m_queue_map.begin (); it != m_queue_map.end (); it ++ )
     {
-        qstat = ( queue_stat_t * ) ( m_queue_index.ptr + it->second.offset );
+        queue_info = & it->second;
+        
+        qstat = ( queue_stat_t * ) ( m_queue_index.ptr + queue_info->offset );
 
         memset ( stat, 0, sizeof ( stat ) );
         sprintf ( stat,
-                 "{\"queue\":\"%s\",\"ready\":[%d,%d,%d],\"max\":%d,\"lock\":%d,\"type\":%d,\"si\":%d,\"ci\":%d,\"tm\":%d},",
+                 "{\"queue\":\"%s\",\"ready\":[%d,%d,%d],\"unacked\":%d,\"max\":%d,\"lock\":%d,\"type\":%d,\"timeout\":%d,\"si\":%d,\"ci\":%d,\"tm\":%d},",
                  it->first.c_str (),
                  clac_real_item ( qstat->sp, qstat->ep ),
                  clac_real_item ( qstat->sp1, qstat->ep1 ),
                  clac_real_item ( qstat->sp2, qstat->ep2 ),
+                 queue_info->unacked->size (),
                  qstat->max,
                  qstat->lock,
                  qstat->type,
+                 qstat->timeout * 60,
                  qstat->sp,
                  qstat->ep,
                  qstat->ctime
@@ -2749,6 +2892,7 @@ int hustdb_t::hustmq_max (
     lockable_t *    qlkt                    = NULL;
     int             offset                  = - 1;
     queue_stat_t *  qstat                   = NULL;
+    queue_info_t *  queue_info              = NULL;
 
     if ( unlikely ( ! tb_name_check ( queue, queue_len ) ||
                    max < 0 || max > MAX_QUEUE_ITEM_NUM )
@@ -2758,20 +2902,20 @@ int hustdb_t::hustmq_max (
         return EKEYREJECTED;
     }
 
+    qhash = m_apptool->locker_hash ( queue, queue_len );
+    qlkt = m_lockers.at ( qhash );
+    scope_lock_t qlocker ( * qlkt );
+    
     std::string inner_queue ( queue, queue_len );
 
-    offset = find_queue_offset ( inner_queue, false, QUEUE_TB, NULL, 0 );
+    offset = find_queue_offset ( inner_queue, false, QUEUE_TB, queue_info );
     if ( unlikely ( offset < 0 ) )
     {
-        LOG_ERROR ( "[hustdb][mq_max]find_queue_offset failed" );
+        LOG_ERROR ( "[hustdb][mq_max][queue=%s]has not found ", inner_queue.c_str () );
         return EPERM;
     }
 
     qstat = ( queue_stat_t * ) ( m_queue_index.ptr + offset );
-
-    qhash = m_apptool->locker_hash ( queue, queue_len );
-    qlkt = m_lockers.at ( qhash );
-    scope_lock_t qlocker ( * qlkt );
 
     qstat->max = max;
 
@@ -2781,13 +2925,14 @@ int hustdb_t::hustmq_max (
 int hustdb_t::hustmq_lock (
                             const char * queue,
                             size_t queue_len,
-                            uint16_t lock
+                            uint8_t lock
                             )
 {
     uint16_t        qhash                   = 0;
     lockable_t *    qlkt                    = NULL;
     int             offset                  = - 1;
     queue_stat_t *  qstat                   = NULL;
+    queue_info_t *  queue_info              = NULL;
 
     if ( unlikely ( ! tb_name_check ( queue, queue_len ) ||
                    lock != 0 && lock != 1 )
@@ -2797,22 +2942,62 @@ int hustdb_t::hustmq_lock (
         return EKEYREJECTED;
     }    
 
+    qhash = m_apptool->locker_hash ( queue, queue_len );
+    qlkt = m_lockers.at ( qhash );
+    scope_lock_t qlocker ( * qlkt );
+    
     std::string inner_queue ( queue, queue_len );
 
-    offset = find_queue_offset ( inner_queue, false, QUEUE_TB, NULL, 0 );
+    offset = find_queue_offset ( inner_queue, false, QUEUE_TB, queue_info );
     if ( unlikely ( offset < 0 ) )
     {
-        LOG_ERROR ( "[hustdb][mq_lock]find_queue_offset failed" );
+        LOG_ERROR ( "[hustdb][mq_lock][queue=%s]has not found ", inner_queue.c_str () );
         return EPERM;
     }
 
     qstat = ( queue_stat_t * ) ( m_queue_index.ptr + offset );
 
+    qstat->lock = lock;
+
+    return 0;
+}
+
+int hustdb_t::hustmq_timeout (
+                               const char * queue,
+                               size_t queue_len,
+                               uint8_t timeout
+                               )
+{
+    uint16_t        qhash                   = 0;
+    lockable_t *    qlkt                    = NULL;
+    int             offset                  = - 1;
+    queue_stat_t *  qstat                   = NULL;
+    queue_info_t *  queue_info              = NULL;
+
+    if ( unlikely ( ! tb_name_check ( queue, queue_len ) ||
+                   timeout <= 0 || timeout > 255 )
+         )
+    {
+        LOG_DEBUG ( "[hustdb][mq_timeout]params error" );
+        return EKEYREJECTED;
+    }
+
     qhash = m_apptool->locker_hash ( queue, queue_len );
     qlkt = m_lockers.at ( qhash );
     scope_lock_t qlocker ( * qlkt );
+    
+    std::string inner_queue ( queue, queue_len );
 
-    qstat->lock = lock;
+    offset = find_queue_offset ( inner_queue, false, QUEUE_TB, queue_info );
+    if ( unlikely ( offset < 0 ) )
+    {
+        LOG_ERROR ( "[hustdb][mq_timeout][queue=%s]has not found ", inner_queue.c_str () );
+        return EPERM;
+    }
+
+    qstat = ( queue_stat_t * ) ( m_queue_index.ptr + offset );
+
+    qstat->timeout = timeout;
 
     return 0;
 }
@@ -2836,6 +3021,7 @@ int hustdb_t::hustmq_purge (
     int             offset                  = - 1;
     queue_stat_t *  qstat                   = NULL;
     unsigned char * qstat_val               = NULL;
+    queue_info_t *  queue_info              = NULL;
     item_ctxt_t *   ctxt                    = NULL;
 
     if ( unlikely ( ! tb_name_check ( queue, queue_len ) ||
@@ -2846,12 +3032,16 @@ int hustdb_t::hustmq_purge (
         return EKEYREJECTED;
     }
 
+    qhash = m_apptool->locker_hash ( queue, queue_len );
+    qlkt = m_lockers.at ( qhash );
+    scope_lock_t qlocker ( * qlkt );
+    
     std::string inner_queue ( queue, queue_len );
 
-    offset = find_queue_offset ( inner_queue, false, QUEUE_TB, NULL, 0 );
+    offset = find_queue_offset ( inner_queue, false, QUEUE_TB, queue_info );
     if ( unlikely ( offset < 0 ) )
     {
-        LOG_ERROR ( "[hustdb][mq_purge]find_queue_offset failed" );
+        LOG_ERROR ( "[hustdb][mq_purge][queue=%s]has not found ", inner_queue.c_str () );
         return EPERM;
     }
 
@@ -2859,10 +3049,6 @@ int hustdb_t::hustmq_purge (
     qstat_val = ( unsigned char * ) ( m_queue_index.ptr + offset );
 
     m_storage->set_inner_table ( NULL, 0, QUEUE_TB, conn );
-
-    qhash = m_apptool->locker_hash ( queue, queue_len );
-    qlkt = m_lockers.at ( qhash );
-    scope_lock_t qlocker ( * qlkt );
 
     fast_memcpy ( & stag, qstat_val + SIZEOF_UNIT32 * priori * 2, SIZEOF_UNIT32 );
     fast_memcpy ( & etag, qstat_val + SIZEOF_UNIT32 * ( priori * 2 + 1 ), SIZEOF_UNIT32 );
@@ -2891,13 +3077,19 @@ int hustdb_t::hustmq_purge (
 
     if ( real <= 0 )
     {
-        scope_lock_t qlocker ( m_mq_locker );
+        scope_lock_t mqlocker ( m_mq_locker );
 
         queue_map_t::iterator it = m_queue_map.find ( inner_queue );
         if ( it != m_queue_map.end () )
         {
-            delete it->second.wlocker;
+            delete it->second.unacked;
+            it->second.unacked = NULL;
+            
+            delete it->second.redelivery;
+            it->second.redelivery = NULL;
+            
             delete it->second.worker;
+            it->second.worker = NULL;
 
             m_queue_map.erase ( it );
         }
@@ -2939,6 +3131,7 @@ int hustdb_t::hustmq_pub (
     uint32_t        tm                      = 0;
     queue_stat_t *  qstat                   = NULL;
     unsigned char * qstat_val               = NULL;
+    queue_info_t *  queue_info              = NULL;
     item_ctxt_t *   ctxt                    = NULL;
     std::string *   rsp                     = NULL;
 
@@ -2956,21 +3149,21 @@ int hustdb_t::hustmq_pub (
         return EINVAL;
     }
 
+    qhash = m_apptool->locker_hash ( queue, queue_len );
+    qlkt = m_lockers.at ( qhash );
+    scope_lock_t qlocker ( * qlkt );
+    
     std::string inner_queue ( queue, queue_len );
 
-    offset = find_queue_offset ( inner_queue, true, PUSHQ_TB, NULL, 0 );
+    offset = find_queue_offset ( inner_queue, true, PUSHQ_TB, queue_info );
     if ( unlikely ( offset < 0 ) )
     {
-        LOG_ERROR ( "[hustdb][mq_pub]find_queue_offset failed" );
+        LOG_ERROR ( "[hustdb][mq_pub][queue=%s]has not found ", inner_queue.c_str () );
         return EPERM;
     }
 
     qstat = ( queue_stat_t * ) ( m_queue_index.ptr + offset );
     qstat_val = ( unsigned char * ) ( m_queue_index.ptr + offset );
-
-    qhash = m_apptool->locker_hash ( queue, queue_len );
-    qlkt = m_lockers.at ( qhash );
-    scope_lock_t qlocker ( * qlkt );
 
     fast_memcpy ( & stag, qstat_val + SIZEOF_UNIT32 * priori * 2, SIZEOF_UNIT32 );
     fast_memcpy ( & etag, qstat_val + SIZEOF_UNIT32 * ( priori * 2 + 1 ), SIZEOF_UNIT32 );
@@ -3075,6 +3268,7 @@ int hustdb_t::hustmq_sub (
     int             offset                  = - 1;
     uint32_t        tm                      = 0;
     queue_stat_t *  qstat                   = NULL;
+    queue_info_t *  queue_info              = NULL;
     item_ctxt_t *   ctxt                    = NULL;
 
     if ( unlikely ( ! tb_name_check ( queue, queue_len ) ||
@@ -3084,21 +3278,21 @@ int hustdb_t::hustmq_sub (
         LOG_DEBUG ( "[hustdb][mq_pub]params error" );
         return EKEYREJECTED;
     }
+    
+    qhash = m_apptool->locker_hash ( queue, queue_len );
+    qlkt = m_lockers.at ( qhash );
+    scope_lock_t qlocker ( * qlkt );
 
     std::string inner_queue ( queue, queue_len );
 
-    offset = find_queue_offset ( inner_queue, false, PUSHQ_TB, NULL, 0 );
+    offset = find_queue_offset ( inner_queue, false, PUSHQ_TB, queue_info );
     if ( unlikely ( offset < 0 ) )
     {
-        LOG_ERROR ( "[hustdb][mq_sub]find_queue_offset failed" );
+        LOG_ERROR ( "[hustdb][mq_sub][queue=%s]has not found ", inner_queue.c_str () );
         return EPERM;
     }
 
     qstat = ( queue_stat_t * ) ( m_queue_index.ptr + offset );
-
-    qhash = m_apptool->locker_hash ( queue, queue_len );
-    qlkt = m_lockers.at ( qhash );
-    scope_lock_t qlocker ( * qlkt );
 
     if ( clac_real_item ( qstat->sp, qstat->ep ) <= 0 )
     {

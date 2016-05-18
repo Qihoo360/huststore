@@ -23,6 +23,9 @@
 #define MIN_WORKER_LEN                4
 #define MAX_WORKER_LEN                32
 #define WORKER_TIMEOUT                269
+
+#define DEF_REDELIVERY_TIMEOUT        3600
+
 #define DEF_MSG_TTL                   900
 #define MAX_MSG_TTL                   7200
 #define MAX_KV_TTL                    2592000
@@ -54,30 +57,34 @@ enum table_type_t
 
 typedef struct queue_stat_s
 {
-    uint32_t sp;
-    uint32_t ep;
-    uint32_t sp1;
-    uint32_t ep1;
-    uint32_t sp2;
-    uint32_t ep2;
+    uint32_t    sp;
+    uint32_t    ep;
+    uint32_t    sp1;
+    uint32_t    ep1;
+    uint32_t    sp2;
+    uint32_t    ep2;
 
-    uint32_t flag : 1;
-    uint32_t lock : 1;
-    uint32_t type : 8;
-    uint32_t _reserved : 22;
-    uint32_t max;
-    uint32_t ctime;
+    uint32_t    flag : 1;
+    uint32_t    lock : 1;
+    uint32_t    type : 8;
+    uint32_t    timeout : 8;
+    uint32_t    _reserved : 14;
+    uint32_t    max;
+    uint32_t    ctime;
 
-    char qname [ MAX_QUEUE_NAME_LEN ];
+    char        qname [ MAX_QUEUE_NAME_LEN ];
 } queue_stat_t;
 
-typedef std::map < std::string, uint32_t > worker_t;
+typedef std::map < std::string, uint32_t >      worker_t;
+typedef std::map < std::string, uint32_t >      unacked_t;
+typedef std::multimap < uint32_t, std::string > redelivery_t;
 
 typedef struct queue_info_s
 {
-    uint32_t offset;
-    lockable_t * wlocker;
-    worker_t * worker;
+    uint32_t          offset;
+    unacked_t *       unacked;
+    redelivery_t *    redelivery;
+    worker_t *        worker;
 } queue_info_t;
 
 typedef std::map < std::string, queue_info_t > queue_map_t;
@@ -488,16 +495,26 @@ public:
                      size_t queue_len,
                      const char * worker,
                      size_t worker_len,
+                     bool is_ack,
                      std::string & ack,
+                     std::string & unacked,
                      std::string * & rsp,
                      conn_ctxt_t conn
                      );
 
+    int hustmq_ack_inner (
+                           std::string & ack,
+                           conn_ctxt_t conn
+                           );
+
     int hustmq_ack (
-                     std::string & ack,
+                     const char * queue,
+                     size_t queue_len,
+                     const char * ack,
+                     size_t ack_len,
                      conn_ctxt_t conn
                      );
-
+    
     int hustmq_worker (
                         const char * queue,
                         size_t queue_len,
@@ -523,8 +540,14 @@ public:
     int hustmq_lock (
                       const char * queue,
                       size_t queue_len,
-                      uint16_t lock
+                      uint8_t lock
                       );
+
+    int hustmq_timeout (
+                         const char * queue,
+                         size_t queue_len,
+                         uint8_t timeout
+                         );
 
     int hustmq_purge (
                        const char * queue,
@@ -619,8 +642,9 @@ private:
                             std::string & queue,
                             bool create,
                             uint8_t type,
-                            const char * worker,
-                            size_t worker_len
+                            queue_info_t * & queue_info,
+                            const char * worker = NULL,
+                            size_t worker_len = 0
                             );
     
 private:
@@ -644,6 +668,8 @@ private:
     
     locker_vec_t m_lockers;
 
+    int32_t m_redelivery_timeout;
+    
     int32_t m_def_msg_ttl;
     int32_t m_max_msg_ttl;
     int32_t m_max_kv_ttl;

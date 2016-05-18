@@ -9,7 +9,7 @@
 
 *  **queue** （必选）  
 *  **item** （必选，GET：val即参数 or POST：val即body）  
-*  **priori** （可选，default：0）    
+*  **priori** （可选，0~2，default：0）    
 
 **使用范例A:**
 

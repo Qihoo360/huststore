@@ -247,12 +247,14 @@ void hustmq_get_handler(const hustmq_get_ctx_t& args, evhtp_request_t * request,
 {
     conn_ctxt_t conn;
     conn.worker_id = ctx->base.get_id(request);
+    bool is_ack = false;
     std::string ack;
+    std::string unacked;
     std::string * rsp = NULL;
-    int r = ctx->db->hustmq_get(args.queue.data, args.queue.len, args.worker.data, args.worker.len, ack, rsp, conn);
-    if (hustdb_network::post_handler(r, rsp, request, ctx))
+    int r = ctx->db->hustmq_get(args.queue.data, args.queue.len, args.worker.data, args.worker.len, is_ack, ack, unacked, rsp, conn);
+    if (hustdb_network::post_handler(r, rsp, request, ctx) && is_ack)
     {
-        ctx->db->hustmq_ack(ack, conn);
+        ctx->db->hustmq_ack_inner(ack, conn);
     }
 }
 

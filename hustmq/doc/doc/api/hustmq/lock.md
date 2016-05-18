@@ -8,7 +8,7 @@
 **参数:** 
 
 *  **queue** （必选）  
-*  **on** （必选）
+*  **on** （必选，0 or 1）
 
 **使用范例A:**
 
@@ -18,7 +18,7 @@
 
 	HTTP/1.1 412 Precondition Failed //queue not exist
 
-**结果范例A1:**
+**结果范例A2:**
 
 	HTTP/1.1 200 OK
 

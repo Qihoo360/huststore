@@ -20,6 +20,9 @@ FAQ
 
 **Q** :  `hustdb ha` 如何通过 `http` 接口动态更新负载均衡表？  
 **A** :  参考 [这里](../api/ha/set_table.md) 。
+
+**Q** :  `hustdb ha` 的接口中 `get` 与 `get2`、`hget` 与 `hget2` 、`zscore` 与 `zscore2` 有什么差别？   
+**A** :  参考 [这里](../api/ha.md) 。
     
 [上一级](index.md)
 

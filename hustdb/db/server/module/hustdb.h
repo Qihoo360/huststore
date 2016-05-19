@@ -13,22 +13,25 @@
 
 #define SIZEOF_UNIT32                 4
 #define MAX_QUEUE_NAME_LEN            64
-#define MAX_QKEY_LEN                  79
+#define MAX_QKEY_LEN                  80
 #define QUEUE_STAT_LEN                sizeof ( queue_stat_t )
-#define QUEUE_INDEX_FILE_LEN          ( sizeof ( queue_stat_t ) * 8192 )
+#define QUEUE_INDEX_FILE_LEN          ( sizeof ( queue_stat_t ) * m_store_conf.mq_queue_maximum )
 
 #define TABLE_STAT_LEN                sizeof ( table_stat_t )
-#define TABLE_INDEX_FILE_LEN          ( sizeof ( table_stat_t ) * 8192 )
+#define TABLE_INDEX_FILE_LEN          ( sizeof ( table_stat_t ) * m_store_conf.db_table_maximum )
 
 #define MIN_WORKER_LEN                4
 #define MAX_WORKER_LEN                32
-#define WORKER_TIMEOUT                269
+#define WORKER_TIMEOUT                512
 
 #define DEF_REDELIVERY_TIMEOUT        3600
 
 #define DEF_MSG_TTL                   900
 #define MAX_MSG_TTL                   7200
 #define MAX_KV_TTL                    2592000
+
+#define MAX_QUEUE_NUM                 8192
+#define MAX_TABLE_NUM                 8192
 
 #define MAX_QUEUE_ITEM_NUM            5000000
 #define CYCLE_QUEUE_ITEM_NUM          11000000
@@ -141,6 +144,25 @@ typedef struct server_conf_s
 
 } server_conf_t;
 
+typedef struct store_conf_s
+{
+    int32_t mq_redelivery_timeout;
+    int32_t mq_ttl_maximum;
+    int32_t db_ttl_maximum;
+    int32_t mq_queue_maximum;
+    int32_t db_table_maximum;
+    
+    store_conf_s ( )
+    : mq_redelivery_timeout ( 0 )
+    , mq_ttl_maximum ( 0 )
+    , db_ttl_maximum ( 0 )
+    , mq_queue_maximum ( 0 )
+    , db_table_maximum ( 0 )
+    {
+    }
+
+} store_conf_t;
+
 class hustdb_t
 {
 public:
@@ -161,11 +183,6 @@ public:
     i_server_kv_t * get_storage ( )
     {
         return m_storage;
-    }
-
-    int32_t get_def_msg_ttl ( )
-    {
-        return m_def_msg_ttl;
     }
 
     int32_t get_worker_count ( )
@@ -600,6 +617,10 @@ private:
     bool init_hash_config ( );
 
     bool init_data_engine ( );
+    
+    bool init_queue_index ( );
+    
+    bool init_table_index ( );
 
     bool generate_hash_conf (
                               int file_count,
@@ -668,18 +689,13 @@ private:
     
     locker_vec_t m_lockers;
 
-    int32_t m_redelivery_timeout;
-    
-    int32_t m_def_msg_ttl;
-    int32_t m_max_msg_ttl;
-    int32_t m_max_kv_ttl;
-
     fmap_t m_table_index;
     table_map_t m_table_map;
 
     lockable_t m_tb_locker;
 
     server_conf_t m_server_conf;
+    store_conf_t m_store_conf;
 
 private:
     // disable

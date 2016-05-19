@@ -18,11 +18,8 @@ hustdb_t::hustdb_t ( )
 , m_mdb ( NULL )
 , m_mdb_ok ( false )
 , m_slow_tasks ( )
-, m_redelivery_timeout ( 0 )
-, m_def_msg_ttl ( 0 )
-, m_max_msg_ttl ( 0 )
-, m_max_kv_ttl ( 0 )
 , m_server_conf ( )
+, m_store_conf ( )
 {
     G_APPTOOL->fmap_init ( & m_queue_index );
     G_APPTOOL->fmap_init ( & m_table_index );
@@ -174,113 +171,16 @@ bool hustdb_t::open ( )
         return false;
     }
 
-    char ph[ 260 ] = { };
-    fast_memcpy ( ph, HUSTMQ_INDEX, sizeof ( HUSTMQ_INDEX ) );
-
-    if ( ! m_apptool->is_file ( ph ) )
+    if ( ! init_queue_index () )
     {
-        FILE * fp = fopen ( ph, "wb" );
-        if ( ! fp )
-        {
-            LOG_ERROR ( "[hustdb][open]hustmq index fopen %s failed", ph );
-            return false;
-        }
-
-        bool ok = true;
-        char buf[ QUEUE_INDEX_FILE_LEN ];
-        memset ( buf, 0, sizeof ( buf ) );
-        if ( sizeof ( buf ) != fwrite ( buf, 1, sizeof ( buf ), fp ) )
-        {
-            ok = false;
-        }
-
-        fclose ( fp );
-        if ( ! ok )
-        {
-            remove ( ph );
-            return false;
-        }
-    }
-
-    if ( ! G_APPTOOL->fmap_open ( & m_queue_index, ph, 0, 0, true ) )
-    {
-        LOG_ERROR ( "[hustdb][open]hustmq index fmap_open failed" );
+        LOG_ERROR ( "[hustdb][open]init_queue_index() failed" );
         return false;
     }
 
-    if ( m_queue_index.ptr_len != QUEUE_INDEX_FILE_LEN )
+    if ( ! init_table_index () )
     {
-        LOG_ERROR ( "[hustdb][open]hustmq index ptr_len error" );
+        LOG_ERROR ( "[hustdb][open]init_table_index() failed" );
         return false;
-    }
-
-    queue_stat_t * qstat = NULL;
-    for ( uint32_t i = 0; i < QUEUE_INDEX_FILE_LEN; i += QUEUE_STAT_LEN )
-    {
-        qstat = ( queue_stat_t * ) ( m_queue_index.ptr + i );
-
-        if ( qstat->flag > 0 )
-        {
-            queue_info_t t;
-            
-            t.offset        = i;
-            t.unacked       = new unacked_t ();
-            t.redelivery    = new redelivery_t ();
-            t.worker        = new worker_t ();
-            
-            m_queue_map.insert (std::pair<std::string, queue_info_t>( qstat->qname, t ));
-        }
-    }
-
-    memset ( ph, 0, sizeof ( ph ) );
-    fast_memcpy ( ph, HUSTTABLE_INDEX, sizeof ( HUSTTABLE_INDEX ) );
-
-    if ( ! m_apptool->is_file ( ph ) )
-    {
-        FILE * fp = fopen ( ph, "wb" );
-        if ( ! fp )
-        {
-            LOG_ERROR ( "[hustdb][open]hustdb index fopen %s failed", ph );
-            return false;
-        }
-
-        bool ok = true;
-        char buf[ TABLE_INDEX_FILE_LEN ];
-        memset ( buf, 0, sizeof ( buf ) );
-        if ( sizeof ( buf ) != fwrite ( buf, 1, sizeof ( buf ), fp ) )
-        {
-            ok = false;
-        }
-
-        fclose ( fp );
-        if ( ! ok )
-        {
-            remove ( ph );
-            return false;
-        }
-    }
-
-    if ( ! G_APPTOOL->fmap_open ( & m_table_index, ph, 0, 0, true ) )
-    {
-        LOG_ERROR ( "[hustdb][open]hustdb index fmap_open failed" );
-        return false;
-    }
-
-    if ( m_table_index.ptr_len != TABLE_INDEX_FILE_LEN )
-    {
-        LOG_ERROR ( "[hustdb][open]hustdb index ptr_len failed" );
-        return false;
-    }
-
-    table_stat_t * tstat = NULL;
-    for ( uint32_t i = TABLE_STAT_LEN; i < TABLE_INDEX_FILE_LEN; i += TABLE_STAT_LEN )
-    {
-        tstat = ( table_stat_t * ) ( m_table_index.ptr + i );
-
-        if ( tstat->flag > 0 )
-        {
-            m_table_map.insert (std::pair<std::string, uint32_t>( tstat->table, i ));
-        }
     }
 
     try
@@ -376,18 +276,40 @@ bool hustdb_t::init_server_config ( )
     s = m_appini->ini_get_string ( m_ini, "server", "http.access.allow", "" );
     m_server_conf.http_access_allow = s ? s : "";
 
-    m_redelivery_timeout = m_appini->ini_get_int ( m_ini, "server", "redelivery.timeout", DEF_REDELIVERY_TIMEOUT ) / 60;
-    if ( m_redelivery_timeout <= 0 || m_redelivery_timeout > 255 )
+    m_store_conf.mq_redelivery_timeout = m_appini->ini_get_int ( m_ini, "store", "mq.redelivery.timeout", DEF_REDELIVERY_TIMEOUT ) / 60;
+    if ( m_store_conf.mq_redelivery_timeout <= 0 || m_store_conf.mq_redelivery_timeout > 255 )
     {
-        LOG_ERROR ( "[hustdb][init_server_config]server redelivery.timeout invalid, redelivery_timeout: %d", m_redelivery_timeout );
+        LOG_ERROR ( "[hustdb][init_server_config]store mq.redelivery.timeout invalid, redelivery.timeout: %d", m_store_conf.mq_redelivery_timeout );
+        return false;
+    }
+
+    m_store_conf.mq_ttl_maximum = m_appini->ini_get_int ( m_ini, "store", "mq.ttl.maximum", MAX_MSG_TTL );
+    if ( m_store_conf.mq_ttl_maximum <= 0 )
+    {
+        LOG_ERROR ( "[hustdb][init_server_config]store mq.ttl.maximum invalid, ttl.maximum: %d", m_store_conf.mq_ttl_maximum );
+        return false;
+    }
+
+    m_store_conf.db_ttl_maximum = m_appini->ini_get_int ( m_ini, "store", "db.ttl.maximum", MAX_KV_TTL );
+    if ( m_store_conf.db_ttl_maximum <= 0 )
+    {
+        LOG_ERROR ( "[hustdb][init_server_config]store db.ttl.maximum invalid, ttl.maximum: %d", m_store_conf.db_ttl_maximum );
         return false;
     }
     
-    m_def_msg_ttl = m_appini->ini_get_int ( m_ini, "server", "ttl.def_msg", DEF_MSG_TTL );
+    m_store_conf.mq_queue_maximum = m_appini->ini_get_int ( m_ini, "store", "mq.queue.maximum", MAX_QUEUE_NUM );
+    if ( m_store_conf.mq_queue_maximum <= 0 )
+    {
+        LOG_ERROR ( "[hustdb][init_server_config]store mq.queue.maximum invalid, queue.maximum: %d", m_store_conf.mq_queue_maximum );
+        return false;
+    }
 
-    m_max_msg_ttl = m_appini->ini_get_int ( m_ini, "server", "ttl.max_msg", MAX_MSG_TTL );
-
-    m_max_kv_ttl = m_appini->ini_get_int ( m_ini, "server", "ttl.max_kv", MAX_KV_TTL );
+    m_store_conf.db_table_maximum = m_appini->ini_get_int ( m_ini, "store", "db.table.maximum", MAX_TABLE_NUM );
+    if ( m_store_conf.db_table_maximum <= 0 )
+    {
+        LOG_ERROR ( "[hustdb][init_server_config]store db.table.maximum invalid, table.maximum: %d", m_store_conf.db_table_maximum );
+        return false;
+    }
 
     return true;
 }
@@ -505,6 +427,184 @@ bool hustdb_t::init_data_engine ( )
         m_mdb_ok = mdb_cache_size > 0 ? true : false;
     }
 
+    return true;
+}
+
+bool hustdb_t::init_queue_index ( )
+{
+    char ph[ 260 ] = { };
+    fast_memcpy ( ph, HUSTMQ_INDEX, sizeof ( HUSTMQ_INDEX ) );
+
+    if ( ! m_apptool->is_file ( ph ) )
+    {
+        FILE * fp = fopen ( ph, "wb" );
+        if ( ! fp )
+        {
+            LOG_ERROR ( "[hustdb][init_queue_index]queue index fopen %s failed", ph );
+            return false;
+        }
+
+        bool ok = true;
+        char buf[ QUEUE_INDEX_FILE_LEN ];
+        memset ( buf, 0, sizeof ( buf ) );
+        if ( sizeof ( buf ) != fwrite ( buf, 1, sizeof ( buf ), fp ) )
+        {
+            LOG_ERROR ( "[hustdb][init_queue_index]queue index fwrite[%d] failed", sizeof ( buf ) );
+            ok = false;
+        }
+
+        fclose ( fp );
+        if ( ! ok )
+        {
+            remove ( ph );
+            return false;
+        }
+    }
+    else
+    {
+        FILE * fp = fopen ( ph, "rb+" );
+        if ( ! fp )
+        {
+            LOG_ERROR ( "[hustdb][init_queue_index]queue index fopen %s failed", ph );
+            return false;
+        }
+        
+        fseek ( fp, 0L, SEEK_END );
+        uint64_t size = ftell ( fp );
+        
+        if ( size < QUEUE_INDEX_FILE_LEN )
+        {
+            char add_buf [ QUEUE_INDEX_FILE_LEN - size ];
+            memset ( add_buf, 0, sizeof ( add_buf ) );
+            
+            if ( sizeof ( add_buf ) != fwrite ( add_buf, 1, sizeof ( add_buf ), fp ) )
+            {
+                LOG_ERROR ( "[hustdb][init_queue_index]queue index fwrite[%d] failed", sizeof ( add_buf ) );
+                fclose ( fp );
+                return false;
+            }
+        }
+        
+        fclose ( fp );
+    }
+
+    if ( ! G_APPTOOL->fmap_open ( & m_queue_index, ph, 0, 0, true ) )
+    {
+        LOG_ERROR ( "[hustdb][init_queue_index]queue index fmap_open failed" );
+        return false;
+    }
+
+    if ( m_queue_index.ptr_len < QUEUE_INDEX_FILE_LEN ||
+         m_queue_index.ptr_len % QUEUE_STAT_LEN != 0
+         )
+    {
+        LOG_ERROR ( "[hustdb][init_queue_index]queue index ptr_len: %d, lt %d or mod %d != 0, error", m_queue_index.ptr_len, QUEUE_INDEX_FILE_LEN, QUEUE_STAT_LEN );
+        return false;
+    }
+
+    queue_stat_t * qstat = NULL;
+    for ( uint32_t i = 0; i < QUEUE_INDEX_FILE_LEN; i += QUEUE_STAT_LEN )
+    {
+        qstat = ( queue_stat_t * ) ( m_queue_index.ptr + i );
+
+        if ( qstat->flag > 0 )
+        {
+            queue_info_t t;
+            
+            t.offset        = i;
+            t.unacked       = new unacked_t ();
+            t.redelivery    = new redelivery_t ();
+            t.worker        = new worker_t ();
+            
+            m_queue_map.insert (std::pair<std::string, queue_info_t>( qstat->qname, t ));
+        }
+    }
+    
+    return true;
+}
+
+bool hustdb_t::init_table_index ( )
+{
+    char ph[ 260 ] = { };
+    fast_memcpy ( ph, HUSTTABLE_INDEX, sizeof ( HUSTTABLE_INDEX ) );
+
+    if ( ! m_apptool->is_file ( ph ) )
+    {
+        FILE * fp = fopen ( ph, "wb" );
+        if ( ! fp )
+        {
+            LOG_ERROR ( "[hustdb][init_table_index]table index fopen %s failed", ph );
+            return false;
+        }
+
+        bool ok = true;
+        char buf[ TABLE_INDEX_FILE_LEN ];
+        memset ( buf, 0, sizeof ( buf ) );
+        if ( sizeof ( buf ) != fwrite ( buf, 1, sizeof ( buf ), fp ) )
+        {
+            ok = false;
+        }
+
+        fclose ( fp );
+        if ( ! ok )
+        {
+            remove ( ph );
+            return false;
+        }
+    }
+    else
+    {
+        FILE * fp = fopen ( ph, "rb+" );
+        if ( ! fp )
+        {
+            LOG_ERROR ( "[hustdb][init_table_index]table index fopen %s failed", ph );
+            return false;
+        }
+        
+        fseek ( fp, 0L, SEEK_END );
+        uint64_t size = ftell ( fp );
+        
+        if ( size < TABLE_INDEX_FILE_LEN )
+        {
+            char add_buf [ TABLE_INDEX_FILE_LEN - size ];
+            memset ( add_buf, 0, sizeof ( add_buf ) );
+            
+            if ( sizeof ( add_buf ) != fwrite ( add_buf, 1, sizeof ( add_buf ), fp ) )
+            {
+                LOG_ERROR ( "[hustdb][init_queue_index]table index fwrite[%d] failed", sizeof ( add_buf ) );
+                fclose ( fp );
+                return false;
+            }
+        }
+        
+        fclose ( fp );
+    }
+
+    if ( ! G_APPTOOL->fmap_open ( & m_table_index, ph, 0, 0, true ) )
+    {
+        LOG_ERROR ( "[hustdb][init_table_index]table index fmap_open failed" );
+        return false;
+    }
+
+    if ( m_table_index.ptr_len < TABLE_INDEX_FILE_LEN ||
+         m_table_index.ptr_len % TABLE_STAT_LEN != 0
+         )
+    {
+        LOG_ERROR ( "[hustdb][init_table_index]table index ptr_len: %d, lt %d or mod %d != 0, error", m_table_index.ptr_len, TABLE_INDEX_FILE_LEN, TABLE_STAT_LEN );
+        return false;
+    }
+
+    table_stat_t * tstat = NULL;
+    for ( uint32_t i = TABLE_STAT_LEN; i < TABLE_INDEX_FILE_LEN; i += TABLE_STAT_LEN )
+    {
+        tstat = ( table_stat_t * ) ( m_table_index.ptr + i );
+
+        if ( tstat->flag > 0 )
+        {
+            m_table_map.insert (std::pair<std::string, uint32_t>( tstat->table, i ));
+        }
+    }
+    
     return true;
 }
 
@@ -888,7 +988,7 @@ int hustdb_t::find_queue_offset (
 
             qstat->flag          = 1;
             qstat->type          = type;
-            qstat->timeout       = m_redelivery_timeout;
+            qstat->timeout       = m_store_conf.mq_redelivery_timeout;
             qstat->ctime         = m_mdb->current_timestamp ();
             fast_memcpy ( qstat->qname, queue.c_str (), queue.size () );
 
@@ -1059,7 +1159,7 @@ int hustdb_t::hustdb_put (
 
     m_storage->set_inner_table ( NULL, 0, KV_ALL, conn );
 
-    if ( ttl <= 0 || ttl > m_max_kv_ttl )
+    if ( ttl <= 0 || ttl > m_store_conf.db_ttl_maximum )
     {
         m_storage->set_inner_ttl ( 0, conn );
     }
@@ -1584,7 +1684,7 @@ int hustdb_t::hustdb_hset (
 
     m_storage->set_inner_table ( table, table_len, HASH_TB, conn );
 
-    if ( ttl <= 0 || ttl > m_max_kv_ttl )
+    if ( ttl <= 0 || ttl > m_store_conf.db_ttl_maximum )
     {
         m_storage->set_inner_ttl ( 0, conn );
     }
@@ -3136,7 +3236,7 @@ int hustdb_t::hustmq_pub (
     std::string *   rsp                     = NULL;
 
     if ( unlikely ( ! tb_name_check ( queue, queue_len ) ||
-                   CHECK_STRING ( item ) || wttl <= 0 || wttl > m_max_msg_ttl )
+                   CHECK_STRING ( item ) || wttl <= 0 || wttl > m_store_conf.mq_ttl_maximum )
          )
     {
         LOG_DEBUG ( "[hustdb][mq_pub]params error" );

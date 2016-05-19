@@ -30,17 +30,18 @@
 
     http.access.allow               = 127.0.0.1 //IP限制；例如：(1)X.Y.Z.1-X.Y.Z.10；(2)X.Y.Z.1-X.Y.Z.10,X.Y.Z.22；(3)X.Y.Z.1-X.Y.Z.10,X.Y.Z.17,A.B.C.1-A.B.C.10
 
-	# UNIT Second
-	redelivery.timeout              = 600       //MQ，message默认处理超时时间
-
-	# UNIT Second
-    ttl.def_msg                     = 900       //MQ，message默认ttl
-    ttl.max_msg                     = 7200      //MQ，message最大ttl
-    ttl.max_kv                      = 2592000   //DB，item最大ttl
-
 	# UNIT Percentage
-    memory.process.threshold        = 70        //hustdb内存限制（%），超出阈值，禁止除del外所有写操作
+    memory.process.threshold        = 70        //hustdb进程内存限制（%），超出阈值，禁止除del外所有写操作
     memory.system.threshold         = 90        //系统内存限制（%），超出阈值，禁止除del外所有写操作
+
+	[store]
+	# UNIT Second
+	mq.redelivery.timeout           = 600       //MQ，message默认处理超时时间
+	mq.ttl.maximum                  = 7200      //MQ，message最大ttl
+	db.ttl.maximum                  = 2592000   //DB，item最大ttl
+
+	mq.queue.maximum                = 8192      //MQ，queue最大数量；当且仅当，数值修改：大→小，会造成尾部索引失效，改回原数值即可恢复
+	db.table.maximum                = 8192      //DB，table最大数量；当且仅当，数值修改：大→小，会造成尾部索引失效，改回原数值即可恢复
 
     [fastdb]
     # 1 ~ 20, default 10

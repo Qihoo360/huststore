@@ -274,11 +274,11 @@ static void __post_handler(ngx_http_request_t *r)
     }
 
     ngx_http_gen_subrequest(
-            ctx->base.base.base.backend_uri,
-            r,
-            ctx->base.base.peer->peer,
-            &ctx->base.base.base,
-            hustdb_ha_on_subrequest_complete);
+        ctx->base.base.base.backend_uri,
+        r,
+        ctx->base.base.peer->peer,
+        &ctx->base.base.base,
+        hustdb_ha_on_subrequest_complete);
 }
 
 ngx_int_t hustdb_ha_start_post(

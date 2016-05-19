@@ -36,6 +36,11 @@ static ngx_http_request_item_t hustdb_ha_handler_dict[] =
         hustdb_ha_get_handler
     },
     {
+        ngx_string("/get2"),
+        ngx_string("/hustdb/get"),
+        hustdb_ha_get2_handler
+    },
+    {
         ngx_string("/exist"),
         ngx_string("/hustdb/exist"),
         hustdb_ha_exist_handler
@@ -64,6 +69,11 @@ static ngx_http_request_item_t hustdb_ha_handler_dict[] =
         ngx_string("/hget"),
         ngx_string("/hustdb/hget"),
         hustdb_ha_hget_handler
+    },
+    {
+        ngx_string("/hget2"),
+        ngx_string("/hustdb/hget"),
+        hustdb_ha_hget2_handler
     },
     {
         ngx_string("/hdel"),
@@ -144,6 +154,11 @@ static ngx_http_request_item_t hustdb_ha_handler_dict[] =
         ngx_string("/zscore"),
         ngx_string("/hustdb/zscore"),
         hustdb_ha_zscore_handler
+    },
+    {
+        ngx_string("/zscore2"),
+        ngx_string("/hustdb/zscore"),
+        hustdb_ha_zscore2_handler
     },
     {
         ngx_string("/zadd"),

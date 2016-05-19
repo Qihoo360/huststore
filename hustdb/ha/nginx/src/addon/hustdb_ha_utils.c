@@ -52,6 +52,15 @@ void zlog_write_debug(zlog_category_t * category, const char * data)
 }
 
 
+ngx_str_t hustdb_ha_make_str(ngx_str_t * val, ngx_http_request_t * r)
+{
+    u_char * tmp = ngx_palloc(r->pool, val->len + 1);
+    memcpy(tmp, val->data, val->len);
+    tmp[val->len] = '\0';
+    ngx_str_t rc = { val->len, tmp };
+    return rc;
+}
+
 static ngx_http_peer_array_t g_peer_array;
 static hustdb_ha_peers_t g_peers;
 

@@ -28,10 +28,10 @@ def manual():
             [uri]
                 uri: ip:port
             [action]
-                put | get | del | exist |
-                hset | hget | hdel | hexist |
+                put | get | get2 | del | exist |
+                hset | hget | hget2 |hdel | hexist |
                 sadd | srem | sismember |
-                zadd | zrem | zismember | zscore |
+                zadd | zrem | zismember | zscore | zscore2 |
                 stat_all | sync_status | get_table | loop
     sample:
         python autotest.py localhost:8082 loop
@@ -71,11 +71,13 @@ class HATester:
             'get_table': self.__get_table,
             'put': self.__put,
             'get': self.__get,
+            'get2': self.__get2,
             'del': self.__del,
             'exist': self.__exist,
             
             'hset': self.__hset,
             'hget': self.__hget,
+            'hget2': self.__hget2,
             'hdel': self.__hdel,
             'hexist': self.__hexist,
             
@@ -87,6 +89,7 @@ class HATester:
             'zrem': self.__zrem,
             'zismember': self.__zismember,
             'zscore': self.__zscore,
+            'zscore2': self.__zscore2,
             
             'loop': self.__loop
             }
@@ -121,6 +124,26 @@ class HATester:
         cmd = self.__gencmd('get')(self.__dbkey)
         r = self.__sess.get(cmd, auth=(USER, PASSWD))
         print r.content if 200 == r.status_code else '%s: %d' % (cmd, r.status_code)
+    def __get2_complete(self, cmd, r):
+        if 'version' in r.headers:
+            print 'Version: %s' % r.headers['version']
+        elif 'version1' in r.headers:
+            print 'Version1: %s' % r.headers['version1']
+            print 'Version2: %s' % r.headers['version2']
+        if 200 == r.status_code:
+            print r.content
+        elif 409 == r.status_code:
+            if 'val-offset' in r.headers:
+                off = int(r.headers['val-offset'])
+                print 'Val-Offset: %d' % off
+                print 'Value1: %s' % r.content[:off]
+                print 'Value2: %s' % r.content[off:]
+        else:
+            print '%s: %d' % (cmd, r.status_code)
+    def __get2(self):
+        cmd = self.__gencmd('get2')(self.__dbkey)
+        r = self.__sess.get(cmd, auth=(USER, PASSWD))
+        self.__get2_complete(cmd, r)
     def __del(self):
         cmd = self.__gencmd('del')(self.__dbkey)
         r = self.__sess.get(cmd, auth=(USER, PASSWD))
@@ -150,6 +173,10 @@ class HATester:
         cmd = self.__gentbcmd('hget')(self.__dbtb, self.__dbkey)
         r = self.__sess.get(cmd, auth=(USER, PASSWD))
         print r.content if 200 == r.status_code else '%s: %d' % (cmd, r.status_code)
+    def __hget2(self):
+        cmd = self.__gentbcmd('hget2')(self.__dbtb, self.__dbkey)
+        r = self.__sess.get(cmd, auth=(USER, PASSWD))
+        self.__get2_complete(cmd, r)
     def __hdel(self):
         cmd = self.__gentbcmd('hdel')(self.__dbtb, self.__dbkey)
         r = self.__sess.get(cmd, auth=(USER, PASSWD))
@@ -196,6 +223,10 @@ class HATester:
         cmd = '%s/zscore?tb=hustdbhaztb' % self.__host
         r = self.__sess.post(cmd, self.__dbkey, headers = {'content-type':'text/plain'}, auth=(USER, PASSWD))
         print r.content if 200 == r.status_code else '%s: %d' % (cmd, r.status_code)
+    def __zscore2(self):
+        cmd = '%s/zscore2?tb=hustdbhaztb' % self.__host
+        r = self.__sess.post(cmd, self.__dbkey, headers = {'content-type':'text/plain'}, auth=(USER, PASSWD))
+        self.__get2_complete(cmd, r)
 
     def __run_template(self, loop, cmd, func):
         try:
@@ -338,7 +369,7 @@ def test(argv):
         obj.dict[cmd]()
         return True
     return False
-                
+
 if __name__ == "__main__":
     if not test(sys.argv):
         manual()

@@ -8,12 +8,14 @@ NGX_ADDON_SRCS="$NGX_ADDON_SRCS \
     $ngx_addon_dir/hustdb_ha_write_handler.c\
     $ngx_addon_dir/hustdb_ha_read_handler.c\
     $ngx_addon_dir/hustdb_ha_get_handler.c\
+    $ngx_addon_dir/hustdb_ha_get2_handler.c\
     $ngx_addon_dir/hustdb_ha_exist_handler.c\
     $ngx_addon_dir/hustdb_ha_put_handler.c\
     $ngx_addon_dir/hustdb_ha_del_handler.c\
     $ngx_addon_dir/hustdb_ha_keys_handler.c\
     $ngx_addon_dir/hustdb_ha_hset_handler.c\
     $ngx_addon_dir/hustdb_ha_hget_handler.c\
+    $ngx_addon_dir/hustdb_ha_hget2_handler.c\
     $ngx_addon_dir/hustdb_ha_hdel_handler.c\
     $ngx_addon_dir/hustdb_ha_hexist_handler.c\
     $ngx_addon_dir/hustdb_ha_hkeys_handler.c\
@@ -30,6 +32,7 @@ NGX_ADDON_SRCS="$NGX_ADDON_SRCS \
     $ngx_addon_dir/hustdb_ha_set_table_handler.c\
     $ngx_addon_dir/hustdb_ha_zismember_handler.c\
     $ngx_addon_dir/hustdb_ha_zscore_handler.c\
+    $ngx_addon_dir/hustdb_ha_zscore2_handler.c\
     $ngx_addon_dir/hustdb_ha_zadd_handler.c\
     $ngx_addon_dir/hustdb_ha_zrem_handler.c\
     $ngx_addon_dir/hustdb_ha_zrangebyrank_handler.c\

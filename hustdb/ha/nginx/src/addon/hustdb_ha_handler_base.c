@@ -13,21 +13,21 @@ ngx_int_t hustdb_ha_send_response(
     ngx_http_request_t *r)
 {
     const ngx_str_t * ver = (NGX_HTTP_OK == status) ? version : &VERSION_VAL;
-    if (!ngx_http_add_field_to_headers_out(&VERSION_KEY, ver, r))
+    if (!hustdb_ha_add_version(ver, r))
     {
         return NGX_ERROR;
     }
-
     return ngx_http_send_response_imp(status, response, r);
 }
 
-static ngx_str_t __make_str(ngx_str_t * val, ngx_http_request_t * r)
+ngx_str_t * hustdb_ha_get_version(ngx_http_request_t * r)
 {
-    u_char * tmp = ngx_palloc(r->pool, val->len + 1);
-    memcpy(tmp, val->data, val->len);
-    tmp[val->len] = '\0';
-    ngx_str_t rc = { val->len, tmp };
-    return rc;
+    return ngx_http_find_head_value(&r->headers_out.headers, &VERSION_KEY);
+}
+
+ngx_bool_t hustdb_ha_add_version(const ngx_str_t * version, ngx_http_request_t * r)
+{
+    return ngx_http_add_field_to_headers_out(&VERSION_KEY, version, r);
 }
 
 ngx_int_t hustdb_ha_on_subrequest_complete(ngx_http_request_t * r, void * data, ngx_int_t rc)
@@ -44,12 +44,12 @@ ngx_int_t hustdb_ha_on_subrequest_complete(ngx_http_request_t * r, void * data, 
         ctx->base.response.len = ngx_http_get_buf_size(&r->upstream->buffer);
         ctx->base.response.data = r->upstream->buffer.pos;
 
-        ngx_str_t * val = ngx_http_find_head_value(&r->headers_out.headers, &VERSION_KEY);
+        ngx_str_t * val = hustdb_ha_get_version(r);
         if (val)
         {
             if (!ctx->version.data)
             {
-                ctx->version = __make_str(val, r->parent);
+                ctx->version = hustdb_ha_make_str(val, r->parent);
             }
             else
             {
@@ -57,7 +57,7 @@ ngx_int_t hustdb_ha_on_subrequest_complete(ngx_http_request_t * r, void * data, 
                 ngx_int_t dst = ngx_atoi(val->data, val->len);
                 if (dst > src)
                 {
-                    ctx->version = __make_str(val, r->parent);
+                    ctx->version = hustdb_ha_make_str(val, r->parent);
                 }
             }
         }

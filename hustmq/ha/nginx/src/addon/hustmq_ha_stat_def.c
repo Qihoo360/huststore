@@ -33,37 +33,41 @@ void hustmq_ha_dispose_backend_stat_array(backend_stat_array_t * arr)
 	}
 }
 
-static void __update_queue_data(const HustmqHaMessageQueue * src, hustmq_ha_queue_base_t * des)
+static void __update_queue_data(const HustmqHaMessageQueue * src, hustmq_ha_queue_base_t * dst)
 {
-    des->valid = true;
-    des->type = src->type;
-    des->lock = src->lock;
-    des->max = src->max;
-    des->idx.start_idx = src->si;
-    des->idx.consistent_idx = src->ci;
-    des->idx.timestamp = src->tm;
-    hustmq_ha_copy_from_integer_array(&src->ready, des->ready, HUSTMQ_HA_READY_SIZE);
+    dst->valid = true;
+    dst->type = src->type;
+    dst->lock = src->lock;
+    dst->max = src->max;
+    dst->idx.start_idx = src->si;
+    dst->idx.consistent_idx = src->ci;
+    dst->idx.timestamp = src->tm;
+    dst->unacked = src->unacked;
+    dst->timeout = src->timeout;
+    hustmq_ha_copy_from_integer_array(&src->ready, dst->ready, HUSTMQ_HA_READY_SIZE);
 }
 
-static void __copy_idx(const hustmq_ha_idx_t * src, hustmq_ha_idx_t * des)
+static void __copy_idx(const hustmq_ha_idx_t * src, hustmq_ha_idx_t * dst)
 {
-    if (!src || !des)
+    if (!src || !dst)
     {
         return;
     }
-    des->start_idx = src->start_idx;
-    des->consistent_idx = src->consistent_idx;
-    des->timestamp = src->timestamp;
+    dst->start_idx = src->start_idx;
+    dst->consistent_idx = src->consistent_idx;
+    dst->timestamp = src->timestamp;
 }
 
-void hustmq_ha_init_queue_base(const hustmq_ha_queue_base_t * src, hustmq_ha_queue_base_t * des)
+void hustmq_ha_init_queue_base(const hustmq_ha_queue_base_t * src, hustmq_ha_queue_base_t * dst)
 {
-    des->valid = true;
-    des->type = src->type;
-    des->lock = src->lock;
-    des->max = src->max;
-    __copy_idx(&src->idx, &des->idx);
-    memcpy(des->ready, src->ready, sizeof(int) * HUSTMQ_HA_READY_SIZE);
+    dst->valid = true;
+    dst->type = src->type;
+    dst->lock = src->lock;
+    dst->max = src->max;
+    dst->unacked = src->unacked;
+    dst->timeout = src->timeout;
+    __copy_idx(&src->idx, &dst->idx);
+    memcpy(dst->ready, src->ready, sizeof(int) * HUSTMQ_HA_READY_SIZE);
 }
 
 static hustmq_ha_queue_item_t * __create_item(ngx_str_t * host, HustmqHaMessageQueue * it, ngx_pool_t * pool)
@@ -236,54 +240,73 @@ void hustmq_ha_update_queue_dict(ngx_bool_t status_cache, const backend_stat_arr
     }
 }
 
-static void __merge_type(hustmq_queue_type_t src, hustmq_queue_type_t * des)
+static void __merge_type(hustmq_queue_type_t src, hustmq_queue_type_t * dst)
 {
-    if (des && HUSTMQ_PUSH_QUEUE == src)
+    if (dst && HUSTMQ_PUSH_QUEUE == src)
     {
-        *des = src;
+        *dst = src;
     }
 }
 
-static void __merge_ready(const int * src, size_t size, int * des)
+static void __merge_ready(const int * src, size_t size, int * dst)
 {
 	size_t i = 0;
 	for (i = 0; i < size; ++i)
 	{
-		*(des + i) += *(src + i);
+		*(dst + i) += *(src + i);
 	}
 }
 
-static void __merge_lock(int src, int * des)
+static void __merge_lock(int src, int * dst)
 {
-	if (des)
+	if (dst)
 	{
-		(*des) |= src;
+		(*dst) |= src;
 	}
 }
 
-static void __merge_max(int src, int * des)
+static void __merge_max(int src, int * dst)
 {
-	if (des && src > 0)
+	if (dst && src > 0)
 	{
-	    if (0 == *des)
+	    if (0 == *dst)
 	    {
-	        *des = src;
+	        *dst = src;
 	    }
 	    else
 	    {
-	        if (src < *des)
+	        if (src < *dst)
 		    {
-		        *des = src;
+		        *dst = src;
 		    }
 	    }
 	}
 }
 
-static ngx_bool_t __greater_than(unsigned int src, unsigned int des)
+static void __merge_unacked(int src, int * dst)
 {
-    if (src > des)
+    if (dst)
     {
-        unsigned int delta = src - des;
+        *dst += src;
+    }
+}
+
+static void __merge_timeout(int src, int * dst)
+{
+    if (dst)
+    {
+        if (src > *dst)
+        {
+            *dst = src;
+        }
+    }
+}
+
+static ngx_bool_t __greater_than(unsigned int src, unsigned int dst)
+{
+    if (src > dst)
+    {
+        unsigned int delta = src - dst;
         if (delta < MAX_QUEUE_ITEM_NUM)
         {
             return true;
@@ -292,7 +315,7 @@ static ngx_bool_t __greater_than(unsigned int src, unsigned int des)
     }
     else
     {
-        unsigned int delta = des - src;
+        unsigned int delta = dst - src;
         if (delta < MAX_QUEUE_ITEM_NUM)
         {
             return false;
@@ -301,26 +324,28 @@ static ngx_bool_t __greater_than(unsigned int src, unsigned int des)
     }
 }
 
-static void __merge_idx(const hustmq_ha_idx_t * src, hustmq_ha_idx_t * des)
+static void __merge_idx(const hustmq_ha_idx_t * src, hustmq_ha_idx_t * dst)
 {
-    if (!src || !des)
+    if (!src || !dst)
     {
         return;
     }
 
-    if (__greater_than(src->consistent_idx, des->consistent_idx) && (src->timestamp > des->timestamp))
+    if (__greater_than(src->consistent_idx, dst->consistent_idx) && (src->timestamp > dst->timestamp))
     {
-        __copy_idx(src, des);
+        __copy_idx(src, dst);
     }
 }
 
-void hustmq_ha_merge_queue_base(const hustmq_ha_queue_base_t * src, hustmq_ha_queue_base_t * des)
+void hustmq_ha_merge_queue_base(const hustmq_ha_queue_base_t * src, hustmq_ha_queue_base_t * dst)
 {
-    __merge_type(src->type, &des->type);
-    __merge_ready(src->ready, HUSTMQ_HA_READY_SIZE, des->ready);
-    __merge_lock(src->lock, &des->lock);
-    __merge_max(src->max, &des->max);
-    __merge_idx(&src->idx, &des->idx);
+    __merge_type(src->type, &dst->type);
+    __merge_ready(src->ready, HUSTMQ_HA_READY_SIZE, dst->ready);
+    __merge_lock(src->lock, &dst->lock);
+    __merge_max(src->max, &dst->max);
+    __merge_idx(&src->idx, &dst->idx);
+    __merge_unacked(src->unacked, &dst->unacked);
+    __merge_timeout(src->timeout, &dst->timeout);
 }
 
 static ngx_bool_t __merge_queue_item(const char * host, const hustmq_ha_queue_item_t * item, void * data)

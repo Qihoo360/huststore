@@ -10,7 +10,9 @@
                 ["json_int_t", "lock"],
                 ["json_int_t", "si"],
                 ["json_int_t", "ci"],
-                ["json_int_t", "tm"]
+                ["json_int_t", "tm"],
+                ["json_int_t", "unacked"],
+                ["json_int_t", "timeout"]
             ],
             "methods" : ["dispose", "deserialize", "loads"],
             "array_methods": ["dispose", "deserialize", "loads"]

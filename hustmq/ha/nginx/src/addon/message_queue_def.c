@@ -16,6 +16,8 @@ void cjson_dispose_hustmqhamessagequeue(HustmqHaMessageQueue * obj_val)
         cjson_dispose_integer(&obj_val->si);
         cjson_dispose_integer(&obj_val->ci);
         cjson_dispose_integer(&obj_val->tm);
+        cjson_dispose_integer(&obj_val->unacked);
+        cjson_dispose_integer(&obj_val->timeout);
     }
 }
 
@@ -53,6 +55,12 @@ json_bool_t cjson_deserialize_hustmqhamessagequeue(const json_t * json_val, Hust
         tmp_json_val = json_object_get_field(json_val, "tm");
         obj_val->json_has_tm = !!tmp_json_val;
         if (tmp_json_val && !cjson_deserialize_integer(tmp_json_val, &obj_val->tm)) break;
+        tmp_json_val = json_object_get_field(json_val, "unacked");
+        obj_val->json_has_unacked = !!tmp_json_val;
+        if (tmp_json_val && !cjson_deserialize_integer(tmp_json_val, &obj_val->unacked)) break;
+        tmp_json_val = json_object_get_field(json_val, "timeout");
+        obj_val->json_has_timeout = !!tmp_json_val;
+        if (tmp_json_val && !cjson_deserialize_integer(tmp_json_val, &obj_val->timeout)) break;
 
         return true;
     } while (0);

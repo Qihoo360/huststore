@@ -8,7 +8,9 @@ static const char * QUEUE_ITEM_JSON_FORMAT = "{\
 \"lock\":%d,\
 \"si\":%d,\
 \"ci\":%d,\
-\"tm\":%d\
+\"tm\":%d,\
+\"unacked\":%d,\
+\"timeout\":%d\
 }";
 
 typedef ngx_bool_t (*serialize_item_t)(void * obj_val, char * json_val);
@@ -110,7 +112,9 @@ static void __dump_message_queue_item_imp(hustmq_ha_message_queue_item_t * obj_v
 			obj_val->base.lock,
 			obj_val->base.idx.start_idx,
 			obj_val->base.idx.consistent_idx,
-			obj_val->base.idx.timestamp);
+			obj_val->base.idx.timestamp,
+			obj_val->base.unacked,
+			obj_val->base.timeout);
 }
 
 ngx_bool_t hustmqha_serialize_message_queue_item(hustmq_ha_message_queue_item_t * obj_val, char * json_val)

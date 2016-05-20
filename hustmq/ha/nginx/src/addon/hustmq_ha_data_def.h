@@ -24,6 +24,8 @@ typedef struct
     hustmq_queue_type_t type;
     int max;
     int lock;
+    int unacked;
+    int timeout;
     ngx_bool_t valid;
 } hustmq_ha_queue_base_t;
 

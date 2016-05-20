@@ -8,11 +8,11 @@
 **参数:** 
 
 *  **queue** （必选）  
-*  **timeout** （必选，单位：秒）
+*  **minute** （必选，单位：分钟，范围：1 ~ 255）
 
 **使用范例A:**
 
-    curl -i -X GET "http://localhost:8085/hustmq/timeout?queue=test_queue&timeout=600"
+    curl -i -X GET "http://localhost:8085/hustmq/timeout?queue=test_queue&minute=5"
 
 **结果范例A1:**
 

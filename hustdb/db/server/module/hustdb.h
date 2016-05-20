@@ -24,7 +24,7 @@
 #define MAX_WORKER_LEN                32
 #define WORKER_TIMEOUT                512
 
-#define DEF_REDELIVERY_TIMEOUT        3600
+#define DEF_REDELIVERY_TIMEOUT        5
 
 #define DEF_MSG_TTL                   900
 #define MAX_MSG_TTL                   7200

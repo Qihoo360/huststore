@@ -276,7 +276,7 @@ bool hustdb_t::init_server_config ( )
     s = m_appini->ini_get_string ( m_ini, "server", "http.access.allow", "" );
     m_server_conf.http_access_allow = s ? s : "";
 
-    m_store_conf.mq_redelivery_timeout = m_appini->ini_get_int ( m_ini, "store", "mq.redelivery.timeout", DEF_REDELIVERY_TIMEOUT ) / 60;
+    m_store_conf.mq_redelivery_timeout = m_appini->ini_get_int ( m_ini, "store", "mq.redelivery.timeout", DEF_REDELIVERY_TIMEOUT );
     if ( m_store_conf.mq_redelivery_timeout <= 0 || m_store_conf.mq_redelivery_timeout > 255 )
     {
         LOG_ERROR ( "[hustdb][init_server_config]store mq.redelivery.timeout invalid, redelivery.timeout: %d", m_store_conf.mq_redelivery_timeout );
@@ -2662,7 +2662,7 @@ int hustdb_t::hustmq_get (
     if ( unlikely ( rit != queue_info->redelivery->end () &&
                    tm - rit->first >= qstat->timeout * 60 )
          )
-    {        
+    {   
         sprintf ( qkey, "%s|%s", inner_queue.c_str (), rit->second.c_str () );
         qkey_len = strlen ( qkey );
 
@@ -2925,7 +2925,7 @@ int hustdb_t::hustmq_stat (
              qstat->max,
              qstat->lock,
              qstat->type,
-             qstat->timeout * 60,
+             qstat->timeout,
              qstat->sp,
              qstat->ep,
              qstat->ctime
@@ -2967,7 +2967,7 @@ void hustdb_t::hustmq_stat_all (
                  qstat->max,
                  qstat->lock,
                  qstat->type,
-                 qstat->timeout * 60,
+                 qstat->timeout,
                  qstat->sp,
                  qstat->ep,
                  qstat->ctime

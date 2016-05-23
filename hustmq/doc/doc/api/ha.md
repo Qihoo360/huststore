@@ -34,6 +34,18 @@ ha
 本节所有以 `curl` 命令描述的测试样例均假设 `http basic authentication` 被关闭。  
 具体做法可参考 [这一节](../advanced/ha/nginx.md) 的末尾对常见问题的解答。
 
+* 关于 `timeout` 接口的使用场景  
+假定队列名称为 `test_queue` ，数据为 `test_data`。
+    * 通过 `put` 接口向 `test_queue` 写入数据 `test_data`
+    * 调用 `timeout` 接口设置 `test_queue` 超时时间为 1 分钟
+    * 调用 `get` 接口从 `test_queue` 中获取数据，其中 `ack` 参数设置为 `0`
+    * 情形一：
+        * 等待 1 分钟以上，期间不进行 `ack` 操作
+        * 再次调用 `get` 接口从 `test_queue` 中获取数据，可以发现取到的依然是 `test_data`
+    * 情形二：
+        * 不等待，调用 `ack` 接口对数据进行确认
+        * 再次调用 `get` 接口从 `test_queue` 中获取数据，可以发现取不到 `test_data` 
+
 * 关于 `http push` 的运作机制  
 [evsub](ha/evsub.md) 、[sub](ha/sub.md)、[pub](ha/pub.md) 配合可以实现 `http push` 机制，用作数据的流式推送。具体的运作流程如下：  
     * `subscriber` 利用 `evsub` 接口向 `test_queue` 订阅数据

@@ -19,7 +19,8 @@ nginx 配置文件
         "local_cmds":
         [
             "autost", "stat_all", "stat",
-            "put", "get", "lock", "max", "purge", 
+            "put", "get", "ack", "timeout", 
+            "lock", "max", "purge", 
             "worker", "evget", "evsub", 
             "sub", "pub", "do_get", "do_post",
             "do_get_status", "do_post_status"
@@ -70,6 +71,8 @@ nginx 配置文件
                 "/hustmq/stat_all",
                 "/hustmq/put",
                 "/hustmq/get",
+                "/hustmq/ack",
+                "/hustmq/timeout",
                 "/hustmq/lock",
                 "/hustmq/max",
                 "/hustmq/purge",
@@ -232,6 +235,14 @@ nginx 配置文件
                 hustmq_ha;
                 #http_basic_auth_file /data/hustmqha/conf/htpasswd;
             }
+            location /ack {
+                hustmq_ha;
+                http_basic_auth_file /data/hustmqha/conf/htpasswd;
+            }
+            location /timeout {
+                hustmq_ha;
+                http_basic_auth_file /data/hustmqha/conf/htpasswd;
+            }
             location /lock {
                 hustmq_ha;
                 http_basic_auth_file /data/hustmqha/conf/htpasswd;
@@ -306,6 +317,30 @@ nginx 配置文件
                 proxy_busy_buffers_size 64m;
             }
             location /hustmq/get {
+                proxy_pass http://backend;
+                proxy_http_version 1.1;
+                proxy_set_header Connection "Keep-Alive";
+                proxy_set_header Authorization "Basic aHVzdHN0b3JlOmh1c3RzdG9yZQ==";
+                proxy_connect_timeout 2s;
+                proxy_send_timeout 60s;
+                proxy_read_timeout 60s;
+                proxy_buffer_size 64m;
+                proxy_buffers 2 64m;
+                proxy_busy_buffers_size 64m;
+            }
+            location /hustmq/ack {
+                proxy_pass http://backend;
+                proxy_http_version 1.1;
+                proxy_set_header Connection "Keep-Alive";
+                proxy_set_header Authorization "Basic aHVzdHN0b3JlOmh1c3RzdG9yZQ==";
+                proxy_connect_timeout 2s;
+                proxy_send_timeout 60s;
+                proxy_read_timeout 60s;
+                proxy_buffer_size 64m;
+                proxy_buffers 2 64m;
+                proxy_busy_buffers_size 64m;
+            }
+            location /hustmq/timeout {
                 proxy_pass http://backend;
                 proxy_http_version 1.1;
                 proxy_set_header Connection "Keep-Alive";

@@ -35,11 +35,13 @@ nginx 配置文件
         [
             "put",
             "get",
+            "get2",
             "del",
             "exist",
             "keys",
             "hset",
             "hget",
+            "hget2",
             "hdel",
             "hexist",
             "hkeys",
@@ -51,6 +53,7 @@ nginx 配置文件
             "zrem",
             "zismember",
             "zscore",
+            "zscore2",
             "zrangebyrank",
             "zrangebyscore",
             "stat",
@@ -227,6 +230,10 @@ nginx 配置文件
                 hustdb_ha;
                 http_basic_auth_file /data/hustdbha/conf/htpasswd;
             }
+            location /get2 {
+                hustdb_ha;
+                http_basic_auth_file /data/hustdbha/conf/htpasswd;
+            }
             location /del {
                 hustdb_ha;
                 http_basic_auth_file /data/hustdbha/conf/htpasswd;
@@ -244,6 +251,10 @@ nginx 配置文件
                 http_basic_auth_file /data/hustdbha/conf/htpasswd;
             }
             location /hget {
+                hustdb_ha;
+                http_basic_auth_file /data/hustdbha/conf/htpasswd;
+            }
+            location /hget2 {
                 hustdb_ha;
                 http_basic_auth_file /data/hustdbha/conf/htpasswd;
             }
@@ -288,6 +299,10 @@ nginx 配置文件
                 http_basic_auth_file /data/hustdbha/conf/htpasswd;
             }
             location /zscore {
+                hustdb_ha;
+                http_basic_auth_file /data/hustdbha/conf/htpasswd;
+            }
+            location /zscore2 {
                 hustdb_ha;
                 http_basic_auth_file /data/hustdbha/conf/htpasswd;
             }

@@ -19,7 +19,8 @@ hustmq ha
         "local_cmds":
         [
             "autost", "stat_all", "stat",
-            "put", "get", "lock", "max", "purge", 
+            "put", "get", "ack", "timeout", 
+            "lock", "max", "purge", 
             "worker", "evget", "evsub", 
             "sub", "pub", "do_get", "do_post",
             "do_get_status", "do_post_status"
@@ -70,6 +71,8 @@ hustmq ha
                 "/hustmq/stat_all",
                 "/hustmq/put",
                 "/hustmq/get",
+                "/hustmq/ack",
+                "/hustmq/timeout",
                 "/hustmq/lock",
                 "/hustmq/max",
                 "/hustmq/purge",

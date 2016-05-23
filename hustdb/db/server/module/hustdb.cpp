@@ -1109,7 +1109,25 @@ int hustdb_t::hustdb_get (
             if ( alive < 0 )
             {
                 ver = 0;
-                m_storage->del ( key, key_len, ver, false, conn, ctxt );
+                r = m_storage->del ( key, key_len, ver, false, conn, ctxt );
+                if ( 0 != r )
+                {
+                    if ( ENOENT == r )
+                    {
+                        LOG_DEBUG ( "[hustdb][db_get]get ttl-del return ENOENT" );
+                    }
+                    else
+                    {
+                        LOG_ERROR ( "[hustdb][db_get]get ttl-del return %d", r );
+                    }
+
+                    return ENOENT;
+                }
+
+                if ( ! ctxt->is_version_error )
+                {
+                    set_table_size ( 0, - 1 );
+                }
 
                 return ENOENT;
             }

@@ -15,6 +15,8 @@ NGX_ADDON_SRCS="$NGX_ADDON_SRCS \
     $ngx_addon_dir/hustmq_ha_worker_handler.c\
     $ngx_addon_dir/hustmq_ha_put_handler.c\
     $ngx_addon_dir/hustmq_ha_get_handler.c\
+    $ngx_addon_dir/hustmq_ha_ack_handler.c\
+    $ngx_addon_dir/hustmq_ha_timeout_handler.c\
     $ngx_addon_dir/hustmq_ha_autost_handler.c\
     $ngx_addon_dir/hustmq_ha_purge_handler.c\
     $ngx_addon_dir/hustmq_ha_max_handler.c\

@@ -172,3 +172,34 @@ ngx_http_upstream_rr_peer_t * hustmq_ha_get_peer(ngx_str_t * queue)
     hash = hash % ngx_http_get_backend_count();
     return g_hash_table[hash];
 }
+
+ngx_str_t hustmq_ha_encode_ack_peer(ngx_str_t * peer_name, ngx_pool_t * pool)
+{
+    ngx_str_t ack_peer = { 0, 0 };
+    ngx_http_upstream_rr_peer_t * peer = ngx_http_peer_dict_get(&g_peer_dict, (const char *)peer_name->data);
+    size_t count = ngx_http_get_backend_count();
+    size_t i = 0;
+    for (i = 0; i < count; ++i)
+    {
+        if (g_hash_table[i] == peer)
+        {
+            ack_peer.data = ngx_palloc(pool, 21);
+            sprintf((char *)ack_peer.data, "%lu", i);
+            ack_peer.len = strlen((const char *)ack_peer.data);
+            return ack_peer;
+        }
+    }
+    return ack_peer;
+}
+
+ngx_http_upstream_rr_peer_t * hustmq_ha_decode_ack_peer(ngx_str_t * ack_peer, ngx_pool_t * pool)
+{
+    char * endptr;
+    uint64_t index = strtoull((const char *)ack_peer->data, &endptr, 10);
+    size_t count = ngx_http_get_backend_count();
+    if (index > count - 1)
+    {
+        return NULL;
+    }
+    return g_hash_table[index];
+}

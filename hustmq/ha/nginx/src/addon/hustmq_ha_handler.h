@@ -7,6 +7,8 @@
 ngx_int_t hustmq_ha_worker_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
 ngx_int_t hustmq_ha_put_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
 ngx_int_t hustmq_ha_get_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
+ngx_int_t hustmq_ha_ack_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
+ngx_int_t hustmq_ha_timeout_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
 ngx_int_t hustmq_ha_autost_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
 ngx_int_t hustmq_ha_purge_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
 ngx_int_t hustmq_ha_max_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);

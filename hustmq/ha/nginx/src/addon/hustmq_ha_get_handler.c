@@ -3,6 +3,10 @@
 #include "hustmq_ha_request_handler.h"
 #include "hustmq_ha_handler_filter.h"
 #include "ngx_http_upstream_check_module.h"
+#include "hustmq_ha_peer_def.h"
+
+static const ngx_str_t ACK_TOKEN = ngx_string("Ack-Token");
+static const ngx_str_t ACK_PEER = ngx_string("Ack-Peer");
 
 typedef struct
 {
@@ -10,6 +14,9 @@ typedef struct
     ngx_http_upstream_rr_peer_t * peer;
 	ngx_str_t queue;
 	hustmq_ha_queue_dict_t * queue_dict;
+	ngx_str_t * peer_name;
+	ngx_str_t * ack_token;
+	ngx_bool_t ack;
 } hustmq_ha_get_ctx_t;
 
 static ngx_bool_t __check_get_queue_item(hustmq_ha_queue_item_t * item)
@@ -90,12 +97,35 @@ static ngx_http_upstream_rr_peer_t * __first_peer(hustmq_ha_queue_dict_t * dict,
 	return __next_peer(dict, queue, peer);
 }
 
+static ngx_int_t __post_subrequest_handler(ngx_http_request_t * r, void * data, ngx_int_t rc)
+{
+    hustmq_ha_get_ctx_t * ctx = data;
+    if (ctx && NGX_HTTP_OK == r->headers_out.status)
+    {
+        ctx->base.response.len = ngx_http_get_buf_size(&r->upstream->buffer);
+        ctx->base.response.data = r->upstream->buffer.pos;
+        if (!ctx->ack)
+        {
+            ctx->peer_name = r->upstream->peer.name;
+            ctx->ack_token = ngx_http_find_head_value(&r->headers_out.headers, &ACK_TOKEN);
+        }
+    }
+    return ngx_http_finish_subrequest(r);
+}
+
 static ngx_int_t __first_get_handler(ngx_str_t * backend_uri, ngx_http_request_t *r)
 {
 	ngx_str_t queue = hustmq_ha_get_queue(r);
 	if (!queue.data)
 	{
 		return NGX_ERROR;
+	}
+
+	char * val = ngx_http_get_param_val(&r->args, "ack", r->pool);
+	ngx_bool_t ack = true;
+	if (val && 1 != atoi(val))
+	{
+	    ack = false;
 	}
 
 	hustmq_ha_queue_dict_t * queue_dict = hustmq_ha_get_queue_dict();
@@ -129,10 +159,29 @@ static ngx_int_t __first_get_handler(ngx_str_t * backend_uri, ngx_http_request_t
 	ngx_http_set_addon_module_ctx(r, ctx);
 	ctx->queue_dict = queue_dict;
 	ctx->queue = queue;
+	ctx->ack = ack;
 
 	ctx->peer = peer;
 	return ngx_http_gen_subrequest(backend_uri, r, ctx->peer,
-	        &ctx->base, ngx_http_post_subrequest_handler);
+        &ctx->base, __post_subrequest_handler);
+}
+
+static ngx_bool_t __add_response_headers(hustmq_ha_get_ctx_t * ctx, ngx_http_request_t *r)
+{
+    if (ctx->ack)
+    {
+        return true;
+    }
+    if (!ngx_http_add_field_to_headers_out(&ACK_TOKEN, ctx->ack_token, r))
+    {
+        return false;
+    }
+    ngx_str_t ack_peer = hustmq_ha_encode_ack_peer(ctx->peer_name, r->pool);
+    if (!ngx_http_add_field_to_headers_out(&ACK_PEER, &ack_peer, r))
+    {
+        return false;
+    }
+    return true;
 }
 
 ngx_int_t hustmq_ha_get_handler(ngx_str_t * backend_uri, ngx_http_request_t *r)
@@ -146,6 +195,10 @@ ngx_int_t hustmq_ha_get_handler(ngx_str_t * backend_uri, ngx_http_request_t *r)
 	{
 		ctx->peer = __next_peer(ctx->queue_dict, &ctx->queue, ctx->peer);
 		return ctx->peer ? ngx_http_run_subrequest(r, &ctx->base, ctx->peer) : NGX_ERROR;
+	}
+	if (!__add_response_headers(ctx, r))
+	{
+	    return ngx_http_send_response_imp(NGX_HTTP_NOT_FOUND, NULL, r);
 	}
 	return ngx_http_send_response_imp(NGX_HTTP_OK, &ctx->base.response, r);
 }

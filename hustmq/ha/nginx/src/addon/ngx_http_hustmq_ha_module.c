@@ -59,6 +59,16 @@ static ngx_http_request_item_t hustmq_ha_handler_dict[] =
         hustmq_ha_get_handler
     },
     {
+        ngx_string("/ack"),
+        ngx_string("/hustmq/ack"),
+        hustmq_ha_ack_handler
+    },
+    {
+        ngx_string("/timeout"),
+        ngx_string("/hustmq/timeout"),
+        hustmq_ha_timeout_handler
+    },
+    {
         ngx_string("/autost"),
         ngx_string("/hustmq/stat_all"),
         hustmq_ha_autost_handler

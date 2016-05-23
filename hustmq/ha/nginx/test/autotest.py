@@ -28,6 +28,8 @@ def manual():
                 stat_all
                 put
                 get
+                getack
+                timeout
                 evget
                 evput
                 evsub
@@ -69,6 +71,8 @@ class HATester:
             'stat_all': self.__stat_all,
             'put': self.__put,
             'get': self.__get,
+            'getack': self.__getack,
+            'timeout': self.__timeout,
             'queue_hash': self.__queue_hash,
             'evget': self.__evget,
             'evput': self.__evput,
@@ -142,6 +146,27 @@ class HATester:
             print '%s: %d' % (cmd, r.status_code)
         else:
             print r.content
+    def __getack(self):
+        cmd = '%s/get?queue=hustmqhaqueue&worker=testworker&ack=false' % self.__host
+        r = requests.get(cmd, auth=(USER, PASSWD))
+        if 200 != r.status_code:
+            print '%s: %d' % (cmd, r.status_code)
+            return
+        print r.content
+        cmd = '%s/ack?queue=hustmqhaqueue&peer=%s&token=%s' % (
+            self.__host, r.headers['ack-peer'], r.headers['ack-token'])
+        r = requests.get(cmd, auth=(USER, PASSWD))
+        if 200 != r.status_code:
+            print '%s: %d' % (cmd, r.status_code)
+            return
+        print 'acked'
+    def __timeout(self):
+        cmd = '%s/timeout?queue=hustmqhaqueue&minute=1' % self.__host
+        r = requests.get(cmd, auth=(USER, PASSWD))
+        if 200 != r.status_code:
+            print '%s: %d' % (cmd, r.status_code)
+        else:
+            print 'ok'
     def __queue_hash(self):
         get_body = lambda i: 'test_body_%d' % i
         print 'put...'

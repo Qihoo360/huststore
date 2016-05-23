@@ -28,7 +28,7 @@ def manual():
                 stat_all
                 put
                 get
-                getack
+                ack
                 timeout
                 evget
                 evput
@@ -71,7 +71,7 @@ class HATester:
             'stat_all': self.__stat_all,
             'put': self.__put,
             'get': self.__get,
-            'getack': self.__getack,
+            'ack': self.__ack,
             'timeout': self.__timeout,
             'queue_hash': self.__queue_hash,
             'evget': self.__evget,
@@ -146,7 +146,7 @@ class HATester:
             print '%s: %d' % (cmd, r.status_code)
         else:
             print r.content
-    def __getack(self):
+    def __ack(self):
         cmd = '%s/get?queue=hustmqhaqueue&worker=testworker&ack=false' % self.__host
         r = requests.get(cmd, auth=(USER, PASSWD))
         if 200 != r.status_code:

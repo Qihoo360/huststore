@@ -10,6 +10,8 @@ ha
 * [stat](ha/stat.md)
 * [put](ha/put.md)
 * [get](ha/get.md)
+* [ack](ha/ack.md)
+* [timeout](ha/timeout.md)
 * [lock](ha/lock.md)
 * [max](ha/max.md)
 * [purge](ha/purge.md)

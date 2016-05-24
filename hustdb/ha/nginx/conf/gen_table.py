@@ -52,6 +52,9 @@ def gen(argv):
     if size < 2:
         print 'the number of host should be 2 at least'
         return False
+    if size > 1024:
+        print 'the number of host should be 1024 at most'
+        return False
     sections = range(size)
     keys = gen_keys(size)
     host_list = [[

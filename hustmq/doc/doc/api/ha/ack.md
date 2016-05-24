@@ -9,7 +9,7 @@
 
 *  **queue** （必选） 
 *  **peer** （必选）  参考 [get](get.md) 接口返回的 `Ack-Peer` 字段
-*  **token** （可选） 参考 [get](get.md) 接口返回的 `Ack-Token` 字段
+*  **token** （必选） 参考 [get](get.md) 接口返回的 `Ack-Token` 字段
 
 该接口是 `/hustmq/ack` 的代理接口，相关参数可参考 [这里](../hustmq/ack.md)。
 

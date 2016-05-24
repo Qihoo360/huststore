@@ -38,7 +38,7 @@ ha
 假定队列名称为 `test_queue` ，数据为 `test_data`。
     * 通过 `put` 接口向 `test_queue` 写入数据 `test_data`
     * 调用 `timeout` 接口设置 `test_queue` 超时时间为 1 分钟
-    * 调用 `get` 接口从 `test_queue` 中获取数据，其中 `ack` 参数设置为 `0`
+    * 调用 `get` 接口从 `test_queue` 中获取数据，其中 `ack` 参数设置为 `false`
     * 情形一：
         * 等待 1 分钟以上，期间不进行 `ack` 操作
         * 再次调用 `get` 接口从 `test_queue` 中获取数据，可以发现取到的依然是 `test_data`

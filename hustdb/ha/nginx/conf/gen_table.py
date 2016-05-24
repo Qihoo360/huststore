@@ -22,21 +22,38 @@ def get_hosts(path):
     f.close()
     return hosts
     
+def split_key(key):
+    pos = (key[0] + key[1]) / 2
+    return [[key[0], pos], [pos, key[1]]]
+
+def gen_keys(size):
+    keys = [[0, 512], [512, 1024]]
+    size = size - 2
+    index = 0
+    while size > 0:
+        tmp_keys = keys[:index]
+        tmp_keys.extend(split_key(keys[index]))
+        if index < len(keys) - 1:
+            tmp_keys.extend(keys[(index + 1):])
+            keys = tmp_keys
+            index = index + 2
+        else:
+            keys = tmp_keys
+            index = 0
+        size = size - 1
+    return keys
+    
 def gen(argv):
     size = len(argv)
     if 3 != size:
         return False
     hosts = get_hosts(argv[1])
     size = len(hosts)
+    if size < 2:
+        print 'the number of host should be 2 at least'
+        return False
     sections = range(size)
-    delta = int(1024 / size)
-    keys = [[
-        1024 - delta * (section + 1), 
-        1024 - delta * (section)
-        ] if sections.index(section) < size - 1 else [
-        0, 1024 - delta * (section)
-        ] for section in sections]
-    keys.reverse()
+    keys = gen_keys(size)
     host_list = [[
         host, hosts[hosts.index(host) + 1]
         ] if hosts.index(host) < size - 1 else [

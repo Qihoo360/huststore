@@ -864,9 +864,11 @@ hustmq_get_ctx_t::hustmq_get_ctx_t(evhtp_query_t * htp_query)
     // reset
     has_queue = false;
     has_worker = false;
+    has_ack = false;
 
     memset(&queue, 0, sizeof(evhtp::c_str_t));
     memset(&worker, 0, sizeof(evhtp::c_str_t));
+    ack = true;
 
     if (!htp_query)
     {
@@ -878,6 +880,7 @@ hustmq_get_ctx_t::hustmq_get_ctx_t(evhtp_query_t * htp_query)
     {
         static evhtp::c_str_t __queue = evhtp_make_str("queue");
         static evhtp::c_str_t __worker = evhtp_make_str("worker");
+        static evhtp::c_str_t __ack = evhtp_make_str("ack");
 
         if (kv->klen == __queue.len && 0 == strncmp(__queue.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
@@ -888,6 +891,80 @@ hustmq_get_ctx_t::hustmq_get_ctx_t(evhtp_query_t * htp_query)
         {
             has_worker = true;
             worker.assign(kv->val, kv->vlen);
+        }
+        else if (kv->klen == __ack.len && 0 == strncmp(__ack.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
+        {
+            has_ack = true;
+            ack = (4 == kv->vlen && 0 == strncmp(kv->val, "true", 4)) ||
+                (1 == kv->vlen && 0 == strncmp(kv->val, "1", 1));
+        }
+        kv = kv->next.tqe_next;
+    }
+}
+
+hustmq_ack_ctx_t::hustmq_ack_ctx_t(evhtp_query_t * htp_query)
+{
+    // reset
+    has_queue = false;
+    has_token = false;
+
+    memset(&queue, 0, sizeof(evhtp::c_str_t));
+    memset(&token, 0, sizeof(evhtp::c_str_t));
+
+    if (!htp_query)
+    {
+        return;
+    }
+    // parse from htp_query
+    evhtp_kv_s * kv = htp_query->tqh_first;
+    while (kv)
+    {
+        static evhtp::c_str_t __queue = evhtp_make_str("queue");
+        static evhtp::c_str_t __token = evhtp_make_str("token");
+
+        if (kv->klen == __queue.len && 0 == strncmp(__queue.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
+        {
+            has_queue = true;
+            queue.assign(kv->val, kv->vlen);
+        }
+        else if (kv->klen == __token.len && 0 == strncmp(__token.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
+        {
+            has_token = true;
+            token.assign(kv->val, kv->vlen);
+        }
+        kv = kv->next.tqe_next;
+    }
+}
+
+hustmq_timeout_ctx_t::hustmq_timeout_ctx_t(evhtp_query_t * htp_query)
+{
+    // reset
+    has_queue = false;
+    has_minute = false;
+
+    memset(&queue, 0, sizeof(evhtp::c_str_t));
+    memset(&minute, 0, sizeof(uint8_t));
+
+    if (!htp_query)
+    {
+        return;
+    }
+    // parse from htp_query
+    evhtp_kv_s * kv = htp_query->tqh_first;
+    while (kv)
+    {
+        static evhtp::c_str_t __queue = evhtp_make_str("queue");
+        static evhtp::c_str_t __minute = evhtp_make_str("minute");
+
+        if (kv->klen == __queue.len && 0 == strncmp(__queue.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
+        {
+            has_queue = true;
+            queue.assign(kv->val, kv->vlen);
+        }
+        else if (kv->klen == __minute.len && 0 == strncmp(__minute.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
+        {
+            has_minute = true;
+            minute = evhtp::cast <uint8_t> (std::string(kv->val, kv->vlen));
         }
         kv = kv->next.tqe_next;
     }

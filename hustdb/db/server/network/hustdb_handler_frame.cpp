@@ -610,6 +610,60 @@ void hustmq_get_frame(evhtp_request_t * request, void * data)
     hustmq_get_handler(args, request, ctx);
 }
 
+void hustmq_ack_frame(evhtp_request_t * request, void * data)
+{
+    hustdb_network_ctx_t * ctx = reinterpret_cast<hustdb_network_ctx_t *>(data);
+    if (!request || !ctx || !ctx->db->ok())
+    {
+        evhtp::send_reply(EVHTP_RES_500, request);
+        return;
+    }
+    if (!evhtp::check_auth(request, &ctx->base))
+    {
+        return;
+    }
+    htp_method method = evhtp_request_get_method(request);
+    if (htp_method_GET != method)
+    {
+        evhtp::invalid_method(request);
+        return;
+    }
+    hustmq_ack_ctx_t args(request->uri->query);
+    if (!args.has_queue || !args.has_token)
+    {
+        evhtp::send_reply(EVHTP_RES_NOTFOUND, request);
+        return;
+    }
+    hustmq_ack_handler(args, request, ctx);
+}
+
+void hustmq_timeout_frame(evhtp_request_t * request, void * data)
+{
+    hustdb_network_ctx_t * ctx = reinterpret_cast<hustdb_network_ctx_t *>(data);
+    if (!request || !ctx || !ctx->db->ok())
+    {
+        evhtp::send_reply(EVHTP_RES_500, request);
+        return;
+    }
+    if (!evhtp::check_auth(request, &ctx->base))
+    {
+        return;
+    }
+    htp_method method = evhtp_request_get_method(request);
+    if (htp_method_GET != method)
+    {
+        evhtp::invalid_method(request);
+        return;
+    }
+    hustmq_timeout_ctx_t args(request->uri->query);
+    if (!args.has_queue || !args.has_minute)
+    {
+        evhtp::send_reply(EVHTP_RES_NOTFOUND, request);
+        return;
+    }
+    hustmq_timeout_handler(args, request, ctx);
+}
+
 void hustmq_worker_frame(evhtp_request_t * request, void * data)
 {
     hustdb_network_ctx_t * ctx = reinterpret_cast<hustdb_network_ctx_t *>(data);
@@ -1143,6 +1197,8 @@ bool hustdb_init_handlers(hustdb_network_ctx_t * ctx, evhtp_t * htp)
     if (!evhtp_set_cb(htp, "/hustdb/export", hustdb_export_frame, ctx)) return false;
     if (!evhtp_set_cb(htp, "/hustmq/put", hustmq_put_frame, ctx)) return false;
     if (!evhtp_set_cb(htp, "/hustmq/get", hustmq_get_frame, ctx)) return false;
+    if (!evhtp_set_cb(htp, "/hustmq/ack", hustmq_ack_frame, ctx)) return false;
+    if (!evhtp_set_cb(htp, "/hustmq/timeout", hustmq_timeout_frame, ctx)) return false;
     if (!evhtp_set_cb(htp, "/hustmq/worker", hustmq_worker_frame, ctx)) return false;
     if (!evhtp_set_cb(htp, "/hustmq/stat", hustmq_stat_frame, ctx)) return false;
     if (!evhtp_set_cb(htp, "/hustmq/stat_all", hustmq_stat_all_frame, ctx)) return false;

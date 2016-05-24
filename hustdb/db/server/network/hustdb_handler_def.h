@@ -263,11 +263,35 @@ struct hustmq_get_ctx_t
 {
     evhtp::c_str_t queue;
     evhtp::c_str_t worker;
+    bool ack;
 
     bool has_queue;
     bool has_worker;
+    bool has_ack;
 
     hustmq_get_ctx_t(evhtp_query_t * htp_query);
+};
+
+struct hustmq_ack_ctx_t
+{
+    evhtp::c_str_t queue;
+    evhtp::c_str_t token;
+
+    bool has_queue;
+    bool has_token;
+
+    hustmq_ack_ctx_t(evhtp_query_t * htp_query);
+};
+
+struct hustmq_timeout_ctx_t
+{
+    evhtp::c_str_t queue;
+    uint8_t minute;
+
+    bool has_queue;
+    bool has_minute;
+
+    hustmq_timeout_ctx_t(evhtp_query_t * htp_query);
 };
 
 struct hustmq_worker_ctx_t

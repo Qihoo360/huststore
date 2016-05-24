@@ -247,15 +247,34 @@ void hustmq_get_handler(const hustmq_get_ctx_t& args, evhtp_request_t * request,
 {
     conn_ctxt_t conn;
     conn.worker_id = ctx->base.get_id(request);
-    bool is_ack = false;
     std::string ack;
     std::string unacked;
     std::string * rsp = NULL;
-    int r = ctx->db->hustmq_get(args.queue.data, args.queue.len, args.worker.data, args.worker.len, is_ack, ack, unacked, rsp, conn);
-    if (hustdb_network::post_handler(r, rsp, request, ctx) && is_ack)
+    int r = ctx->db->hustmq_get(args.queue.data, args.queue.len, args.worker.data, args.worker.len, args.ack, ack, unacked, rsp, conn);
+
+    if (!args.ack)
+    {
+        evhtp::add_kv("Ack-Token", unacked.c_str(), request);
+    }
+
+    if (hustdb_network::post_handler(r, rsp, request, ctx) && args.ack)
     {
         ctx->db->hustmq_ack_inner(ack, conn);
     }
+}
+
+void hustmq_ack_handler(const hustmq_ack_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx)
+{
+    conn_ctxt_t conn;
+    conn.worker_id = ctx->base.get_id(request);
+    int r = ctx->db->hustmq_ack(args.queue.data, args.queue.len, args.token.data, args.token.len, conn);
+    evhtp::send_nobody_reply(ctx->db->errno_int_status(r), request);
+}
+
+void hustmq_timeout_handler(const hustmq_timeout_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx)
+{
+    int r = ctx->db->hustmq_timeout(args.queue.data, args.queue.len, args.minute);
+    evhtp::send_nobody_reply(ctx->db->errno_int_status(r), request);
 }
 
 void hustmq_worker_handler(const hustmq_worker_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx)

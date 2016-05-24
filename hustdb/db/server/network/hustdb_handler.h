@@ -26,6 +26,8 @@ void hustdb_file_count_handler(evhtp_request_t * request, hustdb_network_ctx_t *
 void hustdb_export_handler(const hustdb_export_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx);
 void hustmq_put_handler(const hustmq_put_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx);
 void hustmq_get_handler(const hustmq_get_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx);
+void hustmq_ack_handler(const hustmq_ack_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx);
+void hustmq_timeout_handler(const hustmq_timeout_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx);
 void hustmq_worker_handler(const hustmq_worker_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx);
 void hustmq_stat_handler(const hustmq_stat_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx);
 void hustmq_stat_all_handler(evhtp_request_t * request, hustdb_network_ctx_t * ctx);

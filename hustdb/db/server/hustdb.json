@@ -243,9 +243,32 @@
             "args":
             [
                 ["string", "queue"],
-                ["string", "worker"]
+                ["string", "worker"],
+                ["bool", "ack", "true"]
             ],
             "required": ["queue", "worker"],
+            "check": "!request || !ctx || !ctx->db->ok()"
+        },
+        {
+            "uri": "/hustmq/ack",
+            "methods": ["GET"],
+            "args":
+            [
+                ["string", "queue"],
+                ["string", "token"]
+            ],
+            "required": ["queue", "token"],
+            "check": "!request || !ctx || !ctx->db->ok()"
+        },
+        {
+            "uri": "/hustmq/timeout",
+            "methods": ["GET"],
+            "args":
+            [
+                ["string", "queue"],
+                ["uint8_t", "minute"]
+            ],
+            "required": ["queue", "minute"],
             "check": "!request || !ctx || !ctx->db->ok()"
         },
         {

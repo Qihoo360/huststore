@@ -161,12 +161,38 @@ class HATester:
             return
         print 'acked'
     def __timeout(self):
-        cmd = '%s/timeout?queue=hustmqhaqueue&minute=1' % self.__host
+        qname = 'ha_timeout_queue'
+        val = 'ha_timeout_val'
+        
+        cmd = '%s/put?queue=%s' % (self.__host, qname)
+        r = requests.put(cmd, val, headers={'content-type':'text/plain'}, auth=(USER, PASSWD))
+        if 200 != r.status_code:
+            print '%s: %d' % (cmd, r.status_code)
+            return
+        
+        cmd = '%s/timeout?queue=%s&minute=1' % (self.__host, qname)
         r = requests.get(cmd, auth=(USER, PASSWD))
         if 200 != r.status_code:
             print '%s: %d' % (cmd, r.status_code)
-        else:
-            print 'ok'
+            return
+        
+        cmd = '%s/get?queue=%s&worker=testworker&ack=false' % (self.__host, qname)
+        r = requests.get(cmd, auth=(USER, PASSWD))
+        if 200 != r.status_code:
+            print '%s: %d' % (cmd, r.status_code)
+            return
+        print r.content
+
+        print 'sleep 60 s...'
+        time.sleep(60)
+        
+        cmd = '%s/get?queue=%s&worker=testworker' % (self.__host, qname)
+        r = requests.get(cmd, auth=(USER, PASSWD))
+        if 200 != r.status_code:
+            print '%s: %d' % (cmd, r.status_code)
+            return
+        print r.content
+
     def __queue_hash(self):
         get_body = lambda i: 'test_body_%d' % i
         print 'put...'

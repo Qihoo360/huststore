@@ -176,6 +176,8 @@ class HATester:
             print '%s: %d' % (cmd, r.status_code)
             return
         
+        self.__autost()
+        
         cmd = '%s/get?queue=%s&worker=testworker&ack=false' % (self.__host, qname)
         r = requests.get(cmd, auth=(USER, PASSWD))
         if 200 != r.status_code:

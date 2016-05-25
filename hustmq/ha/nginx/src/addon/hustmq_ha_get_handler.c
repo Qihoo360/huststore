@@ -19,21 +19,6 @@ typedef struct
 	ngx_bool_t ack;
 } hustmq_ha_get_ctx_t;
 
-static ngx_bool_t __check_get_queue_item(hustmq_ha_queue_item_t * item)
-{
-	if (!item)
-	{
-		return false;
-	}
-	json_int_t sum = 0;
-	size_t i = 0;
-	for (i = 0; i < HUSTMQ_HA_READY_SIZE; ++i)
-	{
-		sum += item->base.ready[i];
-	}
-	return sum > 0;
-}
-
 static ngx_bool_t __check_peer(hustmq_ha_queue_dict_t * dict, ngx_str_t * queue, ngx_http_upstream_rr_peer_t * peer)
 {
     hustmq_ha_queue_value_t * queue_val = hustmq_ha_queue_dict_get(dict, (const char *)queue->data);
@@ -48,7 +33,7 @@ static ngx_bool_t __check_peer(hustmq_ha_queue_dict_t * dict, ngx_str_t * queue,
 		return false;
 	}
 
-	if(!__check_get_queue_item(queue_item))
+	if(!hustmq_ha_pre_get_check(&queue_item->base))
 	{
 		return false;
 	}

@@ -64,13 +64,14 @@ ngx_bool_t hustmq_ha_put_queue_item_check(hustmq_ha_queue_dict_t * queue_dict, n
 	return __put_queue_item_check(&item);
 }
 
-static ngx_bool_t __get_queue_item_check(const hustmq_ha_queue_base_t * item)
+ngx_bool_t hustmq_ha_pre_get_check(const hustmq_ha_queue_base_t * item)
 {
 	if (!item)
 	{
 		return false;
 	}
 	int sum = hustmq_ha_get_ready_sum(item->ready, HUSTMQ_HA_READY_SIZE);
+	sum += item->unacked;
 	if (sum < 1)
 	{
 		return false;
@@ -86,7 +87,7 @@ ngx_bool_t hustmq_ha_get_queue_item_check(hustmq_ha_queue_dict_t * queue_dict, n
 	{
 		return false;
 	}
-	return __get_queue_item_check(&item);
+	return hustmq_ha_pre_get_check(&item);
 }
 
 static ngx_bool_t __max_queue_item_check(const hustmq_ha_queue_base_t * item)

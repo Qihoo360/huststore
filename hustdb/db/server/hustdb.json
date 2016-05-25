@@ -266,7 +266,7 @@
             "args":
             [
                 ["string", "queue"],
-                ["uint8_t", "minute"]
+                ["uint32_t", "minute"]
             ],
             "required": ["queue", "minute"],
             "check": "!request || !ctx || !ctx->db->ok()"

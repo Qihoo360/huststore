@@ -273,7 +273,7 @@ void hustmq_ack_handler(const hustmq_ack_ctx_t& args, evhtp_request_t * request,
 
 void hustmq_timeout_handler(const hustmq_timeout_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx)
 {
-    int r = ctx->db->hustmq_timeout(args.queue.data, args.queue.len, args.minute);
+    int r = ctx->db->hustmq_timeout(args.queue.data, args.queue.len, (uint8_t) args.minute);
     evhtp::send_nobody_reply(ctx->db->errno_int_status(r), request);
 }
 

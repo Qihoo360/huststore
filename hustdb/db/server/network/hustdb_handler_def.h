@@ -286,7 +286,7 @@ struct hustmq_ack_ctx_t
 struct hustmq_timeout_ctx_t
 {
     evhtp::c_str_t queue;
-    uint8_t minute;
+    uint32_t minute;
 
     bool has_queue;
     bool has_minute;

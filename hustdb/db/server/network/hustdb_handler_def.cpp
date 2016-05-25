@@ -943,7 +943,7 @@ hustmq_timeout_ctx_t::hustmq_timeout_ctx_t(evhtp_query_t * htp_query)
     has_minute = false;
 
     memset(&queue, 0, sizeof(evhtp::c_str_t));
-    memset(&minute, 0, sizeof(uint8_t));
+    memset(&minute, 0, sizeof(uint32_t));
 
     if (!htp_query)
     {
@@ -964,7 +964,7 @@ hustmq_timeout_ctx_t::hustmq_timeout_ctx_t(evhtp_query_t * htp_query)
         else if (kv->klen == __minute.len && 0 == strncmp(__minute.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
             has_minute = true;
-            minute = evhtp::cast <uint8_t> (std::string(kv->val, kv->vlen));
+            minute = evhtp::cast <uint32_t> (std::string(kv->val, kv->vlen));
         }
         kv = kv->next.tqe_next;
     }

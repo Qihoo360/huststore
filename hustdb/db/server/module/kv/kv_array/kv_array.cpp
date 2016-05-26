@@ -623,7 +623,7 @@ int kv_array_t::export_db (
                           & break_the_loop );
             }
 
-            if ( unlikely ( ignore_this_record ) )
+            if ( unlikely ( ignore_this_record || version <= 0 ) )
             {
                 continue;
             }
@@ -1083,7 +1083,7 @@ int kv_array_t::export_db_mem (
                               & break_the_loop );
                 }
 
-                if ( unlikely ( ignore_this_record ) )
+                if ( unlikely ( ignore_this_record || version <= 0 ) )
                 {
                     continue;
                 }

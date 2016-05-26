@@ -16,7 +16,7 @@
 
 **结果范例A1:**
 
-	HTTP/1.1 412 Precondition Failed //queue not exist
+	HTTP/1.1 412 Precondition Failed //queue not exist or no unacked message
 
 **结果范例A2:**
 

@@ -2189,6 +2189,7 @@ int hustdb_t::hustdb_zadd (
     char            val21[ 32 ]  = { };
     uint32_t        cur_ver      = 0;
     uint64_t        cur_score    = 0;
+    bool            has_been     = false;
     item_ctxt_t *   ctxt         = NULL;
     std::string *   rsp          = NULL;
     uint16_t        zhash        = 0;
@@ -2224,12 +2225,13 @@ int hustdb_t::hustdb_zadd (
     
     m_storage->set_inner_ttl ( 0, conn );
     m_storage->set_inner_table ( table, table_len, ZSET_IN, conn );
-
+    
     r = m_storage->get ( key, key_len, cur_ver, conn, rsp, ctxt );
     if ( 0 == r )
     {
-        cur_score = atol ( rsp->c_str () );
-
+        has_been  = true;
+        cur_score = strtoul ( rsp->c_str (), NULL, 10 );
+        
         if ( opt == 0 &&
              cur_score == score &&
              cur_ver >= ver
@@ -2282,11 +2284,11 @@ int hustdb_t::hustdb_zadd (
         set_table_size ( offset, 1 );
     }
     
-    if ( cur_score > 0 )
+    if ( has_been )
     {
         sprintf ( val21, "%021lu", cur_score );
         m_storage->set_inner_table ( table, table_len, ZSET_TB, conn, val21 );
-        
+
         user_ver = 0;
         r = m_storage->del ( key, key_len, user_ver, false, conn, ctxt );
         if ( 0 != r )
@@ -2410,9 +2412,9 @@ int hustdb_t::hustdb_zrem (
     r = m_storage->get ( key, key_len, cur_ver, conn, rsp, ctxt );
     if ( 0 == r )
     {
-        cur_score = atol ( rsp->c_str () );
+        cur_score = strtoul ( rsp->c_str (), NULL, 10 );
     }
-
+    
     r = m_storage->del ( key, key_len, ver, is_dup, conn, ctxt );
     if ( 0 != r )
     {
@@ -2432,25 +2434,21 @@ int hustdb_t::hustdb_zrem (
     {
         set_table_size ( offset, - 1 );
     }
-    
-    if ( cur_score > 0 )
+
+    sprintf ( val21, "%021lu", cur_score );
+    m_storage->set_inner_table ( table, table_len, ZSET_TB, conn, val21 );
+
+    cur_ver = 0;
+    r = m_storage->del ( key, key_len, cur_ver, false, conn, ctxt );
+    if ( 0 != r )
     {
-        sprintf ( val21, "%021lu", cur_score );
-
-        m_storage->set_inner_table ( table, table_len, ZSET_TB, conn, val21 );
-
-        cur_ver = 0;
-        r = m_storage->del ( key, key_len, cur_ver, false, conn, ctxt );
-        if ( 0 != r )
+        if ( ENOENT == r )
         {
-            if ( ENOENT == r )
-            {
-                LOG_DEBUG ( "[hustdb][db_zrem]del return ENOENT" );
-            }
-            else
-            {
-                LOG_ERROR ( "[hustdb][db_zrem]del return %d", r );
-            }
+            LOG_DEBUG ( "[hustdb][db_zrem]del return ENOENT" );
+        }
+        else
+        {
+            LOG_ERROR ( "[hustdb][db_zrem]del return %d", r );
         }
     }
 

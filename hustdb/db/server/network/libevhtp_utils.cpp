@@ -94,7 +94,7 @@ http_basic_auth_t::http_basic_auth_t(const char * username, const char * passwd)
     memcpy(src.data + ulen + 1, passwd, plen);
     src.data[src.len] = '\0';
 
-    dst.len = c_base64_encoded_length();
+    dst.len = c_base64_encoded_length(src.len);
     dst.data = new char[dst.len + 1];
     if (!dst.data)
     {
@@ -261,7 +261,7 @@ bool check_auth(evhtp_request_t * request, conf_t * data)
     if (!__check_auth(request, data))
     {
         evhtp_headers_add_header(request->headers_out, evhtp_header_new("Content-Length", "0", 1, 1));
-        evhtp_headers_add_header(request->headers_out, evhtp_header_new("WWW-Authenticate", "Basic realm=\"HustVision\"", 1, 1));
+        evhtp_headers_add_header(request->headers_out, evhtp_header_new("WWW-Authenticate", "Basic realm=\"libevhtp\"", 1, 1));
         evhtp_send_reply(request, EVHTP_RES_UNAUTH);
         return false;
     }
@@ -321,7 +321,6 @@ conf_t::conf_t()
       enable_nodelay(0),
       enable_defer_accept(0),
       auth(0),
-      //db(0),
       dict(mutex)
 {
     memset(&recv_timeout, 0, sizeof(struct timeval));

@@ -4,10 +4,10 @@ LIBS =	-levent -levent_pthreads -levent_openssl -lssl -lcrypto -levhtp -ldl -lrt
 LINK = -L /usr/local/lib  \
 	/usr/local/lib/libevhtp.a
 
-BIN  = ./o/
+BIN  = ./bin/
 TARGET = sync
 
-SERVER = ../../
+SERVER = ./
 MODULE_SRC = $(SERVER)module/
 NETWORK_SRC = $(SERVER)network/
 INCLUDE = $(SERVER)include/
@@ -29,6 +29,7 @@ OBJS = $(BIN)main.o \
 	$(BIN)sync.o \
 	$(BIN)threadpool.o \
 	$(BIN)sync_status.o \
+	$(BIN)sync_conf.o \
 	$(BIN)json_serialization.o \
 	$(BIN)sync_network.o \
 	$(BIN)sync_handler_frame.o \
@@ -47,6 +48,9 @@ DEPS = $(INCLUDE)rapidjson/rapidjson.h
 $(TARGET):	$(OBJS)
 
 	$(CXX) -o $(TARGET) $(INCS) $(LINK) $(OBJS) $(LIBS)
+
+	chmod a+x $(TARGET)
+	cp $(MODULE_SRC)sync_server.json sync_server.json
 
 $(BIN)main.o:	$(DEPS) $(SERVER)main.cpp
 	$(CXX) -c $(CXXFLAGS)  $(INCS) -o $(BIN)main.o $(SERVER)main.cpp
@@ -99,6 +103,9 @@ $(BIN)threadpool.o:	$(DEPS) $(MODULE_SRC)threadpool.cpp
 $(BIN)sync_status.o:	$(DEPS) $(MODULE_SRC)sync_status.cpp
 	$(CXX) -c $(CXXFLAGS)  $(INCS) -o $(BIN)sync_status.o $(MODULE_SRC)sync_status.cpp
 
+$(BIN)sync_conf.o:	$(DEPS) $(MODULE_SRC)sync_conf.cpp
+	$(CXX) -c $(CXXFLAGS)  $(INCS) -o $(BIN)sync_conf.o $(MODULE_SRC)sync_conf.cpp
+
 JOS_CPP = $(INCLUDE)/json_serialization.cpp
 $(BIN)json_serialization.o:	$(DEPS) $(JOS_CPP)
 	$(CXX) -c $(CXXFLAGS)  $(INCS) -o $(BIN)json_serialization.o $(JOS_CPP)
@@ -124,5 +131,11 @@ $(BIN)libevhtp_utils.o:	$(NETWORK_SRC)libevhtp_utils.cpp
 all:	$(TARGET)
 
 clean:
-	rm -rf $(OBJS) $(TARGET)
+	rm -rf $(OBJS) $(TARGET) sync_server.json
 
+install:		
+	test -d '/data/hustdbsync' || mkdir -p '/data/hustdbsync'
+	test -d '/data/hustdbsync/logs' || mkdir -p '/data/hustdbsync/logs'
+	cp $(TARGET) '/data/hustdbsync/$(TARGET)'
+	test ! -f '/data/hustdbsync/sync_server.json' || cp '/data/hustdbsync/sync_server.json' '/data/hustdbsync/sync_server.json.old'
+	cp sync_server.json '/data/hustdbsync/'

@@ -1,5 +1,4 @@
 {
-    "includes": ["<limits.h>", "<string>", "<vector>"],
     "rapidjson": true,
     "structs": 
     [

@@ -1,0 +1,53 @@
+{
+    "rapidjson": true,
+    "structs": 
+    [
+        {
+            "name": "NetworkConf",
+            "namespace": "jos_lib",
+            "members": 
+            [
+                ["int", "port", "8089"],
+                ["int", "backlog", "512"],
+                ["bool", "enable_reuseport", "true"],
+                ["bool", "enable_nodelay", "true"],
+                ["bool", "enable_defer_accept", "true"],
+                ["int", "max_body_size", "16777216"],
+                ["int", "max_keepalive_requests", "1024"],
+                ["int", "recv_timeout", "300"],
+                ["int", "send_timeout", "300"],
+                ["int", "threads", "2"],
+                ["std::string", "user", "\"sync\""],
+                ["std::string", "passwd", "\"sync\""],
+                ["std::string", "access_allow", "\"127.0.0.1\""]
+            ],
+            "methods" : ["construct", "operator==", "json_serialize", "json_deserialize"]
+        },
+        {
+            "name": "SyncConf",
+            "namespace": "jos_lib",
+            "members": 
+            [
+                ["bool", "daemon", "true"],
+                ["std::string", "logs_path", "\"/data/hustdbha/logs/\""],
+                ["std::string", "ngx_path", "\"/data/hustdbha/\""],
+                ["std::string", "auth_path", "\"/data/hustdbha/conf/htpasswd\""],
+                ["int", "threads", "4"],
+                ["int", "release_interval", "5000"],
+                ["int", "checkdb_interval", "5000"],
+                ["int", "checklog_interval", "60000"]
+            ],
+            "methods" : ["construct", "operator==", "json_serialize", "json_deserialize"]
+        },
+        {
+            "name": "SyncServerConf",
+            "namespace": "jos_lib",
+            "members": 
+            [
+                ["NetworkConf", "network"],
+                ["SyncConf", "sync"]
+            ],
+            "methods" : ["construct", "operator==", "json_serialize", "json_deserialize"]
+        }
+    ]
+}

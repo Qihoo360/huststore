@@ -1,9 +1,14 @@
 CC = g++
 CXXFLAGS = -O0 -g3 -Wall -fmessage-length=0
-LINK = $(CC) -lpthread -lcurl
+LIBS =	-levent -levent_pthreads -levent_openssl -lssl -lcrypto -levhtp -ldl -lrt -lpthread -lcurl
+LINK = -L /usr/local/lib  \
+	/usr/local/lib/libevhtp.a
+
+BIN  = ./o/
 TARGET = sync
-BIN = bin/
-SYNC_SRC = src/
+SYNC_SRC = libsync/
+NET_SRC = network/
+
 OBJS = $(BIN)main.o \
 	$(BIN)c_base64.o \
 	$(BIN)cond.o \
@@ -21,17 +26,24 @@ OBJS = $(BIN)main.o \
 	$(BIN)sync.o \
 	$(BIN)threadpool.o \
 	$(BIN)sync_status.o \
-	$(BIN)json_serialization.o
+	$(BIN)json_serialization.o \
+	$(BIN)sync_network.o \
+	$(BIN)sync_handler_frame.o \
+	$(BIN)sync_handler.o \
+	$(BIN)sync_handler_def.o \
+	$(BIN)sync_network_utils.o \
+	$(BIN)libevhtp_utils.o
 
-INCS = -I include/rapidjson \
+INCS = -I /usr/local/include/evhtp \
+	-I /usr/local/include/event2 \
+	-I include/rapidjson \
 	-I include
 
 DEPS = include/rapidjson/rapidjson.h
 
 $(TARGET):	$(OBJS)
 
-	$(LINK) -o $(TARGET) $(OBJS)
-
+	$(CXX) -o $(TARGET) $(INCS) $(LINK) $(OBJS) $(LIBS)
 
 $(BIN)main.o:	$(DEPS) main.cpp
 	$(CXX) -c $(CXXFLAGS)  $(INCS) -o $(BIN)main.o main.cpp
@@ -87,6 +99,24 @@ $(BIN)sync_status.o:	$(DEPS) $(SYNC_SRC)sync_status.cpp
 JOS_CPP = include/json_serialization.cpp
 $(BIN)json_serialization.o:	$(DEPS) $(JOS_CPP)
 	$(CXX) -c $(CXXFLAGS)  $(INCS) -o $(BIN)json_serialization.o $(JOS_CPP)
+
+$(BIN)sync_network.o:	$(NET_SRC)sync_network.cpp
+	$(CXX) -c $(CXXFLAGS)  $(INCS) -o $(BIN)sync_network.o $(NET_SRC)sync_network.cpp
+
+$(BIN)sync_handler_frame.o:	$(NET_SRC)sync_handler_frame.cpp
+	$(CXX) -c $(CXXFLAGS)  $(INCS) -o $(BIN)sync_handler_frame.o $(NET_SRC)sync_handler_frame.cpp
+
+$(BIN)sync_handler.o:	$(NET_SRC)sync_handler.cpp
+	$(CXX) -c $(CXXFLAGS)  $(INCS) -o $(BIN)sync_handler.o $(NET_SRC)sync_handler.cpp
+
+$(BIN)sync_handler_def.o:	$(NET_SRC)sync_handler_def.cpp
+	$(CXX) -c $(CXXFLAGS)  $(INCS) -o $(BIN)sync_handler_def.o $(NET_SRC)sync_handler_def.cpp
+
+$(BIN)sync_network_utils.o:	$(NET_SRC)sync_network_utils.cpp
+	$(CXX) -c $(CXXFLAGS)  $(INCS) -o $(BIN)sync_network_utils.o $(NET_SRC)sync_network_utils.cpp
+
+$(BIN)libevhtp_utils.o:	$(NET_SRC)libevhtp_utils.cpp
+	$(CXX) -c $(CXXFLAGS)  $(INCS) -o $(BIN)libevhtp_utils.o $(NET_SRC)libevhtp_utils.cpp
 
 all:	$(TARGET)
 

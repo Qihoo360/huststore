@@ -1,5 +1,5 @@
 #include <iostream>
-#include "src/global.h"
+#include "libsync/global.h"
 
 int main ( int argc, char *argv[] )
 {

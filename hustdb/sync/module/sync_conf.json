@@ -28,7 +28,6 @@
             "namespace": "jos_lib",
             "members": 
             [
-                ["bool", "daemon", "true"],
                 ["std::string", "logs_path", "\"/data/hustdbha/logs/\""],
                 ["std::string", "ngx_path", "\"/data/hustdbha/\""],
                 ["std::string", "auth_path", "\"/data/hustdbha/conf/htpasswd\""],

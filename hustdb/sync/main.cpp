@@ -1,11 +1,54 @@
 #include <iostream>
+#include <unistd.h>
+#include <fcntl.h>
+#include <limits.h>
 #include "module/global.h"
 #include "module/sync_conf.h"
 #include "network/sync_network_utils.h"
 #include "network/sync_network.h"
 
+void manual()
+{
+    printf("\n");
+    printf("    usage:\n");
+    printf("        ./hustdbsync [option]\n");
+    printf("            [option]\n");
+    printf("                -d: run in debug mode\n");
+    printf("\n");
+    printf("    sample:\n");
+    printf("        ./hustdbsync\n");
+    printf("        ./hustdbsync -d\n");
+    printf("\n");
+}
+
 int main ( int argc, char *argv[] )
 {
+    if (2 != argc && 1 != argc)
+    {
+        manual();
+        return -1;
+    }
+    bool debug_mode = false;
+    if (2 == argc)
+    {
+        std::string option = argv[1];
+        std::string debug("-d");
+        if (option == debug)
+        {
+            debug_mode = true;
+        }
+        else
+        {
+            manual();
+            return -1;
+        }
+    }
+    if(!debug_mode && daemon(1, 1) < 0)
+    {
+        printf("daemon error\n");
+        return -1;
+    }
+
     jos_lib::SyncServerConf cf;
     if (!jos_lib::Load("sync_server.json", cf))
     {

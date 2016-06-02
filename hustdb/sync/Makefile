@@ -5,7 +5,7 @@ LINK = -L /usr/local/lib  \
 	/usr/local/lib/libevhtp.a
 
 BIN  = ./bin/
-TARGET = sync
+TARGET = hustdbsync
 
 SERVER = ./
 MODULE_SRC = $(SERVER)module/
@@ -133,7 +133,7 @@ all:	$(TARGET)
 clean:
 	rm -rf $(OBJS) $(TARGET) sync_server.json
 
-install:		
+install:		$(TARGET)
 	test -d '/data/hustdbsync' || mkdir -p '/data/hustdbsync'
 	test -d '/data/hustdbsync/logs' || mkdir -p '/data/hustdbsync/logs'
 	cp $(TARGET) '/data/hustdbsync/$(TARGET)'

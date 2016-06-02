@@ -64,7 +64,6 @@ namespace jos_lib
     SyncConf::SyncConf()
     {
         // fields from jos_lib::SyncConf
-        daemon = true;
         logs_path = "/data/hustdbha/logs/";
         ngx_path = "/data/hustdbha/";
         auth_path = "/data/hustdbha/conf/htpasswd";
@@ -72,7 +71,6 @@ namespace jos_lib
         release_interval = 5000;
         checkdb_interval = 5000;
         checklog_interval = 60000;
-        json_has_daemon = false;
         json_has_logs_path = false;
         json_has_ngx_path = false;
         json_has_auth_path = false;
@@ -85,7 +83,6 @@ namespace jos_lib
     bool SyncConf::operator==(const SyncConf& obj) const
     {
         // fields from jos_lib::SyncConf
-        if (!(daemon == obj.daemon)) return false;
         if (!(logs_path == obj.logs_path)) return false;
         if (!(ngx_path == obj.ngx_path)) return false;
         if (!(auth_path == obj.auth_path)) return false;
@@ -186,7 +183,6 @@ namespace jos_lib
         {
             json_val.SetObject();
             // fields from "jos_lib::SyncConf"
-            if (!Serialize(obj_val.daemon, "daemon", alloc, json_val)) break; // @(field_type : bool)
             if (!Serialize(obj_val.logs_path, "logs_path", alloc, json_val)) break; // @(field_type : std::string)
             if (!Serialize(obj_val.ngx_path, "ngx_path", alloc, json_val)) break; // @(field_type : std::string)
             if (!Serialize(obj_val.auth_path, "auth_path", alloc, json_val)) break; // @(field_type : std::string)
@@ -206,7 +202,6 @@ namespace jos_lib
         do
         {
             // fields from "jos_lib::SyncConf"
-            if (!Deserialize(json_val, "daemon", obj_val.daemon, obj_val.json_has_daemon)) break; // @(field_type : bool)
             if (!Deserialize(json_val, "logs_path", obj_val.logs_path, obj_val.json_has_logs_path)) break; // @(field_type : std::string)
             if (!Deserialize(json_val, "ngx_path", obj_val.ngx_path, obj_val.json_has_ngx_path)) break; // @(field_type : std::string)
             if (!Deserialize(json_val, "auth_path", obj_val.auth_path, obj_val.json_has_auth_path)) break; // @(field_type : std::string)

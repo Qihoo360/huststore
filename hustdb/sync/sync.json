@@ -1,0 +1,16 @@
+{
+    "module": "sync",
+    "handlers":
+    [
+        {
+            "uri": "/sync_status",
+            "methods": ["GET"],
+            "args":
+            [
+                ["uint32_t", "backend_count"]
+            ],
+            "required": ["backend_count"],
+            "check": "!request || !ctx"
+        }
+    ]
+}

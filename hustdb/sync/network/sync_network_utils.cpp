@@ -49,7 +49,7 @@ void add_uniq_sort (unsigned long start, unsigned long end, ip_allow_t * ip_allo
 
 bool get_ip_allow_map(const char * ip_allow_string, unsigned int ip_allow_string_length, ip_allow_t * ip_allow_map)
 {
-    int i = 0;
+    unsigned int i = 0;
     int pos = 0;
     char flag = ',';
     unsigned long prev_ip = 0;

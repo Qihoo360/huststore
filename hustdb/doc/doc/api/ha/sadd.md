@@ -10,7 +10,6 @@
 *  **tb** （必选）  
 *  **key** （必选）  
 该参数必须放在 `http body` 中
-*  **ttl** （可选）
 *  **ver** （可选）
 
 该接口是 `/hustdb/sadd` 的代理接口，参数详情可参考 [这里](../hustdb/hustdb/sadd.md) 。

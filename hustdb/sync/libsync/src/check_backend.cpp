@@ -1,5 +1,5 @@
-#include "../lib/husthttp.h"
-#include "../lib/global.h"
+#include "husthttp.h"
+#include "global.h"
 #include <poll.h>
 #include <sys/time.h>
 #include <sys/timerfd.h>

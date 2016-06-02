@@ -1,4 +1,4 @@
-#include "../lib/husthttp.h"
+#include "husthttp.h"
 #include <cstdio>
 
 husthttp_t::husthttp_t ( )

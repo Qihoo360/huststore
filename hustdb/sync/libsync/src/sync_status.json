@@ -1,0 +1,17 @@
+{
+    "includes": ["<limits.h>", "<string>", "<vector>"],
+    "rapidjson": true,
+    "structs": 
+    [
+        {
+            "name": "Status",
+            "namespace": "jos_lib",
+            "members": 
+            [
+                ["std::map<std::string, int>", "total_status"],
+                ["std::map<std::string, std::map<std::string, int> >", "status"]
+            ],
+            "methods" : ["construct", "operator==", "json_serialize", "json_deserialize"]
+        }
+    ]
+}

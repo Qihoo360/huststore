@@ -1,5 +1,5 @@
-#include "../lib/global.h"
-#include "../lib/status_serialization.h"
+#include "global.h"
+#include "sync_status.h"
 #include <dirent.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
@@ -293,7 +293,7 @@ static int construct_file_queue ( int status_dir_index, int log_dir_index )
 
 char *get_status ( int hosts_size )
 {
-    json_lib::Status json_val;
+    jos_lib::Status json_val;
     std::map<std::string, int> total_status;
     std::map<std::string, std::map<std::string, int> > status;
 
@@ -316,7 +316,7 @@ char *get_status ( int hosts_size )
     std::string res;
 
 
-    if ( ! json_lib::Serialize (json_val, res) )
+    if ( ! jos_lib::Serialize <jos_lib::Status, true> (json_val, res) )
     {
         return NULL;
     }

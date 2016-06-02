@@ -1,5 +1,5 @@
-#include "../lib/task.h"
-#include "../lib/husthttp.h"
+#include "task.h"
+#include "husthttp.h"
 #include <assert.h>
 #include <cstdio>
 

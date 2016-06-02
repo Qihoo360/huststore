@@ -1,4 +1,4 @@
-#include "../lib/message.h"
+#include "message.h"
 
 Message::Message ( std::string _data, int _pos, void *_file )
 : data ( _data )

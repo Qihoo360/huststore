@@ -1,5 +1,5 @@
 #include <iostream>
-#include "lib/global.h"
+#include "src/global.h"
 
 int main ( int argc, char *argv[] )
 {

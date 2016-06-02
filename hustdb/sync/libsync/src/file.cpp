@@ -1,4 +1,4 @@
-#include "../lib/file.h"
+#include "file.h"
 #include <sys/mman.h>
 #include <pthread.h>
 #include <cstdio>

@@ -1,4 +1,4 @@
-#include "../lib/global.h"
+#include "global.h"
 #include <poll.h>
 #include <sys/stat.h>
 #include <fcntl.h>

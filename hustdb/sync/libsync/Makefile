@@ -1,95 +1,94 @@
-CC = g++ -fPIC
+CC = g++
 CXXFLAGS = -O0 -g3 -Wall -fmessage-length=0
-LINK = $(CC) -lpthread -lcurl -shared
-TARGET = libsync.so
-OBJS = bin/c_base64.o	\
-	   bin/cond.o	\
-	   bin/mutex.o	\
-	   bin/task.o	\
-	   bin/http.o	\
-	   bin/husthttp.o	\
-	   bin/message.o	\
-	   bin/item.o	\
-	   bin/file.o	\
-	   bin/monitor.o	\
-	   bin/read_log.o	\
-	   bin/timer.o 		\
-	   bin/check_backend.o	\
-	   bin/sync.o	\
-	   bin/threadpool.o	\
-	   bin/status_serialization.o \
-	   bin/json_serialization.o \
-	   bin/json_reader.o 	\
-	   bin/json_value.o 	\
-	   bin/json_writer.o 	\
+LINK = $(CC) -lpthread -lcurl
+TARGET = sync
+BIN = bin/
+SYNC_SRC = src/
+OBJS = $(BIN)main.o \
+	$(BIN)c_base64.o \
+	$(BIN)cond.o \
+	$(BIN)mutex.o	\
+	$(BIN)task.o \
+	$(BIN)http.o \
+	$(BIN)husthttp.o \
+	$(BIN)message.o \
+	$(BIN)item.o \
+	$(BIN)file.o \
+	$(BIN)monitor.o \
+	$(BIN)read_log.o \
+	$(BIN)timer.o \
+	$(BIN)check_backend.o \
+	$(BIN)sync.o \
+	$(BIN)threadpool.o \
+	$(BIN)sync_status.o \
+	$(BIN)json_serialization.o
 
-INCS = -I json_src/include \
-	-I lib
-DEPS = json_src/include/json/json.h
+INCS = -I include/rapidjson \
+	-I include
 
-$(TARGET): $(OBJS)
+DEPS = include/rapidjson/rapidjson.h
+
+$(TARGET):	$(OBJS)
+
 	$(LINK) -o $(TARGET) $(OBJS)
 
-bin/c_base64.o: src/c_base64.c lib/c_base64.h
-	$(CC) -c $(CXXFLAGS) $< -o $@
-bin/cond.o:	src/cond.cpp lib/cond.h
-	$(CC) -c $(CXXFLAGS) $< -o $@
-bin/mutex.o: src/mutex.cpp lib/mutex.h
-	$(CC) -c $(CXXFLAGS) $< -o $@
-bin/task.o:	src/task.cpp lib/task.h
-	$(CC) -c $(CXXFLAGS) $< -o $@
-bin/http.o:	src/http.c lib/http.h
-	$(CC) -c $(CXXFLAGS) $< -o $@
-bin/husthttp.o: src/husthttp.cpp lib/husthttp.h
-	$(CC) -c $(CXXFLAGS) $< -o $@
-bin/message.o:	src/message.cpp lib/message.h
-	$(CC) -c $(CXXFLAGS) $< -o $@
-bin/item.o:	src/item.cpp lib/item.h
-	$(CC) -c $(CXXFLAGS) $< -o $@
-bin/file.o:	src/file.cpp lib/file.h
-	$(CC) -c $(CXXFLAGS) $< -o $@
-bin/monitor.o: src/monitor.cpp
-	$(CC) -c $(CXXFLAGS) $< -o $@
-bin/read_log.o: src/read_log.cpp
-	$(CC) -c $(CXXFLAGS) $< -o $@
-bin/timer.o:	src/timer.cpp
-	$(CC) -c $(CXXFLAGS) $< -o $@
-bin/check_backend.o: src/check_backend.cpp
-	$(CC) -c $(CXXFLAGS) $< -o $@
-bin/sync.o: src/sync.cpp
-	$(CC) -c $(CXXFLAGS) $< -o $@
-bin/threadpool.o: src/threadpool.cpp lib/threadpool.h
-	$(CC) -c $(CXXFLAGS) $< -o $@
 
-bin/status_serialization.o: src/status_serialization.cpp $(DEPS)
-	$(CC) -c $(CXXFLAGS) $< -o $@
+$(BIN)main.o:	$(DEPS) main.cpp
+	$(CXX) -c $(CXXFLAGS)  $(INCS) -o $(BIN)main.o main.cpp
 
-bin/json_serialization.o:	$(DEPS) \
-	src/json_serialization.cpp
-	$(CC) -c $(CXXFLAGS)  $(INCS) \
-		-o bin/json_serialization.o \
-		src/json_serialization.cpp
+$(BIN)c_base64.o:	$(DEPS) $(SYNC_SRC)c_base64.cpp
+	$(CXX) -c $(CXXFLAGS)  $(INCS) -o $(BIN)c_base64.o $(SYNC_SRC)c_base64.cpp
 
-JSON_READER = json_src/src/lib_json/json_reader.cpp
-bin/json_reader.o:	$(DEPS) \
-	$(JSON_READER)
-	$(CC) -c $(CXXFLAGS)  $(INCS) \
-		-o bin/json_reader.o \
-		$(JSON_READER)
-	
-JSON_VALUE = json_src/src/lib_json/json_value.cpp
-bin/json_value.o:	$(DEPS) \
-	$(JSON_VALUE)
-	$(CC) -c $(CXXFLAGS)  $(INCS) \
-		-o bin/json_value.o \
-		$(JSON_VALUE)
-		
-JSON_WRITER = json_src/src/lib_json/json_writer.cpp
-bin/json_writer.o:	$(DEPS) \
-	$(JSON_WRITER)
-	$(CC) -c $(CXXFLAGS)  $(INCS) \
-		-o bin/json_writer.o \
-		$(JSON_WRITER)
+$(BIN)cond.o:	$(DEPS) $(SYNC_SRC)cond.cpp
+	$(CXX) -c $(CXXFLAGS)  $(INCS) -o $(BIN)cond.o $(SYNC_SRC)cond.cpp
+
+$(BIN)mutex.o:	$(DEPS) $(SYNC_SRC)mutex.cpp
+	$(CXX) -c $(CXXFLAGS)  $(INCS) -o $(BIN)mutex.o $(SYNC_SRC)mutex.cpp
+
+$(BIN)task.o:	$(DEPS) $(SYNC_SRC)task.cpp
+	$(CXX) -c $(CXXFLAGS)  $(INCS) -o $(BIN)task.o $(SYNC_SRC)task.cpp
+
+$(BIN)http.o:	$(DEPS) $(SYNC_SRC)http.cpp
+	$(CXX) -c $(CXXFLAGS)  $(INCS) -o $(BIN)http.o $(SYNC_SRC)http.cpp
+
+$(BIN)husthttp.o:	$(DEPS) $(SYNC_SRC)husthttp.cpp
+	$(CXX) -c $(CXXFLAGS)  $(INCS) -o $(BIN)husthttp.o $(SYNC_SRC)husthttp.cpp
+
+$(BIN)message.o:	$(DEPS) $(SYNC_SRC)message.cpp
+	$(CXX) -c $(CXXFLAGS)  $(INCS) -o $(BIN)message.o $(SYNC_SRC)message.cpp
+
+$(BIN)item.o:	$(DEPS) $(SYNC_SRC)item.cpp
+	$(CXX) -c $(CXXFLAGS)  $(INCS) -o $(BIN)item.o $(SYNC_SRC)item.cpp
+
+$(BIN)file.o:	$(DEPS) $(SYNC_SRC)file.cpp
+	$(CXX) -c $(CXXFLAGS)  $(INCS) -o $(BIN)file.o $(SYNC_SRC)file.cpp
+
+$(BIN)monitor.o:	$(DEPS) $(SYNC_SRC)monitor.cpp
+	$(CXX) -c $(CXXFLAGS)  $(INCS) -o $(BIN)monitor.o $(SYNC_SRC)monitor.cpp
+
+$(BIN)read_log.o:	$(DEPS) $(SYNC_SRC)read_log.cpp
+	$(CXX) -c $(CXXFLAGS)  $(INCS) -o $(BIN)read_log.o $(SYNC_SRC)read_log.cpp
+
+$(BIN)timer.o:	$(DEPS) $(SYNC_SRC)timer.cpp
+	$(CXX) -c $(CXXFLAGS)  $(INCS) -o $(BIN)timer.o $(SYNC_SRC)timer.cpp
+
+$(BIN)check_backend.o:	$(DEPS) $(SYNC_SRC)check_backend.cpp
+	$(CXX) -c $(CXXFLAGS)  $(INCS) -o $(BIN)check_backend.o $(SYNC_SRC)check_backend.cpp
+
+$(BIN)sync.o:	$(DEPS) $(SYNC_SRC)sync.cpp
+	$(CXX) -c $(CXXFLAGS)  $(INCS) -o $(BIN)sync.o $(SYNC_SRC)sync.cpp
+
+$(BIN)threadpool.o:	$(DEPS) $(SYNC_SRC)threadpool.cpp
+	$(CXX) -c $(CXXFLAGS)  $(INCS) -o $(BIN)threadpool.o $(SYNC_SRC)threadpool.cpp
+
+$(BIN)sync_status.o:	$(DEPS) $(SYNC_SRC)sync_status.cpp
+	$(CXX) -c $(CXXFLAGS)  $(INCS) -o $(BIN)sync_status.o $(SYNC_SRC)sync_status.cpp
+
+JOS_CPP = include/json_serialization.cpp
+$(BIN)json_serialization.o:	$(DEPS) $(JOS_CPP)
+	$(CXX) -c $(CXXFLAGS)  $(INCS) -o $(BIN)json_serialization.o $(JOS_CPP)
+
+all:	$(TARGET)
 
 clean:
 	rm -rf $(OBJS) $(TARGET)

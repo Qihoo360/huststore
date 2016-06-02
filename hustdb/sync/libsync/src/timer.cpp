@@ -1,4 +1,4 @@
-#include "../lib/global.h"
+#include "global.h"
 #include <sys/timerfd.h>
 #include <sys/time.h>
 #include <poll.h>

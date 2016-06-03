@@ -1,6 +1,6 @@
 CC = g++
 CXXFLAGS = -O0 -g3 -Wall -fmessage-length=0
-LIBS =	-levent -levent_pthreads -levent_openssl -lssl -lcrypto -levhtp -ldl -lrt -lpthread -lcurl
+LIBS =	-levent -levent_pthreads -levent_openssl -lssl -lcrypto -levhtp -ldl -lrt -lpthread -lcurl -lzlog
 LINK = -L /usr/local/lib  \
 	/usr/local/lib/libevhtp.a
 
@@ -13,6 +13,7 @@ NETWORK_SRC = $(SERVER)network/
 INCLUDE = $(SERVER)include/
 
 OBJS = $(BIN)main.o \
+	$(BIN)sync_server.o \
 	$(BIN)c_base64.o \
 	$(BIN)cond.o \
 	$(BIN)mutex.o	\
@@ -45,15 +46,22 @@ INCS = -I /usr/local/include/evhtp \
 
 DEPS = $(INCLUDE)rapidjson/rapidjson.h
 
+SERVER_CONF = sync_server.json
+LOG_CONF = zlog.conf
+
 $(TARGET):	$(OBJS)
 
 	$(CXX) -o $(TARGET) $(INCS) $(LINK) $(OBJS) $(LIBS)
 
 	chmod a+x $(TARGET)
-	cp $(MODULE_SRC)sync_server.json sync_server.json
+	cp $(MODULE_SRC)$(SERVER_CONF) $(SERVER_CONF)
+	cp $(MODULE_SRC)$(LOG_CONF) $(LOG_CONF)
 
 $(BIN)main.o:	$(DEPS) $(SERVER)main.cpp
 	$(CXX) -c $(CXXFLAGS)  $(INCS) -o $(BIN)main.o $(SERVER)main.cpp
+
+$(BIN)sync_server.o:	$(DEPS) $(SERVER)sync_server.cpp
+	$(CXX) -c $(CXXFLAGS)  $(INCS) -o $(BIN)sync_server.o $(SERVER)sync_server.cpp
 
 $(BIN)c_base64.o:	$(DEPS) $(MODULE_SRC)c_base64.cpp
 	$(CXX) -c $(CXXFLAGS)  $(INCS) -o $(BIN)c_base64.o $(MODULE_SRC)c_base64.cpp
@@ -131,11 +139,15 @@ $(BIN)libevhtp_utils.o:	$(NETWORK_SRC)libevhtp_utils.cpp
 all:	$(TARGET)
 
 clean:
-	rm -rf $(OBJS) $(TARGET) sync_server.json
+	rm -rf $(OBJS) $(TARGET) $(SERVER_CONF) $(LOG_CONF)
 
 install:		$(TARGET)
 	test -d '/data/hustdbsync' || mkdir -p '/data/hustdbsync'
 	test -d '/data/hustdbsync/logs' || mkdir -p '/data/hustdbsync/logs'
 	cp $(TARGET) '/data/hustdbsync/$(TARGET)'
-	test ! -f '/data/hustdbsync/sync_server.json' || cp '/data/hustdbsync/sync_server.json' '/data/hustdbsync/sync_server.json.old'
-	cp sync_server.json '/data/hustdbsync/'
+
+	test ! -f '/data/hustdbsync/$(SERVER_CONF)' || cp '/data/hustdbsync/$(SERVER_CONF)' '/data/hustdbsync/$(SERVER_CONF).old'
+	cp $(SERVER_CONF) '/data/hustdbsync/'
+
+	test ! -f '/data/hustdbsync/$(LOG_CONF)' || cp '/data/hustdbsync/$(LOG_CONF)' '/data/hustdbsync/$(LOG_CONF).old'
+	cp $(LOG_CONF) '/data/hustdbsync/'

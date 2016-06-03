@@ -24,6 +24,7 @@ ngx_int_t hustdb_ha_stat_handler(ngx_str_t * backend_uri, ngx_http_request_t *r)
 ngx_int_t hustdb_ha_stat_all_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
 ngx_int_t hustdb_ha_peer_count_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
 ngx_int_t hustdb_ha_sync_status_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
+ngx_int_t hustdb_ha_sync_alive_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
 ngx_int_t hustdb_ha_get_table_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
 ngx_int_t hustdb_ha_set_table_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
 ngx_int_t hustdb_ha_zismember_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);

@@ -1,8 +1,19 @@
-#include "hustdb_ha_handler.h"
+#include "hustdb_ha_sync_handler.h"
 
 ngx_int_t hustdb_ha_sync_alive_handler(ngx_str_t * backend_uri, ngx_http_request_t *r)
 {
-    ngx_str_t response = ngx_string("ok");
-    r->headers_out.status = NGX_HTTP_OK;
-    return ngx_http_send_response_imp(r->headers_out.status, &response, r);
+    ngx_http_hustdb_ha_main_conf_t * mcf = hustdb_ha_get_module_main_conf(r);
+    if (!mcf)
+    {
+        return NGX_ERROR;
+    }
+    static ngx_str_t http_uri = ngx_string("/status.html");
+    static ngx_str_t http_args = ngx_null_string;
+    ngx_int_t rc = hustdb_ha_fetch_sync_data(&http_uri, &http_args,
+        &mcf->sync_user, &mcf->sync_passwd, mcf->sync_peer, r);
+    if (NGX_ERROR == rc)
+    {
+        return ngx_http_send_response_imp(NGX_HTTP_NOT_FOUND, NULL, r);
+    }
+    return NGX_DONE;
 }

@@ -7,6 +7,7 @@ NGX_ADDON_SRCS="$NGX_ADDON_SRCS \
     $ngx_addon_dir/hustdb_ha_handler_base.c\
     $ngx_addon_dir/hustdb_ha_write_handler.c\
     $ngx_addon_dir/hustdb_ha_read_handler.c\
+    $ngx_addon_dir/hustdb_ha_sync_handler.c\
     $ngx_addon_dir/hustdb_ha_get_handler.c\
     $ngx_addon_dir/hustdb_ha_get2_handler.c\
     $ngx_addon_dir/hustdb_ha_exist_handler.c\

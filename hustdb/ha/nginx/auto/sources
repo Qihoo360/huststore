@@ -299,7 +299,15 @@ HTTP_DEPS="src/http/ngx_http.h \
            src/http/ngx_http_upstream.h \
            src/http/ngx_http_upstream_round_robin.h \
            src/http/ngx_http_peer_selector.h \
-           src/http/modules/ngx_http_utils_module.h"
+           src/http/modules/ngx_http_utils_module.h \
+           src/http/modules/ngx_http_fetch_utils.h \
+           src/http/modules/ngx_http_fetch_cache.h \
+           src/http/modules/ngx_http_fetch_encode.h \
+           src/http/modules/ngx_http_fetch_decode.h \
+           src/http/modules/ngx_http_fetch_keepalive.h \
+           src/http/modules/ngx_http_fetch_upstream_handler.h \
+           src/http/modules/ngx_http_fetch_upstream.h \
+           src/http/modules/ngx_http_fetch.h"
 
 HTTP_SRCS="src/http/ngx_http.c \
            src/http/ngx_http_core_module.c \
@@ -321,7 +329,16 @@ HTTP_SRCS="src/http/ngx_http.c \
            src/http/modules/ngx_http_range_filter_module.c \
            src/http/modules/ngx_http_headers_filter_module.c \
            src/http/modules/ngx_http_not_modified_filter_module.c \
-           src/http/modules/ngx_http_utils_module.c"
+           src/http/modules/ngx_http_utils_module.c \
+           src/http/modules/ngx_http_fetch_utils.c \
+           src/http/modules/ngx_http_fetch_cache.c \
+           src/http/modules/ngx_http_fetch_encode.c \
+           src/http/modules/ngx_http_fetch_decode.c \
+           src/http/modules/ngx_http_fetch_keepalive.c \
+           src/http/modules/ngx_http_fetch_upstream_handler.c \
+           src/http/modules/ngx_http_fetch_upstream.c \
+           src/http/modules/ngx_http_fetch.c \
+           src/http/modules/ngx_http_fetch_module.c"
 
 HTTP_POSTPONE_FILTER_SRCS=src/http/ngx_http_postpone_filter_module.c
 

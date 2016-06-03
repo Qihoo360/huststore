@@ -61,6 +61,20 @@ ngx_str_t hustdb_ha_make_str(ngx_str_t * val, ngx_http_request_t * r)
     return rc;
 }
 
+ngx_str_t hustdb_ha_strcat(const ngx_str_t * str, int num, ngx_pool_t * pool)
+{
+    ngx_str_t out;
+    size_t len = str->len + 11;
+    out.data = ngx_palloc(pool, len);
+    if (!out.data)
+    {
+        return out;
+    }
+    sprintf((char *)out.data, "%s%d", str->data, num);
+    out.len = strlen((const char *)out.data);
+    return out;
+}
+
 static ngx_http_peer_array_t g_peer_array;
 static hustdb_ha_peers_t g_peers;
 
@@ -624,4 +638,92 @@ ngx_bool_t hustdb_ha_overwrite_backends(const ngx_str_array_t * backends, ngx_po
         return false;
     }
     return true;
+}
+
+// ngx_http_upstream.c:ngx_http_upstream_server
+static ngx_http_upstream_server_t * ngx_http_parse_upstream_server(const ngx_str_t * url, ngx_conf_t * cf)
+{
+    ngx_int_t weight = 1;
+    ngx_int_t max_fails = 1;
+    time_t fail_timeout = 10;
+
+    ngx_url_t u;
+    ngx_memzero(&u, sizeof(ngx_url_t));
+    u.url = *url;
+    u.default_port = 80;
+
+    if (NGX_OK != ngx_parse_url(cf->pool, &u))
+    {
+        return NULL;
+    }
+
+    ngx_http_upstream_server_t * us = ngx_palloc(cf->pool, sizeof(ngx_http_upstream_server_t));
+    ngx_memzero(us, sizeof(ngx_http_upstream_server_t));
+
+    us->name = u.url;
+    us->addrs = u.addrs;
+    us->naddrs = u.naddrs;
+    us->weight = weight;
+    us->max_fails = max_fails;
+    us->fail_timeout = fail_timeout;
+
+    return us;
+}
+
+// ngx_http_upstream_round_robin.c:ngx_http_upstream_init_round_robin
+static ngx_http_upstream_rr_peer_t * ngx_http_get_upstream_rr_peer(ngx_http_upstream_server_t * server, ngx_conf_t * cf)
+{
+    ngx_http_upstream_rr_peer_t * peer = ngx_pcalloc(cf->pool, sizeof(ngx_http_upstream_rr_peer_t));
+    if (!peer)
+    {
+        return NULL;
+    }
+
+    peer->sockaddr = server->addrs[0].sockaddr;
+    peer->socklen = server->addrs[0].socklen;
+    peer->name = server->addrs[0].name;
+    peer->weight = server->weight;
+    peer->effective_weight = server->weight;
+    peer->current_weight = 0;
+    peer->max_fails = server->max_fails;
+    peer->fail_timeout = server->fail_timeout;
+    peer->down = server->down;
+    peer->server = server->name;
+
+    return peer;
+}
+
+// ngx_http_upstream_round_robin.c:ngx_http_upstream_init_round_robin
+ngx_http_upstream_rr_peers_t  * hustdb_ha_init_upstream_rr_peers(const ngx_str_t * url, ngx_conf_t * cf)
+{
+    ngx_http_upstream_server_t * server = ngx_http_parse_upstream_server(url, cf);
+    if (!server)
+    {
+        return NULL;
+    }
+    ngx_http_upstream_rr_peer_t * peer = ngx_http_get_upstream_rr_peer(server, cf);
+    if (!peer)
+    {
+        return NULL;
+    }
+
+    ngx_uint_t n = server->naddrs;
+    ngx_uint_t w = server->naddrs * server->weight;
+
+    ngx_http_upstream_rr_peers_t  * peers = ngx_pcalloc(cf->pool, sizeof(ngx_http_upstream_rr_peers_t));
+    if (!peers)
+    {
+        return NULL;
+    }
+
+    peers->single = 1;
+    peers->number = n;
+    peers->weighted = (w != n);
+    peers->total_weight = w;
+
+    ngx_http_upstream_rr_peer_t **peerp = &peers->peer;
+    *peerp = peer;
+    peerp = &peer->next;
+
+    return peers;
 }

@@ -428,10 +428,6 @@ main(int argc, char *const *argv)
         ngx_single_process_cycle(cycle);
 
     } else {
-        if (NGX_OK != ngx_before_master_cycle(cycle))
-        {
-            return 1;
-        }
         ngx_master_process_cycle(cycle);
     }
 

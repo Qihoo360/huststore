@@ -60,6 +60,5 @@ extern sig_atomic_t    ngx_change_binary;
 void sig_user1_handler(int signo, siginfo_t *info, void *none);
 ngx_int_t ngx_reload_configuration();
 ngx_int_t ngx_restart_instance();
-int ngx_before_master_cycle(ngx_cycle_t * cycle);
 
 #endif /* _NGX_PROCESS_CYCLE_H_INCLUDED_ */

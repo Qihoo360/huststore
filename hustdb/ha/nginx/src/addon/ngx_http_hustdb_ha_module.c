@@ -1,9 +1,9 @@
 #include <dlfcn.h>
 #include <pthread.h>
+#include <ngx_http_fetch.h>
 #include "hustdb_ha_table_def.h"
 #include "hustdb_ha_handler.h"
 
-static void * g_libsync = NULL;
 static ngx_http_hustdb_ha_main_conf_t * g_mcf = NULL;
 
 static ngx_int_t ngx_http_hustdb_ha_handler(ngx_http_request_t *r);
@@ -13,11 +13,6 @@ static ngx_int_t ngx_http_hustdb_ha_init_process(ngx_cycle_t * cycle);
 static void ngx_http_hustdb_ha_exit_process(ngx_cycle_t * cycle);
 static void ngx_http_hustdb_ha_exit_master(ngx_cycle_t * cycle);
 static char * ngx_http_debug_sync(ngx_conf_t * cf, ngx_command_t * cmd, void * conf);
-static char * ngx_http_disable_sync(ngx_conf_t * cf, ngx_command_t * cmd, void * conf);
-static char * ngx_http_sync_threads(ngx_conf_t * cf, ngx_command_t * cmd, void * conf);
-static char * ngx_http_sync_release_interval(ngx_conf_t * cf, ngx_command_t * cmd, void * conf);
-static char * ngx_http_sync_checkdb_interval(ngx_conf_t * cf, ngx_command_t * cmd, void * conf);
-static char * ngx_http_sync_checklog_interval(ngx_conf_t * cf, ngx_command_t * cmd, void * conf);
 static char * ngx_http_zlog_mdc(ngx_conf_t * cf, ngx_command_t * cmd, void * conf);
 static char * ngx_http_hustdbtable_file(ngx_conf_t * cf, ngx_command_t * cmd, void * conf);
 static char * ngx_http_hustdb_ha_shm_name(ngx_conf_t * cf, ngx_command_t * cmd, void * conf);
@@ -25,6 +20,18 @@ static char * ngx_http_hustdb_ha_shm_size(ngx_conf_t * cf, ngx_command_t * cmd, 
 static char * ngx_http_public_pem(ngx_conf_t * cf, ngx_command_t * cmd, void * conf);
 static char * ngx_http_identifier_cache_size(ngx_conf_t * cf, ngx_command_t * cmd, void * conf);
 static char * ngx_http_identifier_timeout(ngx_conf_t * cf, ngx_command_t * cmd, void * conf);
+static char * ngx_http_fetch_req_pool_size(ngx_conf_t * cf, ngx_command_t * cmd, void * conf);
+static char * ngx_http_keepalive_cache_size(ngx_conf_t * cf, ngx_command_t * cmd, void * conf);
+static char * ngx_http_connection_cache_size(ngx_conf_t * cf, ngx_command_t * cmd, void * conf);
+static char * ngx_http_fetch_connect_timeout(ngx_conf_t * cf, ngx_command_t * cmd, void * conf);
+static char * ngx_http_fetch_send_timeout(ngx_conf_t * cf, ngx_command_t * cmd, void * conf);
+static char * ngx_http_fetch_read_timeout(ngx_conf_t * cf, ngx_command_t * cmd, void * conf);
+static char * ngx_http_fetch_timeout(ngx_conf_t * cf, ngx_command_t * cmd, void * conf);
+static char * ngx_http_fetch_buffer_size(ngx_conf_t * cf, ngx_command_t * cmd, void * conf);
+static char * ngx_http_sync_port(ngx_conf_t * cf, ngx_command_t * cmd, void * conf);
+static char * ngx_http_sync_status_uri(ngx_conf_t * cf, ngx_command_t * cmd, void * conf);
+static char * ngx_http_sync_user(ngx_conf_t * cf, ngx_command_t * cmd, void * conf);
+static char * ngx_http_sync_passwd(ngx_conf_t * cf, ngx_command_t * cmd, void * conf);
 static void * ngx_http_hustdb_ha_create_main_conf(ngx_conf_t *cf);
 char * ngx_http_hustdb_ha_init_main_conf(ngx_conf_t * cf, void * conf);
 
@@ -195,11 +202,6 @@ static ngx_command_t ngx_http_hustdb_ha_commands[] =
         NULL
     },
     APPEND_MCF_ITEM("debug_sync", ngx_http_debug_sync),
-    APPEND_MCF_ITEM("disable_sync", ngx_http_disable_sync),
-    APPEND_MCF_ITEM("sync_threads", ngx_http_sync_threads),
-    APPEND_MCF_ITEM("sync_release_interval", ngx_http_sync_release_interval),
-    APPEND_MCF_ITEM("sync_checkdb_interval", ngx_http_sync_checkdb_interval),
-    APPEND_MCF_ITEM("sync_checklog_interval", ngx_http_sync_checklog_interval),
     APPEND_MCF_ITEM("zlog_mdc", ngx_http_zlog_mdc),
     APPEND_MCF_ITEM("hustdbtable_file", ngx_http_hustdbtable_file),
     APPEND_MCF_ITEM("hustdb_ha_shm_name", ngx_http_hustdb_ha_shm_name),
@@ -207,6 +209,18 @@ static ngx_command_t ngx_http_hustdb_ha_commands[] =
     APPEND_MCF_ITEM("public_pem", ngx_http_public_pem),
     APPEND_MCF_ITEM("identifier_cache_size", ngx_http_identifier_cache_size),
     APPEND_MCF_ITEM("identifier_timeout", ngx_http_identifier_timeout),
+    APPEND_MCF_ITEM("fetch_req_pool_size", ngx_http_fetch_req_pool_size),
+    APPEND_MCF_ITEM("keepalive_cache_size", ngx_http_keepalive_cache_size),
+    APPEND_MCF_ITEM("connection_cache_size", ngx_http_connection_cache_size),
+    APPEND_MCF_ITEM("fetch_connect_timeout", ngx_http_fetch_connect_timeout),
+    APPEND_MCF_ITEM("fetch_send_timeout", ngx_http_fetch_send_timeout),
+    APPEND_MCF_ITEM("fetch_read_timeout", ngx_http_fetch_read_timeout),
+    APPEND_MCF_ITEM("fetch_timeout", ngx_http_fetch_timeout),
+    APPEND_MCF_ITEM("fetch_buffer_size", ngx_http_fetch_buffer_size),
+    APPEND_MCF_ITEM("sync_port", ngx_http_sync_port),
+    APPEND_MCF_ITEM("sync_status_uri", ngx_http_sync_status_uri),
+    APPEND_MCF_ITEM("sync_user", ngx_http_sync_user),
+    APPEND_MCF_ITEM("sync_passwd", ngx_http_sync_passwd),
     ngx_null_command
 };
 
@@ -252,92 +266,6 @@ static char * ngx_http_debug_sync(ngx_conf_t * cf, ngx_command_t * cmd, void * c
         return "ngx_http_debug_sync error";
     }
     mcf->debug_sync = val;
-    // TODO: you can modify the value here
-    return NGX_CONF_OK;
-}
-
-static char * ngx_http_disable_sync(ngx_conf_t * cf, ngx_command_t * cmd, void * conf)
-{
-    ngx_http_hustdb_ha_main_conf_t * mcf = ngx_http_conf_get_module_main_conf(cf, ngx_http_hustdb_ha_module);
-    if (!mcf || 2 != cf->args->nelts)
-    {
-        mcf->disable_sync = false;
-        return NGX_CONF_OK;
-    }
-    int val = ngx_http_get_flag_slot(cf);
-    if (NGX_ERROR == val)
-    {
-        return "ngx_http_disable_sync error";
-    }
-    mcf->disable_sync = val;
-    // TODO: you can modify the value here
-    return NGX_CONF_OK;
-}
-
-static char * ngx_http_sync_threads(ngx_conf_t * cf, ngx_command_t * cmd, void * conf)
-{
-    ngx_http_hustdb_ha_main_conf_t * mcf = ngx_http_conf_get_module_main_conf(cf, ngx_http_hustdb_ha_module);
-    if (!mcf || 2 != cf->args->nelts)
-    {
-        return "ngx_http_sync_threads error";
-    }
-    ngx_str_t * value = cf->args->elts;
-    mcf->sync_threads = ngx_atoi(value[1].data, value[1].len);
-    if (NGX_ERROR == mcf->sync_threads)
-    {
-        return "ngx_http_sync_threads error";
-    }
-    // TODO: you can modify the value here
-    return NGX_CONF_OK;
-}
-
-static char * ngx_http_sync_release_interval(ngx_conf_t * cf, ngx_command_t * cmd, void * conf)
-{
-    ngx_http_hustdb_ha_main_conf_t * mcf = ngx_http_conf_get_module_main_conf(cf, ngx_http_hustdb_ha_module);
-    if (!mcf || 2 != cf->args->nelts)
-    {
-        return "ngx_http_sync_release_interval error";
-    }
-    ngx_str_t * value = cf->args->elts;
-    mcf->sync_release_interval = ngx_parse_time(&value[1], 0);
-    if (NGX_ERROR == mcf->sync_release_interval)
-    {
-        return "ngx_http_sync_release_interval error";
-    }
-    // TODO: you can modify the value here
-    return NGX_CONF_OK;
-}
-
-static char * ngx_http_sync_checkdb_interval(ngx_conf_t * cf, ngx_command_t * cmd, void * conf)
-{
-    ngx_http_hustdb_ha_main_conf_t * mcf = ngx_http_conf_get_module_main_conf(cf, ngx_http_hustdb_ha_module);
-    if (!mcf || 2 != cf->args->nelts)
-    {
-        return "ngx_http_sync_checkdb_interval error";
-    }
-    ngx_str_t * value = cf->args->elts;
-    mcf->sync_checkdb_interval = ngx_parse_time(&value[1], 0);
-    if (NGX_ERROR == mcf->sync_checkdb_interval)
-    {
-        return "ngx_http_sync_checkdb_interval error";
-    }
-    // TODO: you can modify the value here
-    return NGX_CONF_OK;
-}
-
-static char * ngx_http_sync_checklog_interval(ngx_conf_t * cf, ngx_command_t * cmd, void * conf)
-{
-    ngx_http_hustdb_ha_main_conf_t * mcf = ngx_http_conf_get_module_main_conf(cf, ngx_http_hustdb_ha_module);
-    if (!mcf || 2 != cf->args->nelts)
-    {
-        return "ngx_http_sync_checklog_interval error";
-    }
-    ngx_str_t * value = cf->args->elts;
-    mcf->sync_checklog_interval = ngx_parse_time(&value[1], 0);
-    if (NGX_ERROR == mcf->sync_checklog_interval)
-    {
-        return "ngx_http_sync_checklog_interval error";
-    }
     // TODO: you can modify the value here
     return NGX_CONF_OK;
 }
@@ -445,6 +373,198 @@ static char * ngx_http_identifier_timeout(ngx_conf_t * cf, ngx_command_t * cmd, 
     return NGX_CONF_OK;
 }
 
+static char * ngx_http_fetch_req_pool_size(ngx_conf_t * cf, ngx_command_t * cmd, void * conf)
+{
+    ngx_http_hustdb_ha_main_conf_t * mcf = ngx_http_conf_get_module_main_conf(cf, ngx_http_hustdb_ha_module);
+    if (!mcf || 2 != cf->args->nelts)
+    {
+        return "ngx_http_fetch_req_pool_size error";
+    }
+    ngx_str_t * value = cf->args->elts;
+    mcf->fetch_req_pool_size = ngx_parse_size(&value[1]);
+    if (NGX_ERROR == mcf->fetch_req_pool_size)
+    {
+        return "ngx_http_fetch_req_pool_size error";
+    }
+    // TODO: you can modify the value here
+    return NGX_CONF_OK;
+}
+
+static char * ngx_http_keepalive_cache_size(ngx_conf_t * cf, ngx_command_t * cmd, void * conf)
+{
+    ngx_http_hustdb_ha_main_conf_t * mcf = ngx_http_conf_get_module_main_conf(cf, ngx_http_hustdb_ha_module);
+    if (!mcf || 2 != cf->args->nelts)
+    {
+        return "ngx_http_keepalive_cache_size error";
+    }
+    ngx_str_t * value = cf->args->elts;
+    mcf->keepalive_cache_size = ngx_atoi(value[1].data, value[1].len);
+    if (NGX_ERROR == mcf->keepalive_cache_size)
+    {
+        return "ngx_http_keepalive_cache_size error";
+    }
+    // TODO: you can modify the value here
+    return NGX_CONF_OK;
+}
+
+static char * ngx_http_connection_cache_size(ngx_conf_t * cf, ngx_command_t * cmd, void * conf)
+{
+    ngx_http_hustdb_ha_main_conf_t * mcf = ngx_http_conf_get_module_main_conf(cf, ngx_http_hustdb_ha_module);
+    if (!mcf || 2 != cf->args->nelts)
+    {
+        return "ngx_http_connection_cache_size error";
+    }
+    ngx_str_t * value = cf->args->elts;
+    mcf->connection_cache_size = ngx_atoi(value[1].data, value[1].len);
+    if (NGX_ERROR == mcf->connection_cache_size)
+    {
+        return "ngx_http_connection_cache_size error";
+    }
+    // TODO: you can modify the value here
+    return NGX_CONF_OK;
+}
+
+static char * ngx_http_fetch_connect_timeout(ngx_conf_t * cf, ngx_command_t * cmd, void * conf)
+{
+    ngx_http_hustdb_ha_main_conf_t * mcf = ngx_http_conf_get_module_main_conf(cf, ngx_http_hustdb_ha_module);
+    if (!mcf || 2 != cf->args->nelts)
+    {
+        return "ngx_http_fetch_connect_timeout error";
+    }
+    ngx_str_t * value = cf->args->elts;
+    mcf->fetch_connect_timeout = ngx_parse_time(&value[1], 0);
+    if (NGX_ERROR == mcf->fetch_connect_timeout)
+    {
+        return "ngx_http_fetch_connect_timeout error";
+    }
+    // TODO: you can modify the value here
+    return NGX_CONF_OK;
+}
+
+static char * ngx_http_fetch_send_timeout(ngx_conf_t * cf, ngx_command_t * cmd, void * conf)
+{
+    ngx_http_hustdb_ha_main_conf_t * mcf = ngx_http_conf_get_module_main_conf(cf, ngx_http_hustdb_ha_module);
+    if (!mcf || 2 != cf->args->nelts)
+    {
+        return "ngx_http_fetch_send_timeout error";
+    }
+    ngx_str_t * value = cf->args->elts;
+    mcf->fetch_send_timeout = ngx_parse_time(&value[1], 0);
+    if (NGX_ERROR == mcf->fetch_send_timeout)
+    {
+        return "ngx_http_fetch_send_timeout error";
+    }
+    // TODO: you can modify the value here
+    return NGX_CONF_OK;
+}
+
+static char * ngx_http_fetch_read_timeout(ngx_conf_t * cf, ngx_command_t * cmd, void * conf)
+{
+    ngx_http_hustdb_ha_main_conf_t * mcf = ngx_http_conf_get_module_main_conf(cf, ngx_http_hustdb_ha_module);
+    if (!mcf || 2 != cf->args->nelts)
+    {
+        return "ngx_http_fetch_read_timeout error";
+    }
+    ngx_str_t * value = cf->args->elts;
+    mcf->fetch_read_timeout = ngx_parse_time(&value[1], 0);
+    if (NGX_ERROR == mcf->fetch_read_timeout)
+    {
+        return "ngx_http_fetch_read_timeout error";
+    }
+    // TODO: you can modify the value here
+    return NGX_CONF_OK;
+}
+
+static char * ngx_http_fetch_timeout(ngx_conf_t * cf, ngx_command_t * cmd, void * conf)
+{
+    ngx_http_hustdb_ha_main_conf_t * mcf = ngx_http_conf_get_module_main_conf(cf, ngx_http_hustdb_ha_module);
+    if (!mcf || 2 != cf->args->nelts)
+    {
+        return "ngx_http_fetch_timeout error";
+    }
+    ngx_str_t * value = cf->args->elts;
+    mcf->fetch_timeout = ngx_parse_time(&value[1], 0);
+    if (NGX_ERROR == mcf->fetch_timeout)
+    {
+        return "ngx_http_fetch_timeout error";
+    }
+    // TODO: you can modify the value here
+    return NGX_CONF_OK;
+}
+
+static char * ngx_http_fetch_buffer_size(ngx_conf_t * cf, ngx_command_t * cmd, void * conf)
+{
+    ngx_http_hustdb_ha_main_conf_t * mcf = ngx_http_conf_get_module_main_conf(cf, ngx_http_hustdb_ha_module);
+    if (!mcf || 2 != cf->args->nelts)
+    {
+        return "ngx_http_fetch_buffer_size error";
+    }
+    ngx_str_t * value = cf->args->elts;
+    mcf->fetch_buffer_size = ngx_parse_size(&value[1]);
+    if (NGX_ERROR == mcf->fetch_buffer_size)
+    {
+        return "ngx_http_fetch_buffer_size error";
+    }
+    // TODO: you can modify the value here
+    return NGX_CONF_OK;
+}
+
+static char * ngx_http_sync_port(ngx_conf_t * cf, ngx_command_t * cmd, void * conf)
+{
+    ngx_http_hustdb_ha_main_conf_t * mcf = ngx_http_conf_get_module_main_conf(cf, ngx_http_hustdb_ha_module);
+    if (!mcf || 2 != cf->args->nelts)
+    {
+        return "ngx_http_sync_port error";
+    }
+    ngx_str_t * value = cf->args->elts;
+    mcf->sync_port = ngx_atoi(value[1].data, value[1].len);
+    if (NGX_ERROR == mcf->sync_port)
+    {
+        return "ngx_http_sync_port error";
+    }
+    // TODO: you can modify the value here
+    return NGX_CONF_OK;
+}
+
+static char * ngx_http_sync_status_uri(ngx_conf_t * cf, ngx_command_t * cmd, void * conf)
+{
+    ngx_http_hustdb_ha_main_conf_t * mcf = ngx_http_conf_get_module_main_conf(cf, ngx_http_hustdb_ha_module);
+    if (!mcf || 2 != cf->args->nelts)
+    {
+        return "ngx_http_sync_status_uri error";
+    }
+    ngx_str_t * arr = cf->args->elts;
+    mcf->sync_status_uri = ngx_http_make_str(&arr[1], cf->pool);
+    // TODO: you can modify the value here
+    return NGX_CONF_OK;
+}
+
+static char * ngx_http_sync_user(ngx_conf_t * cf, ngx_command_t * cmd, void * conf)
+{
+    ngx_http_hustdb_ha_main_conf_t * mcf = ngx_http_conf_get_module_main_conf(cf, ngx_http_hustdb_ha_module);
+    if (!mcf || 2 != cf->args->nelts)
+    {
+        return "ngx_http_sync_user error";
+    }
+    ngx_str_t * arr = cf->args->elts;
+    mcf->sync_user = ngx_http_make_str(&arr[1], cf->pool);
+    // TODO: you can modify the value here
+    return NGX_CONF_OK;
+}
+
+static char * ngx_http_sync_passwd(ngx_conf_t * cf, ngx_command_t * cmd, void * conf)
+{
+    ngx_http_hustdb_ha_main_conf_t * mcf = ngx_http_conf_get_module_main_conf(cf, ngx_http_hustdb_ha_module);
+    if (!mcf || 2 != cf->args->nelts)
+    {
+        return "ngx_http_sync_passwd error";
+    }
+    ngx_str_t * arr = cf->args->elts;
+    mcf->sync_passwd = ngx_http_make_str(&arr[1], cf->pool);
+    // TODO: you can modify the value here
+    return NGX_CONF_OK;
+}
+
 static char *ngx_http_hustdb_ha(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 {
     ngx_http_core_loc_conf_t * clcf = ngx_http_conf_get_module_loc_conf(
@@ -462,75 +582,6 @@ static ngx_int_t ngx_http_hustdb_ha_handler(ngx_http_request_t *r)
         return NGX_ERROR;
     }
     return it->handler(&it->backend_uri, r);
-}
-
-static ngx_str_t __get_prefix(ngx_str_t * prefix, ngx_pool_t * pool)
-{
-    ngx_str_t path = { 0, 0 };
-    path.len = prefix->len;
-    path.data  = ngx_pcalloc(pool, path.len + 1);
-    memcpy(path.data, prefix->data, prefix->len);
-    path.data[path.len] = '\0';
-    return path;
-}
-
-int ngx_before_master_cycle(ngx_cycle_t * cycle)
-{
-    if (g_mcf->disable_sync)
-    {
-        return NGX_OK;
-    }
-    ngx_str_t prefix = __get_prefix(&cycle->prefix, cycle->pool);
-    static ngx_str_t libsync = ngx_string("sbin/libsync.so");
-    ngx_str_t dl_path = hustdb_ha_init_dir(&prefix, &libsync, cycle->pool);
-
-    static ngx_str_t logs = ngx_string("logs/");
-    ngx_str_t logs_path = hustdb_ha_init_dir(&prefix, &logs, cycle->pool);
-
-    static ngx_str_t auth = ngx_string("htpasswd");
-    ngx_str_t auth_path = ngx_http_get_conf_path(cycle, &auth);
-
-    do
-    {
-        g_libsync = dlopen((const char *)dl_path.data, RTLD_LAZY);
-        if (!g_libsync)
-        {
-            break;
-        }
-
-        typedef ngx_bool_t (*libsync_init_t)(
-            const char * logs_path,
-            const char * ngx_path,
-            const char * auth_path,
-            int pool_size,
-            int release_interval,
-            int checkdb_interval,
-            int checklog_interval);
-        libsync_init_t init = dlsym(g_libsync, "init");
-        char * error = dlerror();
-        if(error)
-        {
-            break;
-        }
-
-        if (!init((const char *)logs_path.data,
-            (const char *)prefix.data,
-            (const char *)auth_path.data,
-            g_mcf->sync_threads,
-            g_mcf->sync_release_interval,
-            g_mcf->sync_checkdb_interval,
-            g_mcf->sync_checklog_interval))
-        {
-            break;
-        }
-        return NGX_OK;
-    } while (0);
-
-    if (g_libsync)
-    {
-        dlclose(g_libsync);
-    }
-    return NGX_ERROR;
 }
 
 static ngx_int_t ngx_http_hustdb_ha_init_module(ngx_cycle_t * cycle)
@@ -553,49 +604,6 @@ static void ngx_http_hustdb_ha_exit_process(ngx_cycle_t * cycle)
 static void ngx_http_hustdb_ha_exit_master(ngx_cycle_t * cycle)
 {
     // TODO: uninitialize in master process
-    if (g_mcf->disable_sync || !g_libsync)
-    {
-        return;
-    }
-    typedef ngx_bool_t (*libsync_stop_sync_t)();
-    libsync_stop_sync_t stop_sync = dlsym(g_libsync, "stop_sync");
-    char * error = dlerror();
-    if(!error)
-    {
-        stop_sync();
-    }
-    dlclose(g_libsync);
-}
-
-char * hustdb_ha_get_status()
-{
-    if (!g_libsync)
-    {
-        return NULL;
-    }
-    typedef char * (*libsync_get_status_t)(int hosts_size);
-    libsync_get_status_t get_status = dlsym(g_libsync, "get_status");
-    char * error = dlerror();
-    if(!error)
-    {
-        return get_status(ngx_http_get_backend_count());
-    }
-    return NULL;
-}
-
-void hustdb_ha_dispose_status(char * status)
-{
-    if (!g_libsync)
-    {
-        return;
-    }
-    typedef void (*libsync_dispose_status_t)(char * status);
-    libsync_dispose_status_t dispose_status = dlsym(g_libsync, "dispose_status");
-    char * error = dlerror();
-    if(!error)
-    {
-        dispose_status(status);
-    }
 }
 
 static void * ngx_http_hustdb_ha_create_main_conf(ngx_conf_t *cf)
@@ -612,6 +620,41 @@ static ngx_int_t ngx_http_addon_init_shm_ctx(ngx_slab_pool_t * shpool, void * sh
         return NGX_ERROR;
     }
     return NGX_OK;
+}
+
+static ngx_bool_t __init_fetch(ngx_conf_t * cf, ngx_http_hustdb_ha_main_conf_t * mcf)
+{
+    static ngx_str_t ARGS = ngx_string("backend_count=");
+    mcf->sync_status_args = hustdb_ha_strcat(&ARGS, (int) ngx_http_get_backend_count(), cf->pool);
+
+    static ngx_str_t PREFIX = ngx_string("127.0.0.1:");
+    ngx_str_t uri = hustdb_ha_strcat(&PREFIX, mcf->sync_port, cf->pool);
+    if (!uri.data)
+    {
+        return false;
+    }
+
+    ngx_http_upstream_rr_peers_t  * peers = hustdb_ha_init_upstream_rr_peers(&uri, cf);
+    if (!peers)
+    {
+        return false;
+    }
+    mcf->sync_peer = peers->peer;
+    ngx_http_fetch_essential_conf_t ecf = { mcf->fetch_req_pool_size, mcf->keepalive_cache_size, mcf->connection_cache_size, cf, peers };
+    ngx_http_fetch_upstream_conf_t ucf = {
+        mcf->fetch_connect_timeout,
+        mcf->fetch_send_timeout,
+        mcf->fetch_read_timeout,
+        mcf->fetch_timeout,
+        mcf->fetch_buffer_size,
+        { 0, 0 },
+        0
+    };
+    if (NGX_OK != ngx_http_fetch_init_conf(&ecf, &ucf, NULL))
+    {
+        return false;
+    }
+    return true;
 }
 
 char * ngx_http_hustdb_ha_init_main_conf(ngx_conf_t * cf, void * conf)
@@ -642,6 +685,11 @@ char * ngx_http_hustdb_ha_init_main_conf(ngx_conf_t * cf, void * conf)
 	}
 
 	if (!hustdb_ha_init_log_dirs(&mcf->prefix, mcf->pool))
+	{
+	    return NGX_CONF_ERROR;
+	}
+
+	if (!__init_fetch(cf, mcf))
 	{
 	    return NGX_CONF_ERROR;
 	}

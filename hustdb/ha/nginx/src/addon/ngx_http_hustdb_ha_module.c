@@ -143,6 +143,11 @@ static ngx_http_request_item_t hustdb_ha_handler_dict[] =
         hustdb_ha_sync_status_handler
     },
     {
+        ngx_string("/sync_alive"),
+        ngx_null_string,
+        hustdb_ha_sync_alive_handler
+    },
+    {
         ngx_string("/get_table"),
         ngx_null_string,
         hustdb_ha_get_table_handler

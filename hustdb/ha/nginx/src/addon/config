@@ -28,6 +28,7 @@ NGX_ADDON_SRCS="$NGX_ADDON_SRCS \
     $ngx_addon_dir/hustdb_ha_stat_all_handler.c\
     $ngx_addon_dir/hustdb_ha_peer_count_handler.c\
     $ngx_addon_dir/hustdb_ha_sync_status_handler.c\
+    $ngx_addon_dir/hustdb_ha_sync_alive_handler.c\
     $ngx_addon_dir/hustdb_ha_get_table_handler.c\
     $ngx_addon_dir/hustdb_ha_set_table_handler.c\
     $ngx_addon_dir/hustdb_ha_zismember_handler.c\

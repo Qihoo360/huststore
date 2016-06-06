@@ -32,6 +32,16 @@ typedef struct
     ngx_http_fetch_select_addr_t select_addr;
 } ngx_http_fetch_selector_t;
 
+typedef struct
+{
+    ngx_str_t * arr;
+    size_t size;
+} ngx_url_array_t;
+
+// for example: if you need to fetch these urls: ["127.0.0.1:8081", "127.0.0.1:8082", "127.0.0.1:8083"],
+//   which are NOT in "nginx.conf", then you can call this function to get upstream peers.
+ngx_http_upstream_rr_peers_t  * ngx_http_init_upstream_rr_peers(const ngx_url_array_t * urls, ngx_conf_t * cf);
+
 // selector can be set as NULL in most cases
 ngx_int_t ngx_http_fetch_init_conf(
     const ngx_http_fetch_essential_conf_t * essential_conf,

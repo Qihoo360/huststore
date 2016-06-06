@@ -18,6 +18,94 @@ typedef struct
 
 static ngx_http_fetch_conf_t * g_conf = NULL;
 
+// ngx_http_upstream.c:ngx_http_upstream_server
+static ngx_http_upstream_server_t * ngx_http_parse_upstream_server(const ngx_str_t * url, ngx_conf_t * cf)
+{
+    ngx_int_t weight = 1;
+    ngx_int_t max_fails = 1;
+    time_t fail_timeout = 10;
+
+    ngx_url_t u;
+    ngx_memzero(&u, sizeof(ngx_url_t));
+    u.url = *url;
+    u.default_port = 80;
+
+    if (NGX_OK != ngx_parse_url(cf->pool, &u))
+    {
+        return NULL;
+    }
+
+    ngx_http_upstream_server_t * us = ngx_palloc(cf->pool, sizeof(ngx_http_upstream_server_t));
+    ngx_memzero(us, sizeof(ngx_http_upstream_server_t));
+
+    us->name = u.url;
+    us->addrs = u.addrs;
+    us->naddrs = u.naddrs;
+    us->weight = weight;
+    us->max_fails = max_fails;
+    us->fail_timeout = fail_timeout;
+
+    return us;
+}
+
+// ngx_http_upstream_round_robin.c:ngx_http_upstream_init_round_robin
+ngx_http_upstream_rr_peers_t  * ngx_http_init_upstream_rr_peers(const ngx_url_array_t * urls, ngx_conf_t * cf)
+{
+    if (!urls || !urls->arr || urls->size < 1 || !cf)
+    {
+        return NULL;
+    }
+    ngx_http_upstream_server_t ** servers = ngx_palloc(cf->pool, urls->size * sizeof(ngx_http_upstream_server_t *));
+    size_t i = 0;
+    for (i = 0; i < urls->size; ++i)
+    {
+        ngx_http_upstream_server_t * server = ngx_http_parse_upstream_server(urls->arr + i, cf);
+        if (!server)
+        {
+            return NULL;
+        }
+        servers[i] = server;
+    }
+    ngx_uint_t w = 0;
+    for (i = 0; i < urls->size; ++i)
+    {
+        w += servers[i]->naddrs * servers[i]->weight;
+    }
+    ngx_http_upstream_rr_peers_t * peers = ngx_pcalloc(cf->pool, sizeof(ngx_http_upstream_rr_peers_t));
+    if (!peers)
+    {
+        return NULL;
+    }
+    ngx_http_upstream_rr_peer_t * peer = ngx_pcalloc(cf->pool, sizeof(ngx_http_upstream_rr_peer_t) * urls->size);
+    if (!peer)
+    {
+        return NULL;
+    }
+
+    peers->single = (urls->size == 1);
+    peers->number = urls->size;
+    peers->weighted = (w != urls->size);
+    peers->total_weight = w;
+
+    ngx_http_upstream_rr_peer_t ** peerp = &peers->peer;
+    for (i = 0; i < urls->size; ++i)
+    {
+        peer[i].sockaddr = servers[i]->addrs[0].sockaddr;
+        peer[i].socklen = servers[i]->addrs[0].socklen;
+        peer[i].name = servers[i]->addrs[0].name;
+        peer[i].weight = servers[i]->weight;
+        peer[i].effective_weight = servers[i]->weight;
+        peer[i].current_weight = 0;
+        peer[i].max_fails = servers[i]->max_fails;
+        peer[i].fail_timeout = servers[i]->fail_timeout;
+        peer[i].down = servers[i]->down;
+        peer[i].server = servers[i]->name;
+        *peerp = &peer[i];
+        peerp = &peer[i].next;
+    }
+    return peers;
+}
+
 static void __init_upstream_conf(const ngx_http_fetch_upstream_conf_t * src, ngx_http_upstream_conf_t * dst)
 {
     dst->connect_timeout = (src && 0 != src->connect_timeout) ? src->connect_timeout : 60000;

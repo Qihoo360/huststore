@@ -108,7 +108,7 @@ static ngx_int_t __first_get_handler(ngx_str_t * backend_uri, ngx_http_request_t
 
 	char * val = ngx_http_get_param_val(&r->args, "ack", r->pool);
 	ngx_bool_t ack = true;
-	if (val && (0 == atoi(val) || 0 == strncmp(val, "false", 5)))
+	if (val && (0 == strncmp(val, "0", 1) || 0 == strncmp(val, "false", 5)))
 	{
 	    ack = false;
 	}

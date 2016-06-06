@@ -172,6 +172,10 @@ static __pid_t load_server_pid(const char * pid_file)
 bool send_quit_signal(const char * pid_file)
 {
     __pid_t pid = load_server_pid(pid_file);
+    if (0 == pid)
+    {
+        return false;
+    }
     union sigval param;
     param.sival_int = SIGVAL_QUIT;
     if(-1 == sigqueue(pid, SIGTERM, param))

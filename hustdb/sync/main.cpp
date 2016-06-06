@@ -42,10 +42,7 @@ static bool parse_args(int argc, char *argv[], bool& daemon_mode)
         {
             daemon_mode = false;
             std::string pid_file = get_abs_path(PID_FILE);
-            if (!send_quit_signal(pid_file.c_str()))
-            {
-                printf("send_quit_signal error\n");
-            }
+            send_quit_signal(pid_file.c_str());
             return false;
         }
         else

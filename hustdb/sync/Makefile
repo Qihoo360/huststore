@@ -145,7 +145,6 @@ install:		$(TARGET)
 	test -d '/data/hustdbsync' || mkdir -p '/data/hustdbsync'
 	test -d '/data/hustdbsync/logs' || mkdir -p '/data/hustdbsync/logs'
 	cp $(TARGET) '/data/hustdbsync/$(TARGET)'
-	cp stop.py '/data/hustdbsync/'
 
 	test ! -f '/data/hustdbsync/$(SERVER_CONF)' || cp '/data/hustdbsync/$(SERVER_CONF)' '/data/hustdbsync/$(SERVER_CONF).old'
 	cp $(SERVER_CONF) '/data/hustdbsync/'

@@ -53,12 +53,7 @@ extern int release_interval;
 extern int checkdb_interval;
 extern int gen_log_interval;
 
-extern "C"
-{
-    typedef unsigned char c_bool_t;
-
-    c_bool_t init ( const char *, const char *, const char *, int, int, int, int );
-    c_bool_t stop_sync ( );
-    char *get_status ( int );
-    void dispose_status ( char * );
-}
+typedef unsigned char c_bool_t;
+c_bool_t init ( const char *, const char *, const char *, int, int, int, int );
+c_bool_t stop_sync ( );
+bool get_status (int hosts_size, std::string& resp);

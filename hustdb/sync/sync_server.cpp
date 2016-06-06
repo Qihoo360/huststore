@@ -17,19 +17,6 @@ private:
     zlog_category_t * cat_;
 };
 
-struct pid_file_t
-{
-    pid_file_t(const std::string& pid_file);
-    ~pid_file_t();
-    bool error() const { return err_; }
-private:
-    bool init();
-private:
-    bool err_;
-    std::string pid_file_;
-    FILE * fp_;
-};
-
 log_t::log_t(const std::string& conf, const std::string& category)
 : err_(false), cat_(NULL)
 {
@@ -65,6 +52,19 @@ void log_t::log(const char * data)
     printf("%s", data);
     zlog_debug(cat_, "%s", data);
 }
+
+struct pid_file_t
+{
+    pid_file_t(const std::string& pid_file);
+    ~pid_file_t();
+    bool error() const { return err_; }
+private:
+    bool init();
+private:
+    bool err_;
+    std::string pid_file_;
+    FILE * fp_;
+};
 
 bool pid_file_t::init()
 {
@@ -229,10 +229,6 @@ bool run_server(const std::string& srv_conf, const std::string& pid_file, const 
         return false;
     }
 
-    log.log(srv_conf.c_str());
-    log.log(pid_file.c_str());
-    log.log(log_conf.c_str());
-
     jos_lib::SyncServerConf cf;
     if (!jos_lib::Load(srv_conf.c_str(), cf))
     {
@@ -241,8 +237,6 @@ bool run_server(const std::string& srv_conf, const std::string& pid_file, const 
 
     std::string json_val;
     jos_lib::Serialize <jos_lib::SyncServerConf, false> (cf, json_val);
-
-    log.log(json_val.c_str());
 
     if (!init(cf.sync.logs_path.c_str(), cf.sync.ngx_path.c_str(), cf.sync.auth_path.c_str(),
         cf.sync.threads, cf.sync.release_interval, cf.sync.checkdb_interval, cf.sync.checklog_interval))

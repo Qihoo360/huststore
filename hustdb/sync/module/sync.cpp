@@ -16,8 +16,6 @@ int start_timer_thread ( void );
 int stop_timer_thread ( void );
 int start_check_db_thread ( void );
 int stop_check_db_thread ( void );
-char *get_status ( int );
-void dispose_status ( char * );
 
 std::vector<std::string> hosts;
 std::vector<std::string> status_dirs;
@@ -291,7 +289,7 @@ static int construct_file_queue ( int status_dir_index, int log_dir_index )
     return 0;
 }
 
-char *get_status ( int hosts_size )
+bool get_status (int hosts_size, std::string& resp)
 {
     jos_lib::Status json_val;
     std::map<std::string, int> total_status;
@@ -313,24 +311,7 @@ char *get_status ( int hosts_size )
     json_val.total_status   = total_status;
     json_val.status         = status;
 
-    std::string res;
-
-
-    if ( ! jos_lib::Serialize <jos_lib::Status, true> (json_val, res) )
-    {
-        return NULL;
-    }
-
-    size_t status_size = res.size ();
-    char *status_addr   = ( char * ) malloc (status_size + 1);
-    if ( ! status_addr )
-    {
-        return NULL;
-    }
-    memcpy (status_addr, res.c_str (), status_size);
-    status_addr[status_size] = '\0';
-
-    return status_addr;
+    return jos_lib::Serialize <jos_lib::Status, true> (json_val, resp);
 }
 
 void dispose_status ( char *status_addr )

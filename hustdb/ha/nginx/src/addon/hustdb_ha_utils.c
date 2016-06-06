@@ -694,7 +694,7 @@ static ngx_http_upstream_rr_peer_t * ngx_http_get_upstream_rr_peer(ngx_http_upst
 }
 
 // ngx_http_upstream_round_robin.c:ngx_http_upstream_init_round_robin
-ngx_http_upstream_rr_peers_t  * hustdb_ha_init_upstream_rr_peers(const ngx_str_t * url, ngx_conf_t * cf)
+ngx_http_upstream_rr_peers_t  * ngx_http_init_upstream_rr_peers(const ngx_str_t * url, ngx_conf_t * cf)
 {
     ngx_http_upstream_server_t * server = ngx_http_parse_upstream_server(url, cf);
     if (!server)

@@ -23,7 +23,7 @@ static ngx_int_t __post_upstream(ngx_http_request_t * r, void * data, ngx_int_t 
 {
     hustdb_ha_sync_ctx_t * ctx = data;
     ngx_bool_t err = false;
-    if (NGX_OK == rc && NGX_HTTP_OK != r->headers_out.status)
+    if (NGX_OK != rc || NGX_HTTP_OK != r->headers_out.status)
     {
         err = true;
     }

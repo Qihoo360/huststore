@@ -639,7 +639,7 @@ static ngx_bool_t __init_fetch(ngx_conf_t * cf, ngx_http_hustdb_ha_main_conf_t *
         return false;
     }
 
-    ngx_http_upstream_rr_peers_t  * peers = hustdb_ha_init_upstream_rr_peers(&uri, cf);
+    ngx_http_upstream_rr_peers_t  * peers = ngx_http_init_upstream_rr_peers(&uri, cf);
     if (!peers)
     {
         return false;

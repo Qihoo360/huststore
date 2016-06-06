@@ -32,7 +32,7 @@ def manual():
                 hset | hget | hget2 |hdel | hexist |
                 sadd | srem | sismember |
                 zadd | zrem | zismember | zscore | zscore2 |
-                stat_all | sync_status | get_table | loop
+                stat_all | sync_status | sync_alive | get_table | loop
     sample:
         python autotest.py localhost:8082 loop
         python autotest.py localhost:8082 stat_all
@@ -68,6 +68,7 @@ class HATester:
         self.dict = {
             'stat_all': self.__stat_all,
             'sync_status': self.__sync_status,
+            'sync_alive': self.__sync_alive,
             'get_table': self.__get_table,
             'put': self.__put,
             'get': self.__get,
@@ -104,6 +105,10 @@ class HATester:
         
     def __sync_status(self):
         cmd = '%s/sync_status' % (self.__host)
+        r = self.__sess.get(cmd, auth=(USER, PASSWD))
+        print r.content if 200 == r.status_code else '%s: %d' % (cmd, r.status_code)
+    def __sync_alive(self):
+        cmd = '%s/sync_alive' % (self.__host)
         r = self.__sess.get(cmd, auth=(USER, PASSWD))
         print r.content if 200 == r.status_code else '%s: %d' % (cmd, r.status_code)
     def __get_table(self):

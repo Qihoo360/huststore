@@ -128,6 +128,6 @@ ngx_bool_t hustdb_ha_append_item(const char * line, ngx_pool_t * pool, void * da
 
 ngx_bool_t hustdb_ha_overwrite_backends(const ngx_str_array_t * backends, ngx_pool_t * pool);
 
-ngx_http_upstream_rr_peers_t  * hustdb_ha_init_upstream_rr_peers(const ngx_str_t * url, ngx_conf_t * cf);
+ngx_http_upstream_rr_peers_t  * ngx_http_init_upstream_rr_peers(const ngx_str_t * url, ngx_conf_t * cf);
 
 #endif // __hustdb_ha_utils_20150601202703_h__

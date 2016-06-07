@@ -49,6 +49,10 @@ static ngx_bool_t __build_pub_peer_list(const char * host, const hustmq_ha_queue
 
 ngx_http_subrequest_peer_t * hustmq_ha_build_pub_peer_list(hustmq_ha_queue_ctx_t * queue_ctx, ngx_pool_t * pool)
 {
+    if (!queue_ctx || !pool)
+    {
+        return NULL;
+    }
     if (!queue_ctx->queue_val)
     {
         return g_peer_list;

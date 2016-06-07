@@ -194,6 +194,10 @@ ngx_str_t hustmq_ha_encode_ack_peer(ngx_str_t * peer_name, ngx_pool_t * pool)
 
 ngx_http_upstream_rr_peer_t * hustmq_ha_decode_ack_peer(ngx_str_t * ack_peer, ngx_pool_t * pool)
 {
+    if (!ack_peer || !pool)
+    {
+        return NULL;
+    }
     char * endptr;
     uint64_t index = strtoull((const char *)ack_peer->data, &endptr, 10);
     size_t count = ngx_http_get_backend_count();

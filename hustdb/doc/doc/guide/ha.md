@@ -3,18 +3,20 @@ hustdb ha
 
 首先安装 `hustdb ha` 所依赖的公共组件：  
 
-* [zlog](https://github.com/HardySimpson/zlog/releases)
 * [curl](https://github.com/curl/curl/releases)
+* [zlog-1.2.12](https://github.com/HardySimpson/zlog/releases)
+* [libevent-2.0.22-stable](https://github.com/libevent/libevent/releases/download/release-2.0.22-stable/libevent-2.0.22-stable.tar.gz)
+* [libevhtp-1.2.10](https://github.com/ellzey/libevhtp/releases)
 
-安装 `hustdb ha` 以及 `libsync` ：
+安装 `ha` 以及 `sync server`：
 
     $ cd hustdb/ha/nginx
     $ ./configure --prefix=/data/hustdbha --add-module=src/addon
     $ make -j
     $ make install
-    $ cd ../../sync/libsync
+    $ cd ../../sync
     $ make -j
-    $ cp libsync.so /data/hustdbha/sbin/
+    $ make install
 
 修改 `hustdb/ha/nginx/conf/nginx.json` 内容如下，其中 **`backends` 请替换为真实的 `hustdb` 机器列表，至少要有两个：**
 
@@ -27,17 +29,25 @@ hustdb ha
         "keepalive": 32768,
         "main_conf":
         [
-            ["sync_threads", 4],
-            ["sync_release_interval", "5s"],
-            ["sync_checkdb_interval", "5s"],
-            ["sync_checklog_interval", "60s"],
             ["zlog_mdc", "sync_dir"],
             ["hustdbtable_file", "hustdbtable.json"],
             ["hustdb_ha_shm_name", "hustdb_ha_share_memory"],
             ["hustdb_ha_shm_size", "10m"],
             ["public_pem", "public.pem"],
             ["identifier_cache_size", 128],
-            ["identifier_timeout", "10s"]
+            ["identifier_timeout", "10s"],
+            ["fetch_req_pool_size", "4k"],
+            ["keepalive_cache_size", 1024],
+            ["connection_cache_size", 1024],
+            ["fetch_connect_timeout", "2s"],
+            ["fetch_send_timeout", "60s"],
+            ["fetch_read_timeout", "60s"],
+            ["fetch_timeout", "60s"],
+            ["fetch_buffer_size", "64m"],
+            ["sync_port", "8089"],
+            ["sync_status_uri", "/sync_status"],
+            ["sync_user", "sync"],
+            ["sync_passwd", "sync"]
         ],
         "local_cmds": 
         [
@@ -69,6 +79,7 @@ hustdb ha
             "file_count",
             "peer_count",
             "sync_status",
+            "sync_alive",
             "get_table",
             "set_table"
         ],
@@ -134,31 +145,27 @@ hustdb ha
         ]
     }
 
-配置完毕之后，启动 nginx：
+配置完毕之后， **先后** 启动 `HA` 以及 `sync server`：
 
     cd /data/hustdbha/sbin
     ./nginx
+    cd /data/hustdbsync
+    ./hustdbsync
 
 输入如下测试命令：
 
-    curl -i -X GET 'localhost:8082/get_table'
+    curl -i -X GET 'localhost:8082/sync_alive'
 
 可以看到服务器返回如下内容：
 
     HTTP/1.1 200 OK
     Server: nginx/1.9.4
-    Date: Mon, 29 Feb 2016 08:02:52 GMT
+    Date: Tue, 07 Jun 2016 03:25:18 GMT
     Content-Type: text/plain
-    Content-Length: 624
+    Content-Length: 3
     Connection: keep-alive
     
-    {
-        "table":
-        [
-            { "item": { "key": [0, 512], "val": ["192.168.1.101:9999", "192.168.1.102:9999"] } }
-            { "item": { "key": [512, 1024], "val": ["192.168.1.102:9999", "192.168.1.101:9999"] } }
-        ]
-    }
+    ok
 
 返回该结果说明服务器工作正常。
 

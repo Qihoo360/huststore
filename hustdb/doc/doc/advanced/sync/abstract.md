@@ -35,7 +35,7 @@
 
 线程池中线程从 `data_queue` 中取出数据，进行base64解码，构造url，query等，POST到后端db中。
 
-[上一级](../libsync.md)
+[上一级](index.md)
 
 [根目录](../../index.md)
 

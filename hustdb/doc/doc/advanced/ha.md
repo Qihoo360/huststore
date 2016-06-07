@@ -9,6 +9,7 @@ HA
 	* [zlog 配置文件](ha/zlog.md)
 * [测试](ha/test.md)
 * [平滑升级](ha/upgrade.md)
+* [数据同步服务](sync/index.md)
 
 [上一级](index.md)
 

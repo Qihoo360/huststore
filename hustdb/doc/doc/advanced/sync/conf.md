@@ -15,6 +15,6 @@
 
 `sync_checklog_interval 60s` : 	与 `zlog` 生成单一日志文件的速度保持一致，用于确定该日志文件是否已被写完
 
-[上一级](../libsync.md)
+[上一级](index.md)
 
 [根目录](../../index.md)

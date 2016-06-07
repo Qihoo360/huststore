@@ -9,6 +9,7 @@ ha
 * [set_table](ha/set_table.md)
 * [peer_count](ha/peer_count.md)
 * [sync_status](ha/sync_status.md)
+* [sync_alive](ha/sync_alive.md)
 * [put](ha/put.md)
 * [get](ha/get.md)
 * [get2](ha/get2.md)

@@ -18,17 +18,25 @@ nginx 配置文件
         "nginx_root": "/data/hustdbha/html",
         "main_conf":
         [
-            ["sync_threads", 4],
-            ["sync_release_interval", "5s"],
-            ["sync_checkdb_interval", "5s"],
-            ["sync_checklog_interval", "60s"],
             ["zlog_mdc", "sync_dir"],
             ["hustdbtable_file", "hustdbtable.json"],
             ["hustdb_ha_shm_name", "hustdb_ha_share_memory"],
             ["hustdb_ha_shm_size", "10m"],
             ["public_pem", "public.pem"],
             ["identifier_cache_size", 128],
-            ["identifier_timeout", "10s"]
+            ["identifier_timeout", "10s"],
+            ["fetch_req_pool_size", "4k"],
+            ["keepalive_cache_size", 1024],
+            ["connection_cache_size", 1024],
+            ["fetch_connect_timeout", "2s"],
+            ["fetch_send_timeout", "60s"],
+            ["fetch_read_timeout", "60s"],
+            ["fetch_timeout", "60s"],
+            ["fetch_buffer_size", "64m"],
+            ["sync_port", "8089"],
+            ["sync_status_uri", "/sync_status"],
+            ["sync_user", "sync"],
+            ["sync_passwd", "sync"]
         ],
         "auth_filter": [],
         "local_cmds": 
@@ -61,6 +69,7 @@ nginx 配置文件
             "file_count",
             "peer_count",
             "sync_status",
+            "sync_alive",
             "get_table",
             "set_table"
         ],
@@ -124,6 +133,24 @@ nginx 配置文件
 * `proxy`
     * `auth`: `hustdb` 的 `http basic authentication` 认证字符串（进行 `base64` 加密）
     * `backends`: `hustdb` 机器列表配置
+
+`main_conf` 中的如下字段均用于 [`ngx_http_fetch`](../../../../../hustmq/doc/doc/advanced/ha/components.md) :
+
+* `fetch_req_pool_size`：`ngx_http_fetch` 每个子请求申请的内存池大小，建议保持默认值
+* `keepalive_cache_size`：`ngx_http_fetch` 和 `hustmq` 机器所建立的连接中，保持 `keepalive` 状态的连接数量，建议保持默认值
+* `connection_cache_size`：`ngx_http_fetch` 连接池的大小，建议保持默认值
+* `fetch_connect_timeout`：`ngx_http_fetch` 连接的超时时间，可根据网络环境配置合适的值
+* `fetch_send_timeout`：`ngx_http_fetch` 发送数据包的超时时间，可根据网络环境配置合适的值
+* `fetch_read_timeout`：`ngx_http_fetch` 接收数据包的超时时间，可根据网络环境配置合适的值
+* `fetch_timeout`：`ngx_http_fetch` 和 `hustmq` 进行网络通讯的最大超时时间，可根据网络环境配置合适的值
+* `fetch_buffer_size`：`ngx_http_fetch` 收发数据包的缓冲区大小，建议保持默认值
+
+`main_conf` 中的如下字段均用于和 `sync_server` 的通信：
+
+* `sync_port`: `sync_server` 监听的端口，请和 [`sync_server` 的配置](sync_conf.md) **保持一致**
+* `sync_status_uri`: `sync_server` 提供的状态请求服务地址，**请保持默认值**
+* `sync_user`: `sync_server` 进行 `http basic authentication` 的用户名，请和 [`sync_server` 的配置](sync_conf.md) **保持一致**
+* `sync_passwd`: `sync_server` 进行 `http basic authentication` 的密码，请和 [`sync_server` 的配置](sync_conf.md) **保持一致**
 
 **以下配置和 [set_table](../../api/ha/set_table.md) 相关**
   
@@ -206,10 +233,6 @@ nginx 配置文件
             error_log                 /dev/null;
             chunked_transfer_encoding off;
             keepalive_requests        32768;
-            sync_threads              4;
-            sync_release_interval     5s;
-            sync_checkdb_interval     5s;
-            sync_checklog_interval    60s;
             zlog_mdc                  sync_dir;
             hustdbtable_file          hustdbtable.json;
             hustdb_ha_shm_name        hustdb_ha_share_memory;
@@ -217,6 +240,18 @@ nginx 配置文件
             public_pem                public.pem;
             identifier_cache_size     128;
             identifier_timeout        10s;
+            fetch_req_pool_size       4k;
+            keepalive_cache_size      1024;
+            connection_cache_size     1024;
+            fetch_connect_timeout     2s;
+            fetch_send_timeout        60s;
+            fetch_read_timeout        60s;
+            fetch_timeout             60s;
+            fetch_buffer_size         64m;
+            sync_port                 8089;
+            sync_status_uri           /sync_status;
+            sync_user                 sync;
+            sync_passwd               sync;
     
             location /status.html {
                 root /data/hustdbha/html;
@@ -331,6 +366,10 @@ nginx 配置文件
                 http_basic_auth_file /data/hustdbha/conf/htpasswd;
             }
             location /sync_status {
+                hustdb_ha;
+                http_basic_auth_file /data/hustdbha/conf/htpasswd;
+            }
+            location /sync_alive {
                 hustdb_ha;
                 http_basic_auth_file /data/hustdbha/conf/htpasswd;
             }

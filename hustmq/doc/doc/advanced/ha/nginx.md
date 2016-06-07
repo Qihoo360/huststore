@@ -88,6 +88,10 @@ nginx 配置文件
 * `listen`: 监听端口
 * `http_basic_auth_file`: `http basic authentication` 的配置文件  
 （为保证 `hustmq ha` 的高性能，文件使用 **明文** 来配置认证信息）
+* `main_conf`
+    * `username`：`hustmq` 存储机器进行 `http basic authentication` 认证的用户名
+    * `password`：`hustmq` 存储机器进行 `http basic authentication` 认证的密码
+    * `autost_interval`：`hustmq ha` 自动更新集群状态的时间间隔
 * `proxy`
     * `auth`: `hustmq` 的 `http basic authentication` 认证字符串（进行 `base64` 加密）
     * `backends`: `hustmq` 机器列表配置
@@ -97,14 +101,11 @@ nginx 配置文件
 * `fetch_req_pool_size`：`ngx_http_fetch` 每个子请求申请的内存池大小，建议保持默认值
 * `keepalive_cache_size`：`ngx_http_fetch` 和 `hustmq` 机器所建立的连接中，保持 `keepalive` 状态的连接数量，建议保持默认值
 * `connection_cache_size`：`ngx_http_fetch` 连接池的大小，建议保持默认值
-* `username`：`hustmq` 机器进行 `http basic authentication` 认证的用户名，**请根据生产环境的实际情况进行配置**
-* `password`：`hustmq` 机器进行 `http basic authentication` 认证的密码，**请根据生产环境的实际情况进行配置**
 * `fetch_connect_timeout`：`ngx_http_fetch` 连接的超时时间，可根据网络环境配置合适的值
 * `fetch_send_timeout`：`ngx_http_fetch` 发送数据包的超时时间，可根据网络环境配置合适的值
 * `fetch_read_timeout`：`ngx_http_fetch` 接收数据包的超时时间，可根据网络环境配置合适的值
 * `fetch_timeout`：`ngx_http_fetch` 和 `hustmq` 进行网络通讯的最大超时时间，可根据网络环境配置合适的值
 * `fetch_buffer_size`：`ngx_http_fetch` 收发数据包的缓冲区大小，建议保持默认值
-* `autost_interval`：`hustmq ha` 自动更新集群状态的时间间隔，该字段建议保持默认值
 
 **`queue_hash` 参数详解**  
 

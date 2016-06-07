@@ -8,7 +8,6 @@ hustdb
     * [`hustdb`](intro/hustdb.md)
     * [`hustdb ha`](intro/ha.md)
 * [快速入门](guide/index.md)
-    * [`deploy`](guide/deploy.md)
     * [`hustdb`](guide/hustdb.md)
     * [`hustdb ha`](guide/ha.md)
 * [API 手册](api/index.md)

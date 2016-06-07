@@ -57,7 +57,7 @@ ha
 其中 `[a, b, c, d, e]` 代表写入的数据，红色的部分表示写入失败的数据，`c:2` 代表在写入数据 `c` 的时候强制将 `idx` 更新为最新的值 `2`。当 `hustmq ha` 发现 `hustmq` 各个节点的 `idx` 不一致的时候，会自动通知各个节点将 `idx` 更新到最新的值，从而保证最终的一致性。
 
 * 关于 `long polling` 的运作机制  
-[evget](ha/evget.md) 和 [evput](ha/put.md) 配合可以实现 `long polling` 机制。具体的运作流程如下：
+[evget](ha/evget.md) 和 [put](ha/put.md) 配合可以实现 `long polling` 机制。具体的运作流程如下：
     * `client A` 向 `hustmq ha` 发送 `evget` 请求，请求的队列名称为 `test_queue`，则该请求会被 `hustmq ha` 挂住
     * `client B` 向 `hustmq ha` 发送 `put` 请求，向 `test_queue` 投递数据
     * `hustmq ha` 后台的 `autost` 过程会刷新 `hustmq` 集群状态，检测 `test_queue` 是否有数据可获取

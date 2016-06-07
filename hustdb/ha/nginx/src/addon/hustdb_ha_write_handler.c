@@ -41,7 +41,7 @@ static ngx_buf_t * __encode_head(
     {
         return NULL;
     }
-    uint32_t ver = ngx_atoi(version->data, version->len);
+    uint32_t ver = version->data ? ngx_atoi(version->data, version->len) : 0;
     uint32_t key_len = strlen(key);
     uint32_t key_crc = ngx_crc((u_char *) key, (size_t) key_len);
     uint32_t tb_len = has_tb ? strlen(tb) : 0;

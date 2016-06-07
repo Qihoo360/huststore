@@ -823,7 +823,7 @@ int hustdb_t::find_table_offset (
     return - 1;
 }
 
-bool hustdb_t::set_table_size (
+void hustdb_t::set_table_size (
                                 int offset,
                                 int atomic
                                 )
@@ -832,21 +832,6 @@ bool hustdb_t::set_table_size (
 
     tstat = ( table_stat_t * ) ( m_table_index.ptr + offset );
     atomic_fetch_add ( atomic, & tstat->size );
-
-    if ( tstat->size <= 0 && offset > 0 )
-    {
-        scope_lock_t tb_locker ( m_tb_locker );
-
-        table_map_t::iterator it = m_table_map.find ( tstat->table );
-        if ( it != m_table_map.end () )
-        {
-            m_table_map.erase ( it );
-        }
-
-        memset ( tstat, 0, TABLE_STAT_LEN );
-    }
-
-    return true;
 }
 
 int hustdb_t::get_table_size (
@@ -1221,6 +1206,7 @@ int hustdb_t::hustdb_put (
             std::string * buf = m_mdb->buffer ( conn );
             fast_memcpy ( ( char * ) & ( * buf ) [ 0 ], val, val_len );
             fast_memcpy ( ( char * ) & ( * buf ) [ 0 ] + val_len, & ver, SIZEOF_UNIT32 );
+            
             m_mdb->put ( key, key_len, buf->c_str (), val_len + SIZEOF_UNIT32, ttl );
         }
         else
@@ -1501,6 +1487,49 @@ int hustdb_t::hustdb_export (
     token = task;
 
     return 0;
+}
+
+int hustdb_t::hustdb_sweep (
+                             const char * table,
+                             size_t table_len
+                             )
+{
+    int             offset       = - 1;
+    table_stat_t *  tstat        = NULL;
+    
+    if ( unlikely ( ! tb_name_check ( table, table_len ) ) )
+    {
+        LOG_DEBUG ( "[hustdb][db_sweep]params error" );
+        return EKEYREJECTED;
+    }
+
+    std::string inner_table ( table, table_len );
+
+    offset = find_table_offset ( inner_table, false, COMMON_TB );
+    if ( unlikely ( offset < 0 ) )
+    {
+        LOG_ERROR ( "[hustdb][db_sweep]find_table_offset failed" );
+        return EPERM;
+    }
+
+    tstat = ( table_stat_t * ) ( m_table_index.ptr + offset );
+
+    if ( tstat->size > 0 || offset <= 0 )
+    {
+        return ENOENT;
+    }
+
+    scope_lock_t tb_locker ( m_tb_locker );
+
+    table_map_t::iterator it = m_table_map.find ( tstat->table );
+    if ( it != m_table_map.end () )
+    {
+        m_table_map.erase ( it );
+    }
+
+    memset ( tstat, 0, TABLE_STAT_LEN );
+
+    return 0;    
 }
 
 int hustdb_t::hustdb_hexist (
@@ -1794,7 +1823,6 @@ int hustdb_t::hustdb_hdel (
     }
 
     m_storage->set_inner_table ( table, table_len, HASH_TB, conn );
-
 
     r = m_storage->del ( key, key_len, ver, is_dup, conn, ctxt );
     if ( 0 != r )

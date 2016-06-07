@@ -314,6 +314,11 @@ public:
                         void * & token
                         );
 
+    int hustdb_sweep (
+                       const char * table,
+                       size_t table_len
+                       );
+
 public:
 
     int hustdb_hexist (
@@ -644,7 +649,7 @@ private:
                             uint8_t type
                             );
 
-    bool set_table_size (
+    void set_table_size (
                           int offset,
                           int atomic
                           );

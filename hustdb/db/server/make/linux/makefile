@@ -35,6 +35,7 @@ $(BIN)kv_array_%.o: $(SERVER)module/kv/kv_array/%.cpp
 
 SVR_OBJECTS=                                \
 	$(BIN)main.o \
+	$(BIN)server_utils.o \
 	$(BIN)hustdb_network.o \
 	$(BIN)hustdb_handler_frame.o \
 	$(BIN)hustdb_handler.o \
@@ -97,8 +98,11 @@ all: $(MDB_OBJECTS) $(MODULE_OBJECTS) $(SVR_OBJECTS)
 	cp $(SERVER)module/hustdb.conf hustdb.conf
 
 NETWORK     = $(SERVER)network/
-$(BIN)main.o:	$(NETWORK)main.cpp
-	$(CPPC) -c $(CFLAGS)  $(INCS) -o $(BIN)main.o $(NETWORK)main.cpp
+$(BIN)main.o:	$(SERVER)main.cpp
+	$(CPPC) -c $(CFLAGS)  $(INCS) -o $(BIN)main.o $(SERVER)main.cpp
+
+$(BIN)server_utils.o:	$(SERVER)server_utils.cpp
+	$(CPPC) -c $(CFLAGS)  $(INCS) -o $(BIN)server_utils.o $(SERVER)server_utils.cpp
 
 $(BIN)hustdb_network.o:	$(NETWORK)hustdb_network.cpp
 	$(CPPC) -c $(CFLAGS)  $(INCS) -o $(BIN)hustdb_network.o $(NETWORK)hustdb_network.cpp

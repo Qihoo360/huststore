@@ -1,5 +1,7 @@
 #include "hustdb_network.h"
 
+static evbase_t * g_evbase = NULL;
+
 void on_evhtp_thread_init(evhtp_t * htp, evthr_t * thr, void * arg)
 {
     hustdb_network_ctx_t * ctx = reinterpret_cast<hustdb_network_ctx_t *>(arg);
@@ -36,12 +38,16 @@ static evhtp_res on_post_accept(evhtp_connection_t * conn, void * data)
 
 bool hustdb_loop(hustdb_network_ctx_t * ctx)
 {
-    evbase_t * evbase = event_base_new();
-    if (!evbase)
+    if (g_evbase)
     {
         return false;
     }
-    evhtp_t * htp = evhtp_new(evbase, NULL);
+    g_evbase = event_base_new();
+    if (!g_evbase)
+    {
+        return false;
+    }
+    evhtp_t * htp = evhtp_new(g_evbase, NULL);
     if (!htp)
     {
         return false;
@@ -80,7 +86,12 @@ bool hustdb_loop(hustdb_network_ctx_t * ctx)
     {
         return false;
     }
-    event_base_loop(evbase, 0);
+    event_base_loop(g_evbase, 0);
 
     return true;
+}
+
+void libevhtp_exit_server()
+{
+    event_base_loopbreak(g_evbase);
 }

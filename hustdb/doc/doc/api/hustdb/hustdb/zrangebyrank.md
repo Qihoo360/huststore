@@ -1,5 +1,4 @@
-`zrangebyrank`
-----------
+## zrangebyrank ##
 
 **接口:** `/hustdb/zrangebyrank`
 

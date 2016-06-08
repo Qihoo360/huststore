@@ -1,5 +1,4 @@
-`sync_status`
-----------
+## sync_status ##
 
 **接口:** `/sync_status`
 

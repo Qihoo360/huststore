@@ -1,5 +1,4 @@
-`peer_count`
-----------
+## peer_count ##
 
 **接口:** `/peer_count`
 

@@ -1,5 +1,4 @@
-`exist`
-----------
+## exist ##
 
 **接口:** `/hustdb/exist`
 

@@ -1,5 +1,4 @@
-`do_post_status`
-----------
+## do_post_status ##
 
 **接口:** `/do_post_status`
 

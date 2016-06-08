@@ -1,5 +1,4 @@
-`purge`
-----------
+## purge ##
 
 **接口:** `/hustmq/purge`
 

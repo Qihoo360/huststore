@@ -1,5 +1,4 @@
-`sync_alive`
-----------
+## sync_alive ##
 
 **接口:** `/sync_alive`
 

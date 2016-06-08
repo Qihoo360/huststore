@@ -1,5 +1,4 @@
-`timeout`
-----------
+## timeout ##
 
 **接口:** `/hustmq/timeout`
 

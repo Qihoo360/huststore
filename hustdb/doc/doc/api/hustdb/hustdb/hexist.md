@@ -1,5 +1,4 @@
-`hexist`
-----------
+## hexist ##
 
 **接口:** `/hustdb/hexist`
 

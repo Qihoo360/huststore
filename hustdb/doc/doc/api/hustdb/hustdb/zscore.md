@@ -1,5 +1,4 @@
-`zscore`
-----------
+## zscore ##
 
 **接口:** `/hustdb/zscore`
 

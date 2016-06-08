@@ -1,5 +1,4 @@
-`stat_all`
-----------
+## stat_all ##
 
 **接口:** `/hustdb/stat_all`
 

@@ -39,4 +39,5 @@ NGX_ADDON_SRCS="$NGX_ADDON_SRCS \
     $ngx_addon_dir/hustdb_ha_zrem_handler.c\
     $ngx_addon_dir/hustdb_ha_zrangebyrank_handler.c\
     $ngx_addon_dir/hustdb_ha_zrangebyscore_handler.c\
+    $ngx_addon_dir/hustdb_ha_sweep_handler.c\
     $ngx_addon_dir/ngx_http_hustdb_ha_module.c"

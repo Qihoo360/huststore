@@ -1175,6 +1175,33 @@ void hustdb_zrangebyscore_frame(evhtp_request_t * request, void * data)
     hustdb_zrangebyscore_handler(args, request, ctx);
 }
 
+void hustdb_sweep_frame(evhtp_request_t * request, void * data)
+{
+    hustdb_network_ctx_t * ctx = reinterpret_cast<hustdb_network_ctx_t *>(data);
+    if (!request || !ctx || !ctx->db->ok())
+    {
+        evhtp::send_reply(EVHTP_RES_500, request);
+        return;
+    }
+    if (!evhtp::check_auth(request, &ctx->base))
+    {
+        return;
+    }
+    htp_method method = evhtp_request_get_method(request);
+    if (htp_method_GET != method)
+    {
+        evhtp::invalid_method(request);
+        return;
+    }
+    hustdb_sweep_ctx_t args(request->uri->query);
+    if (!args.has_tb)
+    {
+        evhtp::send_reply(EVHTP_RES_NOTFOUND, request);
+        return;
+    }
+    hustdb_sweep_handler(args, request, ctx);
+}
+
 bool hustdb_init_handlers(hustdb_network_ctx_t * ctx, evhtp_t * htp)
 {
     if (!evhtp_set_cb(htp, "/hustdb/exist", hustdb_exist_frame, ctx)) return false;
@@ -1216,6 +1243,7 @@ bool hustdb_init_handlers(hustdb_network_ctx_t * ctx, evhtp_t * htp)
     if (!evhtp_set_cb(htp, "/hustdb/zrem", hustdb_zrem_frame, ctx)) return false;
     if (!evhtp_set_cb(htp, "/hustdb/zrangebyrank", hustdb_zrangebyrank_frame, ctx)) return false;
     if (!evhtp_set_cb(htp, "/hustdb/zrangebyscore", hustdb_zrangebyscore_frame, ctx)) return false;
+    if (!evhtp_set_cb(htp, "/hustdb/sweep", hustdb_sweep_frame, ctx)) return false;
 
     return true;
 }

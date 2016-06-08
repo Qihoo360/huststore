@@ -409,3 +409,9 @@ void hustdb_zrangebyscore_handler(const hustdb_zrangebyscore_ctx_t& args, evhtp_
         false, args.noval, true, count, total, rsp, conn, ctxt);
     hustdb_network::post_keys_handler(r, count, total, rsp, request, ctx);
 }
+
+void hustdb_sweep_handler(const hustdb_sweep_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx)
+{
+    int r = ctx->db->hustdb_sweep(args.tb.data, args.tb.len);
+    evhtp::send_nobody_reply(ctx->db->errno_int_status(0), request);
+}

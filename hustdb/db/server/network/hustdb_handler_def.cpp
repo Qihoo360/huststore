@@ -1579,3 +1579,29 @@ hustdb_zrangebyscore_ctx_t::hustdb_zrangebyscore_ctx_t(evhtp_query_t * htp_query
         kv = kv->next.tqe_next;
     }
 }
+
+hustdb_sweep_ctx_t::hustdb_sweep_ctx_t(evhtp_query_t * htp_query)
+{
+    // reset
+    has_tb = false;
+
+    memset(&tb, 0, sizeof(evhtp::c_str_t));
+
+    if (!htp_query)
+    {
+        return;
+    }
+    // parse from htp_query
+    evhtp_kv_s * kv = htp_query->tqh_first;
+    while (kv)
+    {
+        static evhtp::c_str_t __tb = evhtp_make_str("tb");
+
+        if (kv->klen == __tb.len && 0 == strncmp(__tb.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
+        {
+            has_tb = true;
+            tb.assign(kv->val, kv->vlen);
+        }
+        kv = kv->next.tqe_next;
+    }
+}

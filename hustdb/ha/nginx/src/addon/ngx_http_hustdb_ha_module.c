@@ -191,11 +191,6 @@ static ngx_http_request_item_t hustdb_ha_handler_dict[] =
         ngx_string("/zrangebyscore"),
         ngx_string("/hustdb/zrangebyscore"),
         hustdb_ha_zrangebyscore_handler
-    },
-    {
-        ngx_string("/sweep"),
-        ngx_string("/hustdb/sweep"),
-        hustdb_ha_sweep_handler
     }
 };
 

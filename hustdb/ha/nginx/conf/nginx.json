@@ -55,7 +55,6 @@
         "zscore2",
         "zrangebyrank",
         "zrangebyscore",
-        "sweep",
         "stat",
         "stat_all",
         "file_count",
@@ -109,7 +108,6 @@
             "/hustdb/zscore",
             "/hustdb/zrangebyrank",
             "/hustdb/zrangebyscore",
-            "/hustdb/sweep",
             "/hustdb/stat",
             "/hustdb/stat_all",
             "/hustdb/file_count"

@@ -45,6 +45,5 @@ void hustdb_zadd_handler(const hustdb_zadd_ctx_t& args, evhtp_request_t * reques
 void hustdb_zrem_handler(const hustdb_zrem_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx);
 void hustdb_zrangebyrank_handler(const hustdb_zrangebyrank_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx);
 void hustdb_zrangebyscore_handler(const hustdb_zrangebyscore_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx);
-void hustdb_sweep_handler(const hustdb_sweep_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx);
 
 #endif // __hustdb_handler_20160318131858_h__

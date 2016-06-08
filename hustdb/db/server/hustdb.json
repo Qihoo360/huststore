@@ -460,16 +460,6 @@
             ],
             "required": ["tb", "offset", "size"],
             "check": "!request || !ctx || !ctx->db->ok()"
-        },
-        {
-            "uri": "/hustdb/sweep",
-            "methods": ["GET"],
-            "args":
-            [
-                ["string", "tb"]
-            ],
-            "required": ["tb"],
-            "check": "!request || !ctx || !ctx->db->ok()"
         }
     ]
 }

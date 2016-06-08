@@ -5,6 +5,8 @@ hustdb ha
 * `HA` : `hustdb ha` 的核心组件，是一个典型的 `nginx http` 模块
 * `sync server` : 数据同步服务
 
+![ha](../../../../res/ha.png)
+
 `HA` 在写入后端 `db` 失败时，会将数据写入本地日志，`sync server` 负责将这些数据同步到后端 `db` 中。 `sync server` 在架构设计上只为 `HA` 提供服务， **对于用户而言是透明的** ，用户可以通过 `HA` 提供的接口查询 `sync server` 的信息。
 
 项目目录：

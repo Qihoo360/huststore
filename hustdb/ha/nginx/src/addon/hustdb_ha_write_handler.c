@@ -476,6 +476,30 @@ static void __update_error(uint8_t method, ngx_uint_t status, ngx_http_hustdb_ha
     ctx->error_peer = ctx->base.peer;
 }
 
+// -------------------------------------------------------------
+// |skip   |  0   |  1   |  2   |  0       |  1   |  2  |  0   |
+// -------------------------------------------------------------
+// |err    |  0   |  0   |  0   |  1       |  1   |  0  |  2   |
+// -------------------------------------------------------------
+// |action |  200 |  200 |  404 |  200&log |  404 | 404 | 404  |
+// -------------------------------------------------------------
+static ngx_int_t __send_write_response(
+    uint8_t method,
+    ngx_bool_t has_tb,
+    ngx_http_request_t *r,
+    ngx_http_hustdb_ha_write_ctx_t * ctx)
+{
+    if (0 == ctx->skip_error_count && 1 == ctx->error_count)
+    {
+        return __write_sync_data(method, has_tb, r, ctx);
+    }
+    if (0 == ctx->skip_error_count && 0 == ctx->error_count)
+    {
+        return hustdb_ha_send_response(NGX_HTTP_OK, &ctx->base.version, NULL, r);
+    }
+    return hustdb_ha_send_response(NGX_HTTP_NOT_FOUND, NULL, NULL, r);
+}
+
 static ngx_int_t __on_write_master1_complete(
     uint8_t method,
     ngx_bool_t has_tb,
@@ -500,12 +524,7 @@ static ngx_int_t __on_write_master1_complete(
 	++ctx->error_count;
 	ctx->error_peer = ctx->base.peer;
 
-	if (ctx->error_count > 1) // both master1 & master2 fail
-	{
-		return hustdb_ha_send_response(NGX_HTTP_NOT_FOUND, NULL, NULL, r);
-	}
-
-	return __write_sync_data(method, has_tb, r, ctx);
+	return __send_write_response(method, has_tb, r, ctx);
 }
 
 static ngx_int_t __on_write_master2_complete(
@@ -514,20 +533,8 @@ static ngx_int_t __on_write_master2_complete(
     ngx_http_request_t *r,
     ngx_http_hustdb_ha_write_ctx_t * ctx)
 {
-	__update_error(method, r->headers_out.status, ctx);
-	if (ctx->error_count > 1) // both master1 & master2 fail
-	{
-		return hustdb_ha_send_response(NGX_HTTP_NOT_FOUND, NULL, NULL, r);
-	}
-	else if (1 == ctx->error_count) // master1 or master2 fail
-	{
-		return __write_sync_data(method, has_tb, r, ctx);
-	}
-	if (ctx->skip_error_count > 1) // both master1 and master2 return 404 for del
-	{
-	    return hustdb_ha_send_response(NGX_HTTP_NOT_FOUND, NULL, NULL, r);
-	}
-	return hustdb_ha_send_response(NGX_HTTP_OK, &ctx->base.version, NULL, r);
+    __update_error(method, r->headers_out.status, ctx);
+    return __send_write_response(method, has_tb, r, ctx);
 }
 
 ngx_int_t hustdb_ha_write_handler(

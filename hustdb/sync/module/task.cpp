@@ -248,47 +248,47 @@ static int construct_item ( Message *msg, Item *item )
     {
         case HUSTDB_METHOD_PUT:
             _path = "/hustdb/put";
-            sprintf (query_string, "key=%s&ver=%d&ttl=%d&is_dup=true", key_safe, ver, ttl);
+            sprintf (query_string, "key=%s&ver=%u&ttl=%u&is_dup=true", key_safe, ver, ttl);
             break;
         case HUSTDB_METHOD_HSET:
             _path = "/hustdb/hset";
-            sprintf (query_string, "key=%s&ver=%d&ttl=%d&tb=%s&is_dup=true", key_safe, ver, ttl, tb_str.c_str ());
+            sprintf (query_string, "key=%s&ver=%u&ttl=%u&tb=%s&is_dup=true", key_safe, ver, ttl, tb_str.c_str ());
             break;
         case HUSTDB_METHOD_SADD:
             _path = "/hustdb/sadd";
-            sprintf (query_string, "key=%s&ver=%d&ttl=%d&tb=%s&is_dup=true", key_safe, ver, ttl, tb_str.c_str ());
+            sprintf (query_string, "key=%s&ver=%u&tb=%s&is_dup=true", key_safe, ver, tb_str.c_str ());
             break;
         case HUSTDB_METHOD_ZADD:
             _path = "/hustdb/zadd";
-            sprintf (query_string, "key=%s&ver=%d&tb=%s&score=%ld&opt=%d&is_dup=true", key_safe, ver, tb_str.c_str (), score, opt);
+            sprintf (query_string, "key=%s&ver=%u&tb=%s&score=%ld&opt=%d&is_dup=true", key_safe, ver, tb_str.c_str (), score, opt);
             break;
         case HUSTDB_METHOD_TB_PUT:
             _path = "/husttb/put";
-            sprintf (query_string, "key=%s&ver=%d&tb=%s&is_dup=true", key_safe, ver, tb_str.c_str ());
+            sprintf (query_string, "key=%s&ver=%u&tb=%s&is_dup=true", key_safe, ver, tb_str.c_str ());
             break;
         case HUSTDB_METHOD_TB_UPDATE:
             _path = "/husttb/update";
-            sprintf (query_string, "key=%s&ver=%d&tb=%s&is_dup=true", key_safe, ver, tb_str.c_str ());
+            sprintf (query_string, "key=%s&ver=%u&tb=%s&is_dup=true", key_safe, ver, tb_str.c_str ());
             break;
         case HUSTDB_METHOD_DEL:
             _path = "/hustdb/del";
-            sprintf (query_string, "key=%s&ver=%d&is_dup=true", key_safe, ver);
+            sprintf (query_string, "key=%s&ver=%u&is_dup=true", key_safe, ver);
             break;
         case HUSTDB_METHOD_HDEL:
             _path = "/hustdb/hdel";
-            sprintf (query_string, "key=%s&ver=%d&tb=%s&is_dup=true", key_safe, ver, tb_str.c_str ());
+            sprintf (query_string, "key=%s&ver=%u&tb=%s&is_dup=true", key_safe, ver, tb_str.c_str ());
             break;
         case HUSTDB_METHOD_SREM:
             _path = "/hustdb/srem";
-            sprintf (query_string, "key=%s&ver=%d&tb=%s&is_dup=true", key_safe, ver, tb_str.c_str ());
+            sprintf (query_string, "key=%s&ver=%u&tb=%s&is_dup=true", key_safe, ver, tb_str.c_str ());
             break;
         case HUSTDB_METHOD_ZREM:
             _path = "/hustdb/zrem";
-            sprintf (query_string, "key=%s&ver=%d&tb=%s&is_dup=true", key_safe, ver, tb_str.c_str ());
+            sprintf (query_string, "key=%s&ver=%u&tb=%s&is_dup=true", key_safe, ver, tb_str.c_str ());
             break;
         case HUSTDB_METHOD_TB_DELETE:
             _path = "/husttb/delete";
-            sprintf (query_string, "key=%s&ver=%d&tb=%s&is_dup=true", key_safe, ver, tb_str.c_str ());
+            sprintf (query_string, "key=%s&ver=%u&tb=%s&is_dup=true", key_safe, ver, tb_str.c_str ());
             break;
         default:
             return - 1;

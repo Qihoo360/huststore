@@ -14,7 +14,7 @@ hustdb
 启动服务
 
     $ cd hustdb/db/server/make/linux/
-    $ nohup ./hustdb > /dev/null 2>&1 &
+    $ ./hustdb
 
 输入如下测试命令：
 

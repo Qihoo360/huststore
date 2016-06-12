@@ -6,9 +6,19 @@
 * `hustdb/db/server/make/linux/hustdb`
 * `hustdb/db/server/make/linux/hustdb.conf`
 
-### 启动 ###
+### 使用方法 ###
 
-* `nohup ./hustdb > /dev/null 2>&1 &`
+#### 启动服务（守护进程方式，后台运行） ####
+
+    ./hustdb
+
+#### 退出服务 ####
+
+    ./hustdb -q
+
+#### 启动服务（调试方式，前台运行） ####
+
+    ./hustdb -d
 
 ### 配置 ###
 

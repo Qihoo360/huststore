@@ -211,7 +211,6 @@ static int construct_item ( Message *msg, Item *item )
         }
     }
 
-
     char *value;
     uint32_t value_len;
 
@@ -229,6 +228,14 @@ static int construct_item ( Message *msg, Item *item )
         value = ( char * ) dec_str.data + head_len;
         std::string _value (value, value_len);
         item->set_value (_value);
+    } 
+    if ( method == HUSTDB_METHOD_SADD ||
+         method == HUSTDB_METHOD_ZADD )
+    {
+        std::string _method ("POST");
+        item->set_method (_method);
+        std::string _value (key, key_len);
+        item->set_value (_value);
     }
     else
     {
@@ -239,7 +246,7 @@ static int construct_item ( Message *msg, Item *item )
     int key_safe_len = 3 * key_len + 1;
     char key_safe[key_safe_len];
     if ( ! url_encode_all (key, key_len, key_safe, &key_safe_len) )
-        return - 1;
+        return - 1;    
 
     std::string _path;
     std::string tb_str (tb, tb_len);
@@ -256,11 +263,11 @@ static int construct_item ( Message *msg, Item *item )
             break;
         case HUSTDB_METHOD_SADD:
             _path = "/hustdb/sadd";
-            sprintf (query_string, "key=%s&ver=%u&tb=%s&is_dup=true", key_safe, ver, tb_str.c_str ());
+            sprintf (query_string, "ver=%u&tb=%s&is_dup=true", ver, tb_str.c_str ());
             break;
         case HUSTDB_METHOD_ZADD:
             _path = "/hustdb/zadd";
-            sprintf (query_string, "key=%s&ver=%u&tb=%s&score=%ld&opt=%d&is_dup=true", key_safe, ver, tb_str.c_str (), score, opt);
+            sprintf (query_string, "ver=%u&tb=%s&score=%ld&opt=%d&is_dup=true", ver, tb_str.c_str (), score, opt);
             break;
         case HUSTDB_METHOD_TB_PUT:
             _path = "/husttb/put";

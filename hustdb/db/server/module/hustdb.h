@@ -644,7 +644,7 @@ private:
                             uint8_t type
                             );
 
-    bool set_table_size (
+    void set_table_size (
                           int offset,
                           int atomic
                           );

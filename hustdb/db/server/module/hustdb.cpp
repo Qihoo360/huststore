@@ -823,7 +823,7 @@ int hustdb_t::find_table_offset (
     return - 1;
 }
 
-bool hustdb_t::set_table_size (
+void hustdb_t::set_table_size (
                                 int offset,
                                 int atomic
                                 )
@@ -845,8 +845,6 @@ bool hustdb_t::set_table_size (
 
         memset ( tstat, 0, TABLE_STAT_LEN );
     }
-
-    return true;
 }
 
 int hustdb_t::get_table_size (
@@ -1221,6 +1219,7 @@ int hustdb_t::hustdb_put (
             std::string * buf = m_mdb->buffer ( conn );
             fast_memcpy ( ( char * ) & ( * buf ) [ 0 ], val, val_len );
             fast_memcpy ( ( char * ) & ( * buf ) [ 0 ] + val_len, & ver, SIZEOF_UNIT32 );
+
             m_mdb->put ( key, key_len, buf->c_str (), val_len + SIZEOF_UNIT32, ttl );
         }
         else
@@ -1527,7 +1526,7 @@ int hustdb_t::hustdb_hexist (
     offset = find_table_offset ( inner_table, false, HASH_TB );
     if ( unlikely ( offset < 0 ) )
     {
-        LOG_ERROR ( "[hustdb][db_hexist]find_table_offset failed" );
+        LOG_ERROR ( "[hustdb][db_hexist]find table failed" );
         return EPERM;
     }
 
@@ -1577,7 +1576,7 @@ int hustdb_t::hustdb_hget (
     offset = find_table_offset ( inner_table, false, HASH_TB );
     if ( unlikely ( offset < 0 ) )
     {
-        LOG_ERROR ( "[hustdb][db_hget]find_table_offset failed" );
+        LOG_ERROR ( "[hustdb][db_hget]find table failed" );
         return EPERM;
     }
 
@@ -1696,7 +1695,7 @@ int hustdb_t::hustdb_hset (
     offset = find_table_offset ( inner_table, true, HASH_TB );
     if ( unlikely ( offset < 0 ) )
     {
-        LOG_ERROR ( "[hustdb][db_hset]find_table_offset failed" );
+        LOG_ERROR ( "[hustdb][db_hset]find table failed" );
         return EPERM;
     }
 
@@ -1789,12 +1788,11 @@ int hustdb_t::hustdb_hdel (
     offset = find_table_offset ( inner_table, false, HASH_TB );
     if ( unlikely ( offset < 0 ) )
     {
-        LOG_ERROR ( "[hustdb][db_hdel]find_table_offset failed" );
+        LOG_ERROR ( "[hustdb][db_hdel]find table failed" );
         return EPERM;
     }
 
     m_storage->set_inner_table ( table, table_len, HASH_TB, conn );
-
 
     r = m_storage->del ( key, key_len, ver, is_dup, conn, ctxt );
     if ( 0 != r )
@@ -1862,7 +1860,7 @@ int hustdb_t::hustdb_hkeys (
     _offset = find_table_offset ( inner_table, false, HASH_TB );
     if ( unlikely ( _offset < 0 ) )
     {
-        LOG_ERROR ( "[hustdb][db_hkeys]find_table_offset failed" );
+        LOG_ERROR ( "[hustdb][db_hkeys]find table failed" );
         return EPERM;
     }
 
@@ -1916,7 +1914,7 @@ int hustdb_t::hustdb_sismember (
     offset = find_table_offset ( inner_table, false, SET_TB );
     if ( unlikely ( offset < 0 ) )
     {
-        LOG_ERROR ( "[hustdb][db_sismember]find_table_offset failed" );
+        LOG_ERROR ( "[hustdb][db_sismember]find table failed" );
         return EPERM;
     }
 
@@ -1968,7 +1966,7 @@ int hustdb_t::hustdb_sadd (
     offset = find_table_offset ( inner_table, true, SET_TB );
     if ( unlikely ( offset < 0 ) )
     {
-        LOG_ERROR ( "[hustdb][db_sadd]find_table_offset failed" );
+        LOG_ERROR ( "[hustdb][db_sadd]find table failed" );
         return EPERM;
     }
 
@@ -2032,7 +2030,7 @@ int hustdb_t::hustdb_srem (
     offset = find_table_offset ( inner_table, false, SET_TB );
     if ( unlikely ( offset < 0 ) )
     {
-        LOG_ERROR ( "[hustdb][db_srem]find_table_offset failed" );
+        LOG_ERROR ( "[hustdb][db_srem]find table failed" );
         return EPERM;
     }
 
@@ -2096,7 +2094,7 @@ int hustdb_t::hustdb_smembers (
     _offset = find_table_offset ( inner_table, false, SET_TB );
     if ( unlikely ( _offset < 0 ) )
     {
-        LOG_ERROR ( "[hustdb][db_smembers]find_table_offset failed" );
+        LOG_ERROR ( "[hustdb][db_smembers]find table failed" );
         return EPERM;
     }
 
@@ -2150,7 +2148,7 @@ int hustdb_t::hustdb_zismember (
     offset = find_table_offset ( inner_table, false, ZSET_TB );
     if ( unlikely ( offset < 0 ) )
     {
-        LOG_ERROR ( "[hustdb][db_zismember]find_table_offset failed" );
+        LOG_ERROR ( "[hustdb][db_zismember]find table failed" );
         return EPERM;
     }
 
@@ -2215,7 +2213,7 @@ int hustdb_t::hustdb_zadd (
     offset = find_table_offset ( inner_table, true, ZSET_TB );
     if ( unlikely ( offset < 0 ) )
     {
-        LOG_ERROR ( "[hustdb][db_zadd]find_table_offset failed" );
+        LOG_ERROR ( "[hustdb][db_zadd]find table failed" );
         return EPERM;
     }
     
@@ -2344,7 +2342,7 @@ int hustdb_t::hustdb_zscore (
     offset = find_table_offset ( inner_table, false, ZSET_TB );
     if ( unlikely ( offset < 0 ) )
     {
-        LOG_ERROR ( "[hustdb][db_zscore]find_table_offset failed" );
+        LOG_ERROR ( "[hustdb][db_zscore]find table failed" );
         return EPERM;
     }
 
@@ -2399,7 +2397,7 @@ int hustdb_t::hustdb_zrem (
     offset = find_table_offset ( inner_table, false, ZSET_TB );
     if ( unlikely ( offset < 0 ) )
     {
-        LOG_ERROR ( "[hustdb][db_zrem]find_table_offset failed" );
+        LOG_ERROR ( "[hustdb][db_zrem]find table failed" );
         return EPERM;
     }
     
@@ -2503,7 +2501,7 @@ int hustdb_t::hustdb_zrange (
     _offset = find_table_offset ( inner_table, false, ZSET_TB );
     if ( unlikely ( _offset < 0 ) )
     {
-        LOG_ERROR ( "[hustdb][db_zrange]find_table_offset failed" );
+        LOG_ERROR ( "[hustdb][db_zrange]find table failed" );
         return EPERM;
     }
     
@@ -2586,7 +2584,7 @@ int hustdb_t::hustmq_put (
     offset = find_queue_offset ( inner_queue, true, QUEUE_TB, queue_info );
     if ( unlikely ( offset < 0 ) )
     {
-        LOG_ERROR ( "[hustdb][mq_put][queue=%s]has not found ", inner_queue.c_str () );
+        LOG_ERROR ( "[hustdb][mq_put][queue=%s]find queue failed ", inner_queue.c_str () );
         return EPERM;
     }
 
@@ -2603,7 +2601,7 @@ int hustdb_t::hustmq_put (
         return EINVAL;
     }
 
-    sprintf ( qkey, "%s|%d:%d", inner_queue.c_str (), priori, tag );
+    sprintf ( qkey, "%s|%u:%u", inner_queue.c_str (), priori, tag );
     qkey_len = strlen ( qkey );
 
     m_storage->set_inner_ttl ( 0, conn );
@@ -2665,7 +2663,7 @@ int hustdb_t::hustmq_get (
     offset = find_queue_offset ( inner_queue, false, QUEUE_TB, queue_info, worker, worker_len );
     if ( unlikely ( offset < 0 ) )
     {
-        LOG_ERROR ( "[hustdb][mq_get][queue=%s]has not found ", inner_queue.c_str () );
+        LOG_ERROR ( "[hustdb][mq_get][queue=%s]find queue failed ", inner_queue.c_str () );
         return EPERM;
     }
 
@@ -2708,7 +2706,7 @@ int hustdb_t::hustmq_get (
 
         fast_memcpy ( qstat_val + SIZEOF_UNIT32 * priori * 2, & tag, SIZEOF_UNIT32 );
 
-        sprintf ( qkey, "%s|%d:%d", inner_queue.c_str (), priori, tag );
+        sprintf ( qkey, "%s|%u:%u", inner_queue.c_str (), priori, tag );
         qkey_len = strlen ( qkey );
     }
 
@@ -2783,7 +2781,7 @@ int hustdb_t::hustmq_ack (
         offset = find_queue_offset ( inner_queue, false, QUEUE_TB, queue_info );
         if ( unlikely ( offset < 0 ) )
         {
-            LOG_ERROR ( "[hustdb][mq_ack][queue=%s]has not found ", inner_queue.c_str () );
+            LOG_ERROR ( "[hustdb][mq_ack][queue=%s]find queue failed ", inner_queue.c_str () );
             return EPERM;
         }
 
@@ -2792,7 +2790,7 @@ int hustdb_t::hustmq_ack (
         unacked_t::iterator ait = queue_info->unacked->find ( inner_ack );
         if ( ait == queue_info->unacked->end () )
         {
-            LOG_ERROR ( "[hustdb][mq_ack][queue=%s][ack=%s]has not found ", inner_queue.c_str (), inner_ack.c_str () );
+            LOG_ERROR ( "[hustdb][mq_ack][queue=%s][ack=%s]find queue failed ", inner_queue.c_str (), inner_ack.c_str () );
             return EPERM;
         }
         
@@ -2854,7 +2852,7 @@ int hustdb_t::hustmq_worker (
     offset = find_queue_offset ( inner_queue, false, QUEUE_TB, queue_info );
     if ( unlikely ( offset < 0 ) )
     {
-        LOG_ERROR ( "[hustdb][mq_worker][queue=%s]has not found ", inner_queue.c_str () );
+        LOG_ERROR ( "[hustdb][mq_worker][queue=%s]find queue failed ", inner_queue.c_str () );
         return EPERM;
     }
     wmap = queue_info->worker;
@@ -2879,7 +2877,7 @@ int hustdb_t::hustmq_worker (
 
         memset ( wt, 0, sizeof ( wt ) );
         sprintf ( wt,
-                 "{\"w\":\"%s\",\"t\":%d},",
+                 "{\"w\":\"%s\",\"t\":%u},",
                  wit->first.c_str (),
                  wit->second
                  );
@@ -2925,14 +2923,14 @@ int hustdb_t::hustmq_stat (
     offset = find_queue_offset ( inner_queue, false, COMMON_TB, queue_info );
     if ( unlikely ( offset < 0 ) )
     {
-        LOG_ERROR ( "[hustdb][mq_stat][queue=%s]has not found ", inner_queue.c_str () );
+        LOG_ERROR ( "[hustdb][mq_stat][queue=%s]find queue failed ", inner_queue.c_str () );
         return EPERM;
     }
 
     qstat = ( queue_stat_t * ) ( m_queue_index.ptr + offset );
 
     sprintf ( st,
-             "{\"queue\":\"%s\",\"ready\":[%d,%d,%d],\"unacked\":%d,\"max\":%d,\"lock\":%d,\"type\":%d,\"timeout\":%d,\"si\":%d,\"ci\":%d,\"tm\":%d}",
+             "{\"queue\":\"%s\",\"ready\":[%u,%u,%u],\"unacked\":%u,\"max\":%u,\"lock\":%u,\"type\":%u,\"timeout\":%u,\"si\":%u,\"ci\":%u,\"tm\":%u}",
              inner_queue.c_str (),
              clac_real_item ( qstat->sp, qstat->ep ),
              clac_real_item ( qstat->sp1, qstat->ep1 ),
@@ -2974,7 +2972,7 @@ void hustdb_t::hustmq_stat_all (
 
         memset ( stat, 0, sizeof ( stat ) );
         sprintf ( stat,
-                 "{\"queue\":\"%s\",\"ready\":[%d,%d,%d],\"unacked\":%d,\"max\":%d,\"lock\":%d,\"type\":%d,\"timeout\":%d,\"si\":%d,\"ci\":%d,\"tm\":%d},",
+                 "{\"queue\":\"%s\",\"ready\":[%u,%u,%u],\"unacked\":%u,\"max\":%u,\"lock\":%u,\"type\":%u,\"timeout\":%u,\"si\":%u,\"ci\":%u,\"tm\":%u},",
                  it->first.c_str (),
                  clac_real_item ( qstat->sp, qstat->ep ),
                  clac_real_item ( qstat->sp1, qstat->ep1 ),
@@ -3027,7 +3025,7 @@ int hustdb_t::hustmq_max (
     offset = find_queue_offset ( inner_queue, false, QUEUE_TB, queue_info );
     if ( unlikely ( offset < 0 ) )
     {
-        LOG_ERROR ( "[hustdb][mq_max][queue=%s]has not found ", inner_queue.c_str () );
+        LOG_ERROR ( "[hustdb][mq_max][queue=%s]find queue failed ", inner_queue.c_str () );
         return EPERM;
     }
 
@@ -3067,7 +3065,7 @@ int hustdb_t::hustmq_lock (
     offset = find_queue_offset ( inner_queue, false, QUEUE_TB, queue_info );
     if ( unlikely ( offset < 0 ) )
     {
-        LOG_ERROR ( "[hustdb][mq_lock][queue=%s]has not found ", inner_queue.c_str () );
+        LOG_ERROR ( "[hustdb][mq_lock][queue=%s]find queue failed ", inner_queue.c_str () );
         return EPERM;
     }
 
@@ -3107,7 +3105,7 @@ int hustdb_t::hustmq_timeout (
     offset = find_queue_offset ( inner_queue, false, QUEUE_TB, queue_info );
     if ( unlikely ( offset < 0 ) )
     {
-        LOG_ERROR ( "[hustdb][mq_timeout][queue=%s]has not found ", inner_queue.c_str () );
+        LOG_ERROR ( "[hustdb][mq_timeout][queue=%s]find queue failed ", inner_queue.c_str () );
         return EPERM;
     }
 
@@ -3157,7 +3155,7 @@ int hustdb_t::hustmq_purge (
     offset = find_queue_offset ( inner_queue, false, QUEUE_TB, queue_info );
     if ( unlikely ( offset < 0 ) )
     {
-        LOG_ERROR ( "[hustdb][mq_purge][queue=%s]has not found ", inner_queue.c_str () );
+        LOG_ERROR ( "[hustdb][mq_purge][queue=%s]find queue failed ", inner_queue.c_str () );
         return EPERM;
     }
 
@@ -3178,7 +3176,7 @@ int hustdb_t::hustmq_purge (
     {
         memset ( qkey, 0, sizeof ( qkey ) );
 
-        sprintf ( qkey, "%s|%d:%d", inner_queue.c_str (), priori, p % CYCLE_QUEUE_ITEM_NUM );
+        sprintf ( qkey, "%s|%u:%u", inner_queue.c_str (), priori, p % CYCLE_QUEUE_ITEM_NUM );
         qkey_len = strlen ( qkey );
 
         ver = 0;
@@ -3274,7 +3272,7 @@ int hustdb_t::hustmq_pub (
     offset = find_queue_offset ( inner_queue, true, PUSHQ_TB, queue_info );
     if ( unlikely ( offset < 0 ) )
     {
-        LOG_ERROR ( "[hustdb][mq_pub][queue=%s]has not found ", inner_queue.c_str () );
+        LOG_ERROR ( "[hustdb][mq_pub][queue=%s]find queue failed ", inner_queue.c_str () );
         return EPERM;
     }
 
@@ -3300,7 +3298,7 @@ int hustdb_t::hustmq_pub (
         stag = ( stag + 1 ) % CYCLE_QUEUE_ITEM_NUM;
 
         memset ( qkey, 0, MAX_QKEY_LEN );
-        sprintf ( qkey, "%s|%d:%d", inner_queue.c_str (), priori, stag );
+        sprintf ( qkey, "%s|%u:%u", inner_queue.c_str (), priori, stag );
         qkey_len = strlen ( qkey );
 
         if ( idx < CYCLE_QUEUE_ITEM_NUM && clac_real_item ( stag, idx ) > 0 )
@@ -3343,7 +3341,7 @@ int hustdb_t::hustmq_pub (
     }
 
     memset ( qkey, 0, MAX_QKEY_LEN );
-    sprintf ( qkey, "%s|%d:%d", inner_queue.c_str (), priori, etag );
+    sprintf ( qkey, "%s|%u:%u", inner_queue.c_str (), priori, etag );
     qkey_len = strlen ( qkey );
 
     m_storage->set_inner_ttl ( tm + wttl, conn );
@@ -3404,7 +3402,7 @@ int hustdb_t::hustmq_sub (
     offset = find_queue_offset ( inner_queue, false, PUSHQ_TB, queue_info );
     if ( unlikely ( offset < 0 ) )
     {
-        LOG_ERROR ( "[hustdb][mq_sub][queue=%s]has not found ", inner_queue.c_str () );
+        LOG_ERROR ( "[hustdb][mq_sub][queue=%s]find queue failed ", inner_queue.c_str () );
         return EPERM;
     }
 
@@ -3424,7 +3422,7 @@ int hustdb_t::hustmq_sub (
         return EINVAL;
     }
 
-    sprintf ( qkey, "%s|%d:%d", inner_queue.c_str (), priori, idx );
+    sprintf ( qkey, "%s|%u:%u", inner_queue.c_str (), priori, idx );
     qkey_len = strlen ( qkey );
 
     m_storage->set_inner_table ( NULL, 0, QUEUE_TB, conn );

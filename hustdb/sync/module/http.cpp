@@ -231,8 +231,8 @@ extern "C"
 
         curl_easy_setopt (http->curl, CURLOPT_FOLLOWLOCATION, 1);
         curl_easy_setopt (http->curl, CURLOPT_AUTOREFERER, 1);
-        curl_easy_setopt (http->curl, CURLOPT_MAXREDIRS, 11);
-        curl_easy_setopt (http->curl, CURLOPT_MAXCONNECTS, 11);
+        curl_easy_setopt (http->curl, CURLOPT_MAXREDIRS, 10);
+        curl_easy_setopt (http->curl, CURLOPT_MAXCONNECTS, 100);
         curl_easy_setopt (http->curl, CURLOPT_CLOSEPOLICY, CURLCLOSEPOLICY_LEAST_RECENTLY_USED);
 
         curl_easy_setopt (http->curl, CURLOPT_FILETIME, 1);
@@ -311,6 +311,12 @@ extern "C"
             {
                 return false;
             }
+        }
+        
+        r = curl_easy_setopt (http->curl, CURLOPT_POST, 1);
+        if ( unlikely (CURLE_OK != r) )
+        {
+            return false;
         }
 
         r = curl_easy_setopt (http->curl, CURLOPT_POSTFIELDS, fields);

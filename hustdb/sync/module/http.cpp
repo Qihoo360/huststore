@@ -83,7 +83,7 @@ extern "C"
             return NULL;
         }
 
-        h->keep_alive = true; ///////////////////////////////keep_alive
+        h->keep_alive = false;
         h->connect_timeout_second = - 1;
         h->recv_timeout_second = - 1;
 

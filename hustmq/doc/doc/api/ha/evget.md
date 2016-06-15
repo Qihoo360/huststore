@@ -8,7 +8,8 @@
 
 *  **queue** （必选）  
 *  **worker** （必选）  
-  
+*  **ack** （可选）
+
 该接口和 [put](put.md) 相配合实现 `long polling` 机制。
 
 **使用范例:**

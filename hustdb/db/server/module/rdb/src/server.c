@@ -920,14 +920,14 @@ void createSharedObjects(void) {
     shared.maxstring = createStringObject("maxstring",9);
 }
 
-void initServerConfig(void) {
+void initServerConfig(size_t mem_limit) {
 
     server.hz = CONFIG_DEFAULT_HZ;
     server.arch_bits = (sizeof(long) == 8) ? 64 : 32;
     server.dbnum = CONFIG_DEFAULT_DBNUM;
     server.active_expire_enabled = 1;
     server.activerehashing = CONFIG_DEFAULT_ACTIVE_REHASHING;
-    server.maxmemory = CONFIG_DEFAULT_MAXMEMORY;
+    server.maxmemory = mem_limit * 1024 * 1024;
     server.maxmemory_policy = CONFIG_DEFAULT_MAXMEMORY_POLICY;
     server.maxmemory_samples = CONFIG_DEFAULT_MAXMEMORY_SAMPLES;
     server.hash_max_ziplist_entries = OBJ_HASH_MAX_ZIPLIST_ENTRIES;
@@ -1711,7 +1711,7 @@ void addReplyNULL(client *c){
     _addReplyToBuffer(c, NULL, 0);
 }
 
-int init(){
+int init(size_t mem_limit){
     struct timeval tv;
 
     setlocale(LC_COLLATE,"");
@@ -1719,7 +1719,7 @@ int init(){
     srand(time(NULL)^getpid());
     gettimeofday(&tv,NULL);
     dictSetHashFunctionSeed(tv.tv_sec^tv.tv_usec^getpid());
-    initServerConfig();
+    initServerConfig(mem_limit);
 
     if(initServer() != 0)
         return -1;

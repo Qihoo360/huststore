@@ -5,7 +5,7 @@
 
 int main(int argc, char **argv) {
 
-	if(init() != 0){
+	if(init(1024) != 0){
 		return -1;
 	}
 

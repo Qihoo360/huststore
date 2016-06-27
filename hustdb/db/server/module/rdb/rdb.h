@@ -95,7 +95,7 @@ struct redisCommand {
     long long microseconds, calls;
 };
 
-int init();
+int init(size_t);	//以M为单位
 client *createClient();
 void freeClient(client *c);
 int processInput(client *c, int argc, char *argv[], size_t *resp_len, void *resp);

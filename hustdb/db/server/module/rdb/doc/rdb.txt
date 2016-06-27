@@ -1,0 +1,160 @@
+接口文档
+
+说明：redis共有170多个命令，rdb抽取保留了110个命令，下面的接口是测试通过的
+
+命令处理函数
+int processInput(client *c, int argc, char *argv[], size_t *resp_len, void *resp);
+
+KV
+1. set
+	char *set_cmd[] = {"set", "key", "value"}
+	success = processInput(c, 3, set_cmd, &resp_len, resp)
+
+	success == 0	set成功
+	sucesss == -1 	set失败
+
+2. setex
+	带ttl(以秒为单位)
+	char *setex_cmd[] = {"setex", "key", "seconds", "value"}
+	success = processInput(c, 4, setex_cmd, &resp_len, resp)
+
+	success == 0 	setex成功
+	success == -1 	setex失败
+
+
+3. get
+	char *get_cmd[] = {"get", "key"}
+	success = processInput(c, 2, get_cmd, &resp_len, resp)
+
+	success == 0且resp_len != 0		get成功，value存于resp
+	success == 0且resp_len == 0 	rdb中没有该key
+	success == -1					get失败
+
+4. exists
+	char *exists_cmd[] = {"exists", "key"}
+	success = processInput(c, 2, exists_cmd, &resp_len, resp)
+
+	success == 0且strncmp(resp, "1", resp_len) == 0		key存在
+	success == 0且strncmp(resp, "0", resp_len) == 0 	key不存在
+	success == -1										exists失败	
+
+5. delete
+	char *del_cmd[] = {"del", "key"}
+	success = processInput(c, 2, del_cmd, &resp_len, resp)
+
+	success == 0且strncmp(resp, "1", resp_len) == 0 	删除成功
+	success == 0且strncmp(resp, "0", resp_len) == 0		key不存在
+	success == -1 										del失败
+
+6. append
+	char *append_cmd[] = {"append", "key", "value"}
+	success = processInput(c, 3, append_cmd, &resp_len, resp)
+
+	success == 0	append成功，string(resp, resp_len)返回新value的长度
+	success == -1 	append失败	
+
+7. ttl
+	返回key还有多久过期(以秒为单位)
+	char *ttl_cmd[] = {"ttl", "key"}
+	success = processInput(c, 2, ttl_cmd, &resp_len, resp)
+
+	success == 0且strncmp(resp, "-1", resp_len) == 0	该key永不过期
+	success == 0 										string(resp, resp_len)返回key剩余超时时间	
+	success == -1										该key不存在
+
+
+Hash
+1. hset
+	char *hset_cmd[] = {"hset", "table", "key", "value"}
+	success = processInput(c, 4, hset_cmd, &resp_len, resp)
+
+	success == 0		hset成功
+	success == -1		hset失败
+
+2. hget
+	char *hget_cmd[] = {"hget", "table", "key"}
+	success = processInput(c, 3, hget_cmd, &resp_len, resp)
+
+	success == 0且resp_len == 0		该key不存在		
+	success == 0且resp_len != 0		hget成功，value存于resp
+	success == -1 					该table不存在
+
+
+3. hdel
+	char *hdel_cmd[] = {"hdel", "table", "key"}
+	success = processInput(c, 3, hdel_cmd, &resp_len, resp)
+
+	success == 0且strncmp(resp, "1", resp_len) == 0		删除成功
+	success == 0且strncmp(resp, "0", resp_len) == 0		删除失败或者key不存在
+	success == -1										该table不存在
+
+4. hexist
+	char *hexists_cmd[] = {"hexists", "table", "key"}
+	success = processInput(c, 3, hexists_cmd, &resp_len, resp)
+
+	success == 0且strncmp(resp, "1", resp_len) == 0 	key存在
+	success == 0且strncmp(resp, "0", resp_len) == 0 	key不存在
+	success == -1 										table不存在
+
+Set
+1. sadd
+	char *sadd_cmd[] = {"sadd", "table", "key"}
+	success = processInput(c, 3, sadd_cmd, &resp_len, resp)
+
+	success == 0	sadd成功
+	success == -1	sadd失败
+
+2. sismember
+	char *sismember_cmd[] = {"sismember", "table", "key"}
+	success = processInput(c, 3, sismember_cmd, &resp_len, resp)
+
+	success == 0且strncmp(resp, "1", resp_len) == 0		key存在于table中
+	success == 0且strncmp(resp, "0", resp_len) == 0		key不存在于table中
+	success == -1										table不存在
+
+3. srem
+	char *srem_cmd[] = {"srem", "table", "key"}
+	success = processInput(c, 3, srem_cmd, &resp_len, resp)
+
+	success == 0且strncmp(resp, "1", resp_len) == 0 	删除成功
+	success == 0且strncmp(resp, "0", resp_len) == 0 	key不存在	
+	success == -1 										table不存在
+
+4. srandmember
+	从set中随机取出1个key
+
+	char *srandmember_cmd[] = {"srandmember", "table"}
+	success = processInput(c, 2, srandmember_cmd, &resp_len, resp)
+
+	success == 0	value存于resp	
+	success == -1	table不存在	
+
+Zset
+1. zadd
+	char *zadd_cmd[] = {"zadd", "table", "score", "key"}
+	success = processInput(c, 4, zadd_cmd, &resp_len, resp)
+
+	success == 0	sadd成功
+	success == -1 	sadd失败
+
+2. zscore
+	char *zscore_cmd[] = {"zscore", "table", "key"}
+	success = processInput(c, 3, zscore_cmd, &resp_len, resp)
+
+	success == 0	score存于resp中
+	success == -1	table不存在或者key不存在
+
+3. zrem
+	char *zrem_cmd[] = {"zrem", "table", "key"}
+	success = processInput(c, 3, zrem_cmd, &resp_len, resp)
+
+	success == 0且strncmp(resp, "1", resp_len) == 0		删除成功
+	success == 0且strncmp(resp, "0", resp_len) == 0		key不存在	
+	success == -1										table不存在
+
+Status
+1. info
+	char *info_cmd[] = {"info", "all"}
+	success = processInput(c, 2, info_cmd, &resp_len, resp)
+
+	success == 0	获取状态信息

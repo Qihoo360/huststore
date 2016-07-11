@@ -878,7 +878,7 @@ void * initCron ( void * arg) {
     memset(&tv, 0, sizeof(tv));
 
     tv.it_value.tv_sec = 1;
-    tv.it_interval.tv_nsec = 1000000;
+    tv.it_interval.tv_nsec = 1000000000/server.hz;
 
     if(timerfd_settime(timerfd, 0, &tv, NULL) == -1){
         return (void *) NULL;

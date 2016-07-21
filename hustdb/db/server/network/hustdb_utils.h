@@ -18,5 +18,6 @@ struct c_str_t
 };
 
 void hustdb_base64_encode(const c_str_t *src, c_str_t *dst);
+size_t hustdb_unescape_str(char * str, size_t size);
 
 #endif // __hustdb_utils_20160414141755_h__

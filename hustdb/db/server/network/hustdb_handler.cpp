@@ -108,7 +108,7 @@ void unescape_key(bool ignore_post, evhtp_request_t * request, evhtp::c_str_t& k
             return;
         }
     }
-    hustdb_unescape_str((char *)key.data, key.len);
+    key.len = hustdb_unescape_str((char *)key.data, key.len);
 }
 
 }

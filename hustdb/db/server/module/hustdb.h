@@ -6,7 +6,7 @@
 #include "atomic.h"
 #include "base.h"
 #include "i_server_kv.h"
-#include "slow_task_thread.h"
+#include "tasks/slow_task_thread.h"
 #include "mdb/mdb.h"
 #include <set>
 #include <vector>

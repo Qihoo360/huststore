@@ -3,7 +3,7 @@
 
 #include "db_stdinc.h"
 #include "db_lib.h"
-#include "base.h"
+#include "../base.h"
 #include <list>
 
 enum slow_task_type_t

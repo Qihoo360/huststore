@@ -2,7 +2,7 @@
 #define _task_ttl_scan_h_
 
 #include "../hustdb.h"
-#include "../slow_task_thread.h"
+#include "slow_task_thread.h"
 
 class task_ttl_scan_t : public task2_t
 {

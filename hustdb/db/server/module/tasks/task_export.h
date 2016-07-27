@@ -2,7 +2,7 @@
 #define _task_export_h_
 
 #include "../hustdb.h"
-#include "../slow_task_thread.h"
+#include "slow_task_thread.h"
 #include <string>
 
 class task_export_t : public task2_t

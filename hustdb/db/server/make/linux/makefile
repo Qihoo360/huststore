@@ -62,11 +62,11 @@ MODULE_OBJECTS=  					        \
 	$(BIN)kv_array_kv_array.o			                \
 	$(BIN)kv_array_kv_config.o		                \
 	$(BIN)kv_array_key_hash.o			                \
-	$(BIN)module_slow_task_thread.o                           \
 	$(BIN)module_hustdb.o       		                \
 	$(BIN)module_apptool.o        		                \
 	$(BIN)module_appini.o        		                \
 	$(BIN)base_md5.o   			                \
+	$(BIN)tasks_slow_task_thread.o                          \
 	$(BIN)tasks_task_export.o                               \
 	$(BIN)tasks_task_ttl_scan.o
 

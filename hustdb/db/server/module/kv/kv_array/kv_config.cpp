@@ -262,12 +262,11 @@ bool config_t::open (
 
         try
         {
-            m_files.resize ( max_file_count, "" );
+            m_files.resize ( max_file_count + 1, "" );
         }
         catch ( ... )
         {
-            LOG_ERROR ( "[config]invalid [storage]max_file_count %d, too large",
-                       max_file_count );
+            LOG_ERROR ( "[config]invalid [storage]max_file_count %d, too large", max_file_count );
             r = - 5;
             break;
         }
@@ -276,17 +275,16 @@ bool config_t::open (
 
         r = 0;
 
-        for ( int i = 0; i < max_file_count; ++ i )
+        for ( int i = 0; i <= max_file_count; ++ i )
         {
-
-            int user_file = hash.inner_file_2_user_file ( i );
+            /*int user_file = hash.inner_file_2_user_file ( i );
             if ( user_file < 0 )
             {
                 continue;
-            }
+            }*/
 
             char key[ 32 ];
-            sprintf ( key, "%02d_%02d", user_file, i );
+            sprintf ( key, "%02d_%02d", i, i );
 
             file = DB_DATA_FILE;
             stdstr_replace ( file, "$(FILE_ID)", key );

@@ -81,8 +81,8 @@ public:
     virtual int export_db (
                             int file_id,
                             const char * path,
-                            export_record_callback_t callback,
-                            void * callback_param
+                            export_record_callback_t callback = NULL,
+                            void * callback_param = NULL
                             );
 
     virtual int export_db_mem (
@@ -92,6 +92,11 @@ public:
                                 export_record_callback_t callback = NULL,
                                 void * callback_param = NULL
                                 );
+
+    virtual int ttl_scan (
+                           export_record_callback_t callback = NULL,
+                           void * callback_param = NULL
+                           );
 
     virtual int hash_info (
                             int user_file_id,

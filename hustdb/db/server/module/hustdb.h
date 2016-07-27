@@ -25,13 +25,13 @@
 #define WORKER_TIMEOUT                512
 
 #define DEF_REDELIVERY_TIMEOUT        5
-
 #define DEF_MSG_TTL                   900
 #define MAX_MSG_TTL                   7200
 #define MAX_KV_TTL                    2592000
-
+#define DEF_TTL_SCAN_INTERVAL         30
 #define MAX_QUEUE_NUM                 8192
 #define MAX_TABLE_NUM                 8192
+#define DEF_TTL_SCAN_COUNT            1000
 
 #define MAX_QUEUE_ITEM_NUM            5000000
 #define CYCLE_QUEUE_ITEM_NUM          11000000
@@ -149,15 +149,19 @@ typedef struct store_conf_s
     int32_t mq_redelivery_timeout;
     int32_t mq_ttl_maximum;
     int32_t db_ttl_maximum;
+    int32_t db_ttl_scan_interval;
     int32_t mq_queue_maximum;
     int32_t db_table_maximum;
+    int32_t db_ttl_scan_count;
     
     store_conf_s ( )
     : mq_redelivery_timeout ( 0 )
     , mq_ttl_maximum ( 0 )
     , db_ttl_maximum ( 0 )
+    , db_ttl_scan_interval ( 0 )
     , mq_queue_maximum ( 0 )
     , db_table_maximum ( 0 )
+    , db_ttl_scan_count ( 0 )
     {
     }
 
@@ -185,6 +189,11 @@ public:
         return m_storage;
     }
 
+    mdb_t * get_mdb ( )
+    {
+        return m_mdb;
+    }
+    
     int32_t get_worker_count ( )
     {
         return m_server_conf.tcp_worker_count;
@@ -313,6 +322,8 @@ public:
                         bool noval,
                         void * & token
                         );
+
+    int hustdb_ttl_scan ( );
 
 public:
 

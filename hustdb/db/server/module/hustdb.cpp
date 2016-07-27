@@ -1,5 +1,6 @@
 #include "hustdb.h"
 #include "tasks/task_export.h"
+#include "tasks/task_ttl_scan.h"
 #include "kv/kv_array/key_hash.h"
 #include "perf_target.h"
 #include <sstream>
@@ -297,6 +298,13 @@ bool hustdb_t::init_server_config ( )
         return false;
     }
     
+    m_store_conf.db_ttl_scan_interval = m_appini->ini_get_int ( m_ini, "store", "db.ttl.scan_interval", DEF_TTL_SCAN_INTERVAL );
+    if ( m_store_conf.db_ttl_scan_interval <= 0 )
+    {
+        LOG_ERROR ( "[hustdb][init_server_config]store db.ttl.scan_interval invalid, ttl.scan_interval: %d", m_store_conf.db_ttl_scan_interval );
+        return false;
+    }
+    
     m_store_conf.mq_queue_maximum = m_appini->ini_get_int ( m_ini, "store", "mq.queue.maximum", MAX_QUEUE_NUM );
     if ( m_store_conf.mq_queue_maximum <= 0 )
     {
@@ -308,6 +316,13 @@ bool hustdb_t::init_server_config ( )
     if ( m_store_conf.db_table_maximum <= 0 )
     {
         LOG_ERROR ( "[hustdb][init_server_config]store db.table.maximum invalid, table.maximum: %d", m_store_conf.db_table_maximum );
+        return false;
+    }
+    
+    m_store_conf.db_ttl_scan_count = m_appini->ini_get_int ( m_ini, "store", "db.ttl.scan_count", DEF_TTL_SCAN_COUNT );
+    if ( m_store_conf.db_ttl_scan_count <= 0 || m_store_conf.db_ttl_scan_count > 10000 )
+    {
+        LOG_ERROR ( "[hustdb][init_server_config]store db.ttl.scan_count invalid, ttl.scan_count: %d", m_store_conf.db_ttl_scan_count );
         return false;
     }
 
@@ -1498,6 +1513,32 @@ int hustdb_t::hustdb_export (
     }
 
     token = task;
+
+    return 0;
+}
+
+int hustdb_t::hustdb_ttl_scan ( )
+{
+    if ( ! m_slow_tasks.empty () )
+    {
+        LOG_ERROR ( "[hustdb][db_ttl_scan]slow_tasks not empty" );
+        return EPERM;
+    }
+
+    task_ttl_scan_t * task = task_ttl_scan_t::create ( m_store_conf.db_ttl_scan_count );
+    if ( NULL == task )
+    {
+        LOG_ERROR ( "[hustdb][db_ttl_scan]task_ttl_scan_t::create failed" );
+        return EPERM;
+    }
+
+    if ( ! m_slow_tasks.push ( task ) )
+    {
+        task->release ();
+
+        LOG_ERROR ( "[hustdb][db_ttl_scan]push task_ttl_scan_t failed" );
+        return EPERM;
+    }
 
     return 0;
 }

@@ -119,6 +119,7 @@ public:
                          size_t table_len,
                          const char * val,
                          size_t val_len,
+                         uint32_t ttl,
                          item_ctxt_t * & ctxt
                          );
 
@@ -134,8 +135,8 @@ public:
     virtual int export_db (
                             int file_id,
                             const char * path,
-                            export_record_callback_t callback,
-                            void * callback_param
+                            export_record_callback_t callback = NULL,
+                            void * callback_param = NULL
                             );
 
     virtual int export_db_mem (
@@ -145,6 +146,11 @@ public:
                                 export_record_callback_t callback = NULL,
                                 void * callback_param = NULL
                                 );
+
+    virtual int ttl_scan (
+                           export_record_callback_t callback = NULL,
+                           void * callback_param = NULL
+                           );
 
     virtual int hash_info (
                             int user_file_id,
@@ -216,11 +222,14 @@ private:
     typedef std::vector< i_kv_t * > array_t;
     typedef std::vector< item_ctxt_t > get_buffers_t;
 
+    bool m_ok;
+    int m_file_count;
+    std::string m_ttl_seek;
+    
     array_t m_files;
     key_hash_t * m_hash;
     config_t m_config;
     get_buffers_t m_get_buffers;
-    bool m_ok;
 
 private:
     // disable

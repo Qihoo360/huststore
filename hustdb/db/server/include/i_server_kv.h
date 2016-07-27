@@ -172,6 +172,11 @@ public:
                                 void * callback_param = NULL
                                 ) = 0;
 
+    virtual int ttl_scan (
+                           export_record_callback_t callback = NULL,
+                           void * callback_param = NULL
+                           ) = 0;
+
     virtual int hash_info (
                             int user_file_id,
                             int & inner_file_id

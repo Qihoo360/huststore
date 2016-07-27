@@ -185,8 +185,7 @@ bool kv_md5db_t::check_user_key (
 
     if ( unlikely ( NULL == user_key || 0 == user_key_len || user_key_len > 0xFFFFFF ) )
     {
-        LOG_INFO ( "[md5db][db][user_key_ptr=%p][user_key_len=%d]invalid user_key",
-                  user_key, user_key_len );
+        LOG_INFO ( "[md5db][db][user_key_ptr=%p][user_key_len=%d]invalid user_key", user_key, user_key_len );
         return false;
     }
 
@@ -385,8 +384,6 @@ int kv_md5db_t::check_same_key (
                                  size_t                      user_key_len
                                  )
 {
-    assert ( 16 == inner_key_len );
-
     scope_perf_target_t perf ( m_perf_fullkey_get );
     bool b = bucket.get_fullkey ()->compare (
                                              block_id,
@@ -454,8 +451,6 @@ int kv_md5db_t::add_data_with_content_db (
 
     uint32_t ttl = tmp_ctxt->wttl;
 
-    assert ( user_key && 0 != user_key_len );
-
     uint32_t ukey_len = ( uint32_t ) user_key_len;
 
     size_t need = val_len + user_key_len + sizeof (uint32_t ) * 2;
@@ -481,8 +476,6 @@ int kv_md5db_t::add_data_with_content_db (
     tmp_ctxt->value.append ( ( const char * ) & ukey_len, ( ( const char * ) & ukey_len ) + sizeof (uint32_t ) );
     // ttl
     tmp_ctxt->value.append ( ( const char * ) & ttl, ( ( const char * ) & ttl ) + sizeof (uint32_t ) );
-
-    assert ( ctxt );
 
     // add to content_db
     uint32_t    content_file_id = 0;
@@ -514,6 +507,7 @@ int kv_md5db_t::add_data_with_content_db (
                                             tmp_ctxt->table_len,
                                             ( const char * ) & cdb_data,
                                             sizeof ( cdb_data ),
+                                            ttl,
                                             ctxt );
     }
 
@@ -549,11 +543,7 @@ int kv_md5db_t::set_data_with_content_db (
 
     uint32_t ttl = tmp_ctxt->wttl;
 
-    assert ( user_key && 0 != user_key_len );
-
     uint32_t ukey_len = ( uint32_t ) user_key_len;
-
-    assert ( ctxt );
 
     // find 
     data_item_for_content_db_t  addr;
@@ -646,8 +636,6 @@ int kv_md5db_t::set_data_with_content_db (
     // ttl
     tmp_ctxt->value.append ( ( const char * ) & ttl, ( ( const char * ) & ttl ) + sizeof (uint32_t ) );
 
-    assert ( ctxt );
-
     // update to content_db
     uint32_t new_content_file_id = addr.file_id;
     uint32_t new_content_data_id = addr.data_id;
@@ -678,6 +666,7 @@ int kv_md5db_t::set_data_with_content_db (
                                             tmp_ctxt->table_len,
                                             ( const char * ) & cdb_data,
                                             sizeof ( cdb_data ),
+                                            ttl,
                                             ctxt );
     }
 
@@ -711,8 +700,6 @@ int kv_md5db_t::set_data_with_kv_array (
 
     uint32_t ttl = tmp_ctxt->wttl;
 
-    assert ( user_key && 0 != user_key_len );
-
     uint32_t ukey_len = ( uint32_t ) user_key_len;
 
     size_t need = val_len + user_key_len + sizeof (uint32_t ) * 2;
@@ -739,7 +726,6 @@ int kv_md5db_t::set_data_with_kv_array (
     // ttl
     tmp_ctxt->value.append ( ( const char * ) & ttl, ( ( const char * ) & ttl ) + sizeof (uint32_t ) );
 
-    assert ( ctxt );
     {
         scope_perf_target_t perf ( m_perf_data_put );
         r = m_inner->m_data.put_from_md5db ( block_id,
@@ -748,6 +734,7 @@ int kv_md5db_t::set_data_with_kv_array (
                                             tmp_ctxt->table_len,
                                             tmp_ctxt->value.c_str (),
                                             tmp_ctxt->value.size (),
+                                            ttl,
                                             ctxt );
     }
 
@@ -1303,7 +1290,6 @@ int kv_md5db_t::get_data_without_content_db (
     tmp_ctxt = & m_inner->m_query_ctxts[ conn.worker_id ];
 
     int         r;
-    assert ( ctxt );
     {
         scope_perf_target_t perf ( m_perf_data_get );
         r = m_inner->m_data.get_from_md5db ( block_id,
@@ -1385,7 +1371,6 @@ int kv_md5db_t::get_data_with_content_db (
     tmp_ctxt = & m_inner->m_query_ctxts[ conn.worker_id ];
 
     int         r;
-    assert ( ctxt );
     {
         scope_perf_target_t perf ( m_perf_data_get );
         r = m_inner->m_data.get_from_md5db ( block_id,
@@ -1660,8 +1645,6 @@ int kv_md5db_t::get (
         return r;
     }
 
-    assert ( ctxt );
-
     // get bucket
     bucket_t & bucket = m_inner->m_buckets.get_bucket ( inner_key, inner_key_len );
 
@@ -1806,8 +1789,6 @@ int kv_md5db_t::delete_conflict_data (
         }
         return r;
     }
-
-    assert ( ctxt );
 
     query_ctxt_t * tmp_ctxt;
     tmp_ctxt = & m_inner->m_query_ctxts[ conn.worker_id ];
@@ -2072,8 +2053,6 @@ int kv_md5db_t::delete_direct_data (
         return EFAULT;
     }
 
-    assert ( ctxt );
-
     query_ctxt_t * tmp_ctxt;
     tmp_ctxt = & m_inner->m_query_ctxts[ conn.worker_id ];
 
@@ -2330,8 +2309,6 @@ int kv_md5db_t::del_inner (
         PERF_DEL_FAIL ();
         return r;
     }
-
-    assert ( ctxt );
 
     // get bucket
     bucket_t & bucket = m_inner->m_buckets.get_bucket ( inner_key, inner_key_len );
@@ -2619,8 +2596,6 @@ int kv_md5db_t::put_inner (
         PERF_PUT_CANCEL ();
         return r;
     }
-
-    assert ( ctxt );
 
     // get bucket
     bucket_t & bucket = m_inner->m_buckets.get_bucket ( inner_key, inner_key_len );
@@ -3253,8 +3228,6 @@ int kv_md5db_t::export_db_mem (
         return r;
     }
 
-    assert ( ctxt );
-
     if ( NULL == m_inner )
     {
         LOG_ERROR ( "[md5db][export_db_mem]m_inner is NULL" );
@@ -3270,6 +3243,30 @@ int kv_md5db_t::export_db_mem (
     if ( 0 != r )
     {
         LOG_ERROR ( "[md5db][export_db_mem]export_db return %d", r );
+        return r;
+    }
+
+    return 0;
+}
+
+int kv_md5db_t::ttl_scan (
+                           export_record_callback_t callback,
+                           void * callback_param
+                           )
+{
+    if ( NULL == m_inner )
+    {
+        LOG_ERROR ( "[md5db][ttl_scan]m_inner is NULL" );
+        return EFAULT;
+    }
+    
+    struct export_cb_param_t * cb_pm = ( struct export_cb_param_t * ) callback_param;
+    cb_pm->db = this;
+    
+    int r = m_inner->m_data.ttl_scan ( export_md5db_record, cb_pm );
+    if ( 0 != r )
+    {
+        LOG_ERROR ( "[md5db][ttl_scan]ttl_scan return %d", r );
         return r;
     }
 

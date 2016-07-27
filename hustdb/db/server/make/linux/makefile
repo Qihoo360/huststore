@@ -67,7 +67,8 @@ MODULE_OBJECTS=  					        \
 	$(BIN)module_apptool.o        		                \
 	$(BIN)module_appini.o        		                \
 	$(BIN)base_md5.o   			                \
-	$(BIN)tasks_task_export.o
+	$(BIN)tasks_task_export.o                               \
+	$(BIN)tasks_task_ttl_scan.o
 
 MDB_OBJECTS =                                                   \
     $(BIN)memcached.o                                             \

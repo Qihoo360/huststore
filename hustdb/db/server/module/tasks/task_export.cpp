@@ -13,7 +13,7 @@ task_export_t * task_export_t::create (
                                         )
 {
     task_export_t * p = NULL;
-    
+
     try
     {
         p = new task_export_t ( file_id, path, offset, size, start, end, noval, cover );
@@ -22,7 +22,7 @@ task_export_t * task_export_t::create (
     {
         LOG_ERROR ( "[slow_task][export]bad_alloc" );
     }
-    
+
     return p;
 }
 
@@ -93,29 +93,29 @@ void task_export_t::process_export_db ( )
             LOG_ERROR ( "[slow_task][export]get_storage() return NULL" );
             return;
         }
-        
+
         if ( strcmp ( m_path.c_str (), EXPORT_DB_ALL ) == 0 )
         {
             int file_count = db->get_user_file_count ();
-            
+
             for ( int i = 0; i < file_count; i ++ )
             {
                 if ( i == m_file_id )
                 {
                     continue;
                 }
-                
+
                 sprintf ( i_ph, "./EXPORT/%s%d[%d-%d].%s", m_path.c_str (), i, m_start, m_end, noval_flag );
                 G_APPTOOL->path_to_os ( i_ph );
-                
+
                 if ( G_APPTOOL->is_file ( i_ph ) )
                 {
                     unlink ( i_ph );
                 }
-                
+
                 sprintf ( d_ph, "./EXPORT/%s%d[%d-%d].%s.data", m_path.c_str (), i, m_start, m_end, noval_flag );
                 G_APPTOOL->path_to_os ( d_ph );
-                
+
                 if ( G_APPTOOL->is_file ( d_ph ) )
                 {
                     unlink ( d_ph );

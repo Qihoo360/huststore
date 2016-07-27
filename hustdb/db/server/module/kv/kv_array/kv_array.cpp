@@ -10,11 +10,13 @@ void kv_array_t::kill_me ( )
 }
 
 kv_array_t::kv_array_t ( )
-: m_config ( )
+: m_ok ( false )
+, m_file_count ( 0 )
+, m_ttl_seek ( )
+, m_config ( )
 , m_files ( )
 , m_hash ( NULL )
 , m_get_buffers ( )
-, m_ok ( false )
 {
 }
 
@@ -81,11 +83,11 @@ bool kv_array_t::open ( config_t & config )
         return false;
     }
 
-    int count = config.get_max_file_count ();
+    m_file_count = config.get_max_file_count ();
 
     try
     {
-        m_files.resize ( count, NULL );
+        m_files.resize ( m_file_count + 1, NULL );
     }
     catch ( ... )
     {
@@ -93,8 +95,7 @@ bool kv_array_t::open ( config_t & config )
         return false;
     }
 
-    int i;
-    for ( i = 0; i < count; ++ i )
+    for ( int i = 0; i <= m_file_count; ++ i )
     {
         const char * path = config.get_file_path ( i );
         if ( NULL == path )
@@ -102,6 +103,7 @@ bool kv_array_t::open ( config_t & config )
             LOG_ERROR ( "[kv_array]config.get_file_path( %d ) failed", i );
             return false;
         }
+
         if ( '\0' == * path )
         {
             continue;
@@ -117,11 +119,13 @@ bool kv_array_t::open ( config_t & config )
             LOG_ERROR ( "[kv_array]bad_alloc" );
             return false;
         }
+        
         if ( NULL == o )
         {
             LOG_ERROR ( "[kv_array]create_file() return NULL" );
             return false;
         }
+        
         const kv_config_t & kv_cfg = config.get_kv_config ();
         if ( ! o->open ( path, kv_cfg, i ) )
         {
@@ -136,6 +140,9 @@ bool kv_array_t::open ( config_t & config )
     }
 
     m_ok = true;
+    
+    m_ttl_seek.reserve ( RESERVE_BYTES_FOR_RSP_BUFER );
+    m_ttl_seek.resize ( 0 );
     
     return true;
 }
@@ -162,11 +169,12 @@ void kv_array_t::close ( )
                 catch ( ... )
                 {
                 }
-                LOG_INFO ( "[kv_array][file_id=%u]begin close data_file[path=%s]",
-                          file_id, path.c_str () );
+                
+                LOG_INFO ( "[kv_array][file_id=%u]begin close data_file[path=%s]", file_id, path.c_str () );
+                
                 o->kill_me ();
-                LOG_INFO ( "[kv_array][file_id=%u]end close data_file[path=%s]",
-                          file_id, path.c_str () );
+                
+                LOG_INFO ( "[kv_array][file_id=%u]end close data_file[path=%s]", file_id, path.c_str () );
             }
         }
         m_files.resize ( 0 );
@@ -189,9 +197,9 @@ int kv_array_t::flush ( )
 
 i_kv_t * kv_array_t::get_file ( unsigned int file_id )
 {
-    if ( unlikely ( ( unsigned int ) - 1 == file_id || file_id >= ( unsigned int ) m_files.size () ) )
+    if ( unlikely ( ( unsigned int ) - 1 == file_id || file_id >= m_file_count ) )
     {
-        LOG_ERROR ( "[kv_array]file_id %d >= m_files.size() %d", ( int ) file_id, ( int ) m_files.size () );
+        LOG_ERROR ( "[kv_array]file_id %d >= file_count %d", ( int ) file_id, m_file_count );
         return NULL;
     }
 
@@ -200,7 +208,7 @@ i_kv_t * kv_array_t::get_file ( unsigned int file_id )
 
 unsigned int kv_array_t::file_count ( )
 {
-    return ( unsigned int ) m_files.size ();
+    return m_file_count;
 }
 
 int kv_array_t::get_from_md5db (
@@ -209,10 +217,12 @@ int kv_array_t::get_from_md5db (
                                  const char *                table,
                                  size_t                      table_len,
                                  std::string * &             rsp,
-                                 item_ctxt_t * &              ctxt
+                                 item_ctxt_t * &             ctxt
                                  )
 {
-    assert ( ctxt );
+    const char * key        = NULL;
+    size_t       key_len    = 0;
+    
     rsp = NULL;
 
     if ( unlikely ( ! m_ok ) )
@@ -221,11 +231,9 @@ int kv_array_t::get_from_md5db (
         return EINVAL;
     }
 
-    if ( unlikely ( file_id >= ( int ) m_files.size () ) )
+    if ( unlikely ( file_id >= m_file_count ) )
     {
-        LOG_ERROR ( "[kv_array][local=%d][files=%d]invalid local_id",
-                   file_id,
-                   ( int ) m_files.size () );
+        LOG_ERROR ( "[kv_array][local=%d][files=%d]invalid local_id", ( int ) file_id, m_file_count );
         return EINVAL;
     }
 
@@ -236,19 +244,21 @@ int kv_array_t::get_from_md5db (
         return EFAULT;
     }
 
-    int r;
     if ( table_len <= 0 )
     {
-        r = kv->get ( ( const char * ) & block_id, sizeof ( md5db::block_id_t ), ctxt->value );
+        key     = ( const char * ) & block_id;
+        key_len = sizeof ( md5db::block_id_t );
     }
     else
     {
         ctxt->key.append ( table, table_len );
         ctxt->key.append ( ( const char * ) & block_id, sizeof ( md5db::block_id_t ) );
-
-        r = kv->get ( ctxt->key.c_str (), ctxt->key.size (), ctxt->value );
+        
+        key     = ctxt->key.c_str ();
+        key_len = ctxt->key.size ();
     }
-
+    
+    int r = kv->get ( key, key_len, ctxt->value );
     if ( unlikely ( 0 != r && ENOENT != r ) )
     {
         LOG_ERROR ( "[kv_array][file_id=%u]get return %d", file_id, r );
@@ -268,21 +278,22 @@ int kv_array_t::put_from_md5db (
                                  size_t                      table_len,
                                  const char *                val,
                                  size_t                      val_len,
+                                 uint32_t                    ttl,
                                  item_ctxt_t * &             ctxt
                                  )
 {
-    assert ( ctxt );
-
+    const char * key        = NULL;
+    size_t       key_len    = 0;
+    
     if ( unlikely ( ! m_ok ) )
     {
         LOG_ERROR ( "[kv_array]not ready" );
         return EINVAL;
     }
 
-    if ( unlikely ( file_id >= ( int ) m_files.size () ) )
+    if ( unlikely ( file_id >= m_file_count ) )
     {
-        LOG_ERROR ( "[kv_array][local=%d][files=%d]invalid local_id",
-                   file_id, ( int ) m_files.size () );
+        LOG_ERROR ( "[kv_array][local=%d][files=%d]invalid local_id", ( int ) file_id, m_file_count );
         return EINVAL;
     }
 
@@ -293,25 +304,41 @@ int kv_array_t::put_from_md5db (
         return EFAULT;
     }
 
-    int r;
     if ( table_len <= 0 )
     {
-        r = kv->put ( ( const char * ) & block_id, sizeof ( md5db::block_id_t ), val, val_len );
+        key     = ( const char * ) & block_id;
+        key_len = sizeof ( md5db::block_id_t );
     }
     else
     {
         ctxt->key.append ( table, table_len );
         ctxt->key.append ( ( const char * ) & block_id, sizeof ( md5db::block_id_t ) );
-
-        r = kv->put ( ctxt->key.c_str (), ctxt->key.size (), val, val_len );
+        
+        key     = ctxt->key.c_str ();
+        key_len = ctxt->key.size ();
     }
-
+    
+    int r = kv->put ( key, key_len, val, val_len );
     if ( unlikely ( 0 != r ) )
     {
         LOG_ERROR ( "[kv_array][file_id=%u]put return %d", file_id, r );
+        return r;
     }
 
-    return r;
+    if ( ttl > 0 )
+    {
+        i_kv_t * kv_t = m_files[ m_file_count ];
+        if ( kv_t )
+        {
+            uint32_t val_t [ 2 ];
+            val_t[ 0 ] = ttl;
+            val_t[ 1 ] = file_id;
+
+            kv_t->put ( key, key_len, val_t, sizeof ( val_t ) );
+        }
+    }
+    
+    return 0;
 }
 
 int kv_array_t::hash_with_md5db (
@@ -321,7 +348,6 @@ int kv_array_t::hash_with_md5db (
                                   item_ctxt_t * &     ctxt
                                   )
 {
-    assert ( key );
     ctxt = & m_get_buffers[ conn.worker_id ];
     ctxt->reset ();
 
@@ -339,19 +365,18 @@ int kv_array_t::del_from_md5db (
                                  item_ctxt_t * &             ctxt
                                  )
 {
-    assert ( ctxt );
-
+    const char * key        = NULL;
+    size_t       key_len    = 0;
+    
     if ( unlikely ( ! m_ok ) )
     {
         LOG_ERROR ( "[kv_array]not ready" );
         return EINVAL;
     }
 
-    if ( unlikely ( file_id >= ( int ) m_files.size () ) )
+    if ( unlikely ( file_id >= m_file_count ) )
     {
-        LOG_ERROR ( "[kv_array][local=%d][files=%d]invalid local_id",
-                   file_id,
-                   ( int ) m_files.size () );
+        LOG_ERROR ( "[kv_array][local=%d][files=%d]invalid local_id", ( int ) file_id, m_file_count );
         return EINVAL;
     }
 
@@ -361,20 +386,22 @@ int kv_array_t::del_from_md5db (
         LOG_ERROR ( "[kv_array][file_id=%u]file is NULL", file_id );
         return EFAULT;
     }
-
-    int r;
+    
     if ( table_len <= 0 )
     {
-        r = kv->del ( ( const char * ) & block_id, sizeof ( md5db::block_id_t ) );
+        key     = ( const char * ) & block_id;
+        key_len = sizeof ( md5db::block_id_t );
     }
     else
     {
         ctxt->key.append ( table, table_len );
         ctxt->key.append ( ( const char * ) & block_id, sizeof ( md5db::block_id_t ) );
-
-        r = kv->del ( ctxt->key.c_str (), ctxt->key.size () );
+        
+        key     = ctxt->key.c_str ();
+        key_len = ctxt->key.size ();
     }
 
+    int r = kv->del ( key, key_len );
     if ( unlikely ( 0 != r && ENOENT != r ) )
     {
         LOG_ERROR ( "[kv_array][file_id=%u]del return %d", file_id, r );
@@ -430,11 +457,11 @@ int kv_array_t::export_db (
                             )
 {
     int                 r                     = 0;
+    uint32_t            i                     = 0;
     uint32_t            offset                = 0;
     uint32_t            size                  = 0;
     uint16_t            start                 = 0;
     uint16_t            end                   = 0;
-    uint32_t            i                     = 0;
     uint32_t            version               = 0;
     uint32_t            ttl                   = 0;
     size_t              key_len               = 0;
@@ -468,14 +495,15 @@ int kv_array_t::export_db (
     std::string         json_item;
     std::string         content;
 
-    if ( unlikely ( file_id >= ( int ) m_files.size () || ! path || ! * path ) )
+    if ( unlikely ( file_id >= m_file_count || ! path || ! * path ) )
     {
-        LOG_ERROR ( "[kv_array][export_db][local=%d][files=%d][path is null]", file_id, ( int ) m_files.size () );
+        LOG_ERROR ( "[kv_array][export_db][local=%d][files=%d][path is null]", file_id, m_file_count );
         return EFAULT;
     }
     
     base64_item.reserve ( RESERVE_BYTES_FOR_RSP_BUFER );
     json_item.reserve ( RESERVE_BYTES_FOR_RSP_BUFER );
+    content.reserve ( RESERVE_BYTES_FOR_RSP_BUFER );
 
     i_kv_t * kv = m_files[ file_id ];
     if ( unlikely ( NULL == kv ) )
@@ -749,15 +777,13 @@ int kv_array_t::export_db_mem (
 {
     rsp = NULL;
 
-    assert ( ctxt );
-
     int                 r                     = 0;
+    uint32_t            i                     = 0;
     uint32_t            offset                = 0;
     uint32_t            size                  = 0;
     uint16_t            start                 = 0;
     uint16_t            end                   = 0;
     int                 file_id               = 0;
-    uint32_t            i                     = 0;
     uint32_t            real_size             = 0;
     size_t              key_len               = 0;
     const char *        key                   = NULL;
@@ -798,9 +824,9 @@ int kv_array_t::export_db_mem (
 
     file_id = cb_pm->file_id >= 0 ? cb_pm->file_id : ctxt->inner_file_id;
 
-    if ( unlikely ( file_id >= ( int ) m_files.size () ) )
+    if ( unlikely ( file_id >= m_file_count ) )
     {
-        LOG_ERROR ( "[kv_array][export_db_mem][local=%d][files=%d]invalid local_id", file_id, ( int ) m_files.size () );
+        LOG_ERROR ( "[kv_array][export_db_mem][local=%d][files=%d]invalid local_id", file_id, m_file_count );
         return EFAULT;
     }
 
@@ -961,6 +987,10 @@ int kv_array_t::export_db_mem (
         uint32_t            ttl                   = 0;
         uint32_t            total                 = offset + size;
         i_iterator_t *      it                    = NULL;
+        
+        base64_item.reserve ( RESERVE_BYTES_FOR_RSP_BUFER );
+        json_item.reserve ( RESERVE_BYTES_FOR_RSP_BUFER );
+        content.reserve ( RESERVE_BYTES_FOR_RSP_BUFER );
 
         do
         {
@@ -1189,6 +1219,239 @@ int kv_array_t::export_db_mem (
     return r;
 }
 
+int kv_array_t::ttl_scan (
+                           export_record_callback_t callback,
+                           void * callback_param
+                           )
+{
+    int                 r                     = 0;
+    uint32_t            i                     = 0;
+    uint32_t            size                  = 0;
+    uint32_t            version               = 0;
+    uint32_t            timestamp             = 0;
+    uint32_t            ttl                   = 0;
+    uint32_t            file_id               = 0;
+    size_t              key_len               = 0;
+    const char *        key                   = NULL;
+    size_t              val_len               = 0;
+    const char *        val                   = NULL;
+    size_t              prefix_tl             = 0;
+    size_t              table_len             = 0;
+    const char *        table                 = NULL;
+    size_t              type_len              = 0;
+    char                type[ 2 ]             = { };
+    i_iterator_t *      it                    = NULL;
+    hustdb_t *          g_hustdb              = NULL;
+    bool                ignore_this_record    = false;
+    bool                break_the_loop        = false;
+    item_ctxt_t *       ctxt                  = NULL;
+    conn_ctxt_t         conn;
+    std::string         ttl_key;
+    std::string         content;
+    
+    ttl_key.reserve ( RESERVE_BYTES_FOR_RSP_BUFER );
+    content.reserve ( RESERVE_BYTES_FOR_RSP_BUFER );
+
+    i_kv_t * kv_t  = m_files[ m_file_count ];
+    if ( unlikely ( NULL == kv_t ) )
+    {
+        LOG_ERROR ( "[kv_array][ttl_scan][local=%u]file is NULL", m_file_count );
+        return EFAULT;
+    }
+    
+    g_hustdb       = ( hustdb_t * ) G_APPTOOL->get_hustdb ();
+    timestamp      = g_hustdb->get_mdb ()->current_timestamp ();
+    conn.worker_id = g_hustdb->get_worker_count ();
+    
+    struct export_cb_param_t * cb_pm = ( struct export_cb_param_t * ) callback_param;
+    size           = cb_pm->size;
+    
+    do
+    {
+
+        it = kv_t->iterator ();
+        if ( NULL == it )
+        {
+            LOG_ERROR ( "[kv_array][ttl_scan]iterator() failed" );
+            r = EFAULT;
+            break;
+        }
+
+        if ( ! m_ttl_seek.empty () )
+        {
+            it->seek ( m_ttl_seek.c_str (), m_ttl_seek.size () );
+        }
+        else
+        {
+            it->seek_first ();
+        }
+
+        ttl_key.resize ( 0 );
+        
+        for ( i = 0; it->valid () && i < size; it->next (), i ++ )
+        {
+            if ( ! ttl_key.empty () )
+            {
+                r = kv_t->del ( ttl_key.c_str (), ttl_key.size () );
+                if ( unlikely ( 0 != r ) )
+                {
+                    LOG_ERROR ( "[kv_array][ttl_scan][file_id=%u]del return %d", file_id, r );
+                }
+            }
+            
+            version    = 0;
+            key        = it->key ( & key_len );
+            val        = it->value ( & val_len );
+            
+            if ( i == size - 1 )
+            {
+                m_ttl_seek.resize ( 0 );
+                m_ttl_seek.append ( key, key_len );
+            }
+
+            fast_memcpy ( & ttl, val, sizeof ( uint32_t ) );
+            fast_memcpy ( & file_id, val + sizeof ( uint32_t ), sizeof ( uint32_t ) );
+            
+            if ( key_len > sizeof ( md5db::block_id_t ) )
+            {
+                prefix_tl = key_len - sizeof ( md5db::block_id_t ) - 1;
+                table     = key;
+
+                if ( key_len > ZSET_SCORE_LEN + sizeof ( md5db::block_id_t ) + 1 &&
+                     key [ key_len - ZSET_SCORE_LEN - sizeof ( md5db::block_id_t ) - 1 ] == ZSET_TB
+                     )
+                {
+                    table_len = key_len - ZSET_SCORE_LEN - sizeof ( md5db::block_id_t ) - 1;
+                }
+                else
+                {
+                    table_len = prefix_tl;
+                }
+
+                type[ 0 ] = key [ table_len ];
+                type_len  = 1;
+            }
+            else
+            {
+                prefix_tl = 0;
+                table_len = 0;
+                table     = NULL;
+                type[ 0 ] = KV_ALL;
+                type_len  = 0;
+            }
+            
+            if ( ttl > timestamp )
+            {
+                ttl_key.resize ( 0 );
+                continue;
+            }
+            
+            ttl_key.resize ( 0 );
+            ttl_key.append ( key, key_len );
+            
+            if ( file_id >= m_file_count )
+            {
+                LOG_ERROR ( "[kv_array][ttl_scan][local=%d][files=%d]invalid local_id", file_id, m_file_count );
+                continue;
+            }
+
+            i_kv_t * kv = m_files[ file_id ];
+            if ( unlikely ( NULL == kv ) )
+            {
+                LOG_ERROR ( "[kv_array][ttl_scan][local=%u]file is NULL", file_id );
+                return EFAULT;
+            }
+            
+            r = kv->get ( key, key_len, content );
+            if ( unlikely ( 0 != r ) )
+            {
+                LOG_ERROR ( "[kv_array][ttl_scan][file_id=%u]get return %d", file_id, r );
+                continue;
+            }
+            
+            val     = content.c_str ();
+            val_len = content.size ();
+            
+            if ( callback )
+            {
+                callback ( callback_param,
+                          key,
+                          key_len,
+                          val,
+                          val_len,
+                          table,
+                          prefix_tl,
+                          version,
+                          ttl,
+                          content,
+                          & ignore_this_record,
+                          & break_the_loop );
+            }
+
+            if ( ttl > timestamp )
+            {
+                ttl_key.resize ( 0 );
+                continue;
+            }
+            
+            version = 0;
+            switch ( type[ 0 ] )
+            {
+                case KV_ALL:
+                    r = g_hustdb->hustdb_del ( key, key_len, version, false, conn, ctxt );
+                    break;
+
+                case HASH_TB:
+                    r = g_hustdb->hustdb_hdel ( table, table_len, key, key_len, version, false, conn, ctxt );
+                    break;
+
+                case SET_TB:
+                    r = g_hustdb->hustdb_srem ( table, table_len, key, key_len, version, false, conn, ctxt );
+                    break;
+
+                case ZSET_TB:
+                    r = g_hustdb->hustdb_zrem ( table, table_len, key, key_len, version, false, conn, ctxt );
+                    break;
+
+                default:
+                    r = EFAULT;
+                    break;
+            }
+            
+            if ( unlikely ( 0 != r ) )
+            {
+                LOG_ERROR ( "[kv_array][ttl_scan]hustdb_del return %d", r );
+            }
+        }
+
+        if ( ! ttl_key.empty () )
+        {
+            r = kv_t->del ( ttl_key.c_str (), ttl_key.size () );
+            if ( unlikely ( 0 != r ) )
+            {
+                LOG_ERROR ( "[kv_array][ttl_scan][file_id=%u]del return %d", file_id, r );
+            }
+        }
+        
+        if ( i < size )
+        {
+            m_ttl_seek.resize ( 0 );
+        }
+
+        r = 0;
+
+    }
+    while ( 0 );
+
+    if ( it )
+    {
+        it->kill_me ();
+        it = NULL;
+    }
+
+    return r;
+}
+
 int kv_array_t::hash_info (
                             int                         user_file_id,
                             int &                       inner_file_id
@@ -1210,11 +1473,9 @@ int kv_array_t::hash_info (
         LOG_ERROR ( "[kv_array][export]user_file_id=%d, not in current server", user_file_id );
         return ENOENT;
     }
-    if ( unlikely ( inner_file_id >= ( int ) m_files.size () ) )
+    if ( unlikely ( inner_file_id >= m_file_count ) )
     {
-        LOG_ERROR ( "[kv_array][export][local=%d][files=%d]invalid local_id",
-                   inner_file_id,
-                   ( int ) m_files.size () );
+        LOG_ERROR ( "[kv_array][export][local=%d][files=%d]invalid local_id", inner_file_id, m_file_count );
         return EINVAL;
     }
 

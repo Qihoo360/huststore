@@ -3,7 +3,7 @@
 
 #include "db_stdinc.h"
 #include "db_lib.h"
-#include "md5/md5.h"
+#include "utils/md5.h"
 
 #if ! defined( WIN32 ) && ! defined( WIN64 )
 #include <semaphore.h>

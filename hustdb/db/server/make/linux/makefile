@@ -18,7 +18,7 @@ $(BIN)module_%.o: $(SERVER)module/%.cpp
 $(BIN)tasks_%.o: $(SERVER)module/tasks/%.cpp
 	$(CPPC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
 
-$(BIN)base_%.o: $(SERVER)module/md5/%.c
+$(BIN)base_%.o: $(SERVER)module/utils/%.cpp
 	$(CPPC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
 
 $(BIN)kv_%.o: $(SERVER)module/kv/%.cpp
@@ -66,6 +66,7 @@ MODULE_OBJECTS=  					        \
 	$(BIN)module_apptool.o        		                \
 	$(BIN)module_appini.o        		                \
 	$(BIN)base_md5.o   			                \
+	$(BIN)base_timer.o   			                \
 	$(BIN)tasks_slow_task_thread.o                          \
 	$(BIN)tasks_task_export.o                               \
 	$(BIN)tasks_task_ttl_scan.o

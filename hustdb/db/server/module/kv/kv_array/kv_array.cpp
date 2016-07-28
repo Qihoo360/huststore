@@ -1260,7 +1260,7 @@ int kv_array_t::ttl_scan (
     }
     
     g_hustdb       = ( hustdb_t * ) G_APPTOOL->get_hustdb ();
-    timestamp      = g_hustdb->get_mdb ()->current_timestamp ();
+    timestamp      = g_hustdb->get_current_timestamp ();
     conn.worker_id = g_hustdb->get_worker_count ();
     
     struct export_cb_param_t * cb_pm = ( struct export_cb_param_t * ) callback_param;

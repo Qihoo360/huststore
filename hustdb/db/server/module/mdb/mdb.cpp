@@ -17,7 +17,10 @@ mdb_t::~ mdb_t ( )
     close ();
 }
 
-bool mdb_t::open ( int count, int size, int sys_mem_threshold, int proc_mem_threshold )
+bool mdb_t::open (
+                   int count,
+                   int size
+                   )
 {
     try
     {
@@ -36,17 +39,10 @@ bool mdb_t::open ( int count, int size, int sys_mem_threshold, int proc_mem_thre
         return false;
     }
 
-    if ( sys_mem_threshold < 0 || sys_mem_threshold >= 100 || proc_mem_threshold < 0 || proc_mem_threshold >= 100 )
-    {
-        return false;
-    }
-
     if ( size <= 0 )
     {
-        size = 32;
+        size = 64;
     }
-
-    set_mem_threshold ( sys_mem_threshold, proc_mem_threshold );
 
     if ( init ( size ) != 0 )
     {
@@ -133,14 +129,9 @@ int mdb_t::del (
     return 0;
 }
 
-uint32_t mdb_t::current_timestamp ( )
+void mdb_t::set_mdb_timestamp ( time_t timestamp )
 {
-    return mdb_timestamp ( );
-}
-
-bool mdb_t::is_memory_threshold ( )
-{
-    return is_memory_over_threshold ( );
+    set_current_time ( timestamp );
 }
 
 std::string * mdb_t::buffer (

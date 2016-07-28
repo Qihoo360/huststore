@@ -70,7 +70,7 @@ struct slab_rebalance slab_rebal;
 volatile int slab_rebalance_signal;
 
 
-#define REALTIME_MAXDELTA 60*60*24*30
+#define REALTIME_MAXDELTA    2592000
 
 /*
  * given time value that's either unix time or delta from current unix time, return
@@ -140,12 +140,6 @@ static void settings_init ( size_t size )
  * sizeof(time_t) > sizeof(unsigned int).
  */
 volatile rel_time_t current_time;
-static pthread_t timer_tid;
-
-static int memory_over_threshold ( int _sys_mem_threshold, int _proc_mem_threshold );
-static bool memory_threshold = false;
-static int sys_mem_threshold = 0;
-static int proc_mem_threshold = 0;
 
 static void save_pid ( const char *pid_file )
 {
@@ -258,80 +252,9 @@ static int enable_large_pages ( void )
 #endif
 }
 
-void set_current_time ( )
+void set_current_time ( time_t timestamp )
 {
-    struct timeval tv;
-    gettimeofday (&tv, NULL);
-    current_time = ( rel_time_t ) ( tv.tv_sec - process_started );
-}
-void *timer_thread ( void * );
-
-int start_timer_thread ( void )
-{
-    int ret;
-    if ( ( ret = pthread_create (&timer_tid, NULL, timer_thread, NULL) ) != 0 )
-    {
-        return - 1;
-    }
-    return 0;
-}
-
-void *timer_thread ( void *arg )
-{
-    int timerfd = timerfd_create (CLOCK_REALTIME, 0);
-    if ( timerfd == - 1 )
-    {
-        fprintf (stderr, "timerfd create fail\n");
-        return NULL;
-    }
-
-    struct itimerspec tv;
-    memset (&tv, 0, sizeof (tv ));
-    tv.it_value.tv_sec = 1;
-    tv.it_interval.tv_sec = 1;
-
-    if ( timerfd_settime (timerfd, 0, &tv, NULL) == - 1 )
-    {
-        fprintf (stderr, "timerfd settime failed\n");
-        return NULL;
-    }
-
-    struct pollfd pfd;
-    pfd.fd = timerfd;
-    pfd.events = POLLIN;
-
-    uint64_t val;
-    int ret;
-    while ( 1 )
-    {
-        ret = poll (&pfd, 1, 5000);
-        if ( ret == - 1 )
-        {
-            if ( errno == EINTR )
-            {
-                continue;
-            }
-            return NULL;
-        }
-        else if ( ret == 0 )
-        {
-            fprintf (stderr, "time out\n");
-        }
-        if ( pfd.revents & POLLIN )
-        {
-            read (timerfd, &val, sizeof (val ));
-            set_current_time ();
-            if ( current_time % 10 == 0 )
-            {
-                if ( sys_mem_threshold != 0 || proc_mem_threshold != 0 )
-                {
-                    memory_over_threshold (sys_mem_threshold, proc_mem_threshold);
-                }
-            }
-        }
-    }
-    close (timerfd);
-    return NULL;
+    current_time = ( rel_time_t ) ( timestamp - process_started );
 }
 
 int process_delete_command ( char *key, size_t nkey )
@@ -521,19 +444,18 @@ int init ( size_t size )
     {
         return - 1;
     }
+    
     if ( start_lru_crawler && start_lru_maintainer_thread () != 0 )
     {
         fprintf (stderr, "Failed to enable LRU maintainer thread\n");
         return - 1;
     }
+    
     if ( settings.slab_reassign && start_slab_maintenance_thread () == - 1 )
     {
         return - 1;
     }
-    if ( start_timer_thread () != 0 )
-    {
-        return - 1;
-    }
+
     return 0;
 }
 
@@ -542,68 +464,3 @@ unsigned int get_maxbytes ( )
     return settings.maxbytes / ( 1024 * 1024 );
 }
 
-uint32_t mdb_timestamp ( )
-{
-    return current_time + ( uint32_t ) process_started;
-}
-
-void set_mem_threshold ( int _sys_mem_threshold, int _proc_mem_threshold )
-{
-    sys_mem_threshold = _sys_mem_threshold;
-    proc_mem_threshold = _proc_mem_threshold;
-}
-
-static int memory_over_threshold ( int _sys_mem_threshold, int _proc_mem_threshold )
-{
-    long rss = 0L;
-    FILE *fp = NULL, *meminfo_fp = NULL;
-    long mem[4] = { 0L };
-
-    if ( ( meminfo_fp = fopen ("/proc/meminfo", "r") ) == NULL )
-    {
-        return - 1;
-    }
-    for ( int i = 0; i < 4; i ++ )
-    {
-        if ( fscanf (meminfo_fp, "%*s%ld%*s", mem + i) != 1 )
-        {
-            fclose (meminfo_fp);
-            return - 1;
-        }
-    }
-    fclose (meminfo_fp);
-
-    unsigned long freeram = ( mem[1] + mem[2] + mem[3] ) * 1024;
-    unsigned long totalram = mem[0] * 1024;
-
-    if ( _sys_mem_threshold != 0 && ( 100 * freeram / totalram ) < ( 100 - _sys_mem_threshold ) )
-    {
-        memory_threshold = true;
-        return 1;
-    }
-
-    if ( ( fp = fopen ("/proc/self/statm", "r") ) == NULL )
-    {
-        return - 1;
-    }
-
-    if ( fscanf (fp, "%*s%ld", &rss) != 1 )
-    {
-        fclose (fp);
-        return - 1;
-    }
-    fclose (fp);
-    size_t process_total = ( size_t ) rss * ( size_t ) sysconf (_SC_PAGESIZE);
-    if ( _proc_mem_threshold != 0 && ( 100 * process_total / totalram ) > _proc_mem_threshold )
-    {
-        memory_threshold = true;
-        return 1;
-    }
-    memory_threshold = false;
-    return 0;
-}
-
-bool is_memory_over_threshold ( )
-{
-    return memory_threshold;
-}

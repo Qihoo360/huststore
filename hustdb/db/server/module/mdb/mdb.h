@@ -19,9 +19,7 @@ public:
 
     bool open (
                 int count,
-                int size,
-                int sys_mem_threshold,
-                int proc_mem_threshold
+                int size
                 );
 
     void close ( );
@@ -56,9 +54,7 @@ public:
                            conn_ctxt_t conn
                            );
 
-    uint32_t current_timestamp ( );
-
-    bool is_memory_threshold ( );
+    void set_mdb_timestamp ( time_t timestamp );
 
     static void * operator new( size_t size )
     {

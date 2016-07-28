@@ -417,9 +417,7 @@ extern "C"
     int process_update_command ( char *key, size_t nkey, uint32_t flags, char *value, size_t nbytes, int32_t exptime_int, int comm );
     int init ( size_t size );
     unsigned int get_maxbytes ( );
-    uint32_t mdb_timestamp ( );
-    bool is_memory_over_threshold ( );
-    void set_mem_threshold ( int sys_mem_threshold, int proc_mem_threshold );
+    void set_current_time ( time_t timestamp );
 
 #ifdef __cplusplus
 }

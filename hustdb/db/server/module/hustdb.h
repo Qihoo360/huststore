@@ -7,6 +7,7 @@
 #include "base.h"
 #include "i_server_kv.h"
 #include "tasks/slow_task_thread.h"
+#include "utils/timer.h"
 #include "mdb/mdb.h"
 #include <set>
 #include <vector>
@@ -24,14 +25,7 @@
 #define MAX_WORKER_LEN                32
 #define WORKER_TIMEOUT                512
 
-#define DEF_REDELIVERY_TIMEOUT        5
 #define DEF_MSG_TTL                   900
-#define MAX_MSG_TTL                   7200
-#define MAX_KV_TTL                    2592000
-#define DEF_TTL_SCAN_INTERVAL         30
-#define MAX_QUEUE_NUM                 8192
-#define MAX_TABLE_NUM                 8192
-#define DEF_TTL_SCAN_COUNT            1000
 
 #define MAX_QUEUE_ITEM_NUM            5000000
 #define CYCLE_QUEUE_ITEM_NUM          11000000
@@ -123,6 +117,8 @@ typedef struct server_conf_s
     std::string http_security_user;
     std::string http_security_passwd;
     std::string http_access_allow;
+    int32_t memory_process_threshold;
+    int32_t memory_system_threshold;
 
     server_conf_s ( )
     : tcp_port ( 0 )
@@ -139,6 +135,8 @@ typedef struct server_conf_s
     , http_security_user ( )
     , http_security_passwd ( )
     , http_access_allow ( )
+    , memory_process_threshold ( 0 )
+    , memory_system_threshold ( 0 )
     {
     }
 
@@ -167,11 +165,16 @@ typedef struct store_conf_s
 
 } store_conf_t;
 
+static void timestamp_cb         ( void * ctx );
+static void over_threshold_cb    ( void * ctx );
+static void ttl_scan_cb          ( void * ctx );
+
 class hustdb_t
 {
 public:
 
     void kill_me ( );
+    
     bool open ( );
 
     bool ok ( )
@@ -203,6 +206,16 @@ public:
     {
         return m_server_conf;
     }
+    
+    uint32_t get_current_timestamp ( )
+    {
+        return ( uint32_t ) m_current_timestamp;
+    }
+    
+    void set_current_timestamp ( time_t timestamp )
+    {
+        m_current_timestamp = timestamp;
+    }
 
 public:
 
@@ -232,6 +245,8 @@ public:
 
 public:
 
+    void hustdb_memory_threshold ( );
+    
     void slow_task_info (
                           std::string & info
                           );
@@ -686,13 +701,19 @@ private:
     apptool_t * m_apptool;
     appini_t * m_appini;
 
+    volatile time_t m_current_timestamp;
+    
+    bool m_over_threshold;
+    
     i_server_kv_t * m_storage;
     bool m_storage_ok;
-
-    slow_task_thread_t m_slow_tasks;
-
+    
     mdb_t * m_mdb;
     bool m_mdb_ok;
+    
+    hustdb::timer_t m_timer;
+    
+    slow_task_thread_t m_slow_tasks;
 
     fmap_t m_queue_index;
     queue_map_t m_queue_map;

@@ -14,10 +14,13 @@ hustdb_t::hustdb_t ( )
 : m_ini ( NULL )
 , m_apptool ( NULL )
 , m_appini ( NULL )
+, m_current_timestamp ( 0 )
+, m_over_threshold ( false )
 , m_storage ( NULL )
 , m_storage_ok ( false )
 , m_mdb ( NULL )
 , m_mdb_ok ( false )
+, m_timer ( )
 , m_slow_tasks ( )
 , m_server_conf ( )
 , m_store_conf ( )
@@ -42,6 +45,10 @@ void hustdb_t::destroy ( )
     LOG_INFO ( "[hustdb][destroy]slow task thread closing" );
     m_slow_tasks.stop ();
     LOG_INFO ( "[hustdb][destroy]slow task thread closed" );
+    
+    LOG_INFO ( "[hustdb][destroy]timer closing" );
+    m_timer.kill_me ();
+    LOG_INFO ( "[hustdb][destroy]timer closed" );
 
     if ( m_storage )
     {
@@ -165,6 +172,17 @@ bool hustdb_t::open ( )
         LOG_ERROR ( "[hustdb][open]m_slow_tasks.start() failed" );
         return false;
     }
+    
+    if ( ! ( m_timer.register_task ( hustdb::timer_task_t ( 1, timestamp_cb, this ) ) &&
+             m_timer.register_task ( hustdb::timer_task_t ( 10, over_threshold_cb, this ) ) &&
+             m_timer.register_task ( hustdb::timer_task_t ( m_store_conf.db_ttl_scan_interval, ttl_scan_cb, this ) ) &&
+             m_timer.open ( )
+             )
+         )
+    {
+        LOG_ERROR ( "[hustdb][open]m_timer register task failed" );
+        return false;
+    }
 
     if ( ! init_data_engine () )
     {
@@ -277,49 +295,63 @@ bool hustdb_t::init_server_config ( )
     s = m_appini->ini_get_string ( m_ini, "server", "http.access.allow", "" );
     m_server_conf.http_access_allow = s ? s : "";
 
-    m_store_conf.mq_redelivery_timeout = m_appini->ini_get_int ( m_ini, "store", "mq.redelivery.timeout", DEF_REDELIVERY_TIMEOUT );
+    m_server_conf.memory_process_threshold  = m_appini->ini_get_int ( m_ini, "server", "memory.process.threshold", 70 );
+    if ( m_server_conf.memory_process_threshold < 0 || m_server_conf.memory_process_threshold >= 100 )
+    {
+        LOG_ERROR ( "[hustdb][init_server_config]server memory.process.threshold invalid, process.threshold: %d", m_server_conf.memory_process_threshold );
+        return false;
+    }
+    
+    m_server_conf.memory_system_threshold  = m_appini->ini_get_int ( m_ini, "server", "memory.system.threshold", 90 );
+    if ( m_server_conf.memory_system_threshold < 0 || m_server_conf.memory_system_threshold >= 100 )
+    {
+        LOG_ERROR ( "[hustdb][init_server_config]server memory.system.threshold invalid, system.threshold: %d", m_server_conf.memory_system_threshold );
+        return false;
+    }
+    
+    m_store_conf.mq_redelivery_timeout = m_appini->ini_get_int ( m_ini, "store", "mq.redelivery.timeout", 5 );
     if ( m_store_conf.mq_redelivery_timeout <= 0 || m_store_conf.mq_redelivery_timeout > 255 )
     {
         LOG_ERROR ( "[hustdb][init_server_config]store mq.redelivery.timeout invalid, redelivery.timeout: %d", m_store_conf.mq_redelivery_timeout );
         return false;
     }
 
-    m_store_conf.mq_ttl_maximum = m_appini->ini_get_int ( m_ini, "store", "mq.ttl.maximum", MAX_MSG_TTL );
+    m_store_conf.mq_ttl_maximum = m_appini->ini_get_int ( m_ini, "store", "mq.ttl.maximum", 7200 );
     if ( m_store_conf.mq_ttl_maximum <= 0 )
     {
         LOG_ERROR ( "[hustdb][init_server_config]store mq.ttl.maximum invalid, ttl.maximum: %d", m_store_conf.mq_ttl_maximum );
         return false;
     }
 
-    m_store_conf.db_ttl_maximum = m_appini->ini_get_int ( m_ini, "store", "db.ttl.maximum", MAX_KV_TTL );
+    m_store_conf.db_ttl_maximum = m_appini->ini_get_int ( m_ini, "store", "db.ttl.maximum", 2592000 );
     if ( m_store_conf.db_ttl_maximum <= 0 )
     {
         LOG_ERROR ( "[hustdb][init_server_config]store db.ttl.maximum invalid, ttl.maximum: %d", m_store_conf.db_ttl_maximum );
         return false;
     }
     
-    m_store_conf.db_ttl_scan_interval = m_appini->ini_get_int ( m_ini, "store", "db.ttl.scan_interval", DEF_TTL_SCAN_INTERVAL );
+    m_store_conf.db_ttl_scan_interval = m_appini->ini_get_int ( m_ini, "store", "db.ttl.scan_interval", 30 );
     if ( m_store_conf.db_ttl_scan_interval <= 0 )
     {
         LOG_ERROR ( "[hustdb][init_server_config]store db.ttl.scan_interval invalid, ttl.scan_interval: %d", m_store_conf.db_ttl_scan_interval );
         return false;
     }
     
-    m_store_conf.mq_queue_maximum = m_appini->ini_get_int ( m_ini, "store", "mq.queue.maximum", MAX_QUEUE_NUM );
+    m_store_conf.mq_queue_maximum = m_appini->ini_get_int ( m_ini, "store", "mq.queue.maximum", 8192 );
     if ( m_store_conf.mq_queue_maximum <= 0 )
     {
         LOG_ERROR ( "[hustdb][init_server_config]store mq.queue.maximum invalid, queue.maximum: %d", m_store_conf.mq_queue_maximum );
         return false;
     }
 
-    m_store_conf.db_table_maximum = m_appini->ini_get_int ( m_ini, "store", "db.table.maximum", MAX_TABLE_NUM );
+    m_store_conf.db_table_maximum = m_appini->ini_get_int ( m_ini, "store", "db.table.maximum", 8192 );
     if ( m_store_conf.db_table_maximum <= 0 )
     {
         LOG_ERROR ( "[hustdb][init_server_config]store db.table.maximum invalid, table.maximum: %d", m_store_conf.db_table_maximum );
         return false;
     }
     
-    m_store_conf.db_ttl_scan_count = m_appini->ini_get_int ( m_ini, "store", "db.ttl.scan_count", DEF_TTL_SCAN_COUNT );
+    m_store_conf.db_ttl_scan_count = m_appini->ini_get_int ( m_ini, "store", "db.ttl.scan_count", 1000 );
     if ( m_store_conf.db_ttl_scan_count <= 0 || m_store_conf.db_ttl_scan_count > 10000 )
     {
         LOG_ERROR ( "[hustdb][init_server_config]store db.ttl.scan_count invalid, ttl.scan_count: %d", m_store_conf.db_ttl_scan_count );
@@ -427,9 +459,7 @@ bool hustdb_t::init_data_engine ( )
 
         if (
              ! m_mdb->open ( m_server_conf.tcp_worker_count + 1,
-                            mdb_cache_size,
-                            m_appini->ini_get_int ( m_ini, "server", "memory.system.threshold", 0 ),
-                            m_appini->ini_get_int ( m_ini, "server", "memory.process.threshold", 0 )
+                            mdb_cache_size
                             )
              )
         {
@@ -918,7 +948,6 @@ int hustdb_t::find_queue_offset (
                                   )
 {
     uint32_t                 i            = 0;
-    uint32_t                 tm           = 0;
     queue_stat_t *           qstat        = NULL;
 
     queue_map_t::iterator it = m_queue_map.find ( queue );
@@ -936,13 +965,11 @@ int hustdb_t::find_queue_offset (
             std::string inner_worker ( worker, worker_len );
 
             worker_t * wmap = it->second.worker;
-            
-            tm = m_mdb->current_timestamp ();
 
             worker_t::iterator wit = wmap->find ( inner_worker );
             if ( wit != wmap->end () )
             {
-                wit->second = tm;
+                wit->second = m_current_timestamp;
             }
             else
             {
@@ -951,7 +978,7 @@ int hustdb_t::find_queue_offset (
                     break;
                 }
 
-                wmap->insert (std::pair<std::string, uint32_t>( inner_worker, tm ));
+                wmap->insert (std::pair<std::string, uint32_t>( inner_worker, m_current_timestamp ));
             }
         }
         while ( 0 );
@@ -1002,7 +1029,7 @@ int hustdb_t::find_queue_offset (
             qstat->flag          = 1;
             qstat->type          = type;
             qstat->timeout       = m_store_conf.mq_redelivery_timeout;
-            qstat->ctime         = m_mdb->current_timestamp ();
+            qstat->ctime         = ( uint32_t ) m_current_timestamp;
             fast_memcpy ( qstat->qname, queue.c_str (), queue.size () );
 
             return i;
@@ -1010,6 +1037,63 @@ int hustdb_t::find_queue_offset (
     }
 
     return - 1;
+}
+
+void hustdb_t::hustdb_memory_threshold ( )
+{
+    long            rss         = 0L;
+    FILE *          fp          = NULL;
+    FILE *          meminfo_fp  = NULL;
+    long            mem[4]      = { 0L };
+
+    if ( ( meminfo_fp = fopen ("/proc/meminfo", "r") ) == NULL )
+    {
+        return ;
+    }
+
+    for ( int i = 0; i < 4; i ++ )
+    {
+        if ( fscanf (meminfo_fp, "%*s%ld%*s", mem + i) != 1 )
+        {
+            fclose (meminfo_fp);
+            return ;
+        }
+    }
+    fclose (meminfo_fp);
+
+    unsigned long freeram = ( mem[1] + mem[2] + mem[3] ) * 1024;
+    unsigned long totalram = mem[0] * 1024;
+
+    if ( m_server_conf.memory_system_threshold > 0 &&
+         ( 100 * freeram / totalram ) < ( 100 - m_server_conf.memory_system_threshold )
+         )
+    {
+        m_over_threshold = true;
+        return ;
+    }
+
+    if ( ( fp = fopen ("/proc/self/statm", "r") ) == NULL )
+    {
+        return ;
+    }
+
+    if ( fscanf (fp, "%*s%ld", &rss) != 1 )
+    {
+        fclose (fp);
+        return ;
+    }
+    fclose (fp);
+
+    size_t process_total = ( size_t ) rss * ( size_t ) sysconf (_SC_PAGESIZE);
+    if ( m_server_conf.memory_process_threshold > 0 &&
+         ( 100 * process_total / totalram ) > m_server_conf.memory_process_threshold
+         )
+    {
+        m_over_threshold = true;
+        return ;
+    }
+
+    m_over_threshold = false;
 }
 
 void hustdb_t::slow_task_info (
@@ -1075,7 +1159,6 @@ int hustdb_t::hustdb_get (
                            )
 {
     int             r           = 0;
-    uint32_t        tm          = 0;
     uint32_t        ttl         = 0;
     int             alive       = 0;
     bool            get_ok      = false;
@@ -1112,12 +1195,10 @@ int hustdb_t::hustdb_get (
             return r;
         }
 
-        tm = m_mdb->current_timestamp ();
-
         ttl = m_storage->get_inner_ttl ( conn );
         if ( ttl > 0 )
         {
-            alive = ( ttl > tm ) ? ( ttl - tm ) : - 1;
+            alive = ( ttl > m_current_timestamp ) ? ( ttl - m_current_timestamp ) : - 1;
 
             if ( alive < 0 )
             {
@@ -1171,7 +1252,6 @@ int hustdb_t::hustdb_put (
                            )
 {
     int             r           = 0;
-    uint32_t        tm          = 0;
     uint32_t        user_ver    = ver;
 
     if ( unlikely ( CHECK_STRING ( key ) || CHECK_STRING ( val ) ||
@@ -1182,7 +1262,7 @@ int hustdb_t::hustdb_put (
         return EKEYREJECTED;
     }
 
-    if ( unlikely ( m_mdb->is_memory_threshold () ) )
+    if ( unlikely ( m_over_threshold ) )
     {
         LOG_DEBUG ( "[hustdb][db_put]memory over threshold" );
         return EINVAL;
@@ -1196,8 +1276,7 @@ int hustdb_t::hustdb_put (
     }
     else
     {
-        tm = m_mdb->current_timestamp ();
-        m_storage->set_inner_ttl ( tm + ttl, conn );
+        m_storage->set_inner_ttl ( m_current_timestamp + ttl, conn );
     }
 
     r = m_storage->put ( key, key_len, val, val_len, ver, is_dup, conn, ctxt );
@@ -1598,7 +1677,6 @@ int hustdb_t::hustdb_hget (
                             )
 {
     int             r            = 0;
-    uint32_t        tm           = 0;
     size_t          mkey_len     = 0;
     const char *    mkey         = NULL;
     uint32_t        ttl          = 0;
@@ -1650,12 +1728,10 @@ int hustdb_t::hustdb_hget (
             return r;
         }
 
-        tm = m_mdb->current_timestamp ();
-
         ttl = m_storage->get_inner_ttl ( conn );
         if ( ttl > 0 )
         {
-            alive = ( ttl > tm ) ? ( ttl - tm ) : - 1;
+            alive = ( ttl > m_current_timestamp ) ? ( ttl - m_current_timestamp ) : - 1;
 
             if ( alive < 0 )
             {
@@ -1711,7 +1787,6 @@ int hustdb_t::hustdb_hset (
                             )
 {
     int             r            = 0;
-    uint32_t        tm           = 0;
     uint32_t        user_ver     = ver;
     size_t          mkey_len     = 0;
     const char *    mkey         = NULL;
@@ -1725,7 +1800,7 @@ int hustdb_t::hustdb_hset (
         return EKEYREJECTED;
     }
 
-    if ( unlikely ( m_mdb->is_memory_threshold () ) )
+    if ( unlikely ( m_over_threshold ) )
     {
         LOG_DEBUG ( "[hustdb][db_hset]memory over threshold" );
         return EINVAL;
@@ -1748,8 +1823,7 @@ int hustdb_t::hustdb_hset (
     }
     else
     {
-        tm = m_mdb->current_timestamp ();
-        m_storage->set_inner_ttl ( tm + ttl, conn );
+        m_storage->set_inner_ttl ( m_current_timestamp + ttl, conn );
     }
 
     r = m_storage->put ( key, key_len, val, val_len, ver, is_dup, conn, ctxt );
@@ -1996,7 +2070,7 @@ int hustdb_t::hustdb_sadd (
         return EKEYREJECTED;
     }
 
-    if ( unlikely ( m_mdb->is_memory_threshold () ) )
+    if ( unlikely ( m_over_threshold ) )
     {
         LOG_DEBUG ( "[hustdb][db_sadd]memory over threshold" );
         return EINVAL;
@@ -2243,7 +2317,7 @@ int hustdb_t::hustdb_zadd (
         return EKEYREJECTED;
     }
 
-    if ( unlikely ( m_mdb->is_memory_threshold () ) )
+    if ( unlikely ( m_over_threshold ) )
     {
         LOG_DEBUG ( "[hustdb][db_zadd]memory over threshold" );
         return EINVAL;
@@ -2610,7 +2684,7 @@ int hustdb_t::hustmq_put (
         return EKEYREJECTED;
     }
 
-    if ( unlikely ( m_mdb->is_memory_threshold () ) )
+    if ( unlikely ( m_over_threshold ) )
     {
         LOG_DEBUG ( "[hustdb][mq_put]memory over threshold" );
         return EINVAL;
@@ -2673,7 +2747,6 @@ int hustdb_t::hustmq_get (
                            )
 {
     int             r                       = 0;
-    uint32_t        tm                      = 0;
     size_t          qkey_len                = 0;
     char            qkey[ MAX_QKEY_LEN ]    = { };
     uint32_t        priori                  = 0;
@@ -2711,11 +2784,10 @@ int hustdb_t::hustmq_get (
     qstat = ( queue_stat_t * ) ( m_queue_index.ptr + offset );
     qstat_val = ( unsigned char * ) ( m_queue_index.ptr + offset );
 
-    tm = m_mdb->current_timestamp ();
     redelivery_t::iterator rit = queue_info->redelivery->begin ();
 
     if ( unlikely ( rit != queue_info->redelivery->end () &&
-                   tm - rit->first >= qstat->timeout * 60 )
+                   m_current_timestamp - rit->first >= qstat->timeout * 60 )
          )
     {   
         sprintf ( qkey, "%s|%s", inner_queue.c_str (), rit->second.c_str () );
@@ -2766,8 +2838,8 @@ int hustdb_t::hustmq_get (
     {
         unacked = qkey + queue_len + 1;
         
-        queue_info->unacked->insert ( std::pair<std::string, uint32_t>( unacked, tm ) );
-        queue_info->redelivery->insert ( std::pair<uint32_t, std::string>( tm, unacked ) );
+        queue_info->unacked->insert ( std::pair<std::string, uint32_t>( unacked, m_current_timestamp ) );
+        queue_info->redelivery->insert ( std::pair<uint32_t, std::string>( m_current_timestamp, unacked ) );
     }
 
     return 0;
@@ -2870,7 +2942,6 @@ int hustdb_t::hustmq_worker (
                               std::string & workers
                               )
 {
-    uint32_t        tm                      = 0;
     int             offset                  = - 1;
     worker_t *      wmap                    = NULL;
     char            wt[ 64 ]                = { };
@@ -2898,8 +2969,6 @@ int hustdb_t::hustmq_worker (
     }
     wmap = queue_info->worker;
 
-    tm = m_mdb->current_timestamp ();
-
     workers.resize ( 0 );
     workers.reserve ( 4096 );
     workers += "[";
@@ -2907,7 +2976,7 @@ int hustdb_t::hustmq_worker (
     worker_t::iterator wit = wmap->begin ();
     while ( wit != wmap->end () )
     {
-        if ( wit->second < tm - WORKER_TIMEOUT )
+        if ( wit->second < m_current_timestamp - WORKER_TIMEOUT )
         {
             worker_t::iterator twit = wit;
             wit ++;
@@ -3283,7 +3352,6 @@ int hustdb_t::hustmq_pub (
     uint32_t        etag                    = 0;
     int             offset                  = - 1;
     uint32_t        real                    = 0;
-    uint32_t        tm                      = 0;
     queue_stat_t *  qstat                   = NULL;
     unsigned char * qstat_val               = NULL;
     queue_info_t *  queue_info              = NULL;
@@ -3298,7 +3366,7 @@ int hustdb_t::hustmq_pub (
         return EKEYREJECTED;
     }
 
-    if ( unlikely ( m_mdb->is_memory_threshold () ) )
+    if ( unlikely ( m_over_threshold ) )
     {
         LOG_DEBUG ( "[hustdb][mq_pub]memory over threshold" );
         return EINVAL;
@@ -3332,8 +3400,6 @@ int hustdb_t::hustmq_pub (
 
     m_storage->set_inner_table ( NULL, 0, QUEUE_TB, conn );
 
-    tm = m_mdb->current_timestamp ();
-
     for ( int i = 0; i < real; i ++ )
     {
         stag = ( stag + 1 ) % CYCLE_QUEUE_ITEM_NUM;
@@ -3358,7 +3424,7 @@ int hustdb_t::hustmq_pub (
         }
 
         rttl = m_storage->get_inner_ttl ( conn );
-        if ( rttl <= tm )
+        if ( rttl <= m_current_timestamp )
         {
             ver = 0;
             m_storage->del ( qkey, qkey_len, ver, false, conn, ctxt );
@@ -3385,7 +3451,7 @@ int hustdb_t::hustmq_pub (
     sprintf ( qkey, "%s|%u:%u", inner_queue.c_str (), priori, etag );
     qkey_len = strlen ( qkey );
 
-    m_storage->set_inner_ttl ( tm + wttl, conn );
+    m_storage->set_inner_ttl ( m_current_timestamp + wttl, conn );
 
     ver = 0;
     r = m_storage->put ( qkey, qkey_len, item, item_len, ver, false, conn, ctxt );
@@ -3395,7 +3461,7 @@ int hustdb_t::hustmq_pub (
         return r;
     }
 
-    qstat->ctime = m_mdb->current_timestamp ();
+    qstat->ctime = ( uint32_t ) m_current_timestamp;
     fast_memcpy ( qstat_val + SIZEOF_UNIT32 * priori * 2, & stag, SIZEOF_UNIT32 );
     fast_memcpy ( qstat_val + SIZEOF_UNIT32 * ( priori * 2 + 1 ), & etag, SIZEOF_UNIT32 );
 
@@ -3421,7 +3487,6 @@ int hustdb_t::hustmq_sub (
     lockable_t *    qlkt                    = NULL;
     uint32_t        rttl                    = 0;
     int             offset                  = - 1;
-    uint32_t        tm                      = 0;
     queue_stat_t *  qstat                   = NULL;
     queue_info_t *  queue_info              = NULL;
     item_ctxt_t *   ctxt                    = NULL;
@@ -3476,9 +3541,8 @@ int hustdb_t::hustmq_sub (
         return r;
     }
 
-    tm = m_mdb->current_timestamp ();
     rttl = m_storage->get_inner_ttl ( conn );
-    if ( rttl <= tm )
+    if ( rttl <= m_current_timestamp )
     {
         ver = 0;
         m_storage->del ( qkey, qkey_len, ver, false, conn, ctxt );
@@ -3487,4 +3551,55 @@ int hustdb_t::hustmq_sub (
     }
 
     return 0;
+}
+
+static void timestamp_cb (
+                           void * ctx
+                           )
+{
+    if ( unlikely ( ! ctx ) )
+    {
+        return ;
+    }
+
+    hustdb_t * db = ( hustdb_t * ) ctx;
+    
+    struct timeval tv;
+    gettimeofday ( & tv, NULL );
+    
+    db->set_current_timestamp ( tv.tv_sec );
+
+    db->get_mdb ()->set_mdb_timestamp ( tv.tv_sec );
+}
+
+static void over_threshold_cb (
+                                void * ctx
+                                )
+{
+    if ( unlikely ( ! ctx ) )
+    {
+        return ;
+    }
+
+    hustdb_t * db = ( hustdb_t * ) ctx;
+
+    if ( db->get_server_conf ().memory_process_threshold > 0 ||
+         db->get_server_conf ().memory_system_threshold > 0
+         )
+    {
+        db->hustdb_memory_threshold ( );
+    }
+}
+
+static void ttl_scan_cb (
+                          void * ctx
+                          )
+{
+    if ( unlikely ( ! ctx ) )
+    {
+        return ;
+    }
+    
+    hustdb_t * db = ( hustdb_t * ) ctx;
+    db->hustdb_ttl_scan ( );
 }

@@ -69,8 +69,6 @@ void task_ttl_scan_t::process_ttl_scan ( )
             LOG_ERROR ( "[slow_task][ttl_scan]task failed: %d", r );
             return;
         }
-
-        LOG_INFO ( "[slow_task][ttl_scan]task OK" );
     }
     catch ( ... )
     {

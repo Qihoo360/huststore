@@ -1231,6 +1231,8 @@ int kv_array_t::ttl_scan (
     uint32_t            timestamp             = 0;
     uint32_t            ttl                   = 0;
     uint32_t            file_id               = 0;
+    uint32_t            die_success           = 0;
+    uint32_t            die_fail              = 0;
     size_t              key_len               = 0;
     const char *        key                   = NULL;
     size_t              val_len               = 0;
@@ -1409,7 +1411,7 @@ int kv_array_t::ttl_scan (
                     r = g_hustdb->hustdb_srem ( table, table_len, key, key_len, version, false, conn, ctxt );
                     break;
 
-                case ZSET_TB:
+                case ZSET_IN:
                     r = g_hustdb->hustdb_zrem ( table, table_len, key, key_len, version, false, conn, ctxt );
                     break;
 
@@ -1418,11 +1420,17 @@ int kv_array_t::ttl_scan (
                     break;
             }
             
-            if ( unlikely ( 0 != r ) )
+            if ( likely ( 0 == r ) )
             {
-                LOG_ERROR ( "[kv_array][ttl_scan]hustdb_del return %d", r );
+                die_success ++;
+            }
+            else
+            {
+                die_fail ++;
             }
         }
+        
+        LOG_INFO ( "[kv_array][ttl_scan][count=%d][success=%d][fail=%d]", i, die_success, die_fail );
 
         if ( ! ttl_key.empty () )
         {

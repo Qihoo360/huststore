@@ -1136,7 +1136,7 @@ int call(client *c) {
 
     server.stat_numcommands++;
     if(success != 0){
-        printf("exec command failed: %s\n", c->cmd->name);
+        fprintf(stderr, "exec command failed: %s\n", c->cmd->name);
     }
     return success;
 }
@@ -1620,30 +1620,32 @@ int freeMemoryIfNeeded(void) {
     return C_OK;
 }
 
-client *createClient(){
+client *createClient(size_t limit){
     client *c = zmalloc(sizeof(client));
     selectDb(c, 0);
     c->dictid = 0;
     c->cmd = c->lastcmd = NULL;
+    c->resp_pos = 0;
+    c->limit = limit;
     return c;
 }
 
-int processInput(client *c, int argc, char *argv[], size_t *resp_len, void *resp){
+int processInput(client *c, int argc, RdbCommand *commands, size_t *resp_len, void *resp){
     int success = 0;
     pthread_mutex_lock(&rdb_mutex);
     int i;
     c->resp = resp;
     c->resp_len = resp_len;
-    if(argc){
-        if(c->argv) zfree(c->argv);
+    if(argc) {
+        if (c->argv) zfree(c->argv);
         c->argv = zmalloc(sizeof(robj *) * argc);
     }
     c->argc = argc;
     for(i = 0; i < c->argc; i++){
-        c->argv[i] = createObject(OBJ_STRING, sdsnew(argv[i]));
+        c->argv[i] = createObject(OBJ_STRING, sdsnewlen(commands[i].cmd, commands[i].len));
     }
     if(C_ERR == processCommand(c)){
-        printf("command exec failed\n");
+        fprintf(stderr, "command exec failed");
         success = -1;
     }
     freeClientArgv(c);
@@ -1709,6 +1711,61 @@ void addReplyLongLong(client *c, long long ll){
 
 void addReplyNULL(client *c){
     _addReplyToBuffer(c, NULL, 0);
+}
+
+void _addReplyJson(client *c, int type, char *key, size_t key_len, double d){
+    size_t len = (key_len + 150);
+    char buf[len];
+    size_t res;
+    if(type != 0){
+        res = snprintf(buf, len, "{\"key\":\"%.*s\",\"val\":%.17g}", (int)key_len, key, d);
+    }else{
+        res = snprintf(buf, len, "{\"key\":\"%.*s\"}", (int)key_len, key);
+    }
+    memcpy(c->resp+c->resp_pos, buf, res);
+    c->resp_pos += res;
+}
+
+void addReplyJsonLongLong(client *c, int type, long long ll, double d) {
+    char buf[128];
+    size_t len;
+    len = ll2string(buf, sizeof(buf), ll);
+    _addReplyJson(c, type, buf, len, d);
+}
+
+void addReplyJsonString(client *c, int type, char *key, size_t key_len, double d){
+    _addReplyJson(c, type, key, key_len, d);
+}
+
+void addReplyJson(client *c, int type, robj *obj, double d){
+    if(sdsEncodedObject(obj)){
+        _addReplyJson(c, type, obj->ptr, sdslen(obj->ptr), d);
+    }else if(obj->encoding == OBJ_ENCODING_INT){
+        obj = getDecodedObject(obj);
+        _addReplyJson(c, type, obj->ptr, strlen(obj->ptr), d);
+        decrRefCount(obj);
+    }
+}
+
+void addReplyJsonHead(client *c){
+    *((char *)c->resp) = '[';
+    c->resp_pos += 1;
+}
+void addReplyJsonTail(client *c){
+    *((char *)c->resp+c->resp_pos-1) = ']';
+    *c->resp_len = c->resp_pos;
+    c->resp_pos = 0;
+}
+void addReplyJsonSep(client *c) {
+    *((char *)c->resp+c->resp_pos) = ',';
+    c->resp_pos += 1;
+}
+int outOfRange(client *c) {
+    if(c->resp_pos >= c->limit - 128){
+        return 1;
+    }else{
+        return 0;
+    }
 }
 
 int init(size_t mem_limit){

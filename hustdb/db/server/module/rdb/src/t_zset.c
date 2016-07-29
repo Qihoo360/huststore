@@ -2104,6 +2104,7 @@ int zrangeGenericCommand(client *c, int reverse) {
     long end;
     int llen;
     int rangelen;
+    int type = 0;
 
     if ((getLongFromObject(c->argv[2], &start) != C_OK) ||
         (getLongFromObject(c->argv[3], &end) != C_OK)) return C_ERR;
@@ -2132,6 +2133,9 @@ int zrangeGenericCommand(client *c, int reverse) {
     rangelen = (end-start)+1;
 
     /* Return the result in form of a multi-bulk reply */
+    if(withscores){
+        type = 1;
+    }
 
     if (zobj->encoding == OBJ_ENCODING_ZIPLIST) {
         unsigned char *zl = zobj->ptr;
@@ -2147,8 +2151,10 @@ int zrangeGenericCommand(client *c, int reverse) {
 
         sptr = ziplistNext(zl,eptr);
 
+        addReplyJsonHead(c);
         while (rangelen--) {
             ziplistGet(eptr,&vstr,&vlen,&vlong);
+            /*
             if (vstr == NULL)
                 addReplyLongLong(c,vlong);
             else
@@ -2156,12 +2162,25 @@ int zrangeGenericCommand(client *c, int reverse) {
 
             if (withscores)
                 addReplyDouble(c,zzlGetScore(sptr));
+            */
+
+            if(vstr == NULL){
+                addReplyJsonLongLong(c, type, vlong, zzlGetScore(sptr));
+            }else{
+                addReplyJsonString(c, type, (char *)vstr, vlen, zzlGetScore(sptr));
+            }
+            addReplyJsonSep(c);
 
             if (reverse)
                 zzlPrev(zl,&eptr,&sptr);
             else
                 zzlNext(zl,&eptr,&sptr);
+
+            if(outOfRange(c)){
+                break;
+            }
         }
+        addReplyJsonTail(c);
 
     } else if (zobj->encoding == OBJ_ENCODING_SKIPLIST) {
         zset *zs = zobj->ptr;
@@ -2179,14 +2198,23 @@ int zrangeGenericCommand(client *c, int reverse) {
             if (start > 0)
                 ln = zslGetElementByRank(zsl,start+1);
         }
-
+        addReplyJsonHead(c);
         while(rangelen--) {
             ele = ln->obj;
+            /*
             addReply(c,ele);
             if (withscores)
                 addReplyDouble(c,ln->score);
+                */
+            addReplyJson(c, type, ele, ln->score);
+            addReplyJsonSep(c);
             ln = reverse ? ln->backward : ln->level[0].forward;
+
+            if(outOfRange(c)){
+                break;
+            }
         }
+        addReplyJsonTail(c);
     } else {
         return C_ERR;
     }
@@ -2210,6 +2238,7 @@ int genericZrangebyscoreCommand(client *c, int reverse) {
     int withscores = 0;
     unsigned long rangelen = 0;
     int minidx, maxidx;
+    int type = 0;
 
     /* Parse the range arguments. */
     if (reverse) {
@@ -2248,6 +2277,10 @@ int genericZrangebyscoreCommand(client *c, int reverse) {
     if ((zobj = lookupKeyRead(c->db,key)) == NULL ||
         checkType(c,zobj,OBJ_ZSET)) return C_ERR;
 
+    if(withscores){
+        type = 1;
+    }
+
     if (zobj->encoding == OBJ_ENCODING_ZIPLIST) {
         unsigned char *zl = zobj->ptr;
         unsigned char *eptr, *sptr;
@@ -2277,6 +2310,7 @@ int genericZrangebyscoreCommand(client *c, int reverse) {
 
         /* If there is an offset, just traverse the number of elements without
          * checking the score because that is done in the next loop. */
+        addReplyJsonHead(c);
         while (eptr && offset--) {
             if (reverse) {
                 zzlPrev(zl,&eptr,&sptr);
@@ -2299,6 +2333,7 @@ int genericZrangebyscoreCommand(client *c, int reverse) {
             ziplistGet(eptr,&vstr,&vlen,&vlong);
 
             rangelen++;
+            /*
             if (vstr == NULL) {
                 addReplyLongLong(c,vlong);
             } else {
@@ -2308,6 +2343,14 @@ int genericZrangebyscoreCommand(client *c, int reverse) {
             if (withscores) {
                 addReplyDouble(c,score);
             }
+            */
+
+            if(vstr == NULL){
+                addReplyJsonLongLong(c, type, vlong, score);
+            }else{
+                addReplyJsonString(c, type, (char *)vstr, vlen, score);
+            }
+            addReplyJsonSep(c);
 
             /* Move to next node */
             if (reverse) {
@@ -2315,7 +2358,11 @@ int genericZrangebyscoreCommand(client *c, int reverse) {
             } else {
                 zzlNext(zl,&eptr,&sptr);
             }
+            if(outOfRange(c)){
+                break;
+            }
         }
+        addReplyJsonTail(c);
     } else if (zobj->encoding == OBJ_ENCODING_SKIPLIST) {
         zset *zs = zobj->ptr;
         zskiplist *zsl = zs->zsl;
@@ -2346,7 +2393,7 @@ int genericZrangebyscoreCommand(client *c, int reverse) {
                 ln = ln->level[0].forward;
             }
         }
-
+        addReplyJsonHead(c);
         while (ln && limit--) {
             /* Abort when the node is no longer in range. */
             if (reverse) {
@@ -2356,11 +2403,14 @@ int genericZrangebyscoreCommand(client *c, int reverse) {
             }
 
             rangelen++;
+            /*
             addReply(c,ln->obj);
 
             if (withscores) {
                 addReplyDouble(c,ln->score);
-            }
+            }*/
+            addReplyJson(c, type, ln->obj, ln->score);
+            addReplyJsonSep(c);
 
             /* Move to next node */
             if (reverse) {
@@ -2368,7 +2418,11 @@ int genericZrangebyscoreCommand(client *c, int reverse) {
             } else {
                 ln = ln->level[0].forward;
             }
+            if(outOfRange(c)){
+                break;
+            }
         }
+        addReplyJsonTail(c);
     } else {
         return C_ERR;
     }

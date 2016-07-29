@@ -2,27 +2,99 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <string.h>
 
 int main(int argc, char **argv) {
 
-	if(init(1024) != 0){
+	if(init(256) != 0){
 		return -1;
 	}
 
     char resp[2048];
     size_t resp_len;
 
-    client *c = createClient();
+    client *c = createClient(65535);
 
     ///set
     char *set_cmd[] = {"set", "name", "redis"};
-    processInput(c, 3, set_cmd, &resp_len, resp);
+    RdbCommand set_commands[3];
+    for(int i = 0; i < 3; i++){
+        set_commands[i].cmd = set_cmd[i];
+        set_commands[i].len = strlen(set_cmd[i]);
+    }
+    processInput(c, 3, set_commands, &resp_len, resp);
+    //processInput(c, 3, set_cmd, &resp_len, resp);
 
-        ///get
+    ///get
     char *get_cmd[] = {"get", "name"};
-    processInput(c, 2, get_cmd, &resp_len, resp);
-    //resp[resp_len] = '\0';
+    RdbCommand get_commands[2];
+    for(int i = 0; i < 2; i++){
+        get_commands[i].cmd = get_cmd[i];
+        get_commands[i].len = strlen(get_cmd[i]);
+    }
+    processInput(c, 2, get_commands, &resp_len, resp);
+    resp[resp_len] = '\0';
     printf("get value: %s %lu\n", resp, resp_len);
+
+    ///zadd
+    char *zadd_cmd[] = {"zadd", "page_rank", "10", "google.com"};
+    RdbCommand zadd_commands[4];
+    for(int i = 0; i < 4; i++){
+        zadd_commands[i].cmd = zadd_cmd[i];
+        zadd_commands[i].len = strlen(zadd_cmd[i]);
+    }
+    processInput(c, 4, zadd_commands, &resp_len, resp);
+
+    char *zadd_cmd_1[] = {"zadd", "page_rank", "11", "facebook.com"};
+    RdbCommand zadd_commands_1[4];
+    for(int i = 0; i < 4; i++){
+        zadd_commands_1[i].cmd = zadd_cmd_1[i];
+        zadd_commands_1[i].len = strlen(zadd_cmd_1[i]);
+    }
+    processInput(c, 4, zadd_commands_1, &resp_len, resp);
+    /*
+    char *zrange_cmd[] = {"zrange", "page_rank", "0", "1", "withscores"};
+    RdbCommand zrange_commands[5];
+    for(int i = 0; i < 5; i++){
+        zrange_commands[i].cmd = zrange_cmd[i];
+        zrange_commands[i].len = strlen(zrange_cmd[i]);
+    }
+    processInput(c, 5, zrange_commands, &resp_len, resp);
+    resp[resp_len] = '\0';
+    printf("zrange:%s\n", resp);
+    */
+
+    char *zcard_cmd[] = {"zcard", "page_rank"};
+    RdbCommand zcard_commands[2];
+    for(int i = 0; i < 2; i++){
+        zcard_commands[i].cmd = zcard_cmd[i];
+        zcard_commands[i].len = strlen(zcard_cmd[i]);
+    }
+    processInput(c, 2, zcard_commands, &resp_len, resp);
+    resp[resp_len] = '\0';
+    printf("zcard: %s\n", resp);
+
+   
+    char *zremrangebyrank_cmd[] = {"zincrby", "page_rank", "3", "google.com"};
+    RdbCommand zremrangebyrank_commands[4];
+    for(int i = 0; i < 4; i++){
+        zremrangebyrank_commands[i].cmd = zremrangebyrank_cmd[i];
+        zremrangebyrank_commands[i].len = strlen(zremrangebyrank_cmd[i]);
+    }
+    processInput(c, 4, zremrangebyrank_commands, &resp_len, resp);
+    resp[resp_len] = '\0';
+    printf("zincrby:%s\n", resp);
+
+    char *zrange_by_score_cmd[] = {"zrangebyscore", "page_rank", "1", "14", "withscores"};
+    RdbCommand zrange_by_score_commands[5];
+    for(int i = 0; i < 5; i++){
+        zrange_by_score_commands[i].cmd = zrange_by_score_cmd[i]; 
+        zrange_by_score_commands[i].len = strlen(zrange_by_score_cmd[i]);
+    }
+    processInput(c, 5, zrange_by_score_commands, &resp_len, resp);
+    resp[resp_len] = '\0';
+    printf("zrangebyscore:%s\n", resp);
+    /*
 
     ///exists
     char *exists_cmd[] = {"exists", "name"};
@@ -125,6 +197,7 @@ int main(int argc, char **argv) {
     processInput(c, 3, zrem_cmd, &resp_len, resp);
     resp[resp_len] = '\0';
     printf("zrem value: %s %lu\n", resp, resp_len);
+    */
 
     freeClient(c);
 

@@ -417,6 +417,14 @@ void addReplyNULL(client *c);
 void addReplySds(client *c, sds s);
 void addReplyDouble(client *c, double d);
 
+void addReplyJsonLongLong(client *c, int type, long long ll, double d);
+void addReplyJsonString(client *c, int type, char *key, size_t key_len, double d);
+void addReplyJson(client *c, int type, robj *obj, double d);
+void addReplyJsonHead(client *c);
+void addReplyJsonTail(client *c);
+void addReplyJsonSep(client *c);
+int outOfRange(client *c);
+
 /* List data type */
 void listTypeTryConversion(robj *subject, robj *value);
 void listTypePush(robj *subject, robj *value, int where);

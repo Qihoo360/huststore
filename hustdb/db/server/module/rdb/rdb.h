@@ -76,6 +76,8 @@ typedef struct client {
 
     void *resp;
     size_t *resp_len;
+    size_t resp_pos;
+    size_t limit;
 } client;
 
 
@@ -95,10 +97,15 @@ struct redisCommand {
     long long microseconds, calls;
 };
 
-int init(size_t);	//以M为单位
-client *createClient();
+typedef struct RdbCommand {
+    void *cmd;
+    size_t len;
+}RdbCommand;
+
+int init(size_t mem_limit);	//以M为单位
+client *createClient(size_t limit);
 void freeClient(client *c);
-int processInput(client *c, int argc, char *argv[], size_t *resp_len, void *resp);
+int processInput(client *c, int argc, RdbCommand *commands, size_t *resp_len, void *resp);
 
 #ifdef __cplusplus
 }

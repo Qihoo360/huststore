@@ -166,6 +166,7 @@
                 ["string", "tb"],
                 ["string", "key"],
                 ["uint32_t", "ver", "0"],
+                ["uint32_t", "ttl", "0"],
                 ["bool", "is_dup", "false"]
             ],
             "required": ["tb", "key"],
@@ -408,6 +409,7 @@
                 ["int32_t", "opt", "0"],
                 ["string", "key"],
                 ["uint32_t", "ver", "0"],
+                ["uint32_t", "ttl", "0"],
                 ["bool", "is_dup", "false"]
             ],
             "required": ["tb", "score", "key"],

@@ -220,7 +220,7 @@ void hustdb_sismember_handler(hustdb_sismember_ctx_t& args, evhtp_request_t * re
 void hustdb_sadd_handler(hustdb_sadd_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx)
 {
     PRE_WRITE;
-    int r = ctx->db->hustdb_sadd(args.tb.data, args.tb.len, args.key.data, args.key.len, ver, args.is_dup, conn, ctxt);
+    int r = ctx->db->hustdb_sadd(args.tb.data, args.tb.len, args.key.data, args.key.len, ver, args.ttl, args.is_dup, conn, ctxt);
     hustdb_network::send_write_reply(ctx->db->errno_int_status(r), ver, ctxt, request);
 }
 
@@ -407,7 +407,7 @@ void hustdb_zadd_handler(hustdb_zadd_ctx_t& args, evhtp_request_t * request, hus
     PRE_WRITE;
     bool is_version_error = false;
     hustdb_network::unescape_key(true, request, args.key);
-    int r = ctx->db->hustdb_zadd(args.tb.data, args.tb.len, args.key.data, args.key.len, args.score, args.opt, ver, args.is_dup, conn, is_version_error);
+    int r = ctx->db->hustdb_zadd(args.tb.data, args.tb.len, args.key.data, args.key.len, args.score, args.opt, ver, args.ttl, args.is_dup, conn, is_version_error);
     hustdb_network::send_write_reply(ctx->db->errno_int_status(r), ver, is_version_error, request);
 }
 

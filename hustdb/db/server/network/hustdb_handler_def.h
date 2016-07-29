@@ -177,11 +177,13 @@ struct hustdb_sadd_ctx_t
     evhtp::c_str_t tb;
     evhtp::c_str_t key;
     uint32_t ver;
+    uint32_t ttl;
     bool is_dup;
 
     bool has_tb;
     bool has_key;
     bool has_ver;
+    bool has_ttl;
     bool has_is_dup;
 
     hustdb_sadd_ctx_t(evhtp_query_t * htp_query);
@@ -409,6 +411,7 @@ struct hustdb_zadd_ctx_t
     int32_t opt;
     evhtp::c_str_t key;
     uint32_t ver;
+    uint32_t ttl;
     bool is_dup;
 
     bool has_tb;
@@ -416,6 +419,7 @@ struct hustdb_zadd_ctx_t
     bool has_opt;
     bool has_key;
     bool has_ver;
+    bool has_ttl;
     bool has_is_dup;
 
     hustdb_zadd_ctx_t(evhtp_query_t * htp_query);

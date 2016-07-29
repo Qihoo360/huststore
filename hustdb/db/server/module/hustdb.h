@@ -423,6 +423,7 @@ public:
                       const char * key,
                       size_t key_len,
                       uint32_t & ver,
+                      uint32_t ttl,
                       bool is_dup,
                       conn_ctxt_t conn,
                       item_ctxt_t * & ctxt
@@ -475,6 +476,7 @@ public:
                       uint64_t score,
                       int opt,
                       uint32_t & ver,
+                      uint32_t ttl,
                       bool is_dup,
                       conn_ctxt_t conn,
                       bool & is_version_error

@@ -2053,6 +2053,7 @@ int hustdb_t::hustdb_sadd (
                             const char * key,
                             size_t key_len,
                             uint32_t & ver,
+                            uint32_t ttl,
                             bool is_dup,
                             conn_ctxt_t conn,
                             item_ctxt_t * & ctxt
@@ -2085,8 +2086,16 @@ int hustdb_t::hustdb_sadd (
         return EPERM;
     }
 
-    m_storage->set_inner_ttl ( 0, conn );
     m_storage->set_inner_table ( table, table_len, SET_TB, conn );
+    
+    if ( ttl <= 0 || ttl > m_store_conf.db_ttl_maximum )
+    {
+        m_storage->set_inner_ttl ( 0, conn );
+    }
+    else
+    {
+        m_storage->set_inner_ttl ( m_current_timestamp + ttl, conn );
+    }
     
     r = m_storage->put ( key, key_len, NULL, 0, ver, is_dup, conn, ctxt );
     if ( 0 != r )
@@ -2289,6 +2298,7 @@ int hustdb_t::hustdb_zadd (
                             uint64_t score,
                             int opt,
                             uint32_t & ver,
+                            uint32_t ttl,
                             bool is_dup,
                             conn_ctxt_t conn,
                             bool & is_version_error
@@ -2368,6 +2378,11 @@ int hustdb_t::hustdb_zadd (
 
     sprintf ( val, "%lu", score );
     val_len = strlen ( val );
+    
+    if ( ttl > 0 && ttl <= m_store_conf.db_ttl_maximum )
+    {
+        m_storage->set_inner_ttl ( m_current_timestamp + ttl, conn );
+    }
 
     r = m_storage->put ( key, key_len, val, val_len, ver, is_dup, conn, ctxt );
     is_version_error = ctxt->is_version_error;
@@ -2396,6 +2411,8 @@ int hustdb_t::hustdb_zadd (
     {
         set_table_size ( offset, 1 );
     }
+    
+    m_storage->set_inner_ttl ( 0, conn );
     
     if ( has_been )
     {

@@ -44,7 +44,7 @@ bool mdb_t::open (
         size = 64;
     }
 
-    if ( init ( size ) != 0 )
+    if ( mdb_init ( size ) != 0 )
     {
         return false;
     }

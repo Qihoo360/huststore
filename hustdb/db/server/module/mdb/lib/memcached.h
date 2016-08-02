@@ -415,7 +415,7 @@ extern "C"
     int process_touch_command ( char *key, size_t nkey, int32_t exptime_int );
     int process_get_command ( char *key, size_t nkey, char *dst, int *len );
     int process_update_command ( char *key, size_t nkey, uint32_t flags, char *value, size_t nbytes, int32_t exptime_int, int comm );
-    int init ( size_t size );
+    int mdb_init ( size_t size );
     unsigned int get_maxbytes ( );
     void set_current_time ( time_t timestamp );
 

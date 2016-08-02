@@ -20,6 +20,8 @@ hustdb_t::hustdb_t ( )
 , m_storage_ok ( false )
 , m_mdb ( NULL )
 , m_mdb_ok ( false )
+, m_rdb ( NULL )
+, m_rdb_ok ( false )
 , m_timer ( )
 , m_slow_tasks ( )
 , m_server_conf ( )
@@ -66,6 +68,15 @@ void hustdb_t::destroy ( )
         LOG_INFO ( "[hustdb][destroy]mdb closed" );
         m_mdb = NULL;
         m_mdb_ok = false;
+    }
+    
+    if ( m_rdb )
+    {
+        LOG_INFO ( "[hustdb][destroy]rdb closing" );
+        m_rdb->kill_me ();
+        LOG_INFO ( "[hustdb][destroy]rdb closed" );
+        m_rdb = NULL;
+        m_rdb_ok = false;
     }
 
     if ( m_apptool )
@@ -470,6 +481,27 @@ bool hustdb_t::init_data_engine ( )
         }
 
         m_mdb_ok = mdb_cache_size > 0 ? true : false;
+    }
+    
+    if ( NULL == m_rdb )
+    {
+        int rdb_cache_size = m_appini->ini_get_int ( m_ini, "cachedb", "cache", 512 );
+
+        m_rdb = new rdb_t ();
+
+        if (
+             ! m_rdb->open ( m_server_conf.tcp_worker_count + 1,
+                            rdb_cache_size
+                            )
+             )
+        {
+            LOG_ERROR ( "[hustdb][init_data_engine]rdb->open failed" );
+            m_rdb->kill_me ();
+            m_rdb = NULL;
+            return false;
+        }
+
+        m_rdb_ok = rdb_cache_size > 0 ? true : false;
     }
 
     return true;

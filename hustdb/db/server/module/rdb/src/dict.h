@@ -42,7 +42,7 @@ extern "C"
 #endif
 
 #include <stdint.h>
-#include "../lib/rdb_in.h"
+#include "../lib/redis.h"
 #define DICT_OK 0
 #define DICT_ERR 1
 

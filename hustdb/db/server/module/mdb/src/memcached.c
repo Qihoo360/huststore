@@ -415,7 +415,7 @@ enum store_item_type do_store_item ( item *it, int comm, const uint32_t hv )
     return stored;
 }
 
-int init ( size_t size )
+int mdb_init ( size_t size )
 {
     enum hashfunc_type hash_type = JENKINS_HASH;
     bool preallocate = false;

@@ -36,7 +36,7 @@ extern "C"
 #endif
 
 #include "fmacros.h"
-#include "../lib/rdb_in.h"
+#include "../lib/redis.h"
 
 #include <stdio.h>
 #include <stdlib.h>

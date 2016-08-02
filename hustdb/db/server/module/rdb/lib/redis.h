@@ -102,7 +102,7 @@ typedef struct RdbCommand {
     size_t len;
 }RdbCommand;
 
-int init(size_t mem_limit);	//以M为单位
+int rdb_init(size_t mem_limit);
 client *createClient(size_t limit);
 void freeClient(client *c);
 int processInput(client *c, int argc, RdbCommand *commands, size_t *resp_len, void *resp);

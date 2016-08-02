@@ -60,7 +60,6 @@ extern "C"
 #define _POSIX_C_SOURCE 199506L
 #endif
 
-#define _LARGEFILE_SOURCE
 #define _FILE_OFFSET_BITS 64
 
 #ifdef __cplusplus

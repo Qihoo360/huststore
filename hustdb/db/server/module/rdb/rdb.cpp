@@ -1,5 +1,5 @@
 #include "rdb.h"
-#include "lib/rdb_in.h"
+#include "lib/redis.h"
 
 void rdb_t::kill_me ( )
 {
@@ -44,7 +44,7 @@ bool rdb_t::open (
         size = 64;
     }
 
-    if ( init ( size ) != 0 )
+    if ( rdb_init ( size ) != 0 )
     {
         return false;
     }
@@ -56,7 +56,7 @@ bool rdb_t::open (
 
 void rdb_t::close ( )
 {
-    for ( mdb_buffers_t::iterator it = m_buffers.begin (); it != m_buffers.end (); ++ it )
+    for ( rdb_buffers_t::iterator it = m_buffers.begin (); it != m_buffers.end (); ++ it )
     {
         delete ( * it );
     }

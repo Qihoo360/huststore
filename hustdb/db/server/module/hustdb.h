@@ -9,6 +9,7 @@
 #include "tasks/slow_task_thread.h"
 #include "utils/timer.h"
 #include "mdb/mdb.h"
+#include "rdb/rdb.h"
 #include <set>
 #include <vector>
 
@@ -712,6 +713,9 @@ private:
     
     mdb_t * m_mdb;
     bool m_mdb_ok;
+    
+    rdb_t * m_rdb;
+    bool m_rdb_ok;
     
     hustdb::timer_t m_timer;
     

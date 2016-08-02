@@ -50,9 +50,9 @@ public:
 
 private:
 
-    typedef std::vector< std::string * > mdb_buffers_t;
+    typedef std::vector< std::string * > rdb_buffers_t;
 
-    mdb_buffers_t m_buffers;
+    rdb_buffers_t m_buffers;
     bool m_ok;
 
 private:

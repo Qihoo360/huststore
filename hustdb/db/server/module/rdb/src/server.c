@@ -1768,7 +1768,7 @@ int outOfRange(client *c) {
     }
 }
 
-int init(size_t mem_limit){
+int rdb_init(size_t mem_limit){
     struct timeval tv;
 
     setlocale(LC_COLLATE,"");

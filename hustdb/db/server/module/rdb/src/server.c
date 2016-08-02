@@ -27,7 +27,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "server.h"
+#include "../lib/server.h"
 
 #include <time.h>
 #include <signal.h>

@@ -30,8 +30,8 @@
 
 
 #include <stdlib.h>
-#include "adlist.h"
-#include "zmalloc.h"
+#include "../lib/adlist.h"
+#include "../lib/zmalloc.h"
 
 /* Create a new list. The created list can be freed with
  * AlFreeList(), but private value of every node need to be freed

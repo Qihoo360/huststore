@@ -35,8 +35,8 @@
 #include <string.h>
 #include <ctype.h>
 #include <assert.h>
-#include "sds.h"
-#include "sdsalloc.h"
+#include "../lib/sds.h"
+#include "../lib/sdsalloc.h"
 
 static inline int sdsHdrSize(char type) {
     switch(type&SDS_TYPE_MASK) {
@@ -1099,8 +1099,8 @@ void sds_free(void *ptr) { s_free(ptr); }
 
 #if defined(SDS_TEST_MAIN)
 #include <stdio.h>
-#include "testhelp.h"
-#include "limits.h"
+#include "../lib/testhelp.h"
+#include "../lib/limits.h"
 
 #define UNUSED(x) (void)(x)
 int sdsTest(void) {

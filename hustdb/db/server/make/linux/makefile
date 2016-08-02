@@ -183,67 +183,67 @@ $(BIN)mdb.o: $(MDB_SRC)mdb.cpp $(MDB_SRC)mdb.h $(MDB_SRC)lib/memcached.h
 
 RDB_SRC     = $(SERVER)module/rdb/
 
-$(BIN)adlist.o : $(RDB_SRC)src/adlist.c $(RDB_SRC)src/adlist.h $(RDB_SRC)src/zmalloc.h
+$(BIN)adlist.o : $(RDB_SRC)src/adlist.c $(RDB_SRC)lib/adlist.h $(RDB_SRC)lib/zmalloc.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
-$(BIN)bitops.o : $(RDB_SRC)src/bitops.c $(RDB_SRC)src/server.h
+$(BIN)bitops.o : $(RDB_SRC)src/bitops.c $(RDB_SRC)lib/server.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
-$(BIN)db.o : $(RDB_SRC)src/db.c $(RDB_SRC)src/server.h
+$(BIN)db.o : $(RDB_SRC)src/db.c $(RDB_SRC)lib/server.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
-$(BIN)dict.o : $(RDB_SRC)src/dict.c $(RDB_SRC)src/dict.h $(RDB_SRC)src/zmalloc.h $(RDB_SRC)lib/redis.h
+$(BIN)dict.o : $(RDB_SRC)src/dict.c $(RDB_SRC)lib/dict.h $(RDB_SRC)lib/zmalloc.h $(RDB_SRC)lib/redis.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
-$(BIN)intset.o : $(RDB_SRC)src/intset.c $(RDB_SRC)src/intset.h $(RDB_SRC)src/zmalloc.h
+$(BIN)intset.o : $(RDB_SRC)src/intset.c $(RDB_SRC)lib/intset.h $(RDB_SRC)lib/zmalloc.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
-$(BIN)object.o : $(RDB_SRC)src/object.c $(RDB_SRC)src/server.h
+$(BIN)object.o : $(RDB_SRC)src/object.c $(RDB_SRC)lib/server.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
-$(BIN)pqsort.o : $(RDB_SRC)src/pqsort.c $(RDB_SRC)src/pqsort.h
+$(BIN)pqsort.o : $(RDB_SRC)src/pqsort.c $(RDB_SRC)lib/pqsort.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
-$(BIN)quicklist.o : $(RDB_SRC)src/quicklist.c $(RDB_SRC)src/quicklist.h $(RDB_SRC)src/zmalloc.h $(RDB_SRC)src/ziplist.h $(RDB_SRC)src/util.h
+$(BIN)quicklist.o : $(RDB_SRC)src/quicklist.c $(RDB_SRC)lib/quicklist.h $(RDB_SRC)lib/zmalloc.h $(RDB_SRC)lib/ziplist.h $(RDB_SRC)lib/util.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
-$(BIN)sds.o : $(RDB_SRC)src/sds.c $(RDB_SRC)src/sds.h $(RDB_SRC)src/sdsalloc.h
+$(BIN)sds.o : $(RDB_SRC)src/sds.c $(RDB_SRC)lib/sds.h $(RDB_SRC)lib/sdsalloc.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
-$(BIN)server.o : $(RDB_SRC)src/server.c $(RDB_SRC)src/server.h $(RDB_SRC)src/sds.h $(RDB_SRC)src/dict.h $(RDB_SRC)src/adlist.h $(RDB_SRC)src/zmalloc.h $(RDB_SRC)src/ziplist.h $(RDB_SRC)src/intset.h $(RDB_SRC)src/util.h $(RDB_SRC)src/quicklist.h $(RDB_SRC)lib/redis.h
+$(BIN)server.o : $(RDB_SRC)src/server.c $(RDB_SRC)lib/server.h $(RDB_SRC)lib/sds.h $(RDB_SRC)lib/dict.h $(RDB_SRC)lib/adlist.h $(RDB_SRC)lib/zmalloc.h $(RDB_SRC)lib/ziplist.h $(RDB_SRC)lib/intset.h $(RDB_SRC)lib/util.h $(RDB_SRC)lib/quicklist.h $(RDB_SRC)lib/redis.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
-$(BIN)sort.o : $(RDB_SRC)src/sort.c $(RDB_SRC)src/server.h $(RDB_SRC)src/pqsort.h
+$(BIN)sort.o : $(RDB_SRC)src/sort.c $(RDB_SRC)lib/server.h $(RDB_SRC)lib/pqsort.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
-$(BIN)t_hash.o : $(RDB_SRC)src/t_hash.c $(RDB_SRC)src/server.h
+$(BIN)t_hash.o : $(RDB_SRC)src/t_hash.c $(RDB_SRC)lib/server.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
-$(BIN)t_list.o : $(RDB_SRC)src/t_list.c $(RDB_SRC)src/server.h
+$(BIN)t_list.o : $(RDB_SRC)src/t_list.c $(RDB_SRC)lib/server.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
-$(BIN)t_set.o : $(RDB_SRC)src/t_set.c $(RDB_SRC)src/server.h
+$(BIN)t_set.o : $(RDB_SRC)src/t_set.c $(RDB_SRC)lib/server.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
-$(BIN)t_string.o : $(RDB_SRC)src/t_string.c $(RDB_SRC)src/server.h
+$(BIN)t_string.o : $(RDB_SRC)src/t_string.c $(RDB_SRC)lib/server.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
-$(BIN)t_zset.o : $(RDB_SRC)src/t_zset.c $(RDB_SRC)src/server.h
+$(BIN)t_zset.o : $(RDB_SRC)src/t_zset.c $(RDB_SRC)lib/server.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
-$(BIN)rdb_util.o : $(RDB_SRC)src/util.c $(RDB_SRC)src/util.h $(RDB_SRC)src/fmacros.h	
+$(BIN)rdb_util.o : $(RDB_SRC)src/util.c $(RDB_SRC)lib/util.h $(RDB_SRC)lib/fmacros.h	
 	$(CC) -c $(CFLAGS) $< -o $@
 
-$(BIN)ziplist.o : $(RDB_SRC)src/ziplist.c $(RDB_SRC)src/ziplist.h $(RDB_SRC)src/util.h
+$(BIN)ziplist.o : $(RDB_SRC)src/ziplist.c $(RDB_SRC)lib/ziplist.h $(RDB_SRC)lib/util.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
-$(BIN)zmalloc.o : $(RDB_SRC)src/zmalloc.c $(RDB_SRC)src/zmalloc.h
+$(BIN)zmalloc.o : $(RDB_SRC)src/zmalloc.c $(RDB_SRC)lib/zmalloc.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
-$(BIN)lzf_c.o : $(RDB_SRC)src/lzf_c.c $(RDB_SRC)src/lzf.h $(RDB_SRC)src/lzfP.h
+$(BIN)lzf_c.o : $(RDB_SRC)src/lzf_c.c $(RDB_SRC)lib/lzf.h $(RDB_SRC)lib/lzfP.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
-$(BIN)lzf_d.o : $(RDB_SRC)src/lzf_d.c $(RDB_SRC)src/lzf.h $(RDB_SRC)src/lzfP.h
+$(BIN)lzf_d.o : $(RDB_SRC)src/lzf_d.c $(RDB_SRC)lib/lzf.h $(RDB_SRC)lib/lzfP.h
 	$(CC) -c $(CFLAGS) $< -o $@
 	
 $(BIN)rdb.o: $(RDB_SRC)rdb.cpp $(RDB_SRC)rdb.h $(RDB_SRC)lib/redis.h

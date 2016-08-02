@@ -29,11 +29,11 @@
  */
 
 #include <string.h> /* for memcpy */
-#include "quicklist.h"
-#include "zmalloc.h"
-#include "ziplist.h"
-#include "util.h" /* for ll2string */
-#include "lzf.h"
+#include "../lib/quicklist.h"
+#include "../lib/zmalloc.h"
+#include "../lib/ziplist.h"
+#include "../lib/util.h" /* for ll2string */
+#include "../lib/lzf.h"
 
 #if defined(REDIS_TEST) || defined(REDIS_TEST_VERBOSE)
 #include <stdio.h> /* for printf (debug printing), snprintf (genstr) */

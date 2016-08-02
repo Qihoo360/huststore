@@ -28,7 +28,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "server.h"
+#include "../lib/server.h"
 
 /* -----------------------------------------------------------------------------
  * Helpers and low level bit functions.

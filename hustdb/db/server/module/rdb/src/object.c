@@ -28,7 +28,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "server.h"
+#include "../lib/server.h"
 #include <math.h>
 #include <ctype.h>
 

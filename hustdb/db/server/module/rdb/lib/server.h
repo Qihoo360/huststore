@@ -35,7 +35,7 @@ extern "C"
 {
 #endif
 
-#include "fmacros.h"
+#include "../lib/fmacros.h"
 #include "../lib/redis.h"
 
 #include <stdio.h>
@@ -52,14 +52,14 @@ extern "C"
 
 typedef long long mstime_t; /* millisecond time type. */
 
-#include "sds.h"     /* Dynamic safe strings */
-#include "dict.h"    /* Hash tables */
-#include "adlist.h"  /* Linked lists */
-#include "zmalloc.h" /* total memory usage aware version of malloc/free */
-#include "ziplist.h" /* Compact list data structure */
-#include "intset.h"  /* Compact integer set structure */
-#include "util.h"    /* Misc functions useful in many places */
-#include "quicklist.h"
+#include "../lib/sds.h"     /* Dynamic safe strings */
+#include "../lib/dict.h"    /* Hash tables */
+#include "../lib/adlist.h"  /* Linked lists */
+#include "../lib/zmalloc.h" /* total memory usage aware version of malloc/free */
+#include "../lib/ziplist.h" /* Compact list data structure */
+#include "../lib/intset.h"  /* Compact integer set structure */
+#include "../lib/util.h"    /* Misc functions useful in many places */
+#include "../lib/quicklist.h"
 
 /* Error codes */
 #define C_OK                    0

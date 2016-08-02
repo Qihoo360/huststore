@@ -107,9 +107,9 @@
 #include <stdint.h>
 #include <limits.h>
 #include <assert.h>
-#include "zmalloc.h"
-#include "util.h"
-#include "ziplist.h"
+#include "../lib/zmalloc.h"
+#include "../lib/util.h"
+#include "../lib/ziplist.h"
 
 
 #define ZIP_END 255
@@ -1068,8 +1068,8 @@ void ziplistRepr(unsigned char *zl) {
 
 #ifdef REDIS_TEST
 #include <sys/time.h>
-#include "adlist.h"
-#include "sds.h"
+#include "../lib/adlist.h"
+#include "../lib/sds.h"
 
 #define debug(f, ...) { if (DEBUG) printf(f, __VA_ARGS__); }
 

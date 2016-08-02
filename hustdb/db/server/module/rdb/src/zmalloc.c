@@ -41,7 +41,7 @@ void zlibc_free(void *ptr) {
 
 #include <string.h>
 #include <pthread.h>
-#include "zmalloc.h"
+#include "../lib/zmalloc.h"
 
 #ifdef HAVE_MALLOC_SIZE
 #define PREFIX_SIZE (0)
@@ -55,15 +55,15 @@ void zlibc_free(void *ptr) {
 
 /* Explicitly override malloc/free etc when using tcmalloc. */
 #if defined(USE_TCMALLOC)
-#define malloc(size) tc_malloc(size)
-#define calloc(count,size) tc_calloc(count,size)
-#define realloc(ptr,size) tc_realloc(ptr,size)
-#define free(ptr) tc_free(ptr)
+#define rdb_malloc(size) tc_malloc(size)
+#define rdb_calloc(count,size) tc_calloc(count,size)
+#define rdb_realloc(ptr,size) tc_realloc(ptr,size)
+#define rdb_free(ptr) tc_free(ptr)
 #elif defined(USE_JEMALLOC)
-#define malloc(size) je_malloc(size)
-#define calloc(count,size) je_calloc(count,size)
-#define realloc(ptr,size) je_realloc(ptr,size)
-#define free(ptr) je_free(ptr)
+#define rdb_malloc(size) je_malloc(size)
+#define rdb_calloc(count,size) je_calloc(count,size)
+#define rdb_realloc(ptr,size) je_realloc(ptr,size)
+#define rdb_free(ptr) je_free(ptr)
 #endif
 
 #if defined(__ATOMIC_RELAXED)

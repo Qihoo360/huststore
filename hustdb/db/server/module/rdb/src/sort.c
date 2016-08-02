@@ -29,8 +29,8 @@
  */
 
 
-#include "server.h"
-#include "pqsort.h" /* Partial qsort for SORT+LIMIT */
+#include "../lib/server.h"
+#include "../lib/pqsort.h" /* Partial qsort for SORT+LIMIT */
 #include <math.h> /* isnan() */
 
 zskiplistNode* zslGetElementByRank(zskiplist *zsl, unsigned long rank);

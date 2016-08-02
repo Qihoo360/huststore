@@ -45,7 +45,7 @@ extern "C"
 #define STANDALONE 1 /* at the moment, this is ok. */
 
 #ifndef STANDALONE
-# include "lzf.h"
+# include "../lib/lzf.h"
 #endif
 
 /*

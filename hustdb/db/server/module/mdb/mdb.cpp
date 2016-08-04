@@ -65,8 +65,8 @@ void mdb_t::close ( )
 }
 
 int mdb_t::get (
-                 const char *        user_key,
-                 size_t              user_key_len,
+                 const char *        key,
+                 size_t              key_len,
                  conn_ctxt_t         conn,
                  std::string * &     rsp,
                  int *               rsp_len
@@ -79,7 +79,7 @@ int mdb_t::get (
 
     rsp = m_buffers[ conn.worker_id ];
 
-    int r = process_get_command ( ( char * ) user_key, user_key_len, ( char * ) & ( * rsp ) [ 0 ] , rsp_len );
+    int r = process_get_command ( ( char * ) key, key_len, ( char * ) & ( * rsp ) [ 0 ], rsp_len );
     if ( unlikely ( ! r ) )
     {
         return ENOENT;
@@ -89,8 +89,8 @@ int mdb_t::get (
 }
 
 int mdb_t::put (
-                 const char *        user_key,
-                 size_t              user_key_len,
+                 const char *        key,
+                 size_t              key_len,
                  const char *        val,
                  size_t              val_len,
                  uint32_t            ttl
@@ -101,7 +101,7 @@ int mdb_t::put (
         return EINVAL;
     }
 
-    int r = process_update_command ( ( char * ) user_key, user_key_len, 0, ( char * ) val, val_len, ttl, 2 );
+    int r = process_update_command ( ( char * ) key, key_len, 0, ( char * ) val, val_len, ttl, 2 );
     if ( unlikely ( ! r ) )
     {
         return EINVAL;
@@ -111,8 +111,8 @@ int mdb_t::put (
 }
 
 int mdb_t::del (
-                 const char *        user_key,
-                 size_t              user_key_len
+                 const char *        key,
+                 size_t              key_len
                  )
 {
     if ( unlikely ( ! m_ok ) )
@@ -120,7 +120,7 @@ int mdb_t::del (
         return EINVAL;
     }
 
-    int r = process_delete_command ( ( char * ) user_key, user_key_len );
+    int r = process_delete_command ( ( char * ) key, key_len );
     if ( unlikely ( ! r ) )
     {
         return EINVAL;

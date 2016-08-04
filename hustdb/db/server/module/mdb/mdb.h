@@ -11,7 +11,9 @@
 
 class mdb_t
 {
+    
 public:
+    
     mdb_t ( );
     ~mdb_t ( );
 
@@ -30,21 +32,21 @@ public:
     }
 
     int del (
-              const char * user_key,
-              size_t user_key_len
+              const char * key,
+              size_t key_len
               );
 
     int put (
-              const char * user_key,
-              size_t use_key_len,
+              const char * key,
+              size_t key_len,
               const char * val,
               size_t val_len,
               uint32_t ttl
               );
 
     int get (
-              const char * user_key,
-              size_t user_key_len,
+              const char * key,
+              size_t key_len,
               conn_ctxt_t conn,
               std::string * & rsp,
               int * rsp_len

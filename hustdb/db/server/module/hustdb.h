@@ -198,6 +198,11 @@ public:
         return m_mdb;
     }
     
+    rdb_t * get_rdb ( )
+    {
+        return m_rdb;
+    }
+    
     int32_t get_worker_count ( )
     {
         return m_server_conf.tcp_worker_count;

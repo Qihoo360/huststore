@@ -10,6 +10,7 @@
 *  **score** （必选）
 *  **key** （必选，GET：key即参数 or POST：key即body）  
 *  **opt** （可选，0,1,-1；default：0）
+*  **ttl** （可选，default：0）
 *  **ver** （可选，default：0）
 
 **使用范例A:**

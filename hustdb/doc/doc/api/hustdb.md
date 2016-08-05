@@ -3,8 +3,6 @@ hustdb
 
 ### 接口概要 ###
 
-以下是 `hustdb` 提供的 http 接口：
-
 * [`hustdb`](hustdb/hustdb.md)
 	* [stat](hustdb/hustdb/stat.md)
 	* [stat_all](hustdb/hustdb/stat_all.md)
@@ -30,6 +28,21 @@ hustdb
 	* [zrem](hustdb/hustdb/zrem.md)
 	* [zrangebyrank](hustdb/hustdb/zrangebyrank.md)
 	* [zrangebyscore](hustdb/hustdb/zrangebyscore.md)
+* [`hustcache`](hustdb/hustcache.md)
+	* [exist](hustcache/hustcache/exist.md)
+	* [get](hustcache/hustcache/get.md)
+	* [ttl](hustcache/hustcache/ttl.md)
+	* [put](hustcache/hustcache/put.md)
+	* [append](hustcache/hustcache/append.md)
+	* [del](hustcache/hustcache/del.md)
+	* [expire](hustcache/hustcache/expire.md)
+	* [persist](hustcache/hustcache/persist.md)
+	* [hexist](hustcache/hustcache/hexist.md)
+	* [hget](hustcache/hustcache/hget.md)
+	* [hset](hustcache/hustcache/hset.md)
+	* [hdel](hustcache/hustcache/hdel.md)
+	* [hincrby](hustcache/hustcache/hincrby.md)
+	* [hincrbyfloat](hustcache/hustcache/hincrbyfloat.md)
 
 ### 参数说明 ###
 

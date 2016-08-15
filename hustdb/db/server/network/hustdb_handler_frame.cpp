@@ -1175,6 +1175,426 @@ void hustdb_zrangebyscore_frame(evhtp_request_t * request, void * data)
     hustdb_zrangebyscore_handler(args, request, ctx);
 }
 
+void hustcache_exist_frame(evhtp_request_t * request, void * data)
+{
+    hustdb_network_ctx_t * ctx = reinterpret_cast<hustdb_network_ctx_t *>(data);
+    if (!request || !ctx || !ctx->db->ok() || !ctx->db->get_rdb() || !ctx->db->get_rdb()->ok())
+    {
+        evhtp::send_reply(EVHTP_RES_500, request);
+        return;
+    }
+    if (!evhtp::check_auth(request, &ctx->base))
+    {
+        return;
+    }
+    htp_method method = evhtp_request_get_method(request);
+    if (htp_method_GET != method)
+    {
+        evhtp::invalid_method(request);
+        return;
+    }
+    hustcache_exist_ctx_t args(request->uri->query);
+    if (!args.has_key)
+    {
+        evhtp::send_reply(EVHTP_RES_NOTFOUND, request);
+        return;
+    }
+    hustcache_exist_handler(args, request, ctx);
+}
+
+void hustcache_get_frame(evhtp_request_t * request, void * data)
+{
+    hustdb_network_ctx_t * ctx = reinterpret_cast<hustdb_network_ctx_t *>(data);
+    if (!request || !ctx || !ctx->db->ok() || !ctx->db->get_rdb() || !ctx->db->get_rdb()->ok())
+    {
+        evhtp::send_reply(EVHTP_RES_500, request);
+        return;
+    }
+    if (!evhtp::check_auth(request, &ctx->base))
+    {
+        return;
+    }
+    htp_method method = evhtp_request_get_method(request);
+    if (htp_method_GET != method)
+    {
+        evhtp::invalid_method(request);
+        return;
+    }
+    hustcache_get_ctx_t args(request->uri->query);
+    if (!args.has_key)
+    {
+        evhtp::send_reply(EVHTP_RES_NOTFOUND, request);
+        return;
+    }
+    hustcache_get_handler(args, request, ctx);
+}
+
+void hustcache_ttl_frame(evhtp_request_t * request, void * data)
+{
+    hustdb_network_ctx_t * ctx = reinterpret_cast<hustdb_network_ctx_t *>(data);
+    if (!request || !ctx || !ctx->db->ok() || !ctx->db->get_rdb() || !ctx->db->get_rdb()->ok())
+    {
+        evhtp::send_reply(EVHTP_RES_500, request);
+        return;
+    }
+    if (!evhtp::check_auth(request, &ctx->base))
+    {
+        return;
+    }
+    htp_method method = evhtp_request_get_method(request);
+    if (htp_method_GET != method)
+    {
+        evhtp::invalid_method(request);
+        return;
+    }
+    hustcache_ttl_ctx_t args(request->uri->query);
+    if (!args.has_key)
+    {
+        evhtp::send_reply(EVHTP_RES_NOTFOUND, request);
+        return;
+    }
+    hustcache_ttl_handler(args, request, ctx);
+}
+
+void hustcache_put_frame(evhtp_request_t * request, void * data)
+{
+    hustdb_network_ctx_t * ctx = reinterpret_cast<hustdb_network_ctx_t *>(data);
+    if (!request || !ctx || !ctx->db->ok() || !ctx->db->get_rdb() || !ctx->db->get_rdb()->ok())
+    {
+        evhtp::send_reply(EVHTP_RES_500, request);
+        return;
+    }
+    if (!evhtp::check_auth(request, &ctx->base))
+    {
+        return;
+    }
+    htp_method method = evhtp_request_get_method(request);
+    if (htp_method_GET != method && htp_method_POST != method)
+    {
+        evhtp::invalid_method(request);
+        return;
+    }
+    hustcache_put_ctx_t args(request->uri->query);
+    evhtp::c_str_t body = ctx->base.get_body(request);
+    if (htp_method_POST == method)
+    {
+        if (!body.data || body.len < 1)
+        {
+            evhtp::send_reply(EVHTP_RES_NOTFOUND, request);
+            return;
+        }
+    }
+    if (body.data && body.len > 0)
+    {
+        args.has_val = true;
+        args.val = body;
+    }
+    if (!args.has_key || !args.has_val)
+    {
+        evhtp::send_reply(EVHTP_RES_NOTFOUND, request);
+        return;
+    }
+    hustcache_put_handler(args, request, ctx);
+}
+
+void hustcache_append_frame(evhtp_request_t * request, void * data)
+{
+    hustdb_network_ctx_t * ctx = reinterpret_cast<hustdb_network_ctx_t *>(data);
+    if (!request || !ctx || !ctx->db->ok() || !ctx->db->get_rdb() || !ctx->db->get_rdb()->ok())
+    {
+        evhtp::send_reply(EVHTP_RES_500, request);
+        return;
+    }
+    if (!evhtp::check_auth(request, &ctx->base))
+    {
+        return;
+    }
+    htp_method method = evhtp_request_get_method(request);
+    if (htp_method_GET != method && htp_method_POST != method)
+    {
+        evhtp::invalid_method(request);
+        return;
+    }
+    hustcache_append_ctx_t args(request->uri->query);
+    evhtp::c_str_t body = ctx->base.get_body(request);
+    if (htp_method_POST == method)
+    {
+        if (!body.data || body.len < 1)
+        {
+            evhtp::send_reply(EVHTP_RES_NOTFOUND, request);
+            return;
+        }
+    }
+    if (body.data && body.len > 0)
+    {
+        args.has_val = true;
+        args.val = body;
+    }
+    if (!args.has_key || !args.has_val)
+    {
+        evhtp::send_reply(EVHTP_RES_NOTFOUND, request);
+        return;
+    }
+    hustcache_append_handler(args, request, ctx);
+}
+
+void hustcache_del_frame(evhtp_request_t * request, void * data)
+{
+    hustdb_network_ctx_t * ctx = reinterpret_cast<hustdb_network_ctx_t *>(data);
+    if (!request || !ctx || !ctx->db->ok() || !ctx->db->get_rdb() || !ctx->db->get_rdb()->ok())
+    {
+        evhtp::send_reply(EVHTP_RES_500, request);
+        return;
+    }
+    if (!evhtp::check_auth(request, &ctx->base))
+    {
+        return;
+    }
+    htp_method method = evhtp_request_get_method(request);
+    if (htp_method_GET != method)
+    {
+        evhtp::invalid_method(request);
+        return;
+    }
+    hustcache_del_ctx_t args(request->uri->query);
+    if (!args.has_key)
+    {
+        evhtp::send_reply(EVHTP_RES_NOTFOUND, request);
+        return;
+    }
+    hustcache_del_handler(args, request, ctx);
+}
+
+void hustcache_expire_frame(evhtp_request_t * request, void * data)
+{
+    hustdb_network_ctx_t * ctx = reinterpret_cast<hustdb_network_ctx_t *>(data);
+    if (!request || !ctx || !ctx->db->ok() || !ctx->db->get_rdb() || !ctx->db->get_rdb()->ok())
+    {
+        evhtp::send_reply(EVHTP_RES_500, request);
+        return;
+    }
+    if (!evhtp::check_auth(request, &ctx->base))
+    {
+        return;
+    }
+    htp_method method = evhtp_request_get_method(request);
+    if (htp_method_GET != method)
+    {
+        evhtp::invalid_method(request);
+        return;
+    }
+    hustcache_expire_ctx_t args(request->uri->query);
+    if (!args.has_key || !args.has_ttl)
+    {
+        evhtp::send_reply(EVHTP_RES_NOTFOUND, request);
+        return;
+    }
+    hustcache_expire_handler(args, request, ctx);
+}
+
+void hustcache_persist_frame(evhtp_request_t * request, void * data)
+{
+    hustdb_network_ctx_t * ctx = reinterpret_cast<hustdb_network_ctx_t *>(data);
+    if (!request || !ctx || !ctx->db->ok() || !ctx->db->get_rdb() || !ctx->db->get_rdb()->ok())
+    {
+        evhtp::send_reply(EVHTP_RES_500, request);
+        return;
+    }
+    if (!evhtp::check_auth(request, &ctx->base))
+    {
+        return;
+    }
+    htp_method method = evhtp_request_get_method(request);
+    if (htp_method_GET != method)
+    {
+        evhtp::invalid_method(request);
+        return;
+    }
+    hustcache_persist_ctx_t args(request->uri->query);
+    if (!args.has_key)
+    {
+        evhtp::send_reply(EVHTP_RES_NOTFOUND, request);
+        return;
+    }
+    hustcache_persist_handler(args, request, ctx);
+}
+
+void hustcache_hexist_frame(evhtp_request_t * request, void * data)
+{
+    hustdb_network_ctx_t * ctx = reinterpret_cast<hustdb_network_ctx_t *>(data);
+    if (!request || !ctx || !ctx->db->ok() || !ctx->db->get_rdb() || !ctx->db->get_rdb()->ok())
+    {
+        evhtp::send_reply(EVHTP_RES_500, request);
+        return;
+    }
+    if (!evhtp::check_auth(request, &ctx->base))
+    {
+        return;
+    }
+    htp_method method = evhtp_request_get_method(request);
+    if (htp_method_GET != method)
+    {
+        evhtp::invalid_method(request);
+        return;
+    }
+    hustcache_hexist_ctx_t args(request->uri->query);
+    if (!args.has_tb || !args.has_key)
+    {
+        evhtp::send_reply(EVHTP_RES_NOTFOUND, request);
+        return;
+    }
+    hustcache_hexist_handler(args, request, ctx);
+}
+
+void hustcache_hget_frame(evhtp_request_t * request, void * data)
+{
+    hustdb_network_ctx_t * ctx = reinterpret_cast<hustdb_network_ctx_t *>(data);
+    if (!request || !ctx || !ctx->db->ok() || !ctx->db->get_rdb() || !ctx->db->get_rdb()->ok())
+    {
+        evhtp::send_reply(EVHTP_RES_500, request);
+        return;
+    }
+    if (!evhtp::check_auth(request, &ctx->base))
+    {
+        return;
+    }
+    htp_method method = evhtp_request_get_method(request);
+    if (htp_method_GET != method)
+    {
+        evhtp::invalid_method(request);
+        return;
+    }
+    hustcache_hget_ctx_t args(request->uri->query);
+    if (!args.has_tb || !args.has_key)
+    {
+        evhtp::send_reply(EVHTP_RES_NOTFOUND, request);
+        return;
+    }
+    hustcache_hget_handler(args, request, ctx);
+}
+
+void hustcache_hset_frame(evhtp_request_t * request, void * data)
+{
+    hustdb_network_ctx_t * ctx = reinterpret_cast<hustdb_network_ctx_t *>(data);
+    if (!request || !ctx || !ctx->db->ok() || !ctx->db->get_rdb() || !ctx->db->get_rdb()->ok())
+    {
+        evhtp::send_reply(EVHTP_RES_500, request);
+        return;
+    }
+    if (!evhtp::check_auth(request, &ctx->base))
+    {
+        return;
+    }
+    htp_method method = evhtp_request_get_method(request);
+    if (htp_method_GET != method && htp_method_POST != method)
+    {
+        evhtp::invalid_method(request);
+        return;
+    }
+    hustcache_hset_ctx_t args(request->uri->query);
+    evhtp::c_str_t body = ctx->base.get_body(request);
+    if (htp_method_POST == method)
+    {
+        if (!body.data || body.len < 1)
+        {
+            evhtp::send_reply(EVHTP_RES_NOTFOUND, request);
+            return;
+        }
+    }
+    if (body.data && body.len > 0)
+    {
+        args.has_val = true;
+        args.val = body;
+    }
+    if (!args.has_tb || !args.has_key || !args.has_val)
+    {
+        evhtp::send_reply(EVHTP_RES_NOTFOUND, request);
+        return;
+    }
+    hustcache_hset_handler(args, request, ctx);
+}
+
+void hustcache_hdel_frame(evhtp_request_t * request, void * data)
+{
+    hustdb_network_ctx_t * ctx = reinterpret_cast<hustdb_network_ctx_t *>(data);
+    if (!request || !ctx || !ctx->db->ok() || !ctx->db->get_rdb() || !ctx->db->get_rdb()->ok())
+    {
+        evhtp::send_reply(EVHTP_RES_500, request);
+        return;
+    }
+    if (!evhtp::check_auth(request, &ctx->base))
+    {
+        return;
+    }
+    htp_method method = evhtp_request_get_method(request);
+    if (htp_method_GET != method)
+    {
+        evhtp::invalid_method(request);
+        return;
+    }
+    hustcache_hdel_ctx_t args(request->uri->query);
+    if (!args.has_tb || !args.has_key)
+    {
+        evhtp::send_reply(EVHTP_RES_NOTFOUND, request);
+        return;
+    }
+    hustcache_hdel_handler(args, request, ctx);
+}
+
+void hustcache_hincrby_frame(evhtp_request_t * request, void * data)
+{
+    hustdb_network_ctx_t * ctx = reinterpret_cast<hustdb_network_ctx_t *>(data);
+    if (!request || !ctx || !ctx->db->ok() || !ctx->db->get_rdb() || !ctx->db->get_rdb()->ok())
+    {
+        evhtp::send_reply(EVHTP_RES_500, request);
+        return;
+    }
+    if (!evhtp::check_auth(request, &ctx->base))
+    {
+        return;
+    }
+    htp_method method = evhtp_request_get_method(request);
+    if (htp_method_GET != method)
+    {
+        evhtp::invalid_method(request);
+        return;
+    }
+    hustcache_hincrby_ctx_t args(request->uri->query);
+    if (!args.has_tb || !args.has_key || !args.has_val)
+    {
+        evhtp::send_reply(EVHTP_RES_NOTFOUND, request);
+        return;
+    }
+    hustcache_hincrby_handler(args, request, ctx);
+}
+
+void hustcache_hincrbyfloat_frame(evhtp_request_t * request, void * data)
+{
+    hustdb_network_ctx_t * ctx = reinterpret_cast<hustdb_network_ctx_t *>(data);
+    if (!request || !ctx || !ctx->db->ok() || !ctx->db->get_rdb() || !ctx->db->get_rdb()->ok())
+    {
+        evhtp::send_reply(EVHTP_RES_500, request);
+        return;
+    }
+    if (!evhtp::check_auth(request, &ctx->base))
+    {
+        return;
+    }
+    htp_method method = evhtp_request_get_method(request);
+    if (htp_method_GET != method)
+    {
+        evhtp::invalid_method(request);
+        return;
+    }
+    hustcache_hincrbyfloat_ctx_t args(request->uri->query);
+    if (!args.has_tb || !args.has_key || !args.has_val)
+    {
+        evhtp::send_reply(EVHTP_RES_NOTFOUND, request);
+        return;
+    }
+    hustcache_hincrbyfloat_handler(args, request, ctx);
+}
+
 bool hustdb_init_handlers(hustdb_network_ctx_t * ctx, evhtp_t * htp)
 {
     if (!evhtp_set_cb(htp, "/hustdb/exist", hustdb_exist_frame, ctx)) return false;
@@ -1216,6 +1636,20 @@ bool hustdb_init_handlers(hustdb_network_ctx_t * ctx, evhtp_t * htp)
     if (!evhtp_set_cb(htp, "/hustdb/zrem", hustdb_zrem_frame, ctx)) return false;
     if (!evhtp_set_cb(htp, "/hustdb/zrangebyrank", hustdb_zrangebyrank_frame, ctx)) return false;
     if (!evhtp_set_cb(htp, "/hustdb/zrangebyscore", hustdb_zrangebyscore_frame, ctx)) return false;
+    if (!evhtp_set_cb(htp, "/hustcache/exist", hustcache_exist_frame, ctx)) return false;
+    if (!evhtp_set_cb(htp, "/hustcache/get", hustcache_get_frame, ctx)) return false;
+    if (!evhtp_set_cb(htp, "/hustcache/ttl", hustcache_ttl_frame, ctx)) return false;
+    if (!evhtp_set_cb(htp, "/hustcache/put", hustcache_put_frame, ctx)) return false;
+    if (!evhtp_set_cb(htp, "/hustcache/append", hustcache_append_frame, ctx)) return false;
+    if (!evhtp_set_cb(htp, "/hustcache/del", hustcache_del_frame, ctx)) return false;
+    if (!evhtp_set_cb(htp, "/hustcache/expire", hustcache_expire_frame, ctx)) return false;
+    if (!evhtp_set_cb(htp, "/hustcache/persist", hustcache_persist_frame, ctx)) return false;
+    if (!evhtp_set_cb(htp, "/hustcache/hexist", hustcache_hexist_frame, ctx)) return false;
+    if (!evhtp_set_cb(htp, "/hustcache/hget", hustcache_hget_frame, ctx)) return false;
+    if (!evhtp_set_cb(htp, "/hustcache/hset", hustcache_hset_frame, ctx)) return false;
+    if (!evhtp_set_cb(htp, "/hustcache/hdel", hustcache_hdel_frame, ctx)) return false;
+    if (!evhtp_set_cb(htp, "/hustcache/hincrby", hustcache_hincrby_frame, ctx)) return false;
+    if (!evhtp_set_cb(htp, "/hustcache/hincrbyfloat", hustcache_hincrbyfloat_frame, ctx)) return false;
 
     return true;
 }

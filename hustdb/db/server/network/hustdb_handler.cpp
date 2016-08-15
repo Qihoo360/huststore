@@ -434,3 +434,115 @@ void hustdb_zrangebyscore_handler(hustdb_zrangebyscore_ctx_t& args, evhtp_reques
         false, args.noval, true, count, total, rsp, conn, ctxt);
     hustdb_network::post_keys_handler(r, count, total, rsp, request, ctx);
 }
+
+void hustcache_exist_handler(hustcache_exist_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx)
+{
+    PRE_EXIST;
+    hustdb_network::unescape_key(false, request, args.key);
+    int r = ctx->db->get_rdb()->exist_or_del(args.key.data, args.key.len, true, conn);
+    evhtp::send_nobody_reply(ctx->db->errno_int_status(r), request);
+}
+
+void hustcache_get_handler(hustcache_get_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx)
+{
+    PRE_READ;
+    hustdb_network::unescape_key(false, request, args.key);
+    int r = ctx->db->get_rdb()->get_or_ttl(args.key.data, args.key.len, rsp, &rsp_len, true, conn);
+    hustdb_network::post_handler(r, rsp, request, ctx);
+}
+
+void hustcache_ttl_handler(hustcache_ttl_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx)
+{
+    PRE_READ;
+    hustdb_network::unescape_key(false, request, args.key);
+    int r = ctx->db->get_rdb()->get_or_ttl(args.key.data, args.key.len, rsp, &rsp_len, false, conn);
+    hustdb_network::post_handler(r, rsp, request, ctx);
+}
+
+void hustcache_put_handler(hustcache_put_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx)
+{
+    PRE_HANDLER;
+    hustdb_network::unescape_key(false, request, args.key);
+    int r = ctx->db->get_rdb()->set_or_append(args.key.data, args.key.len, args.val.data, args.val.len, args.ttl.data, args.ttl.len, true, conn);
+    evhtp::send_nobody_reply(ctx->db->errno_int_status(r), request);
+}
+
+void hustcache_append_handler(hustcache_append_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx)
+{
+    PRE_HANDLER;
+    hustdb_network::unescape_key(false, request, args.key);
+    int r = ctx->db->get_rdb()->set_or_append(args.key.data, args.key.len, args.val.data, args.val.len, NULL, 0, false, conn);
+    evhtp::send_nobody_reply(ctx->db->errno_int_status(r), request);
+}
+
+void hustcache_del_handler(hustcache_del_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx)
+{
+    PRE_HANDLER;
+    hustdb_network::unescape_key(false, request, args.key);
+    int r = ctx->db->get_rdb()->exist_or_del(args.key.data, args.key.len, false, conn);
+    evhtp::send_nobody_reply(ctx->db->errno_int_status(r), request);
+}
+
+void hustcache_expire_handler(hustcache_expire_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx)
+{
+    PRE_HANDLER;
+    hustdb_network::unescape_key(false, request, args.key);
+    int r = ctx->db->get_rdb()->expire_or_persist(args.key.data, args.key.len, args.ttl.data, args.ttl.len, true, conn);
+    evhtp::send_nobody_reply(ctx->db->errno_int_status(r), request);
+}
+
+void hustcache_persist_handler(hustcache_persist_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx)
+{
+    PRE_HANDLER;
+    hustdb_network::unescape_key(false, request, args.key);
+    int r = ctx->db->get_rdb()->expire_or_persist(args.key.data, args.key.len, NULL, 0, false, conn);
+    evhtp::send_nobody_reply(ctx->db->errno_int_status(r), request);
+}
+
+void hustcache_hexist_handler(hustcache_hexist_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx)
+{
+    PRE_HANDLER;
+    hustdb_network::unescape_key(false, request, args.key);
+    int r = ctx->db->get_rdb()->hexist_or_hdel(args.tb.data, args.tb.len, args.key.data, args.key.len, true, conn);
+    evhtp::send_nobody_reply(ctx->db->errno_int_status(r), request);
+}
+
+void hustcache_hget_handler(hustcache_hget_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx)
+{
+    PRE_READ;
+    hustdb_network::unescape_key(false, request, args.key);
+    int r = ctx->db->get_rdb()->hget(args.tb.data, args.tb.len, args.key.data, args.key.len, rsp, &rsp_len, conn);
+    hustdb_network::post_handler(r, rsp, request, ctx);
+}
+
+void hustcache_hset_handler(hustcache_hset_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx)
+{
+    PRE_HANDLER;
+    hustdb_network::unescape_key(false, request, args.key);
+    int r = ctx->db->get_rdb()->hset(args.tb.data, args.tb.len, args.key.data, args.key.len, args.val.data, args.val.len, conn);
+    evhtp::send_nobody_reply(ctx->db->errno_int_status(r), request);
+}
+
+void hustcache_hdel_handler(hustcache_hdel_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx)
+{
+    PRE_HANDLER;
+    hustdb_network::unescape_key(false, request, args.key);
+    int r = ctx->db->get_rdb()->hexist_or_hdel(args.tb.data, args.tb.len, args.key.data, args.key.len, false, conn);
+    evhtp::send_nobody_reply(ctx->db->errno_int_status(r), request);
+}
+
+void hustcache_hincrby_handler(hustcache_hincrby_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx)
+{
+    PRE_READ;
+    hustdb_network::unescape_key(false, request, args.key);
+    int r = ctx->db->get_rdb()->hincrby_or_hincrbyfloat(args.tb.data, args.tb.len, args.key.data, args.key.len, args.val.data, args.val.len, rsp, &rsp_len, true, conn);
+    hustdb_network::post_handler(r, rsp, request, ctx);
+}
+
+void hustcache_hincrbyfloat_handler(hustcache_hincrbyfloat_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx)
+{
+    PRE_READ;
+    hustdb_network::unescape_key(false, request, args.key);
+    int r = ctx->db->get_rdb()->hincrby_or_hincrbyfloat(args.tb.data, args.tb.len, args.key.data, args.key.len, args.val.data, args.val.len, rsp, &rsp_len, false, conn);
+    hustdb_network::post_handler(r, rsp, request, ctx);
+}

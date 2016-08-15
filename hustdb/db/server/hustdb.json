@@ -462,6 +462,162 @@
             ],
             "required": ["tb", "offset", "size"],
             "check": "!request || !ctx || !ctx->db->ok()"
+        },
+        {
+            "uri": "/hustcache/exist",
+            "methods": ["GET"],
+            "args":
+            [
+                ["string", "key"]
+            ],
+            "required": ["key"],
+            "check": "!request || !ctx || !ctx->db->ok() || !ctx->db->get_rdb() || !ctx->db->get_rdb()->ok()"
+        },
+        {
+            "uri": "/hustcache/get",
+            "methods": ["GET"],
+            "args":
+            [
+                ["string", "key"]
+            ],
+            "required": ["key"],
+            "check": "!request || !ctx || !ctx->db->ok() || !ctx->db->get_rdb() || !ctx->db->get_rdb()->ok()"
+        },
+        {
+            "uri": "/hustcache/ttl",
+            "methods": ["GET"],
+            "args":
+            [
+                ["string", "key"]
+            ],
+            "required": ["key"],
+            "check": "!request || !ctx || !ctx->db->ok() || !ctx->db->get_rdb() || !ctx->db->get_rdb()->ok()"
+        },
+        {
+            "uri": "/hustcache/put",
+            "methods": ["GET", "POST"],
+            "args":
+            [
+                ["string", "key"],
+                ["string", "val"],
+                ["string", "ttl"]
+            ],
+            "required": ["key", "val"],
+            "post": { "arg": "val" },
+            "check": "!request || !ctx || !ctx->db->ok() || !ctx->db->get_rdb() || !ctx->db->get_rdb()->ok()"
+        },
+        {
+            "uri": "/hustcache/append",
+            "methods": ["GET", "POST"],
+            "args":
+            [
+                ["string", "key"],
+                ["string", "val"]
+            ],
+            "required": ["key", "val"],
+            "post": { "arg": "val" },
+            "check": "!request || !ctx || !ctx->db->ok() || !ctx->db->get_rdb() || !ctx->db->get_rdb()->ok()"
+        },
+        {
+            "uri": "/hustcache/del",
+            "methods": ["GET"],
+            "args":
+            [
+                ["string", "key"]
+            ],
+            "required": ["key"],
+            "check": "!request || !ctx || !ctx->db->ok() || !ctx->db->get_rdb() || !ctx->db->get_rdb()->ok()"
+        },
+        {
+            "uri": "/hustcache/expire",
+            "methods": ["GET"],
+            "args":
+            [
+                ["string", "key"],
+                ["string", "ttl"]
+            ],
+            "required": ["key", "ttl"],
+            "check": "!request || !ctx || !ctx->db->ok() || !ctx->db->get_rdb() || !ctx->db->get_rdb()->ok()"
+        },
+        {
+            "uri": "/hustcache/persist",
+            "methods": ["GET"],
+            "args":
+            [
+                ["string", "key"]
+            ],
+            "required": ["key"],
+            "check": "!request || !ctx || !ctx->db->ok() || !ctx->db->get_rdb() || !ctx->db->get_rdb()->ok()"
+        },
+        {
+            "uri": "/hustcache/hexist",
+            "methods": ["GET"],
+            "args":
+            [
+                ["string", "tb"],
+                ["string", "key"]
+            ],
+            "required": ["tb", "key"],
+            "check": "!request || !ctx || !ctx->db->ok() || !ctx->db->get_rdb() || !ctx->db->get_rdb()->ok()"
+        },
+        {
+            "uri": "/hustcache/hget",
+            "methods": ["GET"],
+            "args":
+            [
+                ["string", "tb"],
+                ["string", "key"]
+            ],
+            "required": ["tb", "key"],
+            "check": "!request || !ctx || !ctx->db->ok() || !ctx->db->get_rdb() || !ctx->db->get_rdb()->ok()"
+        },
+        {
+            "uri": "/hustcache/hset",
+            "methods": ["GET", "POST"],
+            "args":
+            [
+                ["string", "tb"],
+                ["string", "key"],
+                ["string", "val"]
+            ],
+            "required": ["tb", "key", "val"],
+            "post": { "arg": "val" },
+            "check": "!request || !ctx || !ctx->db->ok() || !ctx->db->get_rdb() || !ctx->db->get_rdb()->ok()"
+        },
+        {
+            "uri": "/hustcache/hdel", 
+            "methods": ["GET"],
+            "args":
+            [
+                ["string", "tb"],
+                ["string", "key"]
+            ],
+            "required": ["tb", "key"],
+            "check": "!request || !ctx || !ctx->db->ok() || !ctx->db->get_rdb() || !ctx->db->get_rdb()->ok()"
+        },
+        {
+            "uri": "/hustcache/hincrby",
+            "methods": ["GET"],
+            "args":
+            [
+                ["string", "tb"],
+                ["string", "key"],
+                ["string", "val"]
+            ],
+            "required": ["tb", "key", "val"],
+            "check": "!request || !ctx || !ctx->db->ok() || !ctx->db->get_rdb() || !ctx->db->get_rdb()->ok()"
+        },
+        {
+            "uri": "/hustcache/hincrbyfloat",
+            "methods": ["GET"],
+            "args":
+            [
+                ["string", "tb"],
+                ["string", "key"],
+                ["string", "val"]
+            ],
+            "required": ["tb", "key", "val"],
+            "check": "!request || !ctx || !ctx->db->ok() || !ctx->db->get_rdb() || !ctx->db->get_rdb()->ok()"
         }
     ]
 }

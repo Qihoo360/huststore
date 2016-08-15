@@ -1595,3 +1595,471 @@ hustdb_zrangebyscore_ctx_t::hustdb_zrangebyscore_ctx_t(evhtp_query_t * htp_query
         kv = kv->next.tqe_next;
     }
 }
+
+hustcache_exist_ctx_t::hustcache_exist_ctx_t(evhtp_query_t * htp_query)
+{
+    // reset
+    has_key = false;
+
+    memset(&key, 0, sizeof(evhtp::c_str_t));
+
+    if (!htp_query)
+    {
+        return;
+    }
+    // parse from htp_query
+    evhtp_kv_s * kv = htp_query->tqh_first;
+    while (kv)
+    {
+        static evhtp::c_str_t __key = evhtp_make_str("key");
+
+        if (kv->klen == __key.len && 0 == strncmp(__key.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
+        {
+            has_key = true;
+            key.assign(kv->val, kv->vlen);
+        }
+        kv = kv->next.tqe_next;
+    }
+}
+
+hustcache_get_ctx_t::hustcache_get_ctx_t(evhtp_query_t * htp_query)
+{
+    // reset
+    has_key = false;
+
+    memset(&key, 0, sizeof(evhtp::c_str_t));
+
+    if (!htp_query)
+    {
+        return;
+    }
+    // parse from htp_query
+    evhtp_kv_s * kv = htp_query->tqh_first;
+    while (kv)
+    {
+        static evhtp::c_str_t __key = evhtp_make_str("key");
+
+        if (kv->klen == __key.len && 0 == strncmp(__key.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
+        {
+            has_key = true;
+            key.assign(kv->val, kv->vlen);
+        }
+        kv = kv->next.tqe_next;
+    }
+}
+
+hustcache_ttl_ctx_t::hustcache_ttl_ctx_t(evhtp_query_t * htp_query)
+{
+    // reset
+    has_key = false;
+
+    memset(&key, 0, sizeof(evhtp::c_str_t));
+
+    if (!htp_query)
+    {
+        return;
+    }
+    // parse from htp_query
+    evhtp_kv_s * kv = htp_query->tqh_first;
+    while (kv)
+    {
+        static evhtp::c_str_t __key = evhtp_make_str("key");
+
+        if (kv->klen == __key.len && 0 == strncmp(__key.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
+        {
+            has_key = true;
+            key.assign(kv->val, kv->vlen);
+        }
+        kv = kv->next.tqe_next;
+    }
+}
+
+hustcache_put_ctx_t::hustcache_put_ctx_t(evhtp_query_t * htp_query)
+{
+    // reset
+    has_key = false;
+    has_val = false;
+    has_ttl = false;
+
+    memset(&key, 0, sizeof(evhtp::c_str_t));
+    memset(&val, 0, sizeof(evhtp::c_str_t));
+    memset(&ttl, 0, sizeof(evhtp::c_str_t));
+
+    if (!htp_query)
+    {
+        return;
+    }
+    // parse from htp_query
+    evhtp_kv_s * kv = htp_query->tqh_first;
+    while (kv)
+    {
+        static evhtp::c_str_t __key = evhtp_make_str("key");
+        static evhtp::c_str_t __val = evhtp_make_str("val");
+        static evhtp::c_str_t __ttl = evhtp_make_str("ttl");
+
+        if (kv->klen == __key.len && 0 == strncmp(__key.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
+        {
+            has_key = true;
+            key.assign(kv->val, kv->vlen);
+        }
+        else if (kv->klen == __val.len && 0 == strncmp(__val.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
+        {
+            has_val = true;
+            val.assign(kv->val, kv->vlen);
+        }
+        else if (kv->klen == __ttl.len && 0 == strncmp(__ttl.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
+        {
+            has_ttl = true;
+            ttl.assign(kv->val, kv->vlen);
+        }
+        kv = kv->next.tqe_next;
+    }
+}
+
+hustcache_append_ctx_t::hustcache_append_ctx_t(evhtp_query_t * htp_query)
+{
+    // reset
+    has_key = false;
+    has_val = false;
+
+    memset(&key, 0, sizeof(evhtp::c_str_t));
+    memset(&val, 0, sizeof(evhtp::c_str_t));
+
+    if (!htp_query)
+    {
+        return;
+    }
+    // parse from htp_query
+    evhtp_kv_s * kv = htp_query->tqh_first;
+    while (kv)
+    {
+        static evhtp::c_str_t __key = evhtp_make_str("key");
+        static evhtp::c_str_t __val = evhtp_make_str("val");
+
+        if (kv->klen == __key.len && 0 == strncmp(__key.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
+        {
+            has_key = true;
+            key.assign(kv->val, kv->vlen);
+        }
+        else if (kv->klen == __val.len && 0 == strncmp(__val.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
+        {
+            has_val = true;
+            val.assign(kv->val, kv->vlen);
+        }
+        kv = kv->next.tqe_next;
+    }
+}
+
+hustcache_del_ctx_t::hustcache_del_ctx_t(evhtp_query_t * htp_query)
+{
+    // reset
+    has_key = false;
+
+    memset(&key, 0, sizeof(evhtp::c_str_t));
+
+    if (!htp_query)
+    {
+        return;
+    }
+    // parse from htp_query
+    evhtp_kv_s * kv = htp_query->tqh_first;
+    while (kv)
+    {
+        static evhtp::c_str_t __key = evhtp_make_str("key");
+
+        if (kv->klen == __key.len && 0 == strncmp(__key.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
+        {
+            has_key = true;
+            key.assign(kv->val, kv->vlen);
+        }
+        kv = kv->next.tqe_next;
+    }
+}
+
+hustcache_expire_ctx_t::hustcache_expire_ctx_t(evhtp_query_t * htp_query)
+{
+    // reset
+    has_key = false;
+    has_ttl = false;
+
+    memset(&key, 0, sizeof(evhtp::c_str_t));
+    memset(&ttl, 0, sizeof(evhtp::c_str_t));
+
+    if (!htp_query)
+    {
+        return;
+    }
+    // parse from htp_query
+    evhtp_kv_s * kv = htp_query->tqh_first;
+    while (kv)
+    {
+        static evhtp::c_str_t __key = evhtp_make_str("key");
+        static evhtp::c_str_t __ttl = evhtp_make_str("ttl");
+
+        if (kv->klen == __key.len && 0 == strncmp(__key.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
+        {
+            has_key = true;
+            key.assign(kv->val, kv->vlen);
+        }
+        else if (kv->klen == __ttl.len && 0 == strncmp(__ttl.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
+        {
+            has_ttl = true;
+            ttl.assign(kv->val, kv->vlen);
+        }
+        kv = kv->next.tqe_next;
+    }
+}
+
+hustcache_persist_ctx_t::hustcache_persist_ctx_t(evhtp_query_t * htp_query)
+{
+    // reset
+    has_key = false;
+
+    memset(&key, 0, sizeof(evhtp::c_str_t));
+
+    if (!htp_query)
+    {
+        return;
+    }
+    // parse from htp_query
+    evhtp_kv_s * kv = htp_query->tqh_first;
+    while (kv)
+    {
+        static evhtp::c_str_t __key = evhtp_make_str("key");
+
+        if (kv->klen == __key.len && 0 == strncmp(__key.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
+        {
+            has_key = true;
+            key.assign(kv->val, kv->vlen);
+        }
+        kv = kv->next.tqe_next;
+    }
+}
+
+hustcache_hexist_ctx_t::hustcache_hexist_ctx_t(evhtp_query_t * htp_query)
+{
+    // reset
+    has_tb = false;
+    has_key = false;
+
+    memset(&tb, 0, sizeof(evhtp::c_str_t));
+    memset(&key, 0, sizeof(evhtp::c_str_t));
+
+    if (!htp_query)
+    {
+        return;
+    }
+    // parse from htp_query
+    evhtp_kv_s * kv = htp_query->tqh_first;
+    while (kv)
+    {
+        static evhtp::c_str_t __tb = evhtp_make_str("tb");
+        static evhtp::c_str_t __key = evhtp_make_str("key");
+
+        if (kv->klen == __tb.len && 0 == strncmp(__tb.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
+        {
+            has_tb = true;
+            tb.assign(kv->val, kv->vlen);
+        }
+        else if (kv->klen == __key.len && 0 == strncmp(__key.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
+        {
+            has_key = true;
+            key.assign(kv->val, kv->vlen);
+        }
+        kv = kv->next.tqe_next;
+    }
+}
+
+hustcache_hget_ctx_t::hustcache_hget_ctx_t(evhtp_query_t * htp_query)
+{
+    // reset
+    has_tb = false;
+    has_key = false;
+
+    memset(&tb, 0, sizeof(evhtp::c_str_t));
+    memset(&key, 0, sizeof(evhtp::c_str_t));
+
+    if (!htp_query)
+    {
+        return;
+    }
+    // parse from htp_query
+    evhtp_kv_s * kv = htp_query->tqh_first;
+    while (kv)
+    {
+        static evhtp::c_str_t __tb = evhtp_make_str("tb");
+        static evhtp::c_str_t __key = evhtp_make_str("key");
+
+        if (kv->klen == __tb.len && 0 == strncmp(__tb.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
+        {
+            has_tb = true;
+            tb.assign(kv->val, kv->vlen);
+        }
+        else if (kv->klen == __key.len && 0 == strncmp(__key.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
+        {
+            has_key = true;
+            key.assign(kv->val, kv->vlen);
+        }
+        kv = kv->next.tqe_next;
+    }
+}
+
+hustcache_hset_ctx_t::hustcache_hset_ctx_t(evhtp_query_t * htp_query)
+{
+    // reset
+    has_tb = false;
+    has_key = false;
+    has_val = false;
+
+    memset(&tb, 0, sizeof(evhtp::c_str_t));
+    memset(&key, 0, sizeof(evhtp::c_str_t));
+    memset(&val, 0, sizeof(evhtp::c_str_t));
+
+    if (!htp_query)
+    {
+        return;
+    }
+    // parse from htp_query
+    evhtp_kv_s * kv = htp_query->tqh_first;
+    while (kv)
+    {
+        static evhtp::c_str_t __tb = evhtp_make_str("tb");
+        static evhtp::c_str_t __key = evhtp_make_str("key");
+        static evhtp::c_str_t __val = evhtp_make_str("val");
+
+        if (kv->klen == __tb.len && 0 == strncmp(__tb.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
+        {
+            has_tb = true;
+            tb.assign(kv->val, kv->vlen);
+        }
+        else if (kv->klen == __key.len && 0 == strncmp(__key.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
+        {
+            has_key = true;
+            key.assign(kv->val, kv->vlen);
+        }
+        else if (kv->klen == __val.len && 0 == strncmp(__val.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
+        {
+            has_val = true;
+            val.assign(kv->val, kv->vlen);
+        }
+        kv = kv->next.tqe_next;
+    }
+}
+
+hustcache_hdel_ctx_t::hustcache_hdel_ctx_t(evhtp_query_t * htp_query)
+{
+    // reset
+    has_tb = false;
+    has_key = false;
+
+    memset(&tb, 0, sizeof(evhtp::c_str_t));
+    memset(&key, 0, sizeof(evhtp::c_str_t));
+
+    if (!htp_query)
+    {
+        return;
+    }
+    // parse from htp_query
+    evhtp_kv_s * kv = htp_query->tqh_first;
+    while (kv)
+    {
+        static evhtp::c_str_t __tb = evhtp_make_str("tb");
+        static evhtp::c_str_t __key = evhtp_make_str("key");
+
+        if (kv->klen == __tb.len && 0 == strncmp(__tb.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
+        {
+            has_tb = true;
+            tb.assign(kv->val, kv->vlen);
+        }
+        else if (kv->klen == __key.len && 0 == strncmp(__key.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
+        {
+            has_key = true;
+            key.assign(kv->val, kv->vlen);
+        }
+        kv = kv->next.tqe_next;
+    }
+}
+
+hustcache_hincrby_ctx_t::hustcache_hincrby_ctx_t(evhtp_query_t * htp_query)
+{
+    // reset
+    has_tb = false;
+    has_key = false;
+    has_val = false;
+
+    memset(&tb, 0, sizeof(evhtp::c_str_t));
+    memset(&key, 0, sizeof(evhtp::c_str_t));
+    memset(&val, 0, sizeof(evhtp::c_str_t));
+
+    if (!htp_query)
+    {
+        return;
+    }
+    // parse from htp_query
+    evhtp_kv_s * kv = htp_query->tqh_first;
+    while (kv)
+    {
+        static evhtp::c_str_t __tb = evhtp_make_str("tb");
+        static evhtp::c_str_t __key = evhtp_make_str("key");
+        static evhtp::c_str_t __val = evhtp_make_str("val");
+
+        if (kv->klen == __tb.len && 0 == strncmp(__tb.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
+        {
+            has_tb = true;
+            tb.assign(kv->val, kv->vlen);
+        }
+        else if (kv->klen == __key.len && 0 == strncmp(__key.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
+        {
+            has_key = true;
+            key.assign(kv->val, kv->vlen);
+        }
+        else if (kv->klen == __val.len && 0 == strncmp(__val.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
+        {
+            has_val = true;
+            val.assign(kv->val, kv->vlen);
+        }
+        kv = kv->next.tqe_next;
+    }
+}
+
+hustcache_hincrbyfloat_ctx_t::hustcache_hincrbyfloat_ctx_t(evhtp_query_t * htp_query)
+{
+    // reset
+    has_tb = false;
+    has_key = false;
+    has_val = false;
+
+    memset(&tb, 0, sizeof(evhtp::c_str_t));
+    memset(&key, 0, sizeof(evhtp::c_str_t));
+    memset(&val, 0, sizeof(evhtp::c_str_t));
+
+    if (!htp_query)
+    {
+        return;
+    }
+    // parse from htp_query
+    evhtp_kv_s * kv = htp_query->tqh_first;
+    while (kv)
+    {
+        static evhtp::c_str_t __tb = evhtp_make_str("tb");
+        static evhtp::c_str_t __key = evhtp_make_str("key");
+        static evhtp::c_str_t __val = evhtp_make_str("val");
+
+        if (kv->klen == __tb.len && 0 == strncmp(__tb.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
+        {
+            has_tb = true;
+            tb.assign(kv->val, kv->vlen);
+        }
+        else if (kv->klen == __key.len && 0 == strncmp(__key.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
+        {
+            has_key = true;
+            key.assign(kv->val, kv->vlen);
+        }
+        else if (kv->klen == __val.len && 0 == strncmp(__val.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
+        {
+            has_val = true;
+            val.assign(kv->val, kv->vlen);
+        }
+        kv = kv->next.tqe_next;
+    }
+}

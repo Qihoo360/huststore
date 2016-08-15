@@ -204,6 +204,11 @@ namespace hustdb
 
     void timer_t::kill_me ( )
     {
+        if ( ! m_tid )
+        {
+            return ;
+        }
+        
         write (m_stop_pipe[1], "q", 1);
         pthread_join (m_tid, NULL);
         close (m_stop_pipe[0]);

@@ -53,6 +53,15 @@ enum table_type_t
     ZSET_TB     = 124
 };
 
+typedef struct invariant_s
+{
+    uint64_t    fastdb;
+    uint64_t    conflictdb;
+    uint64_t    contentdb;
+    uint64_t    fast_conflictdb;
+
+} invariant_t;
+
 typedef struct queue_stat_s
 {
     uint32_t    sp;
@@ -647,6 +656,8 @@ public:
 private:
 
     bool init_server_config ( );
+    
+    bool check_invariant_config ( );
 
     bool init_hash_config ( );
 
@@ -726,6 +737,8 @@ private:
     
     slow_task_thread_t m_slow_tasks;
 
+    fmap_t m_invariant;
+    
     fmap_t m_queue_index;
     queue_map_t m_queue_map;
     lockable_t m_mq_locker;

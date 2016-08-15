@@ -158,7 +158,7 @@ bool run_server(const std::string& pid_file)
     hustdb_t db;
     if (!db.open())
     {
-        LOG_ERROR ("[hustdb_network] db open failed");
+        LOG_ERROR ("[hustdb_network]db open failed");
         return -1;
     }
 
@@ -187,10 +187,10 @@ bool run_server(const std::string& pid_file)
 
     if (!hustdb_loop(&ctx))
     {
-        LOG_INFO ("[hustdb_network] hustdb_loop error");
+        LOG_INFO ("[hustdb_network]hustdb_loop error");
     }
 
-    LOG_INFO ("[hustdb_network] hustdb closed");
+    LOG_INFO ("[hustdb_network]hustdb closed");
     return true;
 }
 

@@ -47,36 +47,36 @@ void hustdb_t::destroy ( )
     LOG_INFO ( "[hustdb][destroy]slow task thread closing" );
     m_slow_tasks.stop ();
     LOG_INFO ( "[hustdb][destroy]slow task thread closed" );
-    
+
     LOG_INFO ( "[hustdb][destroy]timer closing" );
     m_timer.kill_me ();
     LOG_INFO ( "[hustdb][destroy]timer closed" );
 
     if ( m_storage )
     {
+        m_storage_ok = false;
         LOG_INFO ( "[hustdb][destroy]storage closing" );
         m_storage->kill_me ();
         LOG_INFO ( "[hustdb][destroy]storage closed" );
         m_storage = NULL;
-        m_storage_ok = false;
     }
 
     if ( m_mdb )
     {
+        m_mdb_ok = false;
         LOG_INFO ( "[hustdb][destroy]mdb closing" );
         m_mdb->kill_me ();
         LOG_INFO ( "[hustdb][destroy]mdb closed" );
         m_mdb = NULL;
-        m_mdb_ok = false;
     }
-    
+
     if ( m_rdb )
     {
+        m_rdb_ok = false;
         LOG_INFO ( "[hustdb][destroy]rdb closing" );
         m_rdb->kill_me ();
         LOG_INFO ( "[hustdb][destroy]rdb closed" );
         m_rdb = NULL;
-        m_rdb_ok = false;
     }
 
     if ( m_apptool )
@@ -102,10 +102,10 @@ void hustdb_t::destroy ( )
     {
         delete it->second.unacked;
         it->second.unacked = NULL;
-        
+
         delete it->second.redelivery;
         it->second.redelivery = NULL;
-        
+
         delete it->second.worker;
         it->second.worker = NULL;
     }
@@ -150,6 +150,12 @@ bool hustdb_t::open ( )
         LOG_ERROR ( "[hustdb][open]init_server_config() failed" );
         return false;
     }
+    
+    if ( ! check_invariant_config () )
+    {
+        LOG_ERROR ( "[hustdb][open]check_invariant_config() failed" );
+        return false;
+    }
 
     m_apptool->make_dir ( DB_DATA_ROOT );
     if ( ! m_apptool->is_dir ( DB_DATA_ROOT ) )
@@ -183,7 +189,7 @@ bool hustdb_t::open ( )
         LOG_ERROR ( "[hustdb][open]m_slow_tasks.start() failed" );
         return false;
     }
-    
+
     if ( ! ( m_timer.register_task ( hustdb::timer_task_t ( 1, timestamp_cb, this ) ) &&
              m_timer.register_task ( hustdb::timer_task_t ( 10, over_threshold_cb, this ) ) &&
              m_timer.register_task ( hustdb::timer_task_t ( m_store_conf.db_ttl_scan_interval, ttl_scan_cb, this ) ) &&
@@ -302,7 +308,7 @@ bool hustdb_t::init_server_config ( )
 
     s = m_appini->ini_get_string ( m_ini, "server", "http.security.passwd", "" );
     m_server_conf.http_security_passwd = s ? s : "";
-    
+
     s = m_appini->ini_get_string ( m_ini, "server", "http.access.allow", "" );
     m_server_conf.http_access_allow = s ? s : "";
 
@@ -312,14 +318,14 @@ bool hustdb_t::init_server_config ( )
         LOG_ERROR ( "[hustdb][init_server_config]server memory.process.threshold invalid, process.threshold: %d", m_server_conf.memory_process_threshold );
         return false;
     }
-    
+
     m_server_conf.memory_system_threshold  = m_appini->ini_get_int ( m_ini, "server", "memory.system.threshold", 90 );
     if ( m_server_conf.memory_system_threshold < 0 || m_server_conf.memory_system_threshold >= 100 )
     {
         LOG_ERROR ( "[hustdb][init_server_config]server memory.system.threshold invalid, system.threshold: %d", m_server_conf.memory_system_threshold );
         return false;
     }
-    
+
     m_store_conf.mq_redelivery_timeout = m_appini->ini_get_int ( m_ini, "store", "mq.redelivery.timeout", 5 );
     if ( m_store_conf.mq_redelivery_timeout <= 0 || m_store_conf.mq_redelivery_timeout > 255 )
     {
@@ -340,14 +346,14 @@ bool hustdb_t::init_server_config ( )
         LOG_ERROR ( "[hustdb][init_server_config]store db.ttl.maximum invalid, ttl.maximum: %d", m_store_conf.db_ttl_maximum );
         return false;
     }
-    
+
     m_store_conf.db_ttl_scan_interval = m_appini->ini_get_int ( m_ini, "store", "db.ttl.scan_interval", 30 );
     if ( m_store_conf.db_ttl_scan_interval <= 0 )
     {
         LOG_ERROR ( "[hustdb][init_server_config]store db.ttl.scan_interval invalid, ttl.scan_interval: %d", m_store_conf.db_ttl_scan_interval );
         return false;
     }
-    
+
     m_store_conf.mq_queue_maximum = m_appini->ini_get_int ( m_ini, "store", "mq.queue.maximum", 8192 );
     if ( m_store_conf.mq_queue_maximum <= 0 )
     {
@@ -361,7 +367,7 @@ bool hustdb_t::init_server_config ( )
         LOG_ERROR ( "[hustdb][init_server_config]store db.table.maximum invalid, table.maximum: %d", m_store_conf.db_table_maximum );
         return false;
     }
-    
+
     m_store_conf.db_ttl_scan_count = m_appini->ini_get_int ( m_ini, "store", "db.ttl.scan_count", 1000 );
     if ( m_store_conf.db_ttl_scan_count <= 0 || m_store_conf.db_ttl_scan_count > 10000 )
     {
@@ -370,6 +376,93 @@ bool hustdb_t::init_server_config ( )
     }
 
     return true;
+}
+
+bool hustdb_t::check_invariant_config ( )
+{
+    char ph[ 260 ] = { };
+    fast_memcpy ( ph, HUSTSTORE_INVARIANT, sizeof ( HUSTSTORE_INVARIANT ) );
+
+    if ( ! m_apptool->is_file ( ph ) )
+    {
+        FILE * fp = fopen ( ph, "wb" );
+        if ( ! fp )
+        {
+            LOG_ERROR ( "[hustdb][check_invariant_config]invariant fopen %s failed", ph );
+            return false;
+        }
+
+        bool ok = true;
+        char buf[ sizeof ( invariant_t ) ];
+        memset ( buf, 0, sizeof ( buf ) );
+        if ( sizeof ( buf ) != fwrite ( buf, 1, sizeof ( buf ), fp ) )
+        {
+            LOG_ERROR ( "[hustdb][check_invariant_config]invariant fwrite[%d] failed", sizeof ( buf ) );
+            ok = false;
+        }
+
+        fclose ( fp );
+        if ( ! ok )
+        {
+            remove ( ph );
+            return false;
+        }
+    }
+    
+    int r = 0;
+    G_APPTOOL->fmap_init ( & m_invariant );
+    
+    do  
+    {
+        if ( ! G_APPTOOL->fmap_open ( & m_invariant, ph, 0, 0, true ) )
+        {
+            r = EINVAL;
+            LOG_ERROR ( "[hustdb][check_invariant_config]invariant fmap_open failed" );
+            break;
+        }
+
+        if ( m_invariant.ptr_len != sizeof ( invariant_t ) )
+        {
+            r = EINVAL;
+            LOG_ERROR ( "[hustdb][check_invariant_config]invariant ptr_len: %d, != must_len: %d, error", m_invariant.ptr_len, sizeof ( invariant_t ) );
+            break;
+        }
+
+        invariant_t * invar = NULL;
+        invar = ( invariant_t * ) m_invariant.ptr;
+
+        int fastdb_count             = m_appini->ini_get_int ( m_ini, "fastdb", "count", 0 );
+        int conflictdb_count         = m_appini->ini_get_int ( m_ini, "conflictdb", "count", 0 );
+        int contentdb_count          = m_appini->ini_get_int ( m_ini, "contentdb", "count", 0 );
+        int fast_conflictdb_count    = m_appini->ini_get_int ( m_ini, "fast_conflictdb", "count", 0 );
+        
+        if ( ( invar->fastdb > 0 && invar->fastdb != fastdb_count ) ||
+             ( invar->conflictdb > 0 && invar->conflictdb != conflictdb_count ) ||
+             ( invar->contentdb > 0 && invar->contentdb != contentdb_count ) ||
+             ( invar->fast_conflictdb > 0 && invar->fast_conflictdb != fast_conflictdb_count )
+             )
+        {
+            r = EINVAL;
+            LOG_ERROR ( "[hustdb][check_invariant_config]invariant error: [%d,%d], [%d,%d], [%d,%d], [%d,%d]",
+                       invar->fastdb, fastdb_count,
+                       invar->conflictdb, conflictdb_count,
+                       invar->contentdb, contentdb_count,
+                       invar->fast_conflictdb, fast_conflictdb_count
+                       );
+            break;
+        }
+        
+        invar->fastdb             = fastdb_count;
+        invar->conflictdb         = conflictdb_count;
+        invar->contentdb          = contentdb_count;
+        invar->fast_conflictdb    = fast_conflictdb_count;
+        
+    }
+    while ( 0 );
+    
+    G_APPTOOL->fmap_close ( & m_invariant );
+    
+    return ( r == 0 );
 }
 
 bool hustdb_t::init_hash_config ( )
@@ -482,7 +575,7 @@ bool hustdb_t::init_data_engine ( )
 
         m_mdb_ok = mdb_cache_size > 0 ? true : false;
     }
-    
+
     if ( NULL == m_rdb )
     {
         int rdb_cache_size = m_appini->ini_get_int ( m_ini, "cachedb", "cache", 512 );
@@ -545,15 +638,15 @@ bool hustdb_t::init_queue_index ( )
             LOG_ERROR ( "[hustdb][init_queue_index]queue index fopen %s failed", ph );
             return false;
         }
-        
+
         fseek ( fp, 0L, SEEK_END );
         uint64_t size = ftell ( fp );
-        
+
         if ( size < QUEUE_INDEX_FILE_LEN )
         {
             char add_buf [ QUEUE_INDEX_FILE_LEN - size ];
             memset ( add_buf, 0, sizeof ( add_buf ) );
-            
+
             if ( sizeof ( add_buf ) != fwrite ( add_buf, 1, sizeof ( add_buf ), fp ) )
             {
                 LOG_ERROR ( "[hustdb][init_queue_index]queue index fwrite[%d] failed", sizeof ( add_buf ) );
@@ -561,7 +654,7 @@ bool hustdb_t::init_queue_index ( )
                 return false;
             }
         }
-        
+
         fclose ( fp );
     }
 
@@ -587,16 +680,16 @@ bool hustdb_t::init_queue_index ( )
         if ( qstat->flag > 0 )
         {
             queue_info_t t;
-            
+
             t.offset        = i;
             t.unacked       = new unacked_t ();
             t.redelivery    = new redelivery_t ();
             t.worker        = new worker_t ();
-            
+
             m_queue_map.insert (std::pair<std::string, queue_info_t>( qstat->qname, t ));
         }
     }
-    
+
     return true;
 }
 
@@ -637,15 +730,15 @@ bool hustdb_t::init_table_index ( )
             LOG_ERROR ( "[hustdb][init_table_index]table index fopen %s failed", ph );
             return false;
         }
-        
+
         fseek ( fp, 0L, SEEK_END );
         uint64_t size = ftell ( fp );
-        
+
         if ( size < TABLE_INDEX_FILE_LEN )
         {
             char add_buf [ TABLE_INDEX_FILE_LEN - size ];
             memset ( add_buf, 0, sizeof ( add_buf ) );
-            
+
             if ( sizeof ( add_buf ) != fwrite ( add_buf, 1, sizeof ( add_buf ), fp ) )
             {
                 LOG_ERROR ( "[hustdb][init_queue_index]table index fwrite[%d] failed", sizeof ( add_buf ) );
@@ -653,7 +746,7 @@ bool hustdb_t::init_table_index ( )
                 return false;
             }
         }
-        
+
         fclose ( fp );
     }
 
@@ -681,7 +774,7 @@ bool hustdb_t::init_table_index ( )
             m_table_map.insert (std::pair<std::string, uint32_t>( tstat->table, i ));
         }
     }
-    
+
     return true;
 }
 
@@ -836,7 +929,7 @@ int hustdb_t::find_table_type (
 
         return it->second;
     }
-    
+
     return - 1;
 }
 
@@ -986,7 +1079,7 @@ int hustdb_t::find_queue_offset (
     if ( it != m_queue_map.end () )
     {
         queue_info = & it->second;
-        
+
         do
         {
             if ( ! worker || worker_len <= 0 )
@@ -1055,7 +1148,7 @@ int hustdb_t::find_queue_offset (
             t.unacked            = new unacked_t ();
             t.redelivery         = new redelivery_t ();
             t.worker             = new worker_t ();
-            
+
             m_queue_map.insert (std::pair<std::string, queue_info_t>( queue, t ));
 
             qstat->flag          = 1;
@@ -1286,8 +1379,10 @@ int hustdb_t::hustdb_put (
     int             r           = 0;
     uint32_t        user_ver    = ver;
 
-    if ( unlikely ( CHECK_STRING ( key ) || CHECK_STRING ( val ) ||
-                   CHECK_VERSION )
+    if ( unlikely ( CHECK_STRING ( key ) ||
+                   CHECK_STRING ( val ) ||
+                   CHECK_VERSION
+                   )
          )
     {
         LOG_DEBUG ( "[hustdb][db_put]params error" );
@@ -1368,7 +1463,10 @@ int hustdb_t::hustdb_del (
 {
     int             r           = 0;
 
-    if ( unlikely ( CHECK_STRING ( key ) || CHECK_VERSION ) )
+    if ( unlikely ( CHECK_STRING ( key ) ||
+                   CHECK_VERSION
+                   )
+         )
     {
         LOG_DEBUG ( "[hustdb][db_del]params error" );
         return EKEYREJECTED;
@@ -1428,7 +1526,8 @@ int hustdb_t::hustdb_keys (
                    size < 0 || size > MEM_EXPORT_SIZE ||
                    file_id < 0 || file_id >= file_count ||
                    ! async && offset > SYNC_EXPORT_OFFSET ||
-                   start < 0 || end < 0 || start >= end || end > MAX_BUCKET_NUM )
+                   start < 0 || end < 0 || start >= end || end > MAX_BUCKET_NUM
+                   )
          )
     {
         LOG_DEBUG ( "[hustdb][db_keys]params error" );
@@ -1467,7 +1566,11 @@ int hustdb_t::hustdb_stat (
                             int & count
                             )
 {
-    if ( unlikely ( table && table_len > 0 && ! tb_name_check ( table, table_len ) ) )
+    if ( unlikely ( table &&
+                   table_len > 0 &&
+                   ! tb_name_check ( table, table_len )
+                   )
+         )
     {
         LOG_DEBUG ( "[hustdb][db_stat]params error" );
         return EKEYREJECTED;
@@ -1556,7 +1659,7 @@ int hustdb_t::hustdb_export (
     if ( table && table_len > 0 )
     {
         std::string inner_table ( table, table_len );
-        
+
         if ( ( ! tb_name_check ( table, table_len ) || find_table_type ( inner_table, type ) < 0 ) )
         {
             LOG_DEBUG ( "[hustdb][db_export]params error" );
@@ -1667,7 +1770,10 @@ int hustdb_t::hustdb_hexist (
     int             r            = 0;
     int             offset       = - 1;
 
-    if ( unlikely ( ! tb_name_check ( table, table_len ) || CHECK_STRING ( key ) ) )
+    if ( unlikely ( ! tb_name_check ( table, table_len ) ||
+                   CHECK_STRING ( key )
+                   )
+         )
     {
         LOG_DEBUG ( "[hustdb][db_hexist]params error" );
         return EKEYREJECTED;
@@ -1716,7 +1822,10 @@ int hustdb_t::hustdb_hget (
     bool            get_ok       = false;
     int             offset       = - 1;
 
-    if ( unlikely ( ! tb_name_check ( table, table_len ) || CHECK_STRING ( key ) ) )
+    if ( unlikely ( ! tb_name_check ( table, table_len ) ||
+                   CHECK_STRING ( key )
+                   )
+         )
     {
         LOG_DEBUG ( "[hustdb][db_hget]params error" );
         return EKEYREJECTED;
@@ -1824,8 +1933,11 @@ int hustdb_t::hustdb_hset (
     const char *    mkey         = NULL;
     int             offset       = - 1;
 
-    if ( unlikely ( ! tb_name_check ( table, table_len ) || CHECK_VERSION ||
-                   CHECK_STRING ( key ) || CHECK_STRING ( val ) )
+    if ( unlikely ( ! tb_name_check ( table, table_len ) ||
+                   CHECK_VERSION ||
+                   CHECK_STRING ( key ) ||
+                   CHECK_STRING ( val )
+                   )
          )
     {
         LOG_DEBUG ( "[hustdb][db_hset]params error" );
@@ -1922,8 +2034,10 @@ int hustdb_t::hustdb_hdel (
     const char *    mkey         = NULL;
     int             offset       = - 1;
 
-    if ( unlikely ( ! tb_name_check ( table, table_len ) || CHECK_VERSION ||
-                   CHECK_STRING ( key ) )
+    if ( unlikely ( ! tb_name_check ( table, table_len ) ||
+                   CHECK_VERSION ||
+                   CHECK_STRING ( key )
+                   )
          )
     {
         LOG_DEBUG ( "[hustdb][db_del]params error" );
@@ -1995,7 +2109,8 @@ int hustdb_t::hustdb_hkeys (
                    offset < 0 || offset > MAX_EXPORT_OFFSET ||
                    size < 0 || size > MEM_EXPORT_SIZE ||
                    ! async && offset > SYNC_EXPORT_OFFSET ||
-                   start < 0 || end < 0 || start >= end || end > MAX_BUCKET_NUM )
+                   start < 0 || end < 0 || start >= end || end > MAX_BUCKET_NUM
+                   )
          )
     {
         LOG_DEBUG ( "[hustdb][db_hkeys]params error" );
@@ -2050,7 +2165,10 @@ int hustdb_t::hustdb_sismember (
     int             r            = 0;
     int             offset       = - 1;
 
-    if ( unlikely ( ! tb_name_check ( table, table_len ) || CHECK_STRING ( key ) ) )
+    if ( unlikely ( ! tb_name_check ( table, table_len ) ||
+                   CHECK_STRING ( key )
+                   )
+         )
     {
         LOG_DEBUG ( "[hustdb][db_sismember]params error" );
         return EKEYREJECTED;
@@ -2095,8 +2213,10 @@ int hustdb_t::hustdb_sadd (
     uint32_t        user_ver     = ver;
     int             offset       = - 1;
 
-    if ( unlikely ( ! tb_name_check ( table, table_len ) || CHECK_VERSION ||
-                   CHECK_STRING ( key ) )
+    if ( unlikely ( ! tb_name_check ( table, table_len ) ||
+                   CHECK_VERSION ||
+                   CHECK_STRING ( key )
+                   )
          )
     {
         LOG_DEBUG ( "[hustdb][db_sadd]params error" );
@@ -2119,7 +2239,7 @@ int hustdb_t::hustdb_sadd (
     }
 
     m_storage->set_inner_table ( table, table_len, SET_TB, conn );
-    
+
     if ( ttl <= 0 || ttl > m_store_conf.db_ttl_maximum )
     {
         m_storage->set_inner_ttl ( 0, conn );
@@ -2128,7 +2248,7 @@ int hustdb_t::hustdb_sadd (
     {
         m_storage->set_inner_ttl ( m_current_timestamp + ttl, conn );
     }
-    
+
     r = m_storage->put ( key, key_len, NULL, 0, ver, is_dup, conn, ctxt );
     if ( 0 != r )
     {
@@ -2173,8 +2293,10 @@ int hustdb_t::hustdb_srem (
     int             r            = 0;
     int             offset       = - 1;
 
-    if ( unlikely ( ! tb_name_check ( table, table_len ) || CHECK_VERSION ||
-                   CHECK_STRING ( key ) )
+    if ( unlikely ( ! tb_name_check ( table, table_len ) ||
+                   CHECK_VERSION ||
+                   CHECK_STRING ( key )
+                   )
          )
     {
         LOG_DEBUG ( "[hustdb][db_srem]params error" );
@@ -2238,7 +2360,8 @@ int hustdb_t::hustdb_smembers (
                    offset < 0 || offset > MAX_EXPORT_OFFSET ||
                    size < 0 || size > MEM_EXPORT_SIZE ||
                    ! async && offset > SYNC_EXPORT_OFFSET ||
-                   start < 0 || end < 0 || start >= end || end > MAX_BUCKET_NUM )
+                   start < 0 || end < 0 || start >= end || end > MAX_BUCKET_NUM
+                   )
          )
     {
         LOG_DEBUG ( "[hustdb][db_smembers]params error" );
@@ -2293,7 +2416,10 @@ int hustdb_t::hustdb_zismember (
     int             r            = 0;
     int             offset       = - 1;
 
-    if ( unlikely ( ! tb_name_check ( table, table_len ) || CHECK_STRING ( key ) ) )
+    if ( unlikely ( ! tb_name_check ( table, table_len ) ||
+                   CHECK_STRING ( key )
+                   )
+         )
     {
         LOG_DEBUG ( "[hustdb][db_zismember]params error" );
         return EKEYREJECTED;
@@ -2351,8 +2477,11 @@ int hustdb_t::hustdb_zadd (
     lockable_t *    zlkt         = NULL;
     is_version_error             = false;
 
-    if ( unlikely ( ! tb_name_check ( table, table_len ) || CHECK_VERSION ||
-                   CHECK_STRING ( key ) || score <= 0 )
+    if ( unlikely ( ! tb_name_check ( table, table_len ) ||
+                   CHECK_VERSION ||
+                   CHECK_STRING ( key ) ||
+                   score <= 0
+                   )
          )
     {
         LOG_DEBUG ( "[hustdb][db_zadd]params error" );
@@ -2373,20 +2502,20 @@ int hustdb_t::hustdb_zadd (
         LOG_ERROR ( "[hustdb][db_zadd]find table failed" );
         return EPERM;
     }
-    
+
     zhash = m_apptool->locker_hash ( key, key_len );
     zlkt = m_lockers.at ( zhash );
     scope_lock_t zlocker ( * zlkt );
-    
+
     m_storage->set_inner_ttl ( 0, conn );
     m_storage->set_inner_table ( table, table_len, ZSET_IN, conn );
-    
+
     r = m_storage->get ( key, key_len, cur_ver, conn, rsp, ctxt );
     if ( 0 == r )
     {
         has_been  = true;
         cur_score = strtoul ( rsp->c_str (), NULL, 10 );
-        
+
         if ( opt == 0 &&
              cur_score == score &&
              cur_ver >= ver
@@ -2398,7 +2527,7 @@ int hustdb_t::hustdb_zadd (
             return 0;
         }
     }
-    
+
     if ( opt > 0 )
     {
         score = cur_score + score;
@@ -2410,7 +2539,7 @@ int hustdb_t::hustdb_zadd (
 
     sprintf ( val, "%lu", score );
     val_len = strlen ( val );
-    
+
     if ( ttl > 0 && ttl <= m_store_conf.db_ttl_maximum )
     {
         m_storage->set_inner_ttl ( m_current_timestamp + ttl, conn );
@@ -2438,14 +2567,14 @@ int hustdb_t::hustdb_zadd (
 
         return r;
     }
-    
+
     if ( ctxt->kv_type == NEW_KV && ! ctxt->is_version_error )
     {
         set_table_size ( offset, 1 );
     }
-    
+
     m_storage->set_inner_ttl ( 0, conn );
-    
+
     if ( has_been )
     {
         sprintf ( val21, "%021lu", cur_score );
@@ -2465,10 +2594,10 @@ int hustdb_t::hustdb_zadd (
             }
         }
     }
-    
+
     sprintf ( val21, "%021lu", score );
     m_storage->set_inner_table ( table, table_len, ZSET_TB, conn, val21 );
-    
+
     user_ver = ver;
     r = m_storage->put ( key, key_len, val, val_len, user_ver, true, conn, ctxt );
     if ( 0 != r )
@@ -2495,7 +2624,10 @@ int hustdb_t::hustdb_zscore (
     int             r            = 0;
     int             offset       = - 1;
 
-    if ( unlikely ( ! tb_name_check ( table, table_len ) || CHECK_STRING ( key ) ) )
+    if ( unlikely ( ! tb_name_check ( table, table_len ) ||
+                   CHECK_STRING ( key )
+                   )
+         )
     {
         LOG_DEBUG ( "[hustdb][db_zscore]params error" );
         return EKEYREJECTED;
@@ -2548,8 +2680,10 @@ int hustdb_t::hustdb_zrem (
     uint16_t        zhash        = 0;
     lockable_t *    zlkt         = NULL;
 
-    if ( unlikely ( ! tb_name_check ( table, table_len ) || CHECK_VERSION ||
-                   CHECK_STRING ( key ) )
+    if ( unlikely ( ! tb_name_check ( table, table_len ) ||
+                   CHECK_VERSION ||
+                   CHECK_STRING ( key )
+                   )
          )
     {
         LOG_DEBUG ( "[hustdb][db_zrem]params error" );
@@ -2564,7 +2698,7 @@ int hustdb_t::hustdb_zrem (
         LOG_ERROR ( "[hustdb][db_zrem]find table failed" );
         return EPERM;
     }
-    
+
     zhash = m_apptool->locker_hash ( key, key_len );
     zlkt = m_lockers.at ( zhash );
     scope_lock_t zlocker ( * zlkt );
@@ -2576,7 +2710,7 @@ int hustdb_t::hustdb_zrem (
     {
         cur_score = strtoul ( rsp->c_str (), NULL, 10 );
     }
-    
+
     r = m_storage->del ( key, key_len, ver, is_dup, conn, ctxt );
     if ( 0 != r )
     {
@@ -2639,7 +2773,7 @@ int hustdb_t::hustdb_zrange (
     int             r            = 0;
     int             _offset      = - 1;
     uint16_t        hash         = 0;
-    
+
     if ( byscore )
     {
         async = false;
@@ -2653,7 +2787,8 @@ int hustdb_t::hustdb_zrange (
                    offset < 0 || offset > MAX_EXPORT_OFFSET ||
                    size < 0 || size > MEM_EXPORT_SIZE ||
                    ! async && offset > SYNC_EXPORT_OFFSET ||
-                   start < 0 || end < 0 || start >= end || end > MAX_BUCKET_NUM )
+                   start < 0 || end < 0 || start >= end || end > MAX_BUCKET_NUM
+                   )
          )
     {
         LOG_DEBUG ( "[hustdb][db_zrange][byscore=%d]params error", byscore );
@@ -2668,7 +2803,7 @@ int hustdb_t::hustdb_zrange (
         LOG_ERROR ( "[hustdb][db_zrange]find table failed" );
         return EPERM;
     }
-    
+
     hash = m_apptool->bucket_hash ( table, table_len );
     if ( hash < start || hash >= end )
     {
@@ -2726,7 +2861,9 @@ int hustdb_t::hustmq_put (
     item_ctxt_t *   ctxt                    = NULL;
 
     if ( unlikely ( ! tb_name_check ( queue, queue_len ) ||
-                   CHECK_STRING ( item ) || priori < 0 || priori > 2 )
+                   CHECK_STRING ( item ) ||
+                   priori < 0 || priori > 2
+                   )
          )
     {
         LOG_DEBUG ( "[hustdb][mq_put]params error" );
@@ -2738,7 +2875,7 @@ int hustdb_t::hustmq_put (
         LOG_DEBUG ( "[hustdb][mq_put]memory over threshold" );
         return EINVAL;
     }
-    
+
     qhash = m_apptool->locker_hash ( queue, queue_len );
     qlkt = m_lockers.at ( qhash );
     scope_lock_t qlocker ( * qlkt );
@@ -2810,7 +2947,9 @@ int hustdb_t::hustmq_get (
     item_ctxt_t *   ctxt                    = NULL;
 
     if ( unlikely ( ! tb_name_check ( queue, queue_len ) ||
-                   worker_len <= MIN_WORKER_LEN || worker_len > MAX_WORKER_LEN )
+                   worker_len <= MIN_WORKER_LEN ||
+                   worker_len > MAX_WORKER_LEN
+                   )
          )
     {
         LOG_DEBUG ( "[hustdb][mq_get]params error" );
@@ -2838,7 +2977,7 @@ int hustdb_t::hustmq_get (
     if ( unlikely ( rit != queue_info->redelivery->end () &&
                    m_current_timestamp - rit->first >= qstat->timeout * 60 )
          )
-    {   
+    {
         sprintf ( qkey, "%s|%s", inner_queue.c_str (), rit->second.c_str () );
         qkey_len = strlen ( qkey );
 
@@ -2882,11 +3021,11 @@ int hustdb_t::hustmq_get (
         LOG_ERROR ( "[hustdb][mq_get]get failed, return:%d, key:%s", r, qkey );
         return r;
     }
-    
+
     if ( ! is_ack )
     {
         unacked = qkey + queue_len + 1;
-        
+
         queue_info->unacked->insert ( std::pair<std::string, uint32_t>( unacked, m_current_timestamp ) );
         queue_info->redelivery->insert ( std::pair<uint32_t, std::string>( m_current_timestamp, unacked ) );
     }
@@ -2903,7 +3042,7 @@ int hustdb_t::hustmq_ack_inner (
     item_ctxt_t *   ctxt                    = NULL;
 
     m_storage->set_inner_table ( NULL, 0, QUEUE_TB, conn );
-    
+
     return m_storage->del ( ack.c_str (), ack.size (), ver, false, conn, ctxt );
 }
 
@@ -2925,7 +3064,8 @@ int hustdb_t::hustmq_ack (
     item_ctxt_t *   ctxt                    = NULL;
 
     if ( unlikely ( ! tb_name_check ( queue, queue_len ) ||
-                   ! tb_name_check ( ack, ack_len ) )
+                   ! tb_name_check ( ack, ack_len )
+                   )
          )
     {
         LOG_DEBUG ( "[hustdb][mq_ack]params error" );
@@ -2948,14 +3088,14 @@ int hustdb_t::hustmq_ack (
         }
 
         std::string inner_ack ( ack, ack_len );
-        
+
         unacked_t::iterator ait = queue_info->unacked->find ( inner_ack );
         if ( ait == queue_info->unacked->end () )
         {
             LOG_ERROR ( "[hustdb][mq_ack][queue=%s][ack=%s]find queue failed ", inner_queue.c_str (), inner_ack.c_str () );
             return EPERM;
         }
-        
+
         redelivery_t::iterator rit = queue_info->redelivery->find ( ait->second );
         while ( rit != queue_info->redelivery->end () )
         {
@@ -2963,25 +3103,25 @@ int hustdb_t::hustmq_ack (
             {
                 break;
             }
-            
+
             if ( rit->second == inner_ack )
             {
                 queue_info->redelivery->erase ( rit );
                 break;
             }
-            
+
             rit ++;
         }
-        
+
         queue_info->unacked->erase ( ait );
-        
+
         sprintf ( qkey, "%s|%s", inner_queue.c_str (), inner_ack.c_str () );
         qkey_len = strlen ( qkey );
     }
     while ( 0 );
 
     m_storage->set_inner_table ( NULL, 0, QUEUE_TB, conn );
-    
+
     return m_storage->del ( qkey, qkey_len, ver, false, conn, ctxt );
 }
 
@@ -3003,7 +3143,7 @@ int hustdb_t::hustmq_worker (
         LOG_DEBUG ( "[hustdb][mq_worker]params error" );
         return EKEYREJECTED;
     }
-    
+
     qhash = m_apptool->locker_hash ( queue, queue_len );
     qlkt = m_lockers.at ( qhash );
     scope_lock_t qlocker ( * qlkt );
@@ -3076,7 +3216,7 @@ int hustdb_t::hustmq_stat (
     qhash = m_apptool->locker_hash ( queue, queue_len );
     qlkt = m_lockers.at ( qhash );
     scope_lock_t qlocker ( * qlkt );
-    
+
     std::string inner_queue ( queue, queue_len );
 
     offset = find_queue_offset ( inner_queue, false, COMMON_TB, queue_info );
@@ -3118,7 +3258,7 @@ void hustdb_t::hustmq_stat_all (
     queue_info_t *  queue_info              = NULL;
 
     scope_lock_t mqlocker ( m_mq_locker );
-    
+
     stats.resize ( 0 );
     stats.reserve ( 1048576 );
     stats += "[";
@@ -3126,7 +3266,7 @@ void hustdb_t::hustmq_stat_all (
     for ( queue_map_t::iterator it = m_queue_map.begin (); it != m_queue_map.end (); it ++ )
     {
         queue_info = & it->second;
-        
+
         qstat = ( queue_stat_t * ) ( m_queue_index.ptr + queue_info->offset );
 
         memset ( stat, 0, sizeof ( stat ) );
@@ -3168,7 +3308,8 @@ int hustdb_t::hustmq_max (
     queue_info_t *  queue_info              = NULL;
 
     if ( unlikely ( ! tb_name_check ( queue, queue_len ) ||
-                   max < 0 || max > MAX_QUEUE_ITEM_NUM )
+                   max < 0 || max > MAX_QUEUE_ITEM_NUM
+                   )
          )
     {
         LOG_DEBUG ( "[hustdb][mq_max]params error" );
@@ -3178,7 +3319,7 @@ int hustdb_t::hustmq_max (
     qhash = m_apptool->locker_hash ( queue, queue_len );
     qlkt = m_lockers.at ( qhash );
     scope_lock_t qlocker ( * qlkt );
-    
+
     std::string inner_queue ( queue, queue_len );
 
     offset = find_queue_offset ( inner_queue, false, QUEUE_TB, queue_info );
@@ -3213,12 +3354,12 @@ int hustdb_t::hustmq_lock (
     {
         LOG_DEBUG ( "[hustdb][mq_lock]params error" );
         return EKEYREJECTED;
-    }    
+    }
 
     qhash = m_apptool->locker_hash ( queue, queue_len );
     qlkt = m_lockers.at ( qhash );
     scope_lock_t qlocker ( * qlkt );
-    
+
     std::string inner_queue ( queue, queue_len );
 
     offset = find_queue_offset ( inner_queue, false, QUEUE_TB, queue_info );
@@ -3248,7 +3389,8 @@ int hustdb_t::hustmq_timeout (
     queue_info_t *  queue_info              = NULL;
 
     if ( unlikely ( ! tb_name_check ( queue, queue_len ) ||
-                   timeout <= 0 || timeout > 255 )
+                   timeout <= 0 || timeout > 255
+                   )
          )
     {
         LOG_DEBUG ( "[hustdb][mq_timeout]params error" );
@@ -3258,7 +3400,7 @@ int hustdb_t::hustmq_timeout (
     qhash = m_apptool->locker_hash ( queue, queue_len );
     qlkt = m_lockers.at ( qhash );
     scope_lock_t qlocker ( * qlkt );
-    
+
     std::string inner_queue ( queue, queue_len );
 
     offset = find_queue_offset ( inner_queue, false, QUEUE_TB, queue_info );
@@ -3298,7 +3440,8 @@ int hustdb_t::hustmq_purge (
     item_ctxt_t *   ctxt                    = NULL;
 
     if ( unlikely ( ! tb_name_check ( queue, queue_len ) ||
-                   priori < 0 || priori > 2 )
+                   priori < 0 || priori > 2
+                   )
          )
     {
         LOG_DEBUG ( "[hustdb][mq_purge]params error" );
@@ -3308,7 +3451,7 @@ int hustdb_t::hustmq_purge (
     qhash = m_apptool->locker_hash ( queue, queue_len );
     qlkt = m_lockers.at ( qhash );
     scope_lock_t qlocker ( * qlkt );
-    
+
     std::string inner_queue ( queue, queue_len );
 
     offset = find_queue_offset ( inner_queue, false, QUEUE_TB, queue_info );
@@ -3357,10 +3500,10 @@ int hustdb_t::hustmq_purge (
         {
             delete it->second.unacked;
             it->second.unacked = NULL;
-            
+
             delete it->second.redelivery;
             it->second.redelivery = NULL;
-            
+
             delete it->second.worker;
             it->second.worker = NULL;
 
@@ -3408,7 +3551,9 @@ int hustdb_t::hustmq_pub (
     std::string *   rsp                     = NULL;
 
     if ( unlikely ( ! tb_name_check ( queue, queue_len ) ||
-                   CHECK_STRING ( item ) || wttl <= 0 || wttl > m_store_conf.mq_ttl_maximum )
+                   CHECK_STRING ( item ) ||
+                   wttl <= 0 || wttl > m_store_conf.mq_ttl_maximum
+                   )
          )
     {
         LOG_DEBUG ( "[hustdb][mq_pub]params error" );
@@ -3424,7 +3569,7 @@ int hustdb_t::hustmq_pub (
     qhash = m_apptool->locker_hash ( queue, queue_len );
     qlkt = m_lockers.at ( qhash );
     scope_lock_t qlocker ( * qlkt );
-    
+
     std::string inner_queue ( queue, queue_len );
 
     offset = find_queue_offset ( inner_queue, true, PUSHQ_TB, queue_info );
@@ -3541,13 +3686,14 @@ int hustdb_t::hustmq_sub (
     item_ctxt_t *   ctxt                    = NULL;
 
     if ( unlikely ( ! tb_name_check ( queue, queue_len ) ||
-                   idx >= CYCLE_QUEUE_ITEM_NUM )
+                   idx >= CYCLE_QUEUE_ITEM_NUM
+                   )
          )
     {
         LOG_DEBUG ( "[hustdb][mq_pub]params error" );
         return EKEYREJECTED;
     }
-    
+
     qhash = m_apptool->locker_hash ( queue, queue_len );
     qlkt = m_lockers.at ( qhash );
     scope_lock_t qlocker ( * qlkt );
@@ -3612,10 +3758,10 @@ static void timestamp_cb (
     }
 
     hustdb_t * db = ( hustdb_t * ) ctx;
-    
+
     struct timeval tv;
     gettimeofday ( & tv, NULL );
-    
+
     db->set_current_timestamp ( tv.tv_sec );
 
     db->get_mdb ()->set_mdb_timestamp ( tv.tv_sec );
@@ -3648,7 +3794,7 @@ static void ttl_scan_cb (
     {
         return ;
     }
-    
+
     hustdb_t * db = ( hustdb_t * ) ctx;
     db->hustdb_ttl_scan ( );
 }

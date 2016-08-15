@@ -20,6 +20,7 @@
 
 #define HUSTMQ_INDEX                    "./DATA/HUSTMQ"
 #define HUSTTABLE_INDEX                 "./DATA/HUSTTABLE"
+#define HUSTSTORE_INVARIANT             "./DATA/HUSTSTORE_INVARIANT"
 
 #define DB_DATA_ROOT                    "./DATA"
 #define DB_DATA_DIR                     "./DATA/DATA"

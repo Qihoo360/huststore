@@ -1,4 +1,4 @@
-## put ##
+## ttl ##
 
 **接口:** `/hustcache/ttl`
 

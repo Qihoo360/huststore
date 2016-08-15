@@ -1,4 +1,4 @@
-## hset ##
+## hincrbyfloat ##
 
 **接口:** `/hustcache/hincrbyfloat`
 

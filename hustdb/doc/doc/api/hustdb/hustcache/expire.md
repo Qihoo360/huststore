@@ -1,4 +1,4 @@
-## put ##
+## expire ##
 
 **接口:** `/hustcache/expire`
 

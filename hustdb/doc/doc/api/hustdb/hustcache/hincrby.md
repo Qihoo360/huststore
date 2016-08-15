@@ -1,4 +1,4 @@
-## hset ##
+## hincrby ##
 
 **接口:** `/hustcache/hincrby`
 

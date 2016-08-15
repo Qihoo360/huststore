@@ -1,4 +1,4 @@
-## put ##
+## append ##
 
 **接口:** `/hustcache/append`
 

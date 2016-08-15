@@ -1,4 +1,4 @@
-## put ##
+## persist ##
 
 **接口:** `/hustcache/persist`
 

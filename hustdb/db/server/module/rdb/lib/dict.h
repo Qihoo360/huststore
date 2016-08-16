@@ -47,28 +47,29 @@ extern "C"
 #define DICT_ERR 1
 
 
-/* Unused arguments generate annoying warnings... */
+    /* Unused arguments generate annoying warnings... */
 #define DICT_NOTUSED(V) ((void) V)
 
-/* If safe is set to 1 this is a safe iterator, that means, you can call
- * dictAdd, dictFind, and other functions against the dictionary even while
- * iterating. Otherwise it is a non safe iterator, and only dictNext()
- * should be called while iterating. */
-typedef struct dictIterator {
-    dict *d;
-    long index;
-    int table, safe;
-    dictEntry *entry, *nextEntry;
-    /* unsafe iterator fingerprint for misuse detection. */
-    long long fingerprint;
-} dictIterator;
+    /* If safe is set to 1 this is a safe iterator, that means, you can call
+     * dictAdd, dictFind, and other functions against the dictionary even while
+     * iterating. Otherwise it is a non safe iterator, and only dictNext()
+     * should be called while iterating. */
+    typedef struct dictIterator
+    {
+        dict *d;
+        long index;
+        int table, safe;
+        dictEntry *entry, *nextEntry;
+        /* unsafe iterator fingerprint for misuse detection. */
+        long long fingerprint;
+    } dictIterator;
 
-typedef void (dictScanFunction)(void *privdata, const dictEntry *de);
+    typedef void (dictScanFunction ) ( void *privdata, const dictEntry *de );
 
-/* This is the initial size of every hash table */
+    /* This is the initial size of every hash table */
 #define DICT_HT_INITIAL_SIZE     4
 
-/* ------------------------------- Macros ------------------------------------*/
+    /* ------------------------------- Macros ------------------------------------*/
 #define dictFreeVal(d, entry) \
     if ((d)->type->valDestructor) \
         (d)->type->valDestructor((d)->privdata, (entry)->v.val)
@@ -115,41 +116,41 @@ typedef void (dictScanFunction)(void *privdata, const dictEntry *de);
 #define dictSize(d) ((d)->ht[0].used+(d)->ht[1].used)
 #define dictIsRehashing(d) ((d)->rehashidx != -1)
 
-/* API */
-dict *dictCreate(dictType *type, void *privDataPtr);
-int dictExpand(dict *d, unsigned long size);
-int dictAdd(dict *d, void *key, void *val);
-dictEntry *dictAddRaw(dict *d, void *key);
-int dictReplace(dict *d, void *key, void *val);
-dictEntry *dictReplaceRaw(dict *d, void *key);
-int dictDelete(dict *d, const void *key);
-int dictDeleteNoFree(dict *d, const void *key);
-void dictRelease(dict *d);
-dictEntry * dictFind(dict *d, const void *key);
-void *dictFetchValue(dict *d, const void *key);
-int dictResize(dict *d);
-dictIterator *dictGetIterator(dict *d);
-dictIterator *dictGetSafeIterator(dict *d);
-dictEntry *dictNext(dictIterator *iter);
-void dictReleaseIterator(dictIterator *iter);
-dictEntry *dictGetRandomKey(dict *d);
-unsigned int dictGetSomeKeys(dict *d, dictEntry **des, unsigned int count);
-void dictGetStats(char *buf, size_t bufsize, dict *d);
-unsigned int dictGenHashFunction(const void *key, int len);
-unsigned int dictGenCaseHashFunction(const unsigned char *buf, int len);
-void dictEmpty(dict *d, void(callback)(void*));
-void dictEnableResize(void);
-void dictDisableResize(void);
-int dictRehash(dict *d, int n);
-int dictRehashMilliseconds(dict *d, int ms);
-void dictSetHashFunctionSeed(unsigned int initval);
-unsigned int dictGetHashFunctionSeed(void);
-unsigned long dictScan(dict *d, unsigned long v, dictScanFunction *fn, void *privdata);
+    /* API */
+    dict *dictCreate ( dictType *type, void *privDataPtr );
+    int dictExpand ( dict *d, unsigned long size );
+    int dictAdd ( dict *d, void *key, void *val );
+    dictEntry *dictAddRaw ( dict *d, void *key );
+    int dictReplace ( dict *d, void *key, void *val );
+    dictEntry *dictReplaceRaw ( dict *d, void *key );
+    int dictDelete ( dict *d, const void *key );
+    int dictDeleteNoFree ( dict *d, const void *key );
+    void dictRelease ( dict *d );
+    dictEntry * dictFind ( dict *d, const void *key );
+    void *dictFetchValue ( dict *d, const void *key );
+    int dictResize ( dict *d );
+    dictIterator *dictGetIterator ( dict *d );
+    dictIterator *dictGetSafeIterator ( dict *d );
+    dictEntry *dictNext ( dictIterator *iter );
+    void dictReleaseIterator ( dictIterator *iter );
+    dictEntry *dictGetRandomKey ( dict *d );
+    unsigned int dictGetSomeKeys ( dict *d, dictEntry **des, unsigned int count );
+    void dictGetStats ( char *buf, size_t bufsize, dict *d );
+    unsigned int dictGenHashFunction ( const void *key, int len );
+    unsigned int dictGenCaseHashFunction ( const unsigned char *buf, int len );
+    void dictEmpty ( dict *d, void(callback ) ( void* ) );
+    void dictEnableResize ( void );
+    void dictDisableResize ( void );
+    int dictRehash ( dict *d, int n );
+    int dictRehashMilliseconds ( dict *d, int ms );
+    void dictSetHashFunctionSeed ( unsigned int initval );
+    unsigned int dictGetHashFunctionSeed ( void );
+    unsigned long dictScan ( dict *d, unsigned long v, dictScanFunction *fn, void *privdata );
 
-/* Hash table types */
-extern dictType dictTypeHeapStringCopyKey;
-extern dictType dictTypeHeapStrings;
-extern dictType dictTypeHeapStringCopyKeyValue;
+    /* Hash table types */
+    extern dictType dictTypeHeapStringCopyKey;
+    extern dictType dictTypeHeapStrings;
+    extern dictType dictTypeHeapStringCopyKeyValue;
 
 #ifdef __cplusplus
 }

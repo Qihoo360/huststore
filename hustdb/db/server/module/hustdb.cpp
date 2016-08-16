@@ -380,11 +380,14 @@ bool hustdb_t::init_server_config ( )
 
 bool hustdb_t::check_invariant_config ( )
 {
+    bool first     = false;
     char ph[ 260 ] = { };
     fast_memcpy ( ph, HUSTSTORE_INVARIANT, sizeof ( HUSTSTORE_INVARIANT ) );
 
     if ( ! m_apptool->is_file ( ph ) )
     {
+        first = true;
+        
         FILE * fp = fopen ( ph, "wb" );
         if ( ! fp )
         {
@@ -435,11 +438,14 @@ bool hustdb_t::check_invariant_config ( )
         int conflictdb_count         = m_appini->ini_get_int ( m_ini, "conflictdb", "count", 0 );
         int contentdb_count          = m_appini->ini_get_int ( m_ini, "contentdb", "count", 0 );
         int fast_conflictdb_count    = m_appini->ini_get_int ( m_ini, "fast_conflictdb", "count", 0 );
-        
-        if ( ( invar->fastdb > 0 && invar->fastdb != fastdb_count ) ||
-             ( invar->conflictdb > 0 && invar->conflictdb != conflictdb_count ) ||
-             ( invar->contentdb > 0 && invar->contentdb != contentdb_count ) ||
-             ( invar->fast_conflictdb > 0 && invar->fast_conflictdb != fast_conflictdb_count )
+
+        if ( ! first &&
+             (
+               invar->fastdb != fastdb_count ||
+               invar->conflictdb != conflictdb_count ||
+               invar->contentdb != contentdb_count ||
+               invar->fast_conflictdb != fast_conflictdb_count
+               )
              )
         {
             r = EINVAL;

@@ -52,7 +52,7 @@ bool rdb_t::open (
         return false;
     }
 
-    m_rdb = createClient ( RDB_KEY_LEN + RDB_VAL_LEN + 16 );
+    m_rdb = createClient ( RDB_KEY_LEN + RDB_VAL_LEN );
 
     m_ok = true;
 
@@ -85,7 +85,7 @@ int rdb_t::exist_or_del (
     size_t rsp_len = 0;
 
     int r = processInput ( m_rdb, 2, cmds, & rsp_len, & ( * rsp ) [ 0 ] );
-    if ( unlikely ( ! r || strncmp (rsp->c_str (), "0", rsp_len) == 0 ) )
+    if ( unlikely ( r || strncmp (rsp->c_str (), "0", rsp_len) == 0 ) )
     {
         return ENOENT;
     }
@@ -120,7 +120,7 @@ int rdb_t::get_or_ttl (
     rsp = m_buffers[ conn.worker_id ];
 
     int r = processInput ( m_rdb, 2, cmds, ( size_t * ) rsp_len, & ( * rsp ) [ 0 ] );
-    if ( unlikely ( ! r || ! rsp_len ) )
+    if ( unlikely ( r || ! rsp_len ) )
     {
         return ENOENT;
     }
@@ -163,7 +163,7 @@ int rdb_t::set_or_append (
     size_t rsp_len = 0;
 
     int r = processInput ( m_rdb, ( ttl && ttl_len > 0 && is_set ) ? 4 : 3, cmds, & rsp_len, & ( * rsp ) [ 0 ] );
-    if ( unlikely ( ! r ) )
+    if ( unlikely ( r ) )
     {
         return ENOENT;
     }
@@ -202,7 +202,7 @@ int rdb_t::expire_or_persist (
     size_t rsp_len = 0;
 
     int r = processInput ( m_rdb, ( ttl && ttl_len > 0 && is_expire ) ? 3 : 2, cmds, & rsp_len, & ( * rsp ) [ 0 ] );
-    if ( unlikely ( ! r || ! rsp_len ) )
+    if ( unlikely ( r || ! rsp_len ) )
     {
         return ENOENT;
     }
@@ -241,7 +241,7 @@ int rdb_t::hexist_or_hdel (
     size_t rsp_len = 0;
 
     int r = processInput ( m_rdb, 3, cmds, & rsp_len, & ( * rsp ) [ 0 ] );
-    if ( unlikely ( ! r || strncmp (rsp->c_str (), "0", rsp_len) == 0 ) )
+    if ( unlikely ( r || strncmp (rsp->c_str (), "0", rsp_len) == 0 ) )
     {
         return ENOENT;
     }
@@ -280,7 +280,7 @@ int rdb_t::hget (
     rsp = m_buffers[ conn.worker_id ];
 
     int r = processInput ( m_rdb, 3, cmds, ( size_t * ) rsp_len, & ( * rsp ) [ 0 ] );
-    if ( unlikely ( ! r || ! rsp_len ) )
+    if ( unlikely ( r || ! rsp_len ) )
     {
         return ENOENT;
     }
@@ -323,7 +323,7 @@ int rdb_t::hset (
     size_t rsp_len = 0;
 
     int r = processInput ( m_rdb, 4, cmds, & rsp_len, & ( * rsp ) [ 0 ] );
-    if ( unlikely ( ! r ) )
+    if ( unlikely ( r ) )
     {
         return ENOENT;
     }
@@ -368,7 +368,7 @@ int rdb_t::hincrby_or_hincrbyfloat (
     rsp = m_buffers[ conn.worker_id ];
 
     int r = processInput ( m_rdb, 4, cmds, ( size_t * ) rsp_len, & ( * rsp ) [ 0 ] );
-    if ( unlikely ( ! r || ! rsp_len ) )
+    if ( unlikely ( r || ! rsp_len ) )
     {
         return ENOENT;
     }

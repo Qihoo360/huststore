@@ -121,185 +121,192 @@ struct redisServer server; /* server global state */
  *    are not fast commands.
  */
 struct redisCommand redisCommandTable[] = {
-    {"get",getCommand,2,"rF",0,NULL,1,1,1,0,0},
-    {"set",setCommand,-3,"wm",0,NULL,1,1,1,0,0},
-    {"setnx",setnxCommand,3,"wmF",0,NULL,1,1,1,0,0},
-    {"setex",setexCommand,4,"wm",0,NULL,1,1,1,0,0},
-    {"psetex",psetexCommand,4,"wm",0,NULL,1,1,1,0,0},
-    {"append",appendCommand,3,"wm",0,NULL,1,1,1,0,0},
-    {"strlen",strlenCommand,2,"rF",0,NULL,1,1,1,0,0},
-    {"del",delCommand,-2,"w",0,NULL,1,-1,1,0,0},
-    {"exists",existsCommand,-2,"rF",0,NULL,1,-1,1,0,0},
-    {"setbit",setbitCommand,4,"wm",0,NULL,1,1,1,0,0},
-    {"getbit",getbitCommand,3,"rF",0,NULL,1,1,1,0,0},
-    {"bitfield",bitfieldCommand,-2,"wm",0,NULL,1,1,1,0,0},
-    {"setrange",setrangeCommand,4,"wm",0,NULL,1,1,1,0,0},
-    {"getrange",getrangeCommand,4,"r",0,NULL,1,1,1,0,0},
-    {"substr",getrangeCommand,4,"r",0,NULL,1,1,1,0,0},
-    {"incr",incrCommand,2,"wmF",0,NULL,1,1,1,0,0},
-    {"decr",decrCommand,2,"wmF",0,NULL,1,1,1,0,0},
-    {"mget",mgetCommand,-2,"r",0,NULL,1,-1,1,0,0},
-    {"rpush",rpushCommand,-3,"wmF",0,NULL,1,1,1,0,0},
-    {"lpush",lpushCommand,-3,"wmF",0,NULL,1,1,1,0,0},
-    {"rpushx",rpushxCommand,3,"wmF",0,NULL,1,1,1,0,0},
-    {"lpushx",lpushxCommand,3,"wmF",0,NULL,1,1,1,0,0},
-    {"linsert",linsertCommand,5,"wm",0,NULL,1,1,1,0,0},
-    {"rpop",rpopCommand,2,"wF",0,NULL,1,1,1,0,0},
-    {"lpop",lpopCommand,2,"wF",0,NULL,1,1,1,0,0},
-    {"llen",llenCommand,2,"rF",0,NULL,1,1,1,0,0},
-    {"lindex",lindexCommand,3,"r",0,NULL,1,1,1,0,0},
-    {"lset",lsetCommand,4,"wm",0,NULL,1,1,1,0,0},
-    {"lrange",lrangeCommand,4,"r",0,NULL,1,1,1,0,0},
-    {"ltrim",ltrimCommand,4,"w",0,NULL,1,1,1,0,0},
-    {"lrem",lremCommand,4,"w",0,NULL,1,1,1,0,0},
-    {"rpoplpush",rpoplpushCommand,3,"wm",0,NULL,1,2,1,0,0},
-    {"sadd",saddCommand,-3,"wmF",0,NULL,1,1,1,0,0},
-    {"srem",sremCommand,-3,"wF",0,NULL,1,1,1,0,0},
-    {"smove",smoveCommand,4,"wF",0,NULL,1,2,1,0,0},
-    {"sismember",sismemberCommand,3,"rF",0,NULL,1,1,1,0,0},
-    {"scard",scardCommand,2,"rF",0,NULL,1,1,1,0,0},
-    {"spop",spopCommand,-2,"wRF",0,NULL,1,1,1,0,0},
-    {"srandmember",srandmemberCommand,-2,"rR",0,NULL,1,1,1,0,0},
-    {"sinter",sinterCommand,-2,"r",0,NULL,1,-1,1,0,0},
-    {"sinterstore",sinterstoreCommand,-3,"wm",0,NULL,1,-1,1,0,0},
-    {"sunion",sunionCommand,-2,"r",0,NULL,1,-1,1,0,0},
-    {"sunionstore",sunionstoreCommand,-3,"wm",0,NULL,1,-1,1,0,0},
-    {"sdiff",sdiffCommand,-2,"r",0,NULL,1,-1,1,0,0},
-    {"sdiffstore",sdiffstoreCommand,-3,"wm",0,NULL,1,-1,1,0,0},
-    {"smembers",sinterCommand,2,"r",0,NULL,1,1,1,0,0},
-    {"sscan",sscanCommand,-3,"rR",0,NULL,1,1,1,0,0},
-    {"zadd",zaddCommand,-4,"wmF",0,NULL,1,1,1,0,0},
-    {"zincrby",zincrbyCommand,4,"wmF",0,NULL,1,1,1,0,0},
-    {"zrem",zremCommand,-3,"wF",0,NULL,1,1,1,0,0},
-    {"zremrangebyscore",zremrangebyscoreCommand,4,"w",0,NULL,1,1,1,0,0},
-    {"zremrangebyrank",zremrangebyrankCommand,4,"w",0,NULL,1,1,1,0,0},
-    {"zremrangebylex",zremrangebylexCommand,4,"w",0,NULL,1,1,1,0,0},
-    {"zunionstore",zunionstoreCommand,-4,"wm",0,zunionInterGetKeys,0,0,0,0,0},
-    {"zinterstore",zinterstoreCommand,-4,"wm",0,zunionInterGetKeys,0,0,0,0,0},
-    {"zrange",zrangeCommand,-4,"r",0,NULL,1,1,1,0,0},
-    {"zrangebyscore",zrangebyscoreCommand,-4,"r",0,NULL,1,1,1,0,0},
-    {"zrevrangebyscore",zrevrangebyscoreCommand,-4,"r",0,NULL,1,1,1,0,0},
-    {"zrangebylex",zrangebylexCommand,-4,"r",0,NULL,1,1,1,0,0},
-    {"zrevrangebylex",zrevrangebylexCommand,-4,"r",0,NULL,1,1,1,0,0},
-    {"zcount",zcountCommand,4,"rF",0,NULL,1,1,1,0,0},
-    {"zlexcount",zlexcountCommand,4,"rF",0,NULL,1,1,1,0,0},
-    {"zrevrange",zrevrangeCommand,-4,"r",0,NULL,1,1,1,0,0},
-    {"zcard",zcardCommand,2,"rF",0,NULL,1,1,1,0,0},
-    {"zscore",zscoreCommand,3,"rF",0,NULL,1,1,1,0,0},
-    {"zrank",zrankCommand,3,"rF",0,NULL,1,1,1,0,0},
-    {"zrevrank",zrevrankCommand,3,"rF",0,NULL,1,1,1,0,0},
-    {"zscan",zscanCommand,-3,"rR",0,NULL,1,1,1,0,0},
-    {"hset",hsetCommand,4,"wmF",0,NULL,1,1,1,0,0},
-    {"hsetnx",hsetnxCommand,4,"wmF",0,NULL,1,1,1,0,0},
-    {"hget",hgetCommand,3,"rF",0,NULL,1,1,1,0,0},
-    {"hmset",hmsetCommand,-4,"wm",0,NULL,1,1,1,0,0},
-    {"hmget",hmgetCommand,-3,"r",0,NULL,1,1,1,0,0},
-    {"hincrby",hincrbyCommand,4,"wmF",0,NULL,1,1,1,0,0},
-    {"hincrbyfloat",hincrbyfloatCommand,4,"wmF",0,NULL,1,1,1,0,0},
-    {"hdel",hdelCommand,-3,"wF",0,NULL,1,1,1,0,0},
-    {"hlen",hlenCommand,2,"rF",0,NULL,1,1,1,0,0},
-    {"hstrlen",hstrlenCommand,3,"rF",0,NULL,1,1,1,0,0},
-    {"hkeys",hkeysCommand,2,"r",0,NULL,1,1,1,0,0},
-    {"hvals",hvalsCommand,2,"r",0,NULL,1,1,1,0,0},
-    {"hgetall",hgetallCommand,2,"r",0,NULL,1,1,1,0,0},
-    {"hexists",hexistsCommand,3,"rF",0,NULL,1,1,1,0,0},
-    {"hscan",hscanCommand,-3,"rR",0,NULL,1,1,1,0,0},
-    {"incrby",incrbyCommand,3,"wmF",0,NULL,1,1,1,0,0},
-    {"decrby",decrbyCommand,3,"wmF",0,NULL,1,1,1,0,0},
-    {"incrbyfloat",incrbyfloatCommand,3,"wmF",0,NULL,1,1,1,0,0},
-    {"getset",getsetCommand,3,"wm",0,NULL,1,1,1,0,0},
-    {"mset",msetCommand,-3,"wm",0,NULL,1,-1,2,0,0},
-    {"msetnx",msetnxCommand,-3,"wm",0,NULL,1,-1,2,0,0},
-    {"randomkey",randomkeyCommand,1,"rR",0,NULL,0,0,0,0,0},
-    {"select",selectCommand,2,"F",0,NULL,0,0,0,0,0},
-    {"move",moveCommand,3,"wF",0,NULL,1,1,1,0,0},
-    {"expire",expireCommand,3,"wF",0,NULL,1,1,1,0,0},
-    {"expireat",expireatCommand,3,"wF",0,NULL,1,1,1,0,0},
-    {"pexpire",pexpireCommand,3,"wF",0,NULL,1,1,1,0,0},
-    {"pexpireat",pexpireatCommand,3,"wF",0,NULL,1,1,1,0,0},
-    {"keys",keysCommand,2,"r",0,NULL,0,0,0,0,0},
-    {"scan",scanCommand,-2,"rR",0,NULL,0,0,0,0,0},
-    {"dbsize",dbsizeCommand,1,"rF",0,NULL,0,0,0,0,0},
-    {"type",typeCommand,2,"rF",0,NULL,1,1,1,0,0},
-    {"flushdb",flushdbCommand,1,"w",0,NULL,0,0,0,0,0},
-    {"flushall",flushallCommand,1,"w",0,NULL,0,0,0,0,0},
-    {"sort",sortCommand,-2,"wm",0,sortGetKeys,1,1,1,0,0},
-    {"info",infoCommand,-1,"t",0,NULL,0,0,0,0,0},
-    {"ttl",ttlCommand,2,"rF",0,NULL,1,1,1,0,0},
-    {"pttl",pttlCommand,2,"rF",0,NULL,1,1,1,0,0},
-    {"object",objectCommand,3,"r",0,NULL,2,2,2,0,0},
-    {"bitop",bitopCommand,-4,"wm",0,NULL,2,-1,1,0,0},
-    {"bitcount",bitcountCommand,-2,"r",0,NULL,1,1,1,0,0},
-    {"bitpos",bitposCommand,-3,"r",0,NULL,1,1,1,0,0},
+    {"get", getCommand, 2, "rF", 0, NULL, 1, 1, 1, 0, 0 },
+    {"set", setCommand, - 3, "wm", 0, NULL, 1, 1, 1, 0, 0 },
+    {"setnx", setnxCommand, 3, "wmF", 0, NULL, 1, 1, 1, 0, 0 },
+    {"setex", setexCommand, 4, "wm", 0, NULL, 1, 1, 1, 0, 0 },
+    {"psetex", psetexCommand, 4, "wm", 0, NULL, 1, 1, 1, 0, 0 },
+    {"append", appendCommand, 3, "wm", 0, NULL, 1, 1, 1, 0, 0 },
+    {"strlen", strlenCommand, 2, "rF", 0, NULL, 1, 1, 1, 0, 0 },
+    {"del", delCommand, - 2, "w", 0, NULL, 1, - 1, 1, 0, 0 },
+    {"exists", existsCommand, - 2, "rF", 0, NULL, 1, - 1, 1, 0, 0 },
+    {"setbit", setbitCommand, 4, "wm", 0, NULL, 1, 1, 1, 0, 0 },
+    {"getbit", getbitCommand, 3, "rF", 0, NULL, 1, 1, 1, 0, 0 },
+    {"bitfield", bitfieldCommand, - 2, "wm", 0, NULL, 1, 1, 1, 0, 0 },
+    {"setrange", setrangeCommand, 4, "wm", 0, NULL, 1, 1, 1, 0, 0 },
+    {"getrange", getrangeCommand, 4, "r", 0, NULL, 1, 1, 1, 0, 0 },
+    {"substr", getrangeCommand, 4, "r", 0, NULL, 1, 1, 1, 0, 0 },
+    {"incr", incrCommand, 2, "wmF", 0, NULL, 1, 1, 1, 0, 0 },
+    {"decr", decrCommand, 2, "wmF", 0, NULL, 1, 1, 1, 0, 0 },
+    {"mget", mgetCommand, - 2, "r", 0, NULL, 1, - 1, 1, 0, 0 },
+    {"rpush", rpushCommand, - 3, "wmF", 0, NULL, 1, 1, 1, 0, 0 },
+    {"lpush", lpushCommand, - 3, "wmF", 0, NULL, 1, 1, 1, 0, 0 },
+    {"rpushx", rpushxCommand, 3, "wmF", 0, NULL, 1, 1, 1, 0, 0 },
+    {"lpushx", lpushxCommand, 3, "wmF", 0, NULL, 1, 1, 1, 0, 0 },
+    {"linsert", linsertCommand, 5, "wm", 0, NULL, 1, 1, 1, 0, 0 },
+    {"rpop", rpopCommand, 2, "wF", 0, NULL, 1, 1, 1, 0, 0 },
+    {"lpop", lpopCommand, 2, "wF", 0, NULL, 1, 1, 1, 0, 0 },
+    {"llen", llenCommand, 2, "rF", 0, NULL, 1, 1, 1, 0, 0 },
+    {"lindex", lindexCommand, 3, "r", 0, NULL, 1, 1, 1, 0, 0 },
+    {"lset", lsetCommand, 4, "wm", 0, NULL, 1, 1, 1, 0, 0 },
+    {"lrange", lrangeCommand, 4, "r", 0, NULL, 1, 1, 1, 0, 0 },
+    {"ltrim", ltrimCommand, 4, "w", 0, NULL, 1, 1, 1, 0, 0 },
+    {"lrem", lremCommand, 4, "w", 0, NULL, 1, 1, 1, 0, 0 },
+    {"rpoplpush", rpoplpushCommand, 3, "wm", 0, NULL, 1, 2, 1, 0, 0 },
+    {"sadd", saddCommand, - 3, "wmF", 0, NULL, 1, 1, 1, 0, 0 },
+    {"srem", sremCommand, - 3, "wF", 0, NULL, 1, 1, 1, 0, 0 },
+    {"smove", smoveCommand, 4, "wF", 0, NULL, 1, 2, 1, 0, 0 },
+    {"sismember", sismemberCommand, 3, "rF", 0, NULL, 1, 1, 1, 0, 0 },
+    {"scard", scardCommand, 2, "rF", 0, NULL, 1, 1, 1, 0, 0 },
+    {"spop", spopCommand, - 2, "wRF", 0, NULL, 1, 1, 1, 0, 0 },
+    {"srandmember", srandmemberCommand, - 2, "rR", 0, NULL, 1, 1, 1, 0, 0 },
+    {"sinter", sinterCommand, - 2, "r", 0, NULL, 1, - 1, 1, 0, 0 },
+    {"sinterstore", sinterstoreCommand, - 3, "wm", 0, NULL, 1, - 1, 1, 0, 0 },
+    {"sunion", sunionCommand, - 2, "r", 0, NULL, 1, - 1, 1, 0, 0 },
+    {"sunionstore", sunionstoreCommand, - 3, "wm", 0, NULL, 1, - 1, 1, 0, 0 },
+    {"sdiff", sdiffCommand, - 2, "r", 0, NULL, 1, - 1, 1, 0, 0 },
+    {"sdiffstore", sdiffstoreCommand, - 3, "wm", 0, NULL, 1, - 1, 1, 0, 0 },
+    {"smembers", sinterCommand, 2, "r", 0, NULL, 1, 1, 1, 0, 0 },
+    {"sscan", sscanCommand, - 3, "rR", 0, NULL, 1, 1, 1, 0, 0 },
+    {"zadd", zaddCommand, - 4, "wmF", 0, NULL, 1, 1, 1, 0, 0 },
+    {"zincrby", zincrbyCommand, 4, "wmF", 0, NULL, 1, 1, 1, 0, 0 },
+    {"zrem", zremCommand, - 3, "wF", 0, NULL, 1, 1, 1, 0, 0 },
+    {"zremrangebyscore", zremrangebyscoreCommand, 4, "w", 0, NULL, 1, 1, 1, 0, 0 },
+    {"zremrangebyrank", zremrangebyrankCommand, 4, "w", 0, NULL, 1, 1, 1, 0, 0 },
+    {"zremrangebylex", zremrangebylexCommand, 4, "w", 0, NULL, 1, 1, 1, 0, 0 },
+    {"zunionstore", zunionstoreCommand, - 4, "wm", 0, zunionInterGetKeys, 0, 0, 0, 0, 0 },
+    {"zinterstore", zinterstoreCommand, - 4, "wm", 0, zunionInterGetKeys, 0, 0, 0, 0, 0 },
+    {"zrange", zrangeCommand, - 4, "r", 0, NULL, 1, 1, 1, 0, 0 },
+    {"zrangebyscore", zrangebyscoreCommand, - 4, "r", 0, NULL, 1, 1, 1, 0, 0 },
+    {"zrevrangebyscore", zrevrangebyscoreCommand, - 4, "r", 0, NULL, 1, 1, 1, 0, 0 },
+    {"zrangebylex", zrangebylexCommand, - 4, "r", 0, NULL, 1, 1, 1, 0, 0 },
+    {"zrevrangebylex", zrevrangebylexCommand, - 4, "r", 0, NULL, 1, 1, 1, 0, 0 },
+    {"zcount", zcountCommand, 4, "rF", 0, NULL, 1, 1, 1, 0, 0 },
+    {"zlexcount", zlexcountCommand, 4, "rF", 0, NULL, 1, 1, 1, 0, 0 },
+    {"zrevrange", zrevrangeCommand, - 4, "r", 0, NULL, 1, 1, 1, 0, 0 },
+    {"zcard", zcardCommand, 2, "rF", 0, NULL, 1, 1, 1, 0, 0 },
+    {"zscore", zscoreCommand, 3, "rF", 0, NULL, 1, 1, 1, 0, 0 },
+    {"zrank", zrankCommand, 3, "rF", 0, NULL, 1, 1, 1, 0, 0 },
+    {"zrevrank", zrevrankCommand, 3, "rF", 0, NULL, 1, 1, 1, 0, 0 },
+    {"zscan", zscanCommand, - 3, "rR", 0, NULL, 1, 1, 1, 0, 0 },
+    {"hset", hsetCommand, 4, "wmF", 0, NULL, 1, 1, 1, 0, 0 },
+    {"hsetnx", hsetnxCommand, 4, "wmF", 0, NULL, 1, 1, 1, 0, 0 },
+    {"hget", hgetCommand, 3, "rF", 0, NULL, 1, 1, 1, 0, 0 },
+    {"hmset", hmsetCommand, - 4, "wm", 0, NULL, 1, 1, 1, 0, 0 },
+    {"hmget", hmgetCommand, - 3, "r", 0, NULL, 1, 1, 1, 0, 0 },
+    {"hincrby", hincrbyCommand, 4, "wmF", 0, NULL, 1, 1, 1, 0, 0 },
+    {"hincrbyfloat", hincrbyfloatCommand, 4, "wmF", 0, NULL, 1, 1, 1, 0, 0 },
+    {"hdel", hdelCommand, - 3, "wF", 0, NULL, 1, 1, 1, 0, 0 },
+    {"hlen", hlenCommand, 2, "rF", 0, NULL, 1, 1, 1, 0, 0 },
+    {"hstrlen", hstrlenCommand, 3, "rF", 0, NULL, 1, 1, 1, 0, 0 },
+    {"hkeys", hkeysCommand, 2, "r", 0, NULL, 1, 1, 1, 0, 0 },
+    {"hvals", hvalsCommand, 2, "r", 0, NULL, 1, 1, 1, 0, 0 },
+    {"hgetall", hgetallCommand, 2, "r", 0, NULL, 1, 1, 1, 0, 0 },
+    {"hexists", hexistsCommand, 3, "rF", 0, NULL, 1, 1, 1, 0, 0 },
+    {"hscan", hscanCommand, - 3, "rR", 0, NULL, 1, 1, 1, 0, 0 },
+    {"incrby", incrbyCommand, 3, "wmF", 0, NULL, 1, 1, 1, 0, 0 },
+    {"decrby", decrbyCommand, 3, "wmF", 0, NULL, 1, 1, 1, 0, 0 },
+    {"incrbyfloat", incrbyfloatCommand, 3, "wmF", 0, NULL, 1, 1, 1, 0, 0 },
+    {"getset", getsetCommand, 3, "wm", 0, NULL, 1, 1, 1, 0, 0 },
+    {"mset", msetCommand, - 3, "wm", 0, NULL, 1, - 1, 2, 0, 0 },
+    {"msetnx", msetnxCommand, - 3, "wm", 0, NULL, 1, - 1, 2, 0, 0 },
+    {"randomkey", randomkeyCommand, 1, "rR", 0, NULL, 0, 0, 0, 0, 0 },
+    {"select", selectCommand, 2, "F", 0, NULL, 0, 0, 0, 0, 0 },
+    {"move", moveCommand, 3, "wF", 0, NULL, 1, 1, 1, 0, 0 },
+    {"expire", expireCommand, 3, "wF", 0, NULL, 1, 1, 1, 0, 0 },
+    {"expireat", expireatCommand, 3, "wF", 0, NULL, 1, 1, 1, 0, 0 },
+    {"pexpire", pexpireCommand, 3, "wF", 0, NULL, 1, 1, 1, 0, 0 },
+    {"pexpireat", pexpireatCommand, 3, "wF", 0, NULL, 1, 1, 1, 0, 0 },
+    {"keys", keysCommand, 2, "r", 0, NULL, 0, 0, 0, 0, 0 },
+    {"scan", scanCommand, - 2, "rR", 0, NULL, 0, 0, 0, 0, 0 },
+    {"dbsize", dbsizeCommand, 1, "rF", 0, NULL, 0, 0, 0, 0, 0 },
+    {"type", typeCommand, 2, "rF", 0, NULL, 1, 1, 1, 0, 0 },
+    {"flushdb", flushdbCommand, 1, "w", 0, NULL, 0, 0, 0, 0, 0 },
+    {"flushall", flushallCommand, 1, "w", 0, NULL, 0, 0, 0, 0, 0 },
+    {"sort", sortCommand, - 2, "wm", 0, sortGetKeys, 1, 1, 1, 0, 0 },
+    {"info", infoCommand, - 1, "t", 0, NULL, 0, 0, 0, 0, 0 },
+    {"ttl", ttlCommand, 2, "rF", 0, NULL, 1, 1, 1, 0, 0 },
+    {"pttl", pttlCommand, 2, "rF", 0, NULL, 1, 1, 1, 0, 0 },
+    {"object", objectCommand, 3, "r", 0, NULL, 2, 2, 2, 0, 0 },
+    {"bitop", bitopCommand, - 4, "wm", 0, NULL, 2, - 1, 1, 0, 0 },
+    {"bitcount", bitcountCommand, - 2, "r", 0, NULL, 1, 1, 1, 0, 0 },
+    {"bitpos", bitposCommand, - 3, "r", 0, NULL, 1, 1, 1, 0, 0 },
 };
 
-struct evictionPoolEntry *evictionPoolAlloc(void);
+struct evictionPoolEntry *evictionPoolAlloc ( void );
 
-
-typedef struct configEnum {
+typedef struct configEnum
+{
     const char * name;
     const int val;
 } configEnum;
 
 configEnum maxmemory_policy_enum[] = {
-    {"volatile-lru", MAXMEMORY_VOLATILE_LRU},
-    {"volatile-random", MAXMEMORY_VOLATILE_RANDOM},
-    {"volatile-ttl", MAXMEMORY_VOLATILE_TTL},
-    {"allkeys-lru", MAXMEMORY_ALLKEYS_LRU},
-    {"allkeys-random", MAXMEMORY_ALLKEYS_RANDOM},
-    {"noeviction", MAXMEMORY_NO_EVICTION},
-    {NULL, 0}
+    {"volatile-lru", MAXMEMORY_VOLATILE_LRU },
+    {"volatile-random", MAXMEMORY_VOLATILE_RANDOM },
+    {"volatile-ttl", MAXMEMORY_VOLATILE_TTL },
+    {"allkeys-lru", MAXMEMORY_ALLKEYS_LRU },
+    {"allkeys-random", MAXMEMORY_ALLKEYS_RANDOM },
+    {"noeviction", MAXMEMORY_NO_EVICTION },
+    {NULL, 0 }
 };
 
 static pthread_mutex_t rdb_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 /*============================ Utility functions ============================ */
 
-
 /* Get enum value from name. If there is no match INT_MIN is returned. */
-int configEnumGetValue(configEnum *ce, char *name) {
-    while(ce->name != NULL) {
-        if (!strcasecmp(ce->name,name)) return ce->val;
-        ce++;
+int configEnumGetValue ( configEnum *ce, char *name )
+{
+    while ( ce->name != NULL )
+    {
+        if ( ! strcasecmp (ce->name, name) ) return ce->val;
+        ce ++;
     }
     return INT_MIN;
 }
 
 /* Get enum name from value. If no match is found NULL is returned. */
-const char *configEnumGetName(configEnum *ce, int val) {
-    while(ce->name != NULL) {
-        if (ce->val == val) return ce->name;
-        ce++;
+const char *configEnumGetName ( configEnum *ce, int val )
+{
+    while ( ce->name != NULL )
+    {
+        if ( ce->val == val ) return ce->name;
+        ce ++;
     }
     return NULL;
 }
 
 /* Wrapper for configEnumGetName() returning "unknown" insetad of NULL if
  * there is no match. */
-const char *configEnumGetNameOrUnknown(configEnum *ce, int val) {
-    const char *name = configEnumGetName(ce,val);
+const char *configEnumGetNameOrUnknown ( configEnum *ce, int val )
+{
+    const char *name = configEnumGetName (ce, val);
     return name ? name : "unknown";
 }
 
 /* Used for INFO generation. */
-const char *evictPolicyToString(void) {
-    return configEnumGetNameOrUnknown(maxmemory_policy_enum,server.maxmemory_policy);
+const char *evictPolicyToString ( void )
+{
+    return configEnumGetNameOrUnknown (maxmemory_policy_enum, server.maxmemory_policy);
 }
 
 /* Return the UNIX time in microseconds */
-long long ustime(void) {
+long long ustime ( void )
+{
     struct timeval tv;
     long long ust;
 
-    gettimeofday(&tv, NULL);
-    ust = ((long long)tv.tv_sec)*1000000;
+    gettimeofday (&tv, NULL);
+    ust = ( ( long long ) tv.tv_sec )*1000000;
     ust += tv.tv_usec;
     return ust;
 }
 
 /* Return the UNIX time in milliseconds */
-mstime_t mstime(void) {
-    return ustime()/1000;
+mstime_t mstime ( void )
+{
+    return ustime () / 1000;
 }
 
 
@@ -309,111 +316,121 @@ mstime_t mstime(void) {
  * keys and redis objects as values (objects can hold SDS strings,
  * lists, sets). */
 
-void dictVanillaFree(void *privdata, void *val)
+void dictVanillaFree ( void *privdata, void *val )
 {
-    DICT_NOTUSED(privdata);
-    zfree(val);
+    DICT_NOTUSED (privdata);
+    zfree (val);
 }
 
-void dictListDestructor(void *privdata, void *val)
+void dictListDestructor ( void *privdata, void *val )
 {
-    DICT_NOTUSED(privdata);
-    listRelease((list*)val);
+    DICT_NOTUSED (privdata);
+    listRelease (( list* ) val);
 }
 
-int dictSdsKeyCompare(void *privdata, const void *key1,
-        const void *key2)
+int dictSdsKeyCompare ( void *privdata, const void *key1,
+                        const void *key2 )
 {
-    int l1,l2;
-    DICT_NOTUSED(privdata);
+    int l1, l2;
+    DICT_NOTUSED (privdata);
 
-    l1 = sdslen((sds)key1);
-    l2 = sdslen((sds)key2);
-    if (l1 != l2) return 0;
-    return memcmp(key1, key2, l1) == 0;
+    l1 = sdslen (( sds ) key1);
+    l2 = sdslen (( sds ) key2);
+    if ( l1 != l2 ) return 0;
+    return memcmp (key1, key2, l1) == 0;
 }
 
 /* A case insensitive version used for the command lookup table and other
  * places where case insensitive non binary-safe comparison is needed. */
-int dictSdsKeyCaseCompare(void *privdata, const void *key1,
-        const void *key2)
+int dictSdsKeyCaseCompare ( void *privdata, const void *key1,
+                            const void *key2 )
 {
-    DICT_NOTUSED(privdata);
+    DICT_NOTUSED (privdata);
 
-    return strcasecmp(key1, key2) == 0;
+    return strcasecmp (key1, key2) == 0;
 }
 
-void dictObjectDestructor(void *privdata, void *val)
+void dictObjectDestructor ( void *privdata, void *val )
 {
-    DICT_NOTUSED(privdata);
+    DICT_NOTUSED (privdata);
 
-    if (val == NULL) return; /* Values of swapped out keys as set to NULL */
-    decrRefCount(val);
+    if ( val == NULL ) return; /* Values of swapped out keys as set to NULL */
+    decrRefCount (val);
 }
 
-void dictSdsDestructor(void *privdata, void *val)
+void dictSdsDestructor ( void *privdata, void *val )
 {
-    DICT_NOTUSED(privdata);
+    DICT_NOTUSED (privdata);
 
-    sdsfree(val);
+    sdsfree (val);
 }
 
-int dictObjKeyCompare(void *privdata, const void *key1,
-        const void *key2)
+int dictObjKeyCompare ( void *privdata, const void *key1,
+                        const void *key2 )
 {
     const robj *o1 = key1, *o2 = key2;
-    return dictSdsKeyCompare(privdata,o1->ptr,o2->ptr);
+    return dictSdsKeyCompare (privdata, o1->ptr, o2->ptr);
 }
 
-unsigned int dictObjHash(const void *key) {
-    const robj *o = key;
-    return dictGenHashFunction(o->ptr, sdslen((sds)o->ptr));
-}
-
-unsigned int dictSdsHash(const void *key) {
-    return dictGenHashFunction((unsigned char*)key, sdslen((char*)key));
-}
-
-unsigned int dictSdsCaseHash(const void *key) {
-    return dictGenCaseHashFunction((unsigned char*)key, sdslen((char*)key));
-}
-
-int dictEncObjKeyCompare(void *privdata, const void *key1,
-        const void *key2)
+unsigned int dictObjHash ( const void *key )
 {
-    robj *o1 = (robj*) key1, *o2 = (robj*) key2;
+    const robj *o = key;
+    return dictGenHashFunction (o->ptr, sdslen (( sds ) o->ptr));
+}
+
+unsigned int dictSdsHash ( const void *key )
+{
+    return dictGenHashFunction (( unsigned char* ) key, sdslen (( char* ) key));
+}
+
+unsigned int dictSdsCaseHash ( const void *key )
+{
+    return dictGenCaseHashFunction (( unsigned char* ) key, sdslen (( char* ) key));
+}
+
+int dictEncObjKeyCompare ( void *privdata, const void *key1,
+                           const void *key2 )
+{
+    robj *o1 = ( robj* ) key1, *o2 = ( robj* ) key2;
     int cmp;
 
-    if (o1->encoding == OBJ_ENCODING_INT &&
-        o2->encoding == OBJ_ENCODING_INT)
-            return o1->ptr == o2->ptr;
+    if ( o1->encoding == OBJ_ENCODING_INT &&
+         o2->encoding == OBJ_ENCODING_INT )
+        return o1->ptr == o2->ptr;
 
-    o1 = getDecodedObject(o1);
-    o2 = getDecodedObject(o2);
-    cmp = dictSdsKeyCompare(privdata,o1->ptr,o2->ptr);
-    decrRefCount(o1);
-    decrRefCount(o2);
+    o1 = getDecodedObject (o1);
+    o2 = getDecodedObject (o2);
+    cmp = dictSdsKeyCompare (privdata, o1->ptr, o2->ptr);
+    decrRefCount (o1);
+    decrRefCount (o2);
     return cmp;
 }
 
-unsigned int dictEncObjHash(const void *key) {
-    robj *o = (robj*) key;
+unsigned int dictEncObjHash ( const void *key )
+{
+    robj *o = ( robj* ) key;
 
-    if (sdsEncodedObject(o)) {
-        return dictGenHashFunction(o->ptr, sdslen((sds)o->ptr));
-    } else {
-        if (o->encoding == OBJ_ENCODING_INT) {
+    if ( sdsEncodedObject (o) )
+    {
+        return dictGenHashFunction (o->ptr, sdslen (( sds ) o->ptr));
+    }
+    else
+    {
+        if ( o->encoding == OBJ_ENCODING_INT )
+        {
             char buf[32];
             int len;
 
-            len = ll2string(buf,32,(long)o->ptr);
-            return dictGenHashFunction((unsigned char*)buf, len);
-        } else {
+            len = ll2string (buf, 32, ( long ) o->ptr);
+            return dictGenHashFunction (( unsigned char* ) buf, len);
+        }
+        else
+        {
             unsigned int hash;
 
-            o = getDecodedObject(o);
-            hash = dictGenHashFunction(o->ptr, sdslen((sds)o->ptr));
-            decrRefCount(o);
+            o = getDecodedObject (o);
+            hash = dictGenHashFunction (o->ptr, sdslen (( sds ) o->ptr));
+            decrRefCount (o);
             return hash;
         }
     }
@@ -421,80 +438,82 @@ unsigned int dictEncObjHash(const void *key) {
 
 /* Sets type hash table */
 dictType setDictType = {
-    dictEncObjHash,            /* hash function */
-    NULL,                      /* key dup */
-    NULL,                      /* val dup */
-    dictEncObjKeyCompare,      /* key compare */
-    dictObjectDestructor, /* key destructor */
-    NULL                       /* val destructor */
+                        dictEncObjHash, /* hash function */
+                        NULL, /* key dup */
+                        NULL, /* val dup */
+                        dictEncObjKeyCompare, /* key compare */
+                        dictObjectDestructor, /* key destructor */
+                        NULL /* val destructor */
 };
 
 /* Sorted sets hash (note: a skiplist is used in addition to the hash table) */
 dictType zsetDictType = {
-    dictEncObjHash,            /* hash function */
-    NULL,                      /* key dup */
-    NULL,                      /* val dup */
-    dictEncObjKeyCompare,      /* key compare */
-    dictObjectDestructor, /* key destructor */
-    NULL                       /* val destructor */
+                         dictEncObjHash, /* hash function */
+                         NULL, /* key dup */
+                         NULL, /* val dup */
+                         dictEncObjKeyCompare, /* key compare */
+                         dictObjectDestructor, /* key destructor */
+                         NULL /* val destructor */
 };
 
 /* Db->dict, keys are sds strings, vals are Redis objects. */
 dictType dbDictType = {
-    dictSdsHash,                /* hash function */
-    NULL,                       /* key dup */
-    NULL,                       /* val dup */
-    dictSdsKeyCompare,          /* key compare */
-    dictSdsDestructor,          /* key destructor */
-    dictObjectDestructor   /* val destructor */
+                       dictSdsHash, /* hash function */
+                       NULL, /* key dup */
+                       NULL, /* val dup */
+                       dictSdsKeyCompare, /* key compare */
+                       dictSdsDestructor, /* key destructor */
+                       dictObjectDestructor /* val destructor */
 };
 
 /* Db->expires */
 dictType keyptrDictType = {
-    dictSdsHash,               /* hash function */
-    NULL,                      /* key dup */
-    NULL,                      /* val dup */
-    dictSdsKeyCompare,         /* key compare */
-    NULL,                      /* key destructor */
-    NULL                       /* val destructor */
+                           dictSdsHash, /* hash function */
+                           NULL, /* key dup */
+                           NULL, /* val dup */
+                           dictSdsKeyCompare, /* key compare */
+                           NULL, /* key destructor */
+                           NULL /* val destructor */
 };
 
 /* Command table. sds string -> command struct pointer. */
 dictType commandTableDictType = {
-    dictSdsCaseHash,           /* hash function */
-    NULL,                      /* key dup */
-    NULL,                      /* val dup */
-    dictSdsKeyCaseCompare,     /* key compare */
-    dictSdsDestructor,         /* key destructor */
-    NULL                       /* val destructor */
+                                 dictSdsCaseHash, /* hash function */
+                                 NULL, /* key dup */
+                                 NULL, /* val dup */
+                                 dictSdsKeyCaseCompare, /* key compare */
+                                 dictSdsDestructor, /* key destructor */
+                                 NULL /* val destructor */
 };
 
 /* Hash type hash table (note that small hashes are represented with ziplists) */
 dictType hashDictType = {
-    dictEncObjHash,             /* hash function */
-    NULL,                       /* key dup */
-    NULL,                       /* val dup */
-    dictEncObjKeyCompare,       /* key compare */
-    dictObjectDestructor,  /* key destructor */
-    dictObjectDestructor   /* val destructor */
+                         dictEncObjHash, /* hash function */
+                         NULL, /* key dup */
+                         NULL, /* val dup */
+                         dictEncObjKeyCompare, /* key compare */
+                         dictObjectDestructor, /* key destructor */
+                         dictObjectDestructor /* val destructor */
 };
 
-int htNeedsResize(dict *dict) {
+int htNeedsResize ( dict *dict )
+{
     long long size, used;
 
-    size = dictSlots(dict);
-    used = dictSize(dict);
+    size = dictSlots (dict);
+    used = dictSize (dict);
     return (size && used && size > DICT_HT_INITIAL_SIZE &&
-            (used*100/size < HASHTABLE_MIN_FILL));
+             ( used * 100 / size < HASHTABLE_MIN_FILL ) );
 }
 
 /* If the percentage of used slots in the HT reaches HASHTABLE_MIN_FILL
  * we resize the hash table to save memory */
-void tryResizeHashTables(int dbid) {
-    if (htNeedsResize(server.db[dbid].dict))
-        dictResize(server.db[dbid].dict);
-    if (htNeedsResize(server.db[dbid].expires))
-        dictResize(server.db[dbid].expires);
+void tryResizeHashTables ( int dbid )
+{
+    if ( htNeedsResize (server.db[dbid].dict) )
+        dictResize (server.db[dbid].dict);
+    if ( htNeedsResize (server.db[dbid].expires) )
+        dictResize (server.db[dbid].expires);
 }
 
 /* Our hash table implementation performs rehashing incrementally while
@@ -504,15 +523,18 @@ void tryResizeHashTables(int dbid) {
  *
  * The function returns 1 if some rehashing was performed, otherwise 0
  * is returned. */
-int incrementallyRehash(int dbid) {
+int incrementallyRehash ( int dbid )
+{
     /* Keys dictionary */
-    if (dictIsRehashing(server.db[dbid].dict)) {
-        dictRehashMilliseconds(server.db[dbid].dict,1);
+    if ( dictIsRehashing (server.db[dbid].dict) )
+    {
+        dictRehashMilliseconds (server.db[dbid].dict, 1);
         return 1; /* already used our millisecond for this loop... */
     }
     /* Expires */
-    if (dictIsRehashing(server.db[dbid].expires)) {
-        dictRehashMilliseconds(server.db[dbid].expires,1);
+    if ( dictIsRehashing (server.db[dbid].expires) )
+    {
+        dictRehashMilliseconds (server.db[dbid].expires, 1);
         return 1; /* already used our millisecond for this loop... */
     }
     return 0;
@@ -524,8 +546,9 @@ int incrementallyRehash(int dbid) {
  * memory pages are copied). The goal of this function is to update the ability
  * for dict.c to resize the hash tables accordingly to the fact we have o not
  * running childs. */
-void updateDictResizePolicy(void) {
-    dictEnableResize();
+void updateDictResizePolicy ( void )
+{
+    dictEnableResize ();
 }
 
 /* ======================= Cron: called every 100 ms ======================== */
@@ -541,17 +564,21 @@ void updateDictResizePolicy(void) {
  *
  * The parameter 'now' is the current time in milliseconds as is passed
  * to the function to avoid too many gettimeofday() syscalls. */
-int activeExpireCycleTryExpire(redisDb *db, dictEntry *de, long long now) {
-    long long t = dictGetSignedIntegerVal(de);
-    if (now > t) {
-        sds key = dictGetKey(de);
-        robj *keyobj = createStringObject(key,sdslen(key));
+int activeExpireCycleTryExpire ( redisDb *db, dictEntry *de, long long now )
+{
+    long long t = dictGetSignedIntegerVal (de);
+    if ( now > t )
+    {
+        sds key = dictGetKey (de);
+        robj *keyobj = createStringObject (key, sdslen (key));
 
-        dbDelete(db,keyobj);
-        decrRefCount(keyobj);
-        server.stat_expiredkeys++;
+        dbDelete (db, keyobj);
+        decrRefCount (keyobj);
+        server.stat_expiredkeys ++;
         return 1;
-    } else {
+    }
+    else
+    {
         return 0;
     }
 }
@@ -578,23 +605,25 @@ int activeExpireCycleTryExpire(redisDb *db, dictEntry *de, long long now) {
  * executed, where the time limit is a percentage of the REDIS_HZ period
  * as specified by the REDIS_EXPIRELOOKUPS_TIME_PERC define. */
 
-void activeExpireCycle(int type) {
+void activeExpireCycle ( int type )
+{
     /* This function has some global state in order to continue the work
      * incrementally across calls. */
     static unsigned int current_db = 0; /* Last DB tested. */
-    static int timelimit_exit = 0;      /* Time limit hit in previous call? */
+    static int timelimit_exit = 0; /* Time limit hit in previous call? */
     static long long last_fast_cycle = 0; /* When last fast cycle ran. */
 
     int j, iteration = 0;
     int dbs_per_call = CRON_DBS_PER_CALL;
-    long long start = ustime(), timelimit;
+    long long start = ustime (), timelimit;
 
-    if (type == ACTIVE_EXPIRE_CYCLE_FAST) {
+    if ( type == ACTIVE_EXPIRE_CYCLE_FAST )
+    {
         /* Don't start a fast cycle if the previous cycle did not exited
          * for time limt. Also don't repeat a fast cycle for the same period
          * as the fast cycle total duration itself. */
-        if (!timelimit_exit) return;
-        if (start < last_fast_cycle + ACTIVE_EXPIRE_CYCLE_FAST_DURATION*2) return;
+        if ( ! timelimit_exit ) return;
+        if ( start < last_fast_cycle + ACTIVE_EXPIRE_CYCLE_FAST_DURATION * 2 ) return;
         last_fast_cycle = start;
     }
 
@@ -605,49 +634,52 @@ void activeExpireCycle(int type) {
      * 2) If last time we hit the time limit, we want to scan all DBs
      * in this iteration, as there is work to do in some DB and we don't want
      * expired keys to use memory for too much time. */
-    if (dbs_per_call > server.dbnum || timelimit_exit)
+    if ( dbs_per_call > server.dbnum || timelimit_exit )
         dbs_per_call = server.dbnum;
 
     /* We can use at max ACTIVE_EXPIRE_CYCLE_SLOW_TIME_PERC percentage of CPU time
      * per iteration. Since this function gets called with a frequency of
      * server.hz times per second, the following is the max amount of
      * microseconds we can spend in this function. */
-    timelimit = 1000000*ACTIVE_EXPIRE_CYCLE_SLOW_TIME_PERC/server.hz/100;
+    timelimit = 1000000 * ACTIVE_EXPIRE_CYCLE_SLOW_TIME_PERC / server.hz / 100;
     timelimit_exit = 0;
-    if (timelimit <= 0) timelimit = 1;
+    if ( timelimit <= 0 ) timelimit = 1;
 
-    if (type == ACTIVE_EXPIRE_CYCLE_FAST)
+    if ( type == ACTIVE_EXPIRE_CYCLE_FAST )
         timelimit = ACTIVE_EXPIRE_CYCLE_FAST_DURATION; /* in microseconds. */
 
-    for (j = 0; j < dbs_per_call; j++) {
+    for ( j = 0; j < dbs_per_call; j ++ )
+    {
         int expired;
-        redisDb *db = server.db+(current_db % server.dbnum);
+        redisDb *db = server.db + ( current_db % server.dbnum );
 
         /* Increment the DB now so we are sure if we run out of time
          * in the current DB we'll restart from the next. This allows to
          * distribute the time evenly across DBs. */
-        current_db++;
+        current_db ++;
 
         /* Continue to expire if at the end of the cycle more than 25%
          * of the keys were expired. */
-        do {
+        do
+        {
             unsigned long num, slots;
             long long now, ttl_sum;
             int ttl_samples;
 
             /* If there is nothing to expire try next DB ASAP. */
-            if ((num = dictSize(db->expires)) == 0) {
+            if ( ( num = dictSize (db->expires) ) == 0 )
+            {
                 db->avg_ttl = 0;
                 break;
             }
-            slots = dictSlots(db->expires);
-            now = mstime();
+            slots = dictSlots (db->expires);
+            now = mstime ();
 
             /* When there are less than 1% filled slots getting random
              * keys is expensive, so stop here waiting for better times...
              * The dictionary will be resized asap. */
-            if (num && slots > DICT_HT_INITIAL_SIZE &&
-                (num*100/slots < 1)) break;
+            if ( num && slots > DICT_HT_INITIAL_SIZE &&
+                 ( num * 100 / slots < 1 ) ) break;
 
             /* The main collection cycle. Sample random keys among keys
              * with an expire set, checking for expired ones. */
@@ -655,77 +687,85 @@ void activeExpireCycle(int type) {
             ttl_sum = 0;
             ttl_samples = 0;
 
-            if (num > ACTIVE_EXPIRE_CYCLE_LOOKUPS_PER_LOOP)
+            if ( num > ACTIVE_EXPIRE_CYCLE_LOOKUPS_PER_LOOP )
                 num = ACTIVE_EXPIRE_CYCLE_LOOKUPS_PER_LOOP;
 
-            while (num--) {
+            while ( num -- )
+            {
                 dictEntry *de;
                 long long ttl;
 
-                if ((de = dictGetRandomKey(db->expires)) == NULL) break;
-                ttl = dictGetSignedIntegerVal(de)-now;
-                if (activeExpireCycleTryExpire(db,de,now)) expired++;
-                if (ttl > 0) {
+                if ( ( de = dictGetRandomKey (db->expires) ) == NULL ) break;
+                ttl = dictGetSignedIntegerVal (de) - now;
+                if ( activeExpireCycleTryExpire (db, de, now) ) expired ++;
+                if ( ttl > 0 )
+                {
                     /* We want the average TTL of keys yet not expired. */
                     ttl_sum += ttl;
-                    ttl_samples++;
+                    ttl_samples ++;
                 }
             }
 
             /* Update the average TTL stats for this database. */
-            if (ttl_samples) {
-                long long avg_ttl = ttl_sum/ttl_samples;
+            if ( ttl_samples )
+            {
+                long long avg_ttl = ttl_sum / ttl_samples;
 
                 /* Do a simple running average with a few samples.
                  * We just use the current estimate with a weight of 2%
                  * and the previous estimate with a weight of 98%. */
-                if (db->avg_ttl == 0) db->avg_ttl = avg_ttl;
-                db->avg_ttl = (db->avg_ttl/50)*49 + (avg_ttl/50);
+                if ( db->avg_ttl == 0 ) db->avg_ttl = avg_ttl;
+                db->avg_ttl = ( db->avg_ttl / 50 )*49 + ( avg_ttl / 50 );
             }
 
             /* We can't block forever here even if there are many keys to
              * expire. So after a given amount of milliseconds return to the
              * caller waiting for the other active expire cycle. */
-            iteration++;
-            if ((iteration & 0xf) == 0) { /* check once every 16 iterations. */
-                long long elapsed = ustime()-start;
+            iteration ++;
+            if ( ( iteration & 0xf ) == 0 )
+            { /* check once every 16 iterations. */
+                long long elapsed = ustime () - start;
 
-                if (elapsed > timelimit) timelimit_exit = 1;
+                if ( elapsed > timelimit ) timelimit_exit = 1;
             }
-            if (timelimit_exit) return;
+            if ( timelimit_exit ) return;
             /* We don't repeat the cycle if there are less than 25% of keys
              * found expired in the current DB. */
-        } while (expired > ACTIVE_EXPIRE_CYCLE_LOOKUPS_PER_LOOP/4);
+        }
+        while ( expired > ACTIVE_EXPIRE_CYCLE_LOOKUPS_PER_LOOP / 4 );
     }
 }
 
-unsigned int getLRUClock(void) {
-    return (mstime()/LRU_CLOCK_RESOLUTION) & LRU_CLOCK_MAX;
+unsigned int getLRUClock ( void )
+{
+    return (mstime () / LRU_CLOCK_RESOLUTION ) & LRU_CLOCK_MAX;
 }
 
 /* Add a sample to the operations per second array of samples. */
-void trackInstantaneousMetric(int metric, long long current_reading) {
-    long long t = mstime() - server.inst_metric[metric].last_sample_time;
+void trackInstantaneousMetric ( int metric, long long current_reading )
+{
+    long long t = mstime () - server.inst_metric[metric].last_sample_time;
     long long ops = current_reading -
-                    server.inst_metric[metric].last_sample_count;
+        server.inst_metric[metric].last_sample_count;
     long long ops_sec;
 
-    ops_sec = t > 0 ? (ops*1000/t) : 0;
+    ops_sec = t > 0 ? ( ops * 1000 / t ) : 0;
 
     server.inst_metric[metric].samples[server.inst_metric[metric].idx] =
         ops_sec;
-    server.inst_metric[metric].idx++;
+    server.inst_metric[metric].idx ++;
     server.inst_metric[metric].idx %= STATS_METRIC_SAMPLES;
-    server.inst_metric[metric].last_sample_time = mstime();
+    server.inst_metric[metric].last_sample_time = mstime ();
     server.inst_metric[metric].last_sample_count = current_reading;
 }
 
 /* Return the mean of all the samples. */
-long long getInstantaneousMetric(int metric) {
+long long getInstantaneousMetric ( int metric )
+{
     int j;
     long long sum = 0;
 
-    for (j = 0; j < STATS_METRIC_SAMPLES; j++)
+    for ( j = 0; j < STATS_METRIC_SAMPLES; j ++ )
         sum += server.inst_metric[metric].samples[j];
     return sum / STATS_METRIC_SAMPLES;
 }
@@ -733,38 +773,43 @@ long long getInstantaneousMetric(int metric) {
 /* This function handles 'background' operations we are required to do
  * incrementally in Redis databases, such as active key expiring, resizing,
  * rehashing. */
-void databasesCron(void) {
+void databasesCron ( void )
+{
     /* Expire keys by random sampling. Not required for slaves
      * as master will synthesize DELs for us. */
-    if (server.active_expire_enabled)
-        activeExpireCycle(ACTIVE_EXPIRE_CYCLE_SLOW);
+    if ( server.active_expire_enabled )
+        activeExpireCycle (ACTIVE_EXPIRE_CYCLE_SLOW);
 
     /* Perform hash tables rehashing if needed, but only if there are no
      * other processes saving the DB on disk. Otherwise rehashing is bad
      * as will cause a lot of copy-on-write of memory pages. */
-        /* We use global counters so if we stop the computation at a given
-         * DB we'll be able to start from the successive in the next
-         * cron loop iteration. */
+    /* We use global counters so if we stop the computation at a given
+     * DB we'll be able to start from the successive in the next
+     * cron loop iteration. */
     static unsigned int resize_db = 0;
     static unsigned int rehash_db = 0;
     int dbs_per_call = CRON_DBS_PER_CALL;
     int j;
 
     /* Don't test more DBs than we have. */
-    if (dbs_per_call > server.dbnum) dbs_per_call = server.dbnum;
+    if ( dbs_per_call > server.dbnum ) dbs_per_call = server.dbnum;
 
     /* Resize */
-    for (j = 0; j < dbs_per_call; j++) {
-        tryResizeHashTables(resize_db % server.dbnum);
-        resize_db++;
+    for ( j = 0; j < dbs_per_call; j ++ )
+    {
+        tryResizeHashTables (resize_db % server.dbnum);
+        resize_db ++;
     }
 
     /* Rehash */
-    if (server.activerehashing) {
-        for (j = 0; j < dbs_per_call; j++) {
-            int work_done = incrementallyRehash(rehash_db % server.dbnum);
-            rehash_db++;
-            if (work_done) {
+    if ( server.activerehashing )
+    {
+        for ( j = 0; j < dbs_per_call; j ++ )
+        {
+            int work_done = incrementallyRehash (rehash_db % server.dbnum);
+            rehash_db ++;
+            if ( work_done )
+            {
                 /* If the function did some work, stop here, we'll do
                  * more at the next cron loop. */
                 break;
@@ -777,9 +822,10 @@ void databasesCron(void) {
  * virtual memory and aging there is to store the current time in objects at
  * every object access, and accuracy is not needed. To access a global var is
  * a lot faster than calling time(NULL) */
-void updateCachedTime(void) {
-    server.unixtime = time(NULL);
-    server.mstime = mstime();
+void updateCachedTime ( void )
+{
+    server.unixtime = time (NULL);
+    server.mstime = mstime ();
 }
 
 /* This is our timer interrupt, called server.hz times per second.
@@ -801,17 +847,19 @@ void updateCachedTime(void) {
  * a macro is used: run_with_period(milliseconds) { .... }
  */
 
-void serverCron( void ) {
+void serverCron ( void )
+{
     int j;
 
     /* Software watchdog: deliver the SIGALRM that will reach the signal
      * handler if we don't return here fast enough. */
 
     /* Update the time cache. */
-    updateCachedTime();
+    updateCachedTime ();
 
-    run_with_period(100) {
-        trackInstantaneousMetric(STATS_METRIC_COMMAND,server.stat_numcommands);
+    run_with_period (100)
+    {
+        trackInstantaneousMetric (STATS_METRIC_COMMAND, server.stat_numcommands);
     }
 
     /* We have just LRU_BITS bits per object for LRU information.
@@ -825,63 +873,69 @@ void serverCron( void ) {
      *
      * Note that you can change the resolution altering the
      * LRU_CLOCK_RESOLUTION define. */
-    server.lruclock = getLRUClock();
+    server.lruclock = getLRUClock ();
 
-    pthread_mutex_lock(&rdb_mutex);
+    pthread_mutex_lock (&rdb_mutex);
     /* Record the max memory used since the server was started. */
-    if (zmalloc_used_memory() > server.stat_peak_memory)
-        server.stat_peak_memory = zmalloc_used_memory();
+    if ( zmalloc_used_memory () > server.stat_peak_memory )
+        server.stat_peak_memory = zmalloc_used_memory ();
 
     /* Sample the RSS here since this is a relatively slow call. */
-    server.resident_set_size = zmalloc_get_rss();
+    server.resident_set_size = zmalloc_get_rss ();
 
     /* We received a SIGTERM, shutting down here in a safe way, as it is
      * not ok doing so inside the signal handler. */
-    
+
     /* Show some info about non-empty databases */
-    run_with_period(5000) {
-        for (j = 0; j < server.dbnum; j++) {
+    run_with_period (5000)
+    {
+        for ( j = 0; j < server.dbnum; j ++ )
+        {
             long long size, used, vkeys;
 
-            size = dictSlots(server.db[j].dict);
-            used = dictSize(server.db[j].dict);
-            vkeys = dictSize(server.db[j].expires);
-            if (used || vkeys) {
+            size = dictSlots (server.db[j].dict);
+            used = dictSize (server.db[j].dict);
+            vkeys = dictSize (server.db[j].expires);
+            if ( used || vkeys )
+            {
                 //serverLog(LL_VERBOSE,"DB %d: %lld keys (%lld volatile) in %lld slots HT.",j,used,vkeys,size);
                 /* dictPrintStats(server.dict); */
             }
         }
     }
 
-    
+
     /* Handle background operations on Redis databases. */
-    databasesCron();
+    databasesCron ();
 
     /* Start a scheduled AOF rewrite if this was requested by the user while
      * a BGSAVE was in progress. */
     /* Check if a background saving or AOF rewrite in progress terminated. */
-    updateDictResizePolicy();
+    updateDictResizePolicy ();
 
-    pthread_mutex_unlock(&rdb_mutex);
-   
-    server.cronloops++;
+    pthread_mutex_unlock (&rdb_mutex);
+
+    server.cronloops ++;
     //return 1000/server.hz;
 }
 
-void * initCron ( void * arg) {
-    int timerfd = timerfd_create(CLOCK_REALTIME, 0);
-    if(timerfd == -1){
-        return (void *) NULL;
+void * initCron ( void * arg )
+{
+    int timerfd = timerfd_create (CLOCK_REALTIME, 0);
+    if ( timerfd == - 1 )
+    {
+        return ( void * ) NULL;
     }
 
     struct itimerspec tv;
-    memset(&tv, 0, sizeof(tv));
+    memset (&tv, 0, sizeof (tv ));
 
     tv.it_value.tv_sec = 1;
-    tv.it_interval.tv_nsec = 1000000000/server.hz;
+    tv.it_interval.tv_nsec = 1000000000 / server.hz;
 
-    if(timerfd_settime(timerfd, 0, &tv, NULL) == -1){
-        return (void *) NULL;
+    if ( timerfd_settime (timerfd, 0, &tv, NULL) == - 1 )
+    {
+        return ( void * ) NULL;
     }
     struct pollfd pfd;
     pfd.fd = timerfd;
@@ -890,40 +944,46 @@ void * initCron ( void * arg) {
     int ret;
     uint64_t val;
 
-    while(1){
-        ret = poll(&pfd, 1, -1);
-        if(ret == -1){
+    while ( 1 )
+    {
+        ret = poll (&pfd, 1, - 1);
+        if ( ret == - 1 )
+        {
             continue;
-        } 
-        if(pfd.revents & POLLIN){
-            read(timerfd, &val, sizeof(val));
-            serverCron();
+        }
+        if ( pfd.revents & POLLIN )
+        {
+            read (timerfd, &val, sizeof (val ));
+            serverCron ();
         }
     }
 }
 
 /* =========================== Server initialization ======================== */
 
-void createSharedObjects(void) {
+void createSharedObjects ( void )
+{
     int j;
 
-    for (j = 0; j < OBJ_SHARED_INTEGERS; j++) {
-        shared.integers[j] = createObject(OBJ_STRING,(void*)(long)j);
+    for ( j = 0; j < OBJ_SHARED_INTEGERS; j ++ )
+    {
+        shared.integers[j] = createObject (OBJ_STRING, ( void* ) ( long ) j);
         shared.integers[j]->encoding = OBJ_ENCODING_INT;
     }
-    
+
     /* The following two shared objects, minstring and maxstrings, are not
      * actually used for their value but as a special object meaning
      * respectively the minimum possible string and the maximum possible
      * string in string comparisons for the ZRANGEBYLEX command. */
-    shared.minstring = createStringObject("minstring",9);
-    shared.maxstring = createStringObject("maxstring",9);
+    shared.minstring = createStringObject ("minstring", 9);
+    shared.maxstring = createStringObject ("maxstring", 9);
 }
 
-void initServerConfig(size_t mem_limit) {
+void initServerConfig ( size_t mem_limit )
+{
 
     server.hz = CONFIG_DEFAULT_HZ;
-    server.arch_bits = (sizeof(long) == 8) ? 64 : 32;
+    server.arch_bits = ( sizeof (long ) == 8 ) ? 64 : 32;
     server.dbnum = CONFIG_DEFAULT_DBNUM;
     server.active_expire_enabled = 1;
     server.activerehashing = CONFIG_DEFAULT_ACTIVE_REHASHING;
@@ -938,30 +998,29 @@ void initServerConfig(size_t mem_limit) {
     server.zset_max_ziplist_entries = OBJ_ZSET_MAX_ZIPLIST_ENTRIES;
     server.zset_max_ziplist_value = OBJ_ZSET_MAX_ZIPLIST_VALUE;
 
-    server.lruclock = getLRUClock();
+    server.lruclock = getLRUClock ();
 
     /* Double constants initialization */
     R_Zero = 0.0;
-    R_PosInf = 1.0/R_Zero;
-    R_NegInf = -1.0/R_Zero;
-    R_Nan = R_Zero/R_Zero;
+    R_PosInf = 1.0 / R_Zero;
+    R_NegInf = - 1.0 / R_Zero;
+    R_Nan = R_Zero / R_Zero;
 
     /* Command table -- we initiialize it here as it is part of the
      * initial configuration, since command names may be changed via
      * redis.conf using the rename-command directive. */
-    server.commands = dictCreate(&commandTableDictType,NULL);
-    populateCommandTable();
+    server.commands = dictCreate (&commandTableDictType, NULL);
+    populateCommandTable ();
 
 }
 
 extern char **environ;
 
-
-
 /* Resets the stats that we expose via INFO or other means that we want
  * to reset via CONFIG RESETSTAT. The function is also used in order to
  * initialize these fields in initServer() at server startup. */
-void resetServerStats(void) {
+void resetServerStats ( void )
+{
     int j;
 
     server.stat_numcommands = 0;
@@ -969,40 +1028,43 @@ void resetServerStats(void) {
     server.stat_evictedkeys = 0;
     server.stat_keyspace_misses = 0;
     server.stat_keyspace_hits = 0;
-    for (j = 0; j < STATS_METRIC_COUNT; j++) {
+    for ( j = 0; j < STATS_METRIC_COUNT; j ++ )
+    {
         server.inst_metric[j].idx = 0;
-        server.inst_metric[j].last_sample_time = mstime();
+        server.inst_metric[j].last_sample_time = mstime ();
         server.inst_metric[j].last_sample_count = 0;
-        memset(server.inst_metric[j].samples,0,
-            sizeof(server.inst_metric[j].samples));
+        memset (server.inst_metric[j].samples, 0,
+                sizeof (server.inst_metric[j].samples ));
     }
 }
 
-int initServer(void) {
+int initServer ( void )
+{
     int j;
     pthread_t tid;
 
-    server.system_memory_size = zmalloc_get_memory_size();
+    server.system_memory_size = zmalloc_get_memory_size ();
 
-    createSharedObjects();
-    server.db = zmalloc(sizeof(redisDb)*server.dbnum);
+    createSharedObjects ();
+    server.db = zmalloc (sizeof (redisDb ) * server.dbnum);
 
     /* Create the Redis databases, and initialize other internal state. */
-    for (j = 0; j < server.dbnum; j++) {
-        server.db[j].dict = dictCreate(&dbDictType,NULL);
-        server.db[j].expires = dictCreate(&keyptrDictType,NULL);
-        server.db[j].eviction_pool = evictionPoolAlloc();
+    for ( j = 0; j < server.dbnum; j ++ )
+    {
+        server.db[j].dict = dictCreate (&dbDictType, NULL);
+        server.db[j].expires = dictCreate (&keyptrDictType, NULL);
+        server.db[j].eviction_pool = evictionPoolAlloc ();
         server.db[j].id = j;
         server.db[j].avg_ttl = 0;
     }
 
     server.cronloops = 0;
-    resetServerStats();
+    resetServerStats ();
     /* A few stats we don't want to reset: server startup time, and peak mem. */
-    server.stat_starttime = time(NULL);
+    server.stat_starttime = time (NULL);
     server.stat_peak_memory = 0;
     server.resident_set_size = 0;
-    updateCachedTime();
+    updateCachedTime ();
 
     /* Create the serverCron() time event, that's our main way to process
      * background operations. */
@@ -1012,77 +1074,93 @@ int initServer(void) {
      * no explicit limit in the user provided configuration we set a limit
      * at 3 GB using maxmemory with 'noeviction' policy'. This avoids
      * useless crashes of the Redis instance for out of memory. */
-    if (server.arch_bits == 32 && server.maxmemory == 0) {
-        server.maxmemory = 3072LL*(1024*1024); /* 3 GB */
+    if ( server.arch_bits == 32 && server.maxmemory == 0 )
+    {
+        server.maxmemory = 3072LL * ( 1024 * 1024 ); /* 3 GB */
         server.maxmemory_policy = MAXMEMORY_NO_EVICTION;
     }
 
     int ret;
-    
-    if((ret = pthread_create(&tid, NULL, initCron, (void *)NULL)) != 0){
-        return -1;
+
+    if ( ( ret = pthread_create (&tid, NULL, initCron, ( void * ) NULL) ) != 0 )
+    {
+        return - 1;
     }
     return 0;
 }
 
 /* Populates the Redis Command Table starting from the hard coded list
  * we have on top of redis.c file. */
-void populateCommandTable(void) {
+void populateCommandTable ( void )
+{
     int j;
-    int numcommands = sizeof(redisCommandTable)/sizeof(struct redisCommand);
-    for (j = 0; j < numcommands; j++) {
-        struct redisCommand *c = redisCommandTable+j;
+    int numcommands = sizeof (redisCommandTable ) / sizeof (struct redisCommand );
+    for ( j = 0; j < numcommands; j ++ )
+    {
+        struct redisCommand *c = redisCommandTable + j;
         char *f = c->sflags;
         int retval1;
 
-        while(*f != '\0') {
-            switch(*f) {
-            case 'w': c->flags |= CMD_WRITE; break;
-            case 'r': c->flags |= CMD_READONLY; break;
-            case 'm': c->flags |= CMD_DENYOOM; break;
-            case 'a': c->flags |= CMD_ADMIN; break;
-            case 'R': c->flags |= CMD_RANDOM; break;
-            case 't': c->flags |= CMD_STALE; break;
-            case 'F': c->flags |= CMD_FAST; break;
-            default: return; break;
+        while ( *f != '\0' )
+        {
+            switch ( *f )
+            {
+                case 'w': c->flags |= CMD_WRITE;
+                    break;
+                case 'r': c->flags |= CMD_READONLY;
+                    break;
+                case 'm': c->flags |= CMD_DENYOOM;
+                    break;
+                case 'a': c->flags |= CMD_ADMIN;
+                    break;
+                case 'R': c->flags |= CMD_RANDOM;
+                    break;
+                case 't': c->flags |= CMD_STALE;
+                    break;
+                case 'F': c->flags |= CMD_FAST;
+                    break;
+                default: return;
+                    break;
             }
-            f++;
+            f ++;
         }
 
-        retval1 = dictAdd(server.commands, sdsnew(c->name), c);
+        retval1 = dictAdd (server.commands, sdsnew (c->name), c);
         /* Populate an additional dictionary that will be unaffected
          * by rename-command statements in redis.conf. */
     }
 }
 
-void resetCommandTableStats(void) {
-    int numcommands = sizeof(redisCommandTable)/sizeof(struct redisCommand);
+void resetCommandTableStats ( void )
+{
+    int numcommands = sizeof (redisCommandTable ) / sizeof (struct redisCommand );
     int j;
 
-    for (j = 0; j < numcommands; j++) {
-        struct redisCommand *c = redisCommandTable+j;
+    for ( j = 0; j < numcommands; j ++ )
+    {
+        struct redisCommand *c = redisCommandTable + j;
 
         c->microseconds = 0;
         c->calls = 0;
     }
 }
 
-
 /* ====================== Commands lookup and execution ===================== */
 
-struct redisCommand *lookupCommand(sds name) {
-    return dictFetchValue(server.commands, name);
+struct redisCommand *lookupCommand ( sds name )
+{
+    return dictFetchValue (server.commands, name);
 }
 
-struct redisCommand *lookupCommandByCString(char *s) {
+struct redisCommand *lookupCommandByCString ( char *s )
+{
     struct redisCommand *cmd;
-    sds name = sdsnew(s);
+    sds name = sdsnew (s);
 
-    cmd = dictFetchValue(server.commands, name);
-    sdsfree(name);
+    cmd = dictFetchValue (server.commands, name);
+    sdsfree (name);
     return cmd;
 }
-
 
 /* Call() is the core of Redis execution of a command.
  *
@@ -1121,22 +1199,24 @@ struct redisCommand *lookupCommandByCString(char *s) {
  * preventCommandReplication(client *c);
  *
  */
-int call(client *c) {
+int call ( client *c )
+{
     long long start, duration;
     int success;
 
     /* Call the command. */
-    start = ustime();
-    success = c->cmd->proc(c);
-    duration = ustime()-start;
+    start = ustime ();
+    success = c->cmd->proc (c);
+    duration = ustime () - start;
 
     /// debug
     c->lastcmd->microseconds += duration;
-    c->lastcmd->calls++;
+    c->lastcmd->calls ++;
 
-    server.stat_numcommands++;
-    if(success != 0){
-        fprintf(stderr, "exec command failed: %s\n", c->cmd->name);
+    server.stat_numcommands ++;
+    if ( success != 0 )
+    {
+        fprintf (stderr, "exec command failed: %s\n", c->cmd->name);
     }
     return success;
 }
@@ -1149,217 +1229,249 @@ int call(client *c) {
  * If C_OK is returned the client is still alive and valid and
  * other operations can be performed by the caller. Otherwise
  * if C_ERR is returned the client was destroyed (i.e. after QUIT). */
-int processCommand(client *c) {
+int processCommand ( client *c )
+{
     /* The QUIT command is handled separately. Normal command procs will
      * go through checking for replication and QUIT will cause trouble
      * when FORCE_REPLICATION is enabled and would be implemented in
      * a regular command proc. */
-    
+
     /* Now lookup the command and check ASAP about trivial error conditions
      * such as wrong arity, bad command name and so forth. */
-    c->cmd = c->lastcmd = lookupCommand(c->argv[0]->ptr);
-    if (!c->cmd) {
+    c->cmd = c->lastcmd = lookupCommand (c->argv[0]->ptr);
+    if ( ! c->cmd )
+    {
         return C_ERR;
-    } else if ((c->cmd->arity > 0 && c->cmd->arity != c->argc) ||
-               (c->argc < -c->cmd->arity)) {
+    }
+    else if ( ( c->cmd->arity > 0 && c->cmd->arity != c->argc ) ||
+          ( c->argc < - c->cmd->arity ) )
+    {
         return C_ERR;
     }
 
-    
+
     /* Handle the maxmemory directive.
      *
      * First we try to free some memory if possible (if there are volatile
      * keys in the dataset). If there are not the only thing we can do
      * is returning an error. */
-    if (server.maxmemory) {
-        int retval = freeMemoryIfNeeded();
+    if ( server.maxmemory )
+    {
+        int retval = freeMemoryIfNeeded ();
 
         /* It was impossible to free enough memory, and the command the client
          * is trying to execute is denied during OOM conditions? Error. */
-        if ((c->cmd->flags & CMD_DENYOOM) && retval == C_ERR) {
-            printf("not enough memory\n");
+        if ( ( c->cmd->flags & CMD_DENYOOM ) && retval == C_ERR )
+        {
+            printf ("not enough memory\n");
             return C_ERR;
         }
     }
     /* Exec the command */
-    return call(c);
+    return call (c);
 }
 
 /*================================== Shutdown =============================== */
 
-
 /*================================== Commands =============================== */
 
 
-void echoCommand(client *c) {
-    addReply(c,c->argv[1]);
+void echoCommand ( client *c )
+{
+    addReply (c, c->argv[1]);
 }
-
 
 /* Convert an amount of bytes into a human readable string in the form
  * of 100B, 2G, 100M, 4K, and so forth. */
-void bytesToHuman(char *s, unsigned long long n) {
+void bytesToHuman ( char *s, unsigned long long n )
+{
     double d;
 
-    if (n < 1024) {
+    if ( n < 1024 )
+    {
         /* Bytes */
-        sprintf(s,"%lluB",n);
+        sprintf (s, "%lluB", n);
         return;
-    } else if (n < (1024*1024)) {
-        d = (double)n/(1024);
-        sprintf(s,"%.2fK",d);
-    } else if (n < (1024LL*1024*1024)) {
-        d = (double)n/(1024*1024);
-        sprintf(s,"%.2fM",d);
-    } else if (n < (1024LL*1024*1024*1024)) {
-        d = (double)n/(1024LL*1024*1024);
-        sprintf(s,"%.2fG",d);
-    } else if (n < (1024LL*1024*1024*1024*1024)) {
-        d = (double)n/(1024LL*1024*1024*1024);
-        sprintf(s,"%.2fT",d);
-    } else if (n < (1024LL*1024*1024*1024*1024*1024)) {
-        d = (double)n/(1024LL*1024*1024*1024*1024);
-        sprintf(s,"%.2fP",d);
-    } else {
+    }
+    else if ( n < ( 1024 * 1024 ) )
+    {
+        d = ( double ) n / ( 1024 );
+        sprintf (s, "%.2fK", d);
+    }
+    else if ( n < ( 1024LL * 1024 * 1024 ) )
+    {
+        d = ( double ) n / ( 1024 * 1024 );
+        sprintf (s, "%.2fM", d);
+    }
+    else if ( n < ( 1024LL * 1024 * 1024 * 1024 ) )
+    {
+        d = ( double ) n / ( 1024LL * 1024 * 1024 );
+        sprintf (s, "%.2fG", d);
+    }
+    else if ( n < ( 1024LL * 1024 * 1024 * 1024 * 1024 ) )
+    {
+        d = ( double ) n / ( 1024LL * 1024 * 1024 * 1024 );
+        sprintf (s, "%.2fT", d);
+    }
+    else if ( n < ( 1024LL * 1024 * 1024 * 1024 * 1024 * 1024 ) )
+    {
+        d = ( double ) n / ( 1024LL * 1024 * 1024 * 1024 * 1024 );
+        sprintf (s, "%.2fP", d);
+    }
+    else
+    {
         /* Let's hope we never need this */
-        sprintf(s,"%lluB",n);
+        sprintf (s, "%lluB", n);
     }
 }
 
 /* Create the string returned by the INFO command. This is decoupled
  * by the INFO command itself as we need to report the same information
  * on memory corruption problems. */
-sds genRedisInfoString(char *section) {
-    sds info = sdsempty();
+sds genRedisInfoString ( char *section )
+{
+    sds info = sdsempty ();
     int j, numcommands;
     int allsections = 0, defsections = 0;
     int sections = 0;
 
-    if(!strcasecmp(section, "default")){
+    if ( ! strcasecmp (section, "default") )
+    {
         defsections = 1;
-    }else if(!strcasecmp(section, "all")){
+    }
+    else if ( ! strcasecmp (section, "all") )
+    {
         allsections = 1;
     }
 
     /* Memory */
-    if (allsections || defsections || !strcasecmp(section,"memory")) {
+    if ( allsections || defsections || ! strcasecmp (section, "memory") )
+    {
         char hmem[64];
         char peak_hmem[64];
         char total_system_hmem[64];
         char used_memory_rss_hmem[64];
         char maxmemory_hmem[64];
-        size_t zmalloc_used = zmalloc_used_memory();
+        size_t zmalloc_used = zmalloc_used_memory ();
         size_t total_system_mem = server.system_memory_size;
-        const char *evict_policy = evictPolicyToString();
+        const char *evict_policy = evictPolicyToString ();
 
         /* Peak memory is updated from time to time by serverCron() so it
          * may happen that the instantaneous value is slightly bigger than
          * the peak value. This may confuse users, so we update the peak
          * if found smaller than the current memory usage. */
-        if (zmalloc_used > server.stat_peak_memory)
+        if ( zmalloc_used > server.stat_peak_memory )
             server.stat_peak_memory = zmalloc_used;
 
-        bytesToHuman(hmem,zmalloc_used);
-        bytesToHuman(peak_hmem,server.stat_peak_memory);
-        bytesToHuman(total_system_hmem,total_system_mem);
-        bytesToHuman(used_memory_rss_hmem,server.resident_set_size);
-        bytesToHuman(maxmemory_hmem,server.maxmemory);
+        bytesToHuman (hmem, zmalloc_used);
+        bytesToHuman (peak_hmem, server.stat_peak_memory);
+        bytesToHuman (total_system_hmem, total_system_mem);
+        bytesToHuman (used_memory_rss_hmem, server.resident_set_size);
+        bytesToHuman (maxmemory_hmem, server.maxmemory);
 
-        if (sections++) info = sdscat(info,"\r\n");
-        info = sdscatprintf(info,
-            "# Memory\r\n"
-            "used_memory:%zu\r\n"
-            "used_memory_human:%s\r\n"
-            "used_memory_rss:%zu\r\n"
-            "used_memory_rss_human:%s\r\n"
-            "used_memory_peak:%zu\r\n"
-            "used_memory_peak_human:%s\r\n"
-            "total_system_memory:%lu\r\n"
-            "total_system_memory_human:%s\r\n"
-            "maxmemory:%lld\r\n"
-            "maxmemory_human:%s\r\n"
-            "maxmemory_policy:%s\r\n"
-            "mem_fragmentation_ratio:%.2f\r\n"
-            "mem_allocator:%s\r\n",
-            zmalloc_used,
-            hmem,
-            server.resident_set_size,
-            used_memory_rss_hmem,
-            server.stat_peak_memory,
-            peak_hmem,
-            (unsigned long)total_system_mem,
-            total_system_hmem,
-            server.maxmemory,
-            maxmemory_hmem,
-            evict_policy,
-            zmalloc_get_fragmentation_ratio(server.resident_set_size),
-            ZMALLOC_LIB
-            );
+        if ( sections ++ ) info = sdscat (info, "\r\n");
+        info = sdscatprintf (info,
+                             "# Memory\r\n"
+                             "used_memory:%zu\r\n"
+                             "used_memory_human:%s\r\n"
+                             "used_memory_rss:%zu\r\n"
+                             "used_memory_rss_human:%s\r\n"
+                             "used_memory_peak:%zu\r\n"
+                             "used_memory_peak_human:%s\r\n"
+                             "total_system_memory:%lu\r\n"
+                             "total_system_memory_human:%s\r\n"
+                             "maxmemory:%lld\r\n"
+                             "maxmemory_human:%s\r\n"
+                             "maxmemory_policy:%s\r\n"
+                             "mem_fragmentation_ratio:%.2f\r\n"
+                             "mem_allocator:%s\r\n",
+                             zmalloc_used,
+                             hmem,
+                             server.resident_set_size,
+                             used_memory_rss_hmem,
+                             server.stat_peak_memory,
+                             peak_hmem,
+                             ( unsigned long ) total_system_mem,
+                             total_system_hmem,
+                             server.maxmemory,
+                             maxmemory_hmem,
+                             evict_policy,
+                             zmalloc_get_fragmentation_ratio (server.resident_set_size),
+                             ZMALLOC_LIB
+                             );
     }
 
-    
+
     /* Stats */
-    if (allsections || defsections || !strcasecmp(section,"stats")) {
-        if (sections++) info = sdscat(info,"\r\n");
-        info = sdscatprintf(info,
-            "# Stats\r\n"
-            "total_commands_processed:%lld\r\n"
-            "instantaneous_ops_per_sec:%lld\r\n"
-            "expired_keys:%lld\r\n"
-            "evicted_keys:%lld\r\n"
-            "keyspace_hits:%lld\r\n"
-            "keyspace_misses:%lld\r\n",
-            server.stat_numcommands,
-            getInstantaneousMetric(STATS_METRIC_COMMAND),
-            server.stat_expiredkeys,
-            server.stat_evictedkeys,
-            server.stat_keyspace_hits,
-            server.stat_keyspace_misses);
+    if ( allsections || defsections || ! strcasecmp (section, "stats") )
+    {
+        if ( sections ++ ) info = sdscat (info, "\r\n");
+        info = sdscatprintf (info,
+                             "# Stats\r\n"
+                             "total_commands_processed:%lld\r\n"
+                             "instantaneous_ops_per_sec:%lld\r\n"
+                             "expired_keys:%lld\r\n"
+                             "evicted_keys:%lld\r\n"
+                             "keyspace_hits:%lld\r\n"
+                             "keyspace_misses:%lld\r\n",
+                             server.stat_numcommands,
+                             getInstantaneousMetric (STATS_METRIC_COMMAND),
+                             server.stat_expiredkeys,
+                             server.stat_evictedkeys,
+                             server.stat_keyspace_hits,
+                             server.stat_keyspace_misses);
     }
 
 
     /* cmdtime */
-    if (allsections || !strcasecmp(section,"commandstats")) {
-        if (sections++) info = sdscat(info,"\r\n");
-        info = sdscatprintf(info, "# Commandstats\r\n");
-        numcommands = sizeof(redisCommandTable)/sizeof(struct redisCommand);
-        for (j = 0; j < numcommands; j++) {
-            struct redisCommand *c = redisCommandTable+j;
+    if ( allsections || ! strcasecmp (section, "commandstats") )
+    {
+        if ( sections ++ ) info = sdscat (info, "\r\n");
+        info = sdscatprintf (info, "# Commandstats\r\n");
+        numcommands = sizeof (redisCommandTable ) / sizeof (struct redisCommand );
+        for ( j = 0; j < numcommands; j ++ )
+        {
+            struct redisCommand *c = redisCommandTable + j;
 
-            if (!c->calls) continue;
-            info = sdscatprintf(info,
-                "cmdstat_%s:calls=%lld,usec=%lld,usec_per_call=%.2f\r\n",
-                c->name, c->calls, c->microseconds,
-                (c->calls == 0) ? 0 : ((float)c->microseconds/c->calls));
+            if ( ! c->calls ) continue;
+            info = sdscatprintf (info,
+                                 "cmdstat_%s:calls=%lld,usec=%lld,usec_per_call=%.2f\r\n",
+                                 c->name, c->calls, c->microseconds,
+                                 ( c->calls == 0 ) ? 0 : ( ( float ) c->microseconds / c->calls ));
         }
     }
 
     /* Key space */
-    if (allsections || defsections || !strcasecmp(section,"keyspace")) {
-        if (sections++) info = sdscat(info,"\r\n");
-        info = sdscatprintf(info, "# Keyspace\r\n");
-        for (j = 0; j < server.dbnum; j++) {
+    if ( allsections || defsections || ! strcasecmp (section, "keyspace") )
+    {
+        if ( sections ++ ) info = sdscat (info, "\r\n");
+        info = sdscatprintf (info, "# Keyspace\r\n");
+        for ( j = 0; j < server.dbnum; j ++ )
+        {
             long long keys, vkeys;
 
-            keys = dictSize(server.db[j].dict);
-            vkeys = dictSize(server.db[j].expires);
-            if (keys || vkeys) {
-                info = sdscatprintf(info,
-                    "db%d:keys=%lld,expires=%lld,avg_ttl=%lld\r\n",
-                    j, keys, vkeys, server.db[j].avg_ttl);
+            keys = dictSize (server.db[j].dict);
+            vkeys = dictSize (server.db[j].expires);
+            if ( keys || vkeys )
+            {
+                info = sdscatprintf (info,
+                                     "db%d:keys=%lld,expires=%lld,avg_ttl=%lld\r\n",
+                                     j, keys, vkeys, server.db[j].avg_ttl);
             }
         }
     }
     return info;
 }
 
-int infoCommand(client *c) {
+int infoCommand ( client *c )
+{
     char *section = c->argc == 2 ? c->argv[1]->ptr : "default";
 
-    if (c->argc > 2) {
+    if ( c->argc > 2 )
+    {
         return C_ERR;
     }
-    addReplySds(c, genRedisInfoString(section));
+    addReplySds (c, genRedisInfoString (section));
     return C_OK;
 }
 
@@ -1404,12 +1516,14 @@ int infoCommand(client *c) {
  * evicted in the whole database. */
 
 /* Create a new eviction pool. */
-struct evictionPoolEntry *evictionPoolAlloc(void) {
+struct evictionPoolEntry *evictionPoolAlloc ( void )
+{
     struct evictionPoolEntry *ep;
     int j;
 
-    ep = zmalloc(sizeof(*ep)*MAXMEMORY_EVICTION_POOL_SIZE);
-    for (j = 0; j < MAXMEMORY_EVICTION_POOL_SIZE; j++) {
+    ep = zmalloc (sizeof (*ep ) * MAXMEMORY_EVICTION_POOL_SIZE);
+    for ( j = 0; j < MAXMEMORY_EVICTION_POOL_SIZE; j ++ )
+    {
         ep[j].idle = 0;
         ep[j].key = NULL;
     }
@@ -1426,144 +1540,168 @@ struct evictionPoolEntry *evictionPoolAlloc(void) {
  * right. */
 
 #define EVICTION_SAMPLES_ARRAY_SIZE 16
-void evictionPoolPopulate(dict *sampledict, dict *keydict, struct evictionPoolEntry *pool) {
+
+void evictionPoolPopulate ( dict *sampledict, dict *keydict, struct evictionPoolEntry *pool )
+{
     int j, k, count;
-    dictEntry *_samples[EVICTION_SAMPLES_ARRAY_SIZE];
+    dictEntry * _samples[EVICTION_SAMPLES_ARRAY_SIZE];
     dictEntry **samples;
 
     /* Try to use a static buffer: this function is a big hit...
      * Note: it was actually measured that this helps. */
-    if (server.maxmemory_samples <= EVICTION_SAMPLES_ARRAY_SIZE) {
+    if ( server.maxmemory_samples <= EVICTION_SAMPLES_ARRAY_SIZE )
+    {
         samples = _samples;
-    } else {
-        samples = zmalloc(sizeof(samples[0])*server.maxmemory_samples);
+    }
+    else
+    {
+        samples = zmalloc (sizeof (samples[0] ) * server.maxmemory_samples);
     }
 
-    count = dictGetSomeKeys(sampledict,samples,server.maxmemory_samples);
-    for (j = 0; j < count; j++) {
+    count = dictGetSomeKeys (sampledict, samples, server.maxmemory_samples);
+    for ( j = 0; j < count; j ++ )
+    {
         unsigned long long idle;
         sds key;
         robj *o;
         dictEntry *de;
 
         de = samples[j];
-        key = dictGetKey(de);
+        key = dictGetKey (de);
         /* If the dictionary we are sampling from is not the main
          * dictionary (but the expires one) we need to lookup the key
          * again in the key dictionary to obtain the value object. */
-        if (sampledict != keydict) de = dictFind(keydict, key);
-        o = dictGetVal(de);
-        idle = estimateObjectIdleTime(o);
+        if ( sampledict != keydict ) de = dictFind (keydict, key);
+        o = dictGetVal (de);
+        idle = estimateObjectIdleTime (o);
 
         /* Insert the element inside the pool.
          * First, find the first empty bucket or the first populated
          * bucket that has an idle time smaller than our idle time. */
         k = 0;
-        while (k < MAXMEMORY_EVICTION_POOL_SIZE &&
-               pool[k].key &&
-               pool[k].idle < idle) k++;
-        if (k == 0 && pool[MAXMEMORY_EVICTION_POOL_SIZE-1].key != NULL) {
+        while ( k < MAXMEMORY_EVICTION_POOL_SIZE &&
+                pool[k].key &&
+                pool[k].idle < idle ) k ++;
+        if ( k == 0 && pool[MAXMEMORY_EVICTION_POOL_SIZE - 1].key != NULL )
+        {
             /* Can't insert if the element is < the worst element we have
              * and there are no empty buckets. */
             continue;
-        } else if (k < MAXMEMORY_EVICTION_POOL_SIZE && pool[k].key == NULL) {
+        }
+        else if ( k < MAXMEMORY_EVICTION_POOL_SIZE && pool[k].key == NULL )
+        {
             /* Inserting into empty position. No setup needed before insert. */
-        } else {
+        }
+        else
+        {
             /* Inserting in the middle. Now k points to the first element
              * greater than the element to insert.  */
-            if (pool[MAXMEMORY_EVICTION_POOL_SIZE-1].key == NULL) {
+            if ( pool[MAXMEMORY_EVICTION_POOL_SIZE - 1].key == NULL )
+            {
                 /* Free space on the right? Insert at k shifting
                  * all the elements from k to end to the right. */
-                memmove(pool+k+1,pool+k,
-                    sizeof(pool[0])*(MAXMEMORY_EVICTION_POOL_SIZE-k-1));
-            } else {
+                memmove (pool + k + 1, pool + k,
+                         sizeof (pool[0] )*( MAXMEMORY_EVICTION_POOL_SIZE - k - 1 ));
+            }
+            else
+            {
                 /* No free space on right? Insert at k-1 */
-                k--;
+                k --;
                 /* Shift all elements on the left of k (included) to the
                  * left, so we discard the element with smaller idle time. */
-                sdsfree(pool[0].key);
-                memmove(pool,pool+1,sizeof(pool[0])*k);
+                sdsfree (pool[0].key);
+                memmove (pool, pool + 1, sizeof (pool[0] ) * k);
             }
         }
-        pool[k].key = sdsdup(key);
+        pool[k].key = sdsdup (key);
         pool[k].idle = idle;
     }
-    if (samples != _samples) zfree(samples);
+    if ( samples != _samples ) zfree (samples);
 }
 
-int freeMemoryIfNeeded(void) {
+int freeMemoryIfNeeded ( void )
+{
     size_t mem_used, mem_tofree, mem_freed;
 
     /* Remove the size of slaves output buffers and AOF buffer from the
      * count of used memory. */
-    mem_used = zmalloc_used_memory();
+    mem_used = zmalloc_used_memory ();
 
 
     /* Check if we are over the memory limit. */
-    if (mem_used <= server.maxmemory) return C_OK;
+    if ( mem_used <= server.maxmemory ) return C_OK;
 
-    if (server.maxmemory_policy == MAXMEMORY_NO_EVICTION)
+    if ( server.maxmemory_policy == MAXMEMORY_NO_EVICTION )
         return C_ERR; /* We need to free memory, but policy forbids. */
 
     /* Compute how much memory we need to free. */
     mem_tofree = mem_used - server.maxmemory;
     mem_freed = 0;
-    while (mem_freed < mem_tofree) {
+    while ( mem_freed < mem_tofree )
+    {
         int j, k, keys_freed = 0;
 
-        for (j = 0; j < server.dbnum; j++) {
+        for ( j = 0; j < server.dbnum; j ++ )
+        {
             long bestval = 0; /* just to prevent warning */
             sds bestkey = NULL;
             dictEntry *de;
-            redisDb *db = server.db+j;
+            redisDb *db = server.db + j;
             dict *dict;
 
-            if (server.maxmemory_policy == MAXMEMORY_ALLKEYS_LRU ||
-                server.maxmemory_policy == MAXMEMORY_ALLKEYS_RANDOM)
+            if ( server.maxmemory_policy == MAXMEMORY_ALLKEYS_LRU ||
+                 server.maxmemory_policy == MAXMEMORY_ALLKEYS_RANDOM )
             {
                 dict = server.db[j].dict;
-            } else {
+            }
+            else
+            {
                 dict = server.db[j].expires;
             }
-            if (dictSize(dict) == 0) continue;
+            if ( dictSize (dict) == 0 ) continue;
 
             /* volatile-random and allkeys-random policy */
-            if (server.maxmemory_policy == MAXMEMORY_ALLKEYS_RANDOM ||
-                server.maxmemory_policy == MAXMEMORY_VOLATILE_RANDOM)
+            if ( server.maxmemory_policy == MAXMEMORY_ALLKEYS_RANDOM ||
+                 server.maxmemory_policy == MAXMEMORY_VOLATILE_RANDOM )
             {
-                de = dictGetRandomKey(dict);
-                bestkey = dictGetKey(de);
+                de = dictGetRandomKey (dict);
+                bestkey = dictGetKey (de);
             }
 
-            /* volatile-lru and allkeys-lru policy */
-            else if (server.maxmemory_policy == MAXMEMORY_ALLKEYS_LRU ||
-                server.maxmemory_policy == MAXMEMORY_VOLATILE_LRU)
+                /* volatile-lru and allkeys-lru policy */
+            else if ( server.maxmemory_policy == MAXMEMORY_ALLKEYS_LRU ||
+                      server.maxmemory_policy == MAXMEMORY_VOLATILE_LRU )
             {
                 struct evictionPoolEntry *pool = db->eviction_pool;
 
-                while(bestkey == NULL) {
-                    evictionPoolPopulate(dict, db->dict, db->eviction_pool);
+                while ( bestkey == NULL )
+                {
+                    evictionPoolPopulate (dict, db->dict, db->eviction_pool);
                     /* Go backward from best to worst element to evict. */
-                    for (k = MAXMEMORY_EVICTION_POOL_SIZE-1; k >= 0; k--) {
-                        if (pool[k].key == NULL) continue;
-                        de = dictFind(dict,pool[k].key);
+                    for ( k = MAXMEMORY_EVICTION_POOL_SIZE - 1; k >= 0; k -- )
+                    {
+                        if ( pool[k].key == NULL ) continue;
+                        de = dictFind (dict, pool[k].key);
 
                         /* Remove the entry from the pool. */
-                        sdsfree(pool[k].key);
+                        sdsfree (pool[k].key);
                         /* Shift all elements on its right to left. */
-                        memmove(pool+k,pool+k+1,
-                            sizeof(pool[0])*(MAXMEMORY_EVICTION_POOL_SIZE-k-1));
+                        memmove (pool + k, pool + k + 1,
+                                 sizeof (pool[0] )*( MAXMEMORY_EVICTION_POOL_SIZE - k - 1 ));
                         /* Clear the element on the right which is empty
                          * since we shifted one position to the left.  */
-                        pool[MAXMEMORY_EVICTION_POOL_SIZE-1].key = NULL;
-                        pool[MAXMEMORY_EVICTION_POOL_SIZE-1].idle = 0;
+                        pool[MAXMEMORY_EVICTION_POOL_SIZE - 1].key = NULL;
+                        pool[MAXMEMORY_EVICTION_POOL_SIZE - 1].idle = 0;
 
                         /* If the key exists, is our pick. Otherwise it is
                          * a ghost and we need to try the next element. */
-                        if (de) {
-                            bestkey = dictGetKey(de);
+                        if ( de )
+                        {
+                            bestkey = dictGetKey (de);
                             break;
-                        } else {
+                        }
+                        else
+                        {
                             /* Ghost... */
                             continue;
                         }
@@ -1571,19 +1709,22 @@ int freeMemoryIfNeeded(void) {
                 }
             }
 
-            /* volatile-ttl */
-            else if (server.maxmemory_policy == MAXMEMORY_VOLATILE_TTL) {
-                for (k = 0; k < server.maxmemory_samples; k++) {
+                /* volatile-ttl */
+            else if ( server.maxmemory_policy == MAXMEMORY_VOLATILE_TTL )
+            {
+                for ( k = 0; k < server.maxmemory_samples; k ++ )
+                {
                     sds thiskey;
                     long thisval;
 
-                    de = dictGetRandomKey(dict);
-                    thiskey = dictGetKey(de);
-                    thisval = (long) dictGetVal(de);
+                    de = dictGetRandomKey (dict);
+                    thiskey = dictGetKey (de);
+                    thisval = ( long ) dictGetVal (de);
 
                     /* Expire sooner (minor expire unix timestamp) is better
                      * candidate for deletion */
-                    if (bestkey == NULL || thisval < bestval) {
+                    if ( bestkey == NULL || thisval < bestval )
+                    {
                         bestkey = thiskey;
                         bestval = thisval;
                     }
@@ -1591,10 +1732,11 @@ int freeMemoryIfNeeded(void) {
             }
 
             /* Finally remove the selected key. */
-            if (bestkey) {
+            if ( bestkey )
+            {
                 long long delta;
 
-                robj *keyobj = createStringObject(bestkey,sdslen(bestkey));
+                robj *keyobj = createStringObject (bestkey, sdslen (bestkey));
                 /* We compute the amount of memory freed by dbDelete() alone.
                  * It is possible that actually the memory needed to propagate
                  * the DEL in AOF and replication link is greater than the one
@@ -1603,200 +1745,248 @@ int freeMemoryIfNeeded(void) {
                  *
                  * AOF and Output buffer memory will be freed eventually so
                  * we only care about memory used by the key space. */
-                delta = (long long) zmalloc_used_memory();
-                dbDelete(db,keyobj);
-                delta -= (long long) zmalloc_used_memory();
+                delta = ( long long ) zmalloc_used_memory ();
+                dbDelete (db, keyobj);
+                delta -= ( long long ) zmalloc_used_memory ();
                 mem_freed += delta;
-                server.stat_evictedkeys++;
-                decrRefCount(keyobj);
-                keys_freed++;
+                server.stat_evictedkeys ++;
+                decrRefCount (keyobj);
+                keys_freed ++;
 
             }
         }
-        if (!keys_freed) {
+        if ( ! keys_freed )
+        {
             return C_ERR; /* nothing to free... */
         }
     }
     return C_OK;
 }
 
-client *createClient(size_t limit){
-    client *c = zmalloc(sizeof(client));
-    selectDb(c, 0);
+client *createClient ( size_t limit )
+{
+    client *c = zmalloc (sizeof (client ));
+    memset (c, 0, sizeof (client ));
+
+    selectDb (c, 0);
+
     c->dictid = 0;
     c->cmd = c->lastcmd = NULL;
     c->resp_pos = 0;
     c->limit = limit;
+
     return c;
 }
 
-int processInput(client *c, int argc, RdbCommand *commands, size_t *resp_len, void *resp){
-    int success = 0;
-    pthread_mutex_lock(&rdb_mutex);
+int processInput ( client *c, int argc, RdbCommand *commands, size_t *resp_len, void *resp )
+{
     int i;
+    int success = 0;
+    pthread_mutex_lock (&rdb_mutex);
     c->resp = resp;
     c->resp_len = resp_len;
-    if(argc) {
-        if (c->argv) zfree(c->argv);
-        c->argv = zmalloc(sizeof(robj *) * argc);
+    if ( argc )
+    {
+        if ( c->argv ) zfree (c->argv);
+        c->argv = zmalloc (sizeof (robj * ) * argc);
     }
     c->argc = argc;
-    for(i = 0; i < c->argc; i++){
-        c->argv[i] = createObject(OBJ_STRING, sdsnewlen(commands[i].cmd, commands[i].len));
+    for ( i = 0; i < c->argc; i ++ )
+    {
+        c->argv[i] = createObject (OBJ_STRING, sdsnewlen (commands[i].cmd, commands[i].len));
     }
-    if(C_ERR == processCommand(c)){
-        fprintf(stderr, "command exec failed");
-        success = -1;
+    if ( C_ERR == processCommand (c) )
+    {
+        fprintf (stderr, "command exec failed");
+        success = - 1;
     }
-    freeClientArgv(c);
-    pthread_mutex_unlock(&rdb_mutex);
+    freeClientArgv (c);
+    pthread_mutex_unlock (&rdb_mutex);
     return success;
 }
 
-void freeClientArgv(client *c){
+void freeClientArgv ( client *c )
+{
     int j;
 
-    for(j = 0; j < c->argc; j++){
-        decrRefCount(c->argv[j]);
+    for ( j = 0; j < c->argc; j ++ )
+    {
+        decrRefCount (c->argv[j]);
     }
     c->argc = 0;
     c->cmd = NULL;
 }
 
-void freeClient(client *c){
-    freeClientArgv(c);
-    zfree(c->argv);
-    zfree(c);
+void freeClient ( client *c )
+{
+    freeClientArgv (c);
+    zfree (c->argv);
+    zfree (c);
 }
 
-static void _addReplyToBuffer(client *c, char *s, size_t len){
-    *(c->resp_len) = len;
-    if(s){
-        memcpy(c->resp, s, len);
+static void _addReplyToBuffer ( client *c, char *s, size_t len )
+{
+    *( c->resp_len ) = len;
+    if ( s )
+    {
+        memcpy (c->resp, s, len);
     }
 }
 
-void addReply(client *c, robj *obj){
-    if(sdsEncodedObject(obj)){
-        _addReplyToBuffer(c, obj->ptr, sdslen(obj->ptr));
-    }else if(obj->encoding == OBJ_ENCODING_INT){
-        obj = getDecodedObject(obj);
-        _addReplyToBuffer(c, obj->ptr, strlen(obj->ptr));
-        decrRefCount(obj);
+void addReply ( client *c, robj *obj )
+{
+    if ( sdsEncodedObject (obj) )
+    {
+        _addReplyToBuffer (c, obj->ptr, sdslen (obj->ptr));
+    }
+    else if ( obj->encoding == OBJ_ENCODING_INT )
+    {
+        obj = getDecodedObject (obj);
+        _addReplyToBuffer (c, obj->ptr, strlen (obj->ptr));
+        decrRefCount (obj);
     }
 }
 
-void addReplySds(client *c, sds s){
-    _addReplyToBuffer(c, s, sdslen(s));
-    sdsfree(s);
+void addReplySds ( client *c, sds s )
+{
+    _addReplyToBuffer (c, s, sdslen (s));
+    sdsfree (s);
 }
 
-void addReplyString(client *c, char *s, size_t len){
-    _addReplyToBuffer(c, s, len);
+void addReplyString ( client *c, char *s, size_t len )
+{
+    _addReplyToBuffer (c, s, len);
 }
 
-void addReplyDouble(client *c, double d){
+void addReplyDouble ( client *c, double d )
+{
     char dbuf[128];
     int dlen;
-    dlen = snprintf(dbuf, sizeof(dbuf), "%.17g", d);
-    addReplyString(c, dbuf, dlen);
+    dlen = snprintf (dbuf, sizeof (dbuf ), "%.17g", d);
+    addReplyString (c, dbuf, dlen);
 }
 
-void addReplyLongLong(client *c, long long ll){
+void addReplyLongLong ( client *c, long long ll )
+{
     char buf[128];
     int len;
-    len = ll2string(buf, sizeof(buf), ll);
-    addReplyString(c, buf, len);
+    len = ll2string (buf, sizeof (buf ), ll);
+    addReplyString (c, buf, len);
 }
 
-void addReplyNULL(client *c){
-    _addReplyToBuffer(c, NULL, 0);
+void addReplyNULL ( client *c )
+{
+    _addReplyToBuffer (c, NULL, 0);
 }
 
-void _addReplyJson(client *c, int type, char *key, size_t key_len, double d){
-    size_t len = (key_len + 150);
+void _addReplyJson ( client *c, int type, char *key, size_t key_len, double d )
+{
+    size_t len = ( key_len + 150 );
     char buf[len];
     size_t res;
-    if(type != 0){
-        res = snprintf(buf, len, "{\"key\":\"%.*s\",\"val\":%.17g}", (int)key_len, key, d);
-    }else{
-        res = snprintf(buf, len, "{\"key\":\"%.*s\"}", (int)key_len, key);
+    if ( type != 0 )
+    {
+        res = snprintf (buf, len, "{\"key\":\"%.*s\",\"val\":%.17g}", ( int ) key_len, key, d);
     }
-    memcpy(c->resp+c->resp_pos, buf, res);
+    else
+    {
+        res = snprintf (buf, len, "{\"key\":\"%.*s\"}", ( int ) key_len, key);
+    }
+    memcpy (c->resp + c->resp_pos, buf, res);
     c->resp_pos += res;
 }
 
-void addReplyJsonLongLong(client *c, int type, long long ll, double d) {
+void addReplyJsonLongLong ( client *c, int type, long long ll, double d )
+{
     char buf[128];
     size_t len;
-    len = ll2string(buf, sizeof(buf), ll);
-    _addReplyJson(c, type, buf, len, d);
+    len = ll2string (buf, sizeof (buf ), ll);
+    _addReplyJson (c, type, buf, len, d);
 }
 
-void addReplyJsonString(client *c, int type, char *key, size_t key_len, double d){
-    _addReplyJson(c, type, key, key_len, d);
+void addReplyJsonString ( client *c, int type, char *key, size_t key_len, double d )
+{
+    _addReplyJson (c, type, key, key_len, d);
 }
 
-void addReplyJson(client *c, int type, robj *obj, double d){
-    if(sdsEncodedObject(obj)){
-        _addReplyJson(c, type, obj->ptr, sdslen(obj->ptr), d);
-    }else if(obj->encoding == OBJ_ENCODING_INT){
-        obj = getDecodedObject(obj);
-        _addReplyJson(c, type, obj->ptr, strlen(obj->ptr), d);
-        decrRefCount(obj);
+void addReplyJson ( client *c, int type, robj *obj, double d )
+{
+    if ( sdsEncodedObject (obj) )
+    {
+        _addReplyJson (c, type, obj->ptr, sdslen (obj->ptr), d);
+    }
+    else if ( obj->encoding == OBJ_ENCODING_INT )
+    {
+        obj = getDecodedObject (obj);
+        _addReplyJson (c, type, obj->ptr, strlen (obj->ptr), d);
+        decrRefCount (obj);
     }
 }
 
-void addReplyJsonHead(client *c){
-    *((char *)c->resp) = '[';
+void addReplyJsonHead ( client *c )
+{
+    *( ( char * ) c->resp ) = '[';
     c->resp_pos += 1;
 }
-void addReplyJsonTail(client *c){
-    *((char *)c->resp+c->resp_pos-1) = ']';
+
+void addReplyJsonTail ( client *c )
+{
+    *( ( char * ) c->resp + c->resp_pos - 1 ) = ']';
     *c->resp_len = c->resp_pos;
     c->resp_pos = 0;
 }
-void addReplyJsonSep(client *c) {
-    *((char *)c->resp+c->resp_pos) = ',';
+
+void addReplyJsonSep ( client *c )
+{
+    *( ( char * ) c->resp + c->resp_pos ) = ',';
     c->resp_pos += 1;
 }
-int outOfRange(client *c) {
-    if(c->resp_pos >= c->limit - 128){
+
+int outOfRange ( client *c )
+{
+    if ( c->resp_pos >= c->limit - 128 )
+    {
         return 1;
-    }else{
+    }
+    else
+    {
         return 0;
     }
 }
 
-int rdb_init(size_t mem_limit){
+int rdb_init ( size_t mem_limit )
+{
     struct timeval tv;
 
-    setlocale(LC_COLLATE,"");
-    zmalloc_enable_thread_safeness();
-    srand(time(NULL)^getpid());
-    gettimeofday(&tv,NULL);
-    dictSetHashFunctionSeed(tv.tv_sec^tv.tv_usec^getpid());
-    initServerConfig(mem_limit);
+    setlocale (LC_COLLATE, "");
+    zmalloc_enable_thread_safeness ();
+    srand (time (NULL)^getpid ());
+    gettimeofday (&tv, NULL);
+    dictSetHashFunctionSeed (tv.tv_sec^tv.tv_usec^getpid ());
+    initServerConfig (mem_limit);
 
-    if(initServer() != 0)
-        return -1;
-    return 0;   
+    if ( initServer () != 0 )
+        return - 1;
+    return 0;
 }
 /* =================================== Main! ================================ */
 
 #ifdef __linux__
-int linuxOvercommitMemoryValue(void) {
-    FILE *fp = fopen("/proc/sys/vm/overcommit_memory","r");
+
+int linuxOvercommitMemoryValue ( void )
+{
+    FILE *fp = fopen ("/proc/sys/vm/overcommit_memory", "r");
     char buf[64];
 
-    if (!fp) return -1;
-    if (fgets(buf,64,fp) == NULL) {
-        fclose(fp);
-        return -1;
+    if ( ! fp ) return - 1;
+    if ( fgets (buf, 64, fp) == NULL )
+    {
+        fclose (fp);
+        return - 1;
     }
-    fclose(fp);
+    fclose (fp);
 
-    return atoi(buf);
+    return atoi (buf);
 }
 
 #endif /* __linux__ */

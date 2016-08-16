@@ -113,6 +113,14 @@ public:
                                   bool is_hincrby,
                                   conn_ctxt_t conn
                                   );
+
+public:
+
+    int info (
+               std::string * & rsp,
+               int * rsp_len,
+               conn_ctxt_t conn
+               );
     
     static void * operator new( size_t size )
     {

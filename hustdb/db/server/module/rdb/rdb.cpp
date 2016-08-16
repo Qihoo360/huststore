@@ -381,6 +381,37 @@ int rdb_t::hincrby_or_hincrbyfloat (
     return 0;
 }
 
+int rdb_t::info (
+                  std::string * &     rsp,
+                  int *               rsp_len,
+                  conn_ctxt_t         conn
+                  )
+{
+    if ( unlikely ( ! m_ok ) )
+    {
+        return EINVAL;
+    }
+
+    RdbCommand cmds[ 2 ];
+
+    cmds[ 0 ].cmd = ( char * ) "info";
+    cmds[ 0 ].len = 4;
+    cmds[ 1 ].cmd = ( char * ) "all";
+    cmds[ 1 ].len = 3;
+
+    std::string * rspi = m_buffers[ conn.worker_id ];
+
+    int r = processInput ( m_rdb, 2, cmds, ( size_t * ) rsp_len, & ( * rspi ) [ 0 ] );
+    if ( unlikely ( r || ! * rsp_len ) )
+    {
+        return ENOENT;
+    }
+
+    rsp = rspi;
+
+    return 0;
+}
+
 void rdb_t::close ( )
 {
     for ( rdb_buffers_t::iterator it = m_buffers.begin (); it != m_buffers.end (); ++ it )

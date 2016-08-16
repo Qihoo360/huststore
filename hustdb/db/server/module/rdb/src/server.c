@@ -226,6 +226,7 @@ struct redisCommand redisCommandTable[] = {
     {"sort", sortCommand, - 2, "wm", 0, sortGetKeys, 1, 1, 1, 0, 0 },
     {"info", infoCommand, - 1, "t", 0, NULL, 0, 0, 0, 0, 0 },
     {"ttl", ttlCommand, 2, "rF", 0, NULL, 1, 1, 1, 0, 0 },
+	{"persist",persistCommand,2,"wF",0,NULL,1,1,1,0,0},
     {"pttl", pttlCommand, 2, "rF", 0, NULL, 1, 1, 1, 0, 0 },
     {"object", objectCommand, 3, "r", 0, NULL, 2, 2, 2, 0, 0 },
     {"bitop", bitopCommand, - 4, "wm", 0, NULL, 2, - 1, 1, 0, 0 },

@@ -841,6 +841,7 @@ int expireGenericCommand ( client *c, long long basetime, int unit )
     /* No key, return zero. */
     if ( lookupKeyWrite (c->db, key) == NULL )
     {
+        addReplyLongLong (c, 0);
         return C_ERR;
     }
 
@@ -852,11 +853,13 @@ int expireGenericCommand ( client *c, long long basetime, int unit )
      * (possibly in the past) and wait for an explicit DEL from the master. */
     if ( when <= mstime () )
     {
+        addReplyLongLong (c, 0);
         return C_ERR;
     }
     else
     {
         setExpire (c->db, key, when);
+        addReplyLongLong (c, 1);
         return C_OK;
     }
 }
@@ -926,16 +929,19 @@ int persistCommand ( client *c )
     de = dictFind (c->db->dict, c->argv[1]->ptr);
     if ( de == NULL )
     {
+        addReplyLongLong (c, 0);
         return C_ERR;
     }
     else
     {
         if ( removeExpire (c->db, c->argv[1]) )
         {
+            addReplyLongLong (c, 0);
             return C_OK;
         }
         else
         {
+            addReplyLongLong (c, 1);
             return C_ERR;
         }
     }

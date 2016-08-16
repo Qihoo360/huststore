@@ -32,7 +32,6 @@ bool rdb_t::open (
         {
             std::string * s = new std::string ();
             s->reserve ( RDB_VAL_LEN + 16 );
-            s->resize ( 0 );
 
             m_buffers.push_back ( s );
         }
@@ -117,14 +116,16 @@ int rdb_t::get_or_ttl (
     cmds[ 1 ].cmd = ( char * ) key;
     cmds[ 1 ].len = key_len;
 
-    rsp = m_buffers[ conn.worker_id ];
+    std::string * rspi = m_buffers[ conn.worker_id ];
 
-    int r = processInput ( m_rdb, 2, cmds, ( size_t * ) rsp_len, & ( * rsp ) [ 0 ] );
+    int r = processInput ( m_rdb, 2, cmds, ( size_t * ) rsp_len, & ( * rspi ) [ 0 ] );
     if ( unlikely ( r || ! rsp_len ) )
     {
         return ENOENT;
     }
 
+    rsp = rspi;
+    
     return 0;
 }
 
@@ -277,13 +278,15 @@ int rdb_t::hget (
     cmds[ 2 ].cmd = ( char * ) key;
     cmds[ 2 ].len = key_len;
 
-    rsp = m_buffers[ conn.worker_id ];
+    std::string * rspi = m_buffers[ conn.worker_id ];
 
-    int r = processInput ( m_rdb, 3, cmds, ( size_t * ) rsp_len, & ( * rsp ) [ 0 ] );
+    int r = processInput ( m_rdb, 3, cmds, ( size_t * ) rsp_len, & ( * rspi ) [ 0 ] );
     if ( unlikely ( r || ! rsp_len ) )
     {
         return ENOENT;
     }
+    
+    rsp = rspi;
 
     return 0;
 }
@@ -365,13 +368,15 @@ int rdb_t::hincrby_or_hincrbyfloat (
     cmds[ 3 ].cmd = ( char * ) val;
     cmds[ 3 ].len = val_len;
 
-    rsp = m_buffers[ conn.worker_id ];
+    std::string * rspi = m_buffers[ conn.worker_id ];
 
-    int r = processInput ( m_rdb, 4, cmds, ( size_t * ) rsp_len, & ( * rsp ) [ 0 ] );
+    int r = processInput ( m_rdb, 4, cmds, ( size_t * ) rsp_len, & ( * rspi ) [ 0 ] );
     if ( unlikely ( r || ! rsp_len ) )
     {
         return ENOENT;
     }
+    
+    rsp = rspi;
 
     return 0;
 }

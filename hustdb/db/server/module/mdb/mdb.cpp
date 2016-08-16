@@ -29,7 +29,6 @@ bool mdb_t::open (
         {
             std::string * s = new std::string ();
             s->reserve ( MDB_VAL_LEN + 16 );
-            s->resize ( 0 );
 
             m_buffers.push_back ( s );
         }
@@ -77,13 +76,15 @@ int mdb_t::get (
         return EINVAL;
     }
 
-    rsp = m_buffers[ conn.worker_id ];
+    std::string * rspi = m_buffers[ conn.worker_id ];
 
-    int r = process_get_command ( ( char * ) key, key_len, ( char * ) & ( * rsp ) [ 0 ], rsp_len );
+    int r = process_get_command ( ( char * ) key, key_len, ( char * ) & ( * rspi ) [ 0 ], rsp_len );
     if ( unlikely ( ! r ) )
     {
         return ENOENT;
     }
+    
+    rsp = rspi;
 
     return 0;
 }

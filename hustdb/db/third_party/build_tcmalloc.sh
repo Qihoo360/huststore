@@ -9,7 +9,7 @@ cd ..
 rm -fr gperftools-2.1
 tar zxvf gperftools-2.1.tar.gz
 cd gperftools-2.1
-./configure
+./configure --enable-frame-pointers
 make
 sudo make install
 cd ..

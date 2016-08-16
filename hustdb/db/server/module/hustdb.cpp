@@ -150,12 +150,6 @@ bool hustdb_t::open ( )
         LOG_ERROR ( "[hustdb][open]init_server_config() failed" );
         return false;
     }
-    
-    if ( ! check_invariant_config () )
-    {
-        LOG_ERROR ( "[hustdb][open]check_invariant_config() failed" );
-        return false;
-    }
 
     m_apptool->make_dir ( DB_DATA_ROOT );
     if ( ! m_apptool->is_dir ( DB_DATA_ROOT ) )
@@ -168,6 +162,12 @@ bool hustdb_t::open ( )
     if ( ! m_apptool->is_dir ( DB_DATA_DIR ) )
     {
         LOG_ERROR ( "[hustdb][open]./DATA/DATA create failed" );
+        return false;
+    }
+    
+    if ( ! check_invariant_config () )
+    {
+        LOG_ERROR ( "[hustdb][open]check_invariant_config() failed" );
         return false;
     }
 

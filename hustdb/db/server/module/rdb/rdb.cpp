@@ -119,7 +119,7 @@ int rdb_t::get_or_ttl (
     std::string * rspi = m_buffers[ conn.worker_id ];
 
     int r = processInput ( m_rdb, 2, cmds, ( size_t * ) rsp_len, & ( * rspi ) [ 0 ] );
-    if ( unlikely ( r || ! rsp_len ) )
+    if ( unlikely ( r || ! * rsp_len ) )
     {
         return ENOENT;
     }
@@ -281,7 +281,7 @@ int rdb_t::hget (
     std::string * rspi = m_buffers[ conn.worker_id ];
 
     int r = processInput ( m_rdb, 3, cmds, ( size_t * ) rsp_len, & ( * rspi ) [ 0 ] );
-    if ( unlikely ( r || ! rsp_len ) )
+    if ( unlikely ( r || ! * rsp_len ) )
     {
         return ENOENT;
     }
@@ -371,7 +371,7 @@ int rdb_t::hincrby_or_hincrbyfloat (
     std::string * rspi = m_buffers[ conn.worker_id ];
 
     int r = processInput ( m_rdb, 4, cmds, ( size_t * ) rsp_len, & ( * rspi ) [ 0 ] );
-    if ( unlikely ( r || ! rsp_len ) )
+    if ( unlikely ( r || ! * rsp_len ) )
     {
         return ENOENT;
     }

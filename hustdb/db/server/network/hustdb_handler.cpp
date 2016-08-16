@@ -93,9 +93,9 @@ bool __post_handler(int r, const char * data, size_t len, evhtp_request_t * requ
     return !r;
 }
 
-bool post_handler(int r, std::string * rsp, evhtp_request_t * request, hustdb_network_ctx_t * ctx)
+bool post_handler(int r, std::string * rsp, size_t size, evhtp_request_t * request, hustdb_network_ctx_t * ctx)
 {
-    return __post_handler(r, rsp ? rsp->c_str() : 0, rsp ? rsp->size() : 0, request, ctx);
+    return __post_handler(r, rsp ? rsp->c_str() : 0, size, request, ctx);
 }
 
 void unescape_key(bool ignore_post, evhtp_request_t * request, evhtp::c_str_t& key)
@@ -253,7 +253,7 @@ void hustdb_export_handler(hustdb_export_ctx_t& args, evhtp_request_t * request,
         args.start, args.end, args.cover, args.noval, token);
     uint64_t tmp = reinterpret_cast<uint64_t> (token);
     std::string rsp = evhtp::to_string(tmp);
-    hustdb_network::post_handler(r, &rsp, request, ctx);
+    hustdb_network::post_handler(r, &rsp, rsp.size(), request, ctx);
 }
 
 void hustmq_put_handler(hustmq_put_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx)
@@ -278,7 +278,7 @@ void hustmq_get_handler(hustmq_get_ctx_t& args, evhtp_request_t * request, hustd
         evhtp::add_kv("Ack-Token", unacked.c_str(), request);
     }
 
-    if (hustdb_network::post_handler(r, rsp, request, ctx) && args.ack)
+    if (hustdb_network::post_handler(r, rsp, rsp->size(), request, ctx) && args.ack)
     {
         ctx->db->hustmq_ack_inner(ack, conn);
     }
@@ -302,14 +302,14 @@ void hustmq_worker_handler(hustmq_worker_ctx_t& args, evhtp_request_t * request,
 {
     std::string workers;
     int r = ctx->db->hustmq_worker(args.queue.data, args.queue.len, workers);
-    hustdb_network::post_handler(r, &workers, request, ctx);
+    hustdb_network::post_handler(r, &workers, workers.size(), request, ctx);
 }
 
 void hustmq_stat_handler(hustmq_stat_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx)
 {
     std::string stat;
     int r = ctx->db->hustmq_stat(args.queue.data, args.queue.len, stat);
-    hustdb_network::post_handler(r, &stat, request, ctx);
+    hustdb_network::post_handler(r, &stat, stat.size(), request, ctx);
 }
 
 void hustmq_stat_all_handler(evhtp_request_t * request, hustdb_network_ctx_t * ctx)
@@ -361,7 +361,7 @@ void hustmq_sub_handler(hustmq_sub_ctx_t& args, evhtp_request_t * request, hustd
         sprintf(val, "%u-%u", sp, ep);
         evhtp::add_kv("Index", val, request);
     }
-    hustdb_network::post_handler(r, rsp, request, ctx);
+    hustdb_network::post_handler(r, rsp, rsp->size(), request, ctx);
 }
 
 void hustdb_info_handler(evhtp_request_t * request, hustdb_network_ctx_t * ctx)
@@ -448,7 +448,7 @@ void hustcache_get_handler(hustcache_get_ctx_t& args, evhtp_request_t * request,
     PRE_READ;
     hustdb_network::unescape_key(false, request, args.key);
     int r = ctx->db->get_rdb()->get_or_ttl(args.key.data, args.key.len, rsp, &rsp_len, true, conn);
-    hustdb_network::post_handler(r, rsp, request, ctx);
+    hustdb_network::post_handler(r, rsp, rsp_len, request, ctx);
 }
 
 void hustcache_ttl_handler(hustcache_ttl_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx)
@@ -456,7 +456,7 @@ void hustcache_ttl_handler(hustcache_ttl_ctx_t& args, evhtp_request_t * request,
     PRE_READ;
     hustdb_network::unescape_key(false, request, args.key);
     int r = ctx->db->get_rdb()->get_or_ttl(args.key.data, args.key.len, rsp, &rsp_len, false, conn);
-    hustdb_network::post_handler(r, rsp, request, ctx);
+    hustdb_network::post_handler(r, rsp, rsp_len, request, ctx);
 }
 
 void hustcache_put_handler(hustcache_put_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx)
@@ -512,7 +512,7 @@ void hustcache_hget_handler(hustcache_hget_ctx_t& args, evhtp_request_t * reques
     PRE_READ;
     hustdb_network::unescape_key(false, request, args.key);
     int r = ctx->db->get_rdb()->hget(args.tb.data, args.tb.len, args.key.data, args.key.len, rsp, &rsp_len, conn);
-    hustdb_network::post_handler(r, rsp, request, ctx);
+    hustdb_network::post_handler(r, rsp, rsp_len, request, ctx);
 }
 
 void hustcache_hset_handler(hustcache_hset_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx)
@@ -536,7 +536,7 @@ void hustcache_hincrby_handler(hustcache_hincrby_ctx_t& args, evhtp_request_t * 
     PRE_READ;
     hustdb_network::unescape_key(false, request, args.key);
     int r = ctx->db->get_rdb()->hincrby_or_hincrbyfloat(args.tb.data, args.tb.len, args.key.data, args.key.len, args.val.data, args.val.len, rsp, &rsp_len, true, conn);
-    hustdb_network::post_handler(r, rsp, request, ctx);
+    hustdb_network::post_handler(r, rsp, rsp_len, request, ctx);
 }
 
 void hustcache_hincrbyfloat_handler(hustcache_hincrbyfloat_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx)
@@ -544,5 +544,5 @@ void hustcache_hincrbyfloat_handler(hustcache_hincrbyfloat_ctx_t& args, evhtp_re
     PRE_READ;
     hustdb_network::unescape_key(false, request, args.key);
     int r = ctx->db->get_rdb()->hincrby_or_hincrbyfloat(args.tb.data, args.tb.len, args.key.data, args.key.len, args.val.data, args.val.len, rsp, &rsp_len, false, conn);
-    hustdb_network::post_handler(r, rsp, request, ctx);
+    hustdb_network::post_handler(r, rsp, rsp_len, request, ctx);
 }

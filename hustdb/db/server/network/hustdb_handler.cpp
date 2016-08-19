@@ -278,7 +278,7 @@ void hustmq_get_handler(hustmq_get_ctx_t& args, evhtp_request_t * request, hustd
         evhtp::add_kv("Ack-Token", unacked.c_str(), request);
     }
 
-    if (hustdb_network::post_handler(r, rsp, rsp->size(), request, ctx) && args.ack)
+    if (hustdb_network::post_handler(r, rsp, rsp ? rsp->size() : 0, request, ctx) && args.ack)
     {
         ctx->db->hustmq_ack_inner(ack, conn);
     }
@@ -361,7 +361,7 @@ void hustmq_sub_handler(hustmq_sub_ctx_t& args, evhtp_request_t * request, hustd
         sprintf(val, "%u-%u", sp, ep);
         evhtp::add_kv("Index", val, request);
     }
-    hustdb_network::post_handler(r, rsp, rsp->size(), request, ctx);
+    hustdb_network::post_handler(r, rsp, rsp ? rsp->size() : 0, request, ctx);
 }
 
 void hustdb_info_handler(evhtp_request_t * request, hustdb_network_ctx_t * ctx)

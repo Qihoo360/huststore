@@ -32,6 +32,10 @@ def manual():
                 hset | hget | hget2 |hdel | hexist |
                 sadd | srem | sismember |
                 zadd | zrem | zismember | zscore | zscore2 |
+                cache_exist | cache_get | cache_ttl | 
+                cache_put | cache_append | cache_del | cache_expire |
+                cache_hexist | cache_hget | cache_hset | cache_hdel |
+                cache_hincrby | cache_hincrbyfloat |
                 stat_all | sync_status | sync_alive | get_table | loop
     sample:
         python autotest.py localhost:8082 loop
@@ -92,6 +96,21 @@ class HATester:
             'zscore': self.__zscore,
             'zscore2': self.__zscore2,
             
+            'cache_exist': self.__cache_exist,
+            'cache_get': self.__cache_get,
+            'cache_ttl': self.__cache_ttl,
+            'cache_put': self.__cache_put,
+            'cache_append': self.__cache_append,
+            'cache_del': self.__cache_del,
+            'cache_expire': self.__cache_expire,
+            
+            'cache_hexist': self.__cache_hexist,
+            'cache_hget': self.__cache_hget,
+            'cache_hset': self.__cache_hset,
+            'cache_hdel': self.__cache_hdel,
+            'cache_hincrby': self.__cache_hincrby,
+            'cache_hincrbyfloat': self.__cache_hincrbyfloat,
+            
             'loop': self.__loop
             }
         self.__func_dict = self.__functors()
@@ -117,7 +136,7 @@ class HATester:
         print r.content if 200 == r.status_code else '%s: %d' % (cmd, r.status_code)
     def __put(self):
         cmd = self.__gencmd('put')(self.__dbkey)
-        r = self.__sess.put(cmd, self.__dbval, headers = {'content-type':'text/plain'}, auth=(USER, PASSWD))
+        r = self.__sess.post(cmd, self.__dbval, headers = {'content-type':'text/plain'}, auth=(USER, PASSWD))
         if 200 == r.status_code:
             if 'sync' in r.headers:
                 print 'sync: %s' % r.headers['sync']
@@ -149,8 +168,7 @@ class HATester:
         cmd = self.__gencmd('get2')(self.__dbkey)
         r = self.__sess.get(cmd, auth=(USER, PASSWD))
         self.__get2_complete(cmd, r)
-    def __del(self):
-        cmd = self.__gencmd('del')(self.__dbkey)
+    def __write_base(self, cmd):
         r = self.__sess.get(cmd, auth=(USER, PASSWD))
         if 200 == r.status_code:
             if 'sync' in r.headers:
@@ -159,21 +177,15 @@ class HATester:
                 print 'pass'
         else:
             print '%s: %d' % (cmd, r.status_code)
+    def __del(self):
+        self.__write_base(self.__gencmd('del')(self.__dbkey))
     def __exist(self):
         cmd = self.__gencmd('exist')(self.__dbkey)
         r = self.__sess.get(cmd, auth=(USER, PASSWD))
         print 'exist' if 200 == r.status_code else '%s: %d' % (cmd, r.status_code)
 
     def __hset(self):
-        cmd = self.__gentbcmd('hset')(self.__dbtb, self.__dbkey)
-        r = self.__sess.put(cmd, self.__dbval, headers = {'content-type':'text/plain'}, auth=(USER, PASSWD))
-        if 200 == r.status_code:
-            if 'sync' in r.headers:
-                print 'sync: %s' % r.headers['sync']
-            else:
-                print 'pass'
-        else:
-            print '%s: %d' % (cmd, r.status_code)
+        self.__post_base(self.__gentbcmd('hset')(self.__dbtb, self.__dbkey), self.__dbval)
     def __hget(self):
         cmd = self.__gentbcmd('hget')(self.__dbtb, self.__dbkey)
         r = self.__sess.get(cmd, auth=(USER, PASSWD))
@@ -183,15 +195,7 @@ class HATester:
         r = self.__sess.get(cmd, auth=(USER, PASSWD))
         self.__get2_complete(cmd, r)
     def __hdel(self):
-        cmd = self.__gentbcmd('hdel')(self.__dbtb, self.__dbkey)
-        r = self.__sess.get(cmd, auth=(USER, PASSWD))
-        if 200 == r.status_code:
-            if 'sync' in r.headers:
-                print 'sync: %s' % r.headers['sync']
-            else:
-                print 'pass'
-        else:
-            print '%s: %d' % (cmd, r.status_code)
+        self.__write_base(self.__gentbcmd('hdel')(self.__dbtb, self.__dbkey))
     def __hexist(self):
         cmd = self.__gentbcmd('hexist')(self.__dbtb, self.__dbkey)
         r = self.__sess.get(cmd, auth=(USER, PASSWD))
@@ -232,6 +236,57 @@ class HATester:
         cmd = '%s/zscore2?tb=hustdbhaztb' % self.__host
         r = self.__sess.post(cmd, self.__dbkey, headers = {'content-type':'text/plain'}, auth=(USER, PASSWD))
         self.__get2_complete(cmd, r)
+    def __cache_exist(self):
+        cmd = self.__gencmd('cache/exist')(self.__dbkey)
+        r = self.__sess.get(cmd, auth=(USER, PASSWD))
+        print 'exist' if 200 == r.status_code else '%s: %d' % (cmd, r.status_code)
+    def __cache_get(self):
+        cmd = self.__gencmd('cache/get')(self.__dbkey)
+        r = self.__sess.get(cmd, auth=(USER, PASSWD))
+        print r.content if 200 == r.status_code else '%s: %d' % (cmd, r.status_code)
+    def __cache_ttl(self):
+        cmd = self.__gencmd('cache/ttl')(self.__dbkey)
+        r = self.__sess.get(cmd, auth=(USER, PASSWD))
+        print r.content if 200 == r.status_code else '%s: %d' % (cmd, r.status_code)
+    def __post_cache_base(self, cmd, body):
+        r = self.__sess.post(cmd, body, headers = {'content-type':'text/plain'}, auth=(USER, PASSWD))
+        if 200 == r.status_code:
+            if 'fail' in r.headers:
+                print 'fail: %s' % r.headers['fail']
+            else:
+                print 'pass'
+        else:
+            print '%s: %d' % (cmd, r.status_code)
+    def __cache_put(self):
+        self.__post_cache_base(self.__gencmd('cache/put')(self.__dbkey), self.__dbval)
+    def __cache_append(self):
+        self.__post_cache_base(self.__gencmd('cache/append')(self.__dbkey), self.__dbval)
+    def __cache_del(self):
+        self.__post_cache_base(self.__gencmd('cache/del')(self.__dbkey), '')
+    def __cache_expire(self):
+        self.__post_cache_base('%s/cache/expire?key=%s&ttl=5' % (self.__host, self.__dbkey), '')
+    def __cache_hexist(self):
+        cmd = self.__gentbcmd('cache/hexist')(self.__dbtb, self.__dbkey)
+        r = self.__sess.get(cmd, auth=(USER, PASSWD))
+        print 'exist' if 200 == r.status_code else '%s: %d' % (cmd, r.status_code)
+    def __cache_hget(self):
+        cmd = self.__gentbcmd('cache/hget')(self.__dbtb, self.__dbkey)
+        r = self.__sess.get(cmd, auth=(USER, PASSWD))
+        print r.content if 200 == r.status_code else '%s: %d' % (cmd, r.status_code)
+    def __cache_hset(self):
+        self.__post_cache_base(self.__gentbcmd('cache/hset')(self.__dbtb, self.__dbkey), self.__dbval)
+    def __cache_hdel(self):
+        self.__post_cache_base(self.__gentbcmd('cache/hdel')(self.__dbtb, self.__dbkey), '')
+    def __cache_hincrby(self):
+        cmd = '%s/cache/hset?tb=%s&key=%s&val=5' % (self.__host, self.__dbtb, self.__dbkey)
+        r = self.__sess.get(cmd, auth=(USER, PASSWD))
+        if 200 == r.status_code:
+            self.__post_cache_base('%s/cache/hincrby?tb=%s&key=%s&val=5' % (self.__host, self.__dbtb, self.__dbkey), '')
+    def __cache_hincrbyfloat(self):
+        cmd = '%s/cache/hset?tb=%s&key=%s&val=5.125' % (self.__host, self.__dbtb, self.__dbkey)
+        r = self.__sess.get(cmd, auth=(USER, PASSWD))
+        if 200 == r.status_code:
+            self.__post_cache_base('%s/cache/hincrbyfloat?tb=%s&key=%s&val=5.125' % (self.__host, self.__dbtb, self.__dbkey), '')
 
     def __run_template(self, loop, cmd, func):
         try:
@@ -264,6 +319,15 @@ class HATester:
                 else:
                     if 'sync' in r.headers:
                         log_err(self.__log_dir, 'loop %s { %s: { sync: %s } }' % (loop, cmd, r.headers['sync']))
+            return __del_imp
+        def __del_cache(func):
+            def __del_imp(loop, cmd):
+                r = func(cmd, timeout=TIMEOUT, auth=(USER, PASSWD))
+                if 200 != r.status_code:
+                    log_err(self.__log_dir, 'loop %s { %s: %d }' % (loop, cmd, r.status_code))
+                else:
+                    if 'fail' in r.headers:
+                        log_err(self.__log_dir, 'loop %s { %s: { fail: %s } }' % (loop, cmd, r.headers['fail']))
             return __del_imp
         def __exist(func): 
             def __exist_imp(loop, cmd):
@@ -315,7 +379,11 @@ class HATester:
             'zadd': __zadd,
             'zscore': __zscore,
             'zrem': __zrem,
-            'zismember': __zismember
+            'zismember': __zismember,
+            'cache_put': __put,
+            'cache_get': __get,
+            'cache_del': __del_cache,
+            'cache_exist': __exist
             }
     def __run_each_case(self, loop, tb, key, val):
         cases = [
@@ -340,7 +408,19 @@ class HATester:
             ['zscore',    '%s/zscore?tb=hustdbhaztb' % self.__host,        self.__func_dict['zscore'](key, 60, self.__sess.post)],
             ['zrem',      '%s/zrem?tb=hustdbhaztb' % self.__host,          self.__func_dict['zrem'](key, self.__sess.post)],
             ['zismember', '%s/zismember?tb=hustdbhaztb' % self.__host,     self.__func_dict['zismember'](key, self.__sess.post)]
-        ]
+            ]
+        cache_cases = [
+            ['cache/put', self.__func_dict['cache_put'](val, self.__sess.post)],
+            ['cache/get', self.__func_dict['cache_get'](val, self.__sess.get)],
+            ['cache/del', self.__func_dict['cache_del'](self.__sess.get)],
+            ['cache/exist', self.__func_dict['cache_exist'](self.__sess.get)]
+            ]
+        cache_hcases = [
+            ['cache/hset', self.__func_dict['cache_put'](val, self.__sess.post)],
+            ['cache/hget', self.__func_dict['cache_get'](val, self.__sess.get)],
+            ['cache/hdel', self.__func_dict['cache_del'](self.__sess.get)],
+            ['cache/hexist', self.__func_dict['cache_exist'](self.__sess.get)]
+            ]
         for case in cases:
             self.__run_template(loop, self.__gencmd(case[0])(key),       case[1])
         for case in hcases:
@@ -349,6 +429,10 @@ class HATester:
             self.__run_template(loop, self.__genscmd(case[0])(tb),       case[1])
         for case in zcases:
             self.__run_template(loop, case[1], case[2])
+        for case in cache_cases:
+            self.__run_template(loop, self.__gencmd(case[0])(key),       case[1])
+        for case in cache_hcases:
+            self.__run_template(loop, self.__gentbcmd(case[0])(tb, key), case[1])
     def __run_cases(self, loop):
         self.__count = 0
         for case in test_cases:

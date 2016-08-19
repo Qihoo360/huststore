@@ -36,6 +36,15 @@ typedef struct
 	ngx_bool_t has_tb;
 } hustdb_ha_write_ctx_t;
 
+typedef struct
+{
+    ngx_http_subrequest_ctx_t base;
+    ngx_http_subrequest_peer_t * peer;
+    hustdb_write_state_t state;
+    int error_count;
+    ngx_http_subrequest_peer_t * error_peer;
+} hustdb_ha_write_cache_ctx_t;
+
 typedef ngx_int_t (*hustdb_ha_start_write_t)(
     ngx_bool_t support_post_only,
     ngx_bool_t key_in_body,
@@ -67,6 +76,15 @@ ngx_int_t hustdb_ha_write_handler(
 
 ngx_int_t hustdb_ha_zwrite_handler(
     uint8_t method,
+    ngx_str_t * backend_uri,
+    ngx_http_request_t *r);
+
+ngx_bool_t hustdb_ha_has_tb(ngx_str_t * backend_uri, ngx_http_request_t *r);
+ngx_bool_t hustdb_ha_has_ttl(ngx_str_t * backend_uri, ngx_http_request_t *r);
+ngx_bool_t hustdb_ha_check_incr(ngx_str_t * backend_uri, ngx_http_request_t *r);
+
+ngx_int_t hustdb_ha_write_cache_handler(
+    hustdb_ha_check_parameter_t check,
     ngx_str_t * backend_uri,
     ngx_http_request_t *r);
 

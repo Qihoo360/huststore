@@ -191,6 +191,76 @@ static ngx_http_request_item_t hustdb_ha_handler_dict[] =
         ngx_string("/zrangebyscore"),
         ngx_string("/hustdb/zrangebyscore"),
         hustdb_ha_zrangebyscore_handler
+    },
+    {
+        ngx_string("/cache/exist"),
+        ngx_string("/hustcache/exist"),
+        hustdb_ha_cache_exist_handler
+    },
+    {
+        ngx_string("/cache/get"),
+        ngx_string("/hustcache/get"),
+        hustdb_ha_cache_get_handler
+    },
+    {
+        ngx_string("/cache/ttl"),
+        ngx_string("/hustcache/ttl"),
+        hustdb_ha_cache_ttl_handler
+    },
+    {
+        ngx_string("/cache/put"),
+        ngx_string("/hustcache/put"),
+        hustdb_ha_cache_put_handler
+    },
+    {
+        ngx_string("/cache/append"),
+        ngx_string("/hustcache/append"),
+        hustdb_ha_cache_append_handler
+    },
+    {
+        ngx_string("/cache/del"),
+        ngx_string("/hustcache/del"),
+        hustdb_ha_cache_del_handler
+    },
+    {
+        ngx_string("/cache/expire"),
+        ngx_string("/hustcache/expire"),
+        hustdb_ha_cache_expire_handler
+    },
+    {
+        ngx_string("/cache/persist"),
+        ngx_string("/hustcache/persist"),
+        hustdb_ha_cache_persist_handler
+    },
+    {
+        ngx_string("/cache/hexist"),
+        ngx_string("/hustcache/hexist"),
+        hustdb_ha_cache_hexist_handler
+    },
+    {
+        ngx_string("/cache/hget"),
+        ngx_string("/hustcache/hget"),
+        hustdb_ha_cache_hget_handler
+    },
+    {
+        ngx_string("/cache/hset"),
+        ngx_string("/hustcache/hset"),
+        hustdb_ha_cache_hset_handler
+    },
+    {
+        ngx_string("/cache/hdel"),
+        ngx_string("/hustcache/hdel"),
+        hustdb_ha_cache_hdel_handler
+    },
+    {
+        ngx_string("/cache/hincrby"),
+        ngx_string("/hustcache/hincrby"),
+        hustdb_ha_cache_hincrby_handler
+    },
+    {
+        ngx_string("/cache/hincrbyfloat"),
+        ngx_string("/hustcache/hincrbyfloat"),
+        hustdb_ha_cache_hincrbyfloat_handler
     }
 };
 

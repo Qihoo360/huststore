@@ -62,7 +62,21 @@
         "sync_status",
         "sync_alive",
         "get_table",
-        "set_table"
+        "set_table",
+        "cache/exist",
+        "cache/get",
+        "cache/ttl",
+        "cache/put",
+        "cache/append",
+        "cache/del",
+        "cache/expire",
+        "cache/persist",
+        "cache/hexist",
+        "cache/hget",
+        "cache/hset",
+        "cache/hdel", 
+        "cache/hincrby",
+        "cache/hincrbyfloat"
     ],
     "proxy":
     {
@@ -110,7 +124,21 @@
             "/hustdb/zrangebyscore",
             "/hustdb/stat",
             "/hustdb/stat_all",
-            "/hustdb/file_count"
+            "/hustdb/file_count",
+            "/hustcache/exist",
+            "/hustcache/get",
+            "/hustcache/ttl",
+            "/hustcache/put",
+            "/hustcache/append",
+            "/hustcache/del",
+            "/hustcache/expire",
+            "/hustcache/persist",
+            "/hustcache/hexist",
+            "/hustcache/hget",
+            "/hustcache/hset",
+            "/hustcache/hdel", 
+            "/hustcache/hincrby",
+            "/hustcache/hincrbyfloat"
         ]
     }
 }

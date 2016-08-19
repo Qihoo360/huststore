@@ -34,5 +34,19 @@ ngx_int_t hustdb_ha_zadd_handler(ngx_str_t * backend_uri, ngx_http_request_t *r)
 ngx_int_t hustdb_ha_zrem_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
 ngx_int_t hustdb_ha_zrangebyrank_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
 ngx_int_t hustdb_ha_zrangebyscore_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
+ngx_int_t hustdb_ha_cache_exist_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
+ngx_int_t hustdb_ha_cache_get_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
+ngx_int_t hustdb_ha_cache_ttl_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
+ngx_int_t hustdb_ha_cache_put_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
+ngx_int_t hustdb_ha_cache_append_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
+ngx_int_t hustdb_ha_cache_del_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
+ngx_int_t hustdb_ha_cache_expire_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
+ngx_int_t hustdb_ha_cache_persist_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
+ngx_int_t hustdb_ha_cache_hexist_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
+ngx_int_t hustdb_ha_cache_hget_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
+ngx_int_t hustdb_ha_cache_hset_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
+ngx_int_t hustdb_ha_cache_hdel_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
+ngx_int_t hustdb_ha_cache_hincrby_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
+ngx_int_t hustdb_ha_cache_hincrbyfloat_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
 
 #endif // __hustdb_ha_handler_20150601202210_h__

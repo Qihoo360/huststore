@@ -39,4 +39,18 @@ NGX_ADDON_SRCS="$NGX_ADDON_SRCS \
     $ngx_addon_dir/hustdb_ha_zrem_handler.c\
     $ngx_addon_dir/hustdb_ha_zrangebyrank_handler.c\
     $ngx_addon_dir/hustdb_ha_zrangebyscore_handler.c\
+    $ngx_addon_dir/hustdb_ha_cache_exist_handler.c\
+    $ngx_addon_dir/hustdb_ha_cache_get_handler.c\
+    $ngx_addon_dir/hustdb_ha_cache_ttl_handler.c\
+    $ngx_addon_dir/hustdb_ha_cache_put_handler.c\
+    $ngx_addon_dir/hustdb_ha_cache_append_handler.c\
+    $ngx_addon_dir/hustdb_ha_cache_del_handler.c\
+    $ngx_addon_dir/hustdb_ha_cache_expire_handler.c\
+    $ngx_addon_dir/hustdb_ha_cache_persist_handler.c\
+    $ngx_addon_dir/hustdb_ha_cache_hexist_handler.c\
+    $ngx_addon_dir/hustdb_ha_cache_hget_handler.c\
+    $ngx_addon_dir/hustdb_ha_cache_hset_handler.c\
+    $ngx_addon_dir/hustdb_ha_cache_hdel_handler.c\
+    $ngx_addon_dir/hustdb_ha_cache_hincrby_handler.c\
+    $ngx_addon_dir/hustdb_ha_cache_hincrbyfloat_handler.c\
     $ngx_addon_dir/ngx_http_hustdb_ha_module.c"

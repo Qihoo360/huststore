@@ -149,7 +149,7 @@ int rdb_t::set_or_append (
         return EINVAL;
     }
 
-    RdbCommand cmds[ 4 ];
+    RdbCommand cmds[ 5 ];
 
     cmds[ 0 ].cmd = ( char * ) ( is_set ? "set" : "append" );
     cmds[ 0 ].len = is_set ? 3 : 6;
@@ -157,13 +157,15 @@ int rdb_t::set_or_append (
     cmds[ 1 ].len = key_len;
     cmds[ 2 ].cmd = ( char * ) val;
     cmds[ 2 ].len = val_len;
-    cmds[ 3 ].cmd = ( char * ) ttl;
-    cmds[ 3 ].len = ttl_len;
+    cmds[ 3 ].cmd = ( char * ) "EX";
+    cmds[ 3 ].len = 2;
+    cmds[ 4 ].cmd = ( char * ) ttl;
+    cmds[ 4 ].len = ttl_len;
 
     std::string * rsp = m_buffers[ conn.worker_id ];
     size_t rsp_len = 0;
 
-    int r = processInput ( m_rdb, ( ttl && ttl_len > 0 && is_set ) ? 4 : 3, cmds, & rsp_len, & ( * rsp ) [ 0 ] );
+    int r = processInput ( m_rdb, ( ttl && ttl_len > 0 && is_set ) ? 5 : 3, cmds, & rsp_len, & ( * rsp ) [ 0 ] );
     if ( unlikely ( r ) )
     {
         return ENOENT;

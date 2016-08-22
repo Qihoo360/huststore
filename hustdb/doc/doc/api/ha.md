@@ -36,6 +36,21 @@ ha
 * [stat](ha/stat.md)
 * [stat_all](ha/stat_all.md)
 * [file_count](ha/file_count.md)
+* [`cache`](ha/cache.md)
+    * [exist](ha/cache/exist.md)
+    * [get](ha/cache/get.md)
+    * [ttl](ha/cache/ttl.md)
+    * [put](ha/cache/put.md)
+    * [append](ha/cache/append.md)
+    * [del](ha/cache/del.md)
+    * [expire](ha/cache/expire.md)
+    * [persist](ha/cache/persist.md)
+    * [hexist](ha/cache/hexist.md)
+    * [hget](ha/cache/hget.md)
+    * [hset](ha/cache/hset.md)
+    * [hdel](ha/cache/hdel.md)
+    * [hincrby](ha/cache/hincrby.md)
+    * [hincrbyfloat](ha/cache/hincrbyfloat.md)
 
 ### 常见问题 ###
 

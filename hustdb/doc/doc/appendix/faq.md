@@ -23,6 +23,9 @@ FAQ
 
 **Q** :  `hustdb ha` 的接口中 `get` 与 `get2`、`hget` 与 `hget2` 、`zscore` 与 `zscore2` 有什么差别？   
 **A** :  参考 [这里](../api/ha.md) 。
+
+**Q** :  `hustdb ha` 的接口中 `/cache/xxx` 与 `/xxx` 的差别是什么？例如 `/cache/put` 和 `put`。   
+**A** :  参考 [这里](../api/ha.md) 。
     
 [上一级](index.md)
 

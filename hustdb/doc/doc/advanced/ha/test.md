@@ -12,11 +12,15 @@
             [uri]
                 uri: ip:port
             [action]
-                put | get | del | exist |
-                hset | hget | hdel | hexist |
+                put | get | get2 | del | exist |
+                hset | hget | hget2 |hdel | hexist |
                 sadd | srem | sismember |
-                zadd | zrem | zismember | zscore |
-                stat_all | sync_status | get_table | loop
+                zadd | zrem | zismember | zscore | zscore2 |
+                cache_exist | cache_get | cache_ttl | 
+                cache_put | cache_append | cache_del | cache_expire |
+                cache_hexist | cache_hget | cache_hset | cache_hdel |
+                cache_hincrby | cache_hincrbyfloat |
+                stat_all | sync_status | sync_alive | get_table | loop
     sample:
         python autotest.py localhost:8082 loop
         python autotest.py localhost:8082 stat_all

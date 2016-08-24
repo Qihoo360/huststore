@@ -4,7 +4,7 @@ FAQ
 本节提供 `hustdb` 常见问题的答案。
 
 **Q** :  如何部署 `hustdb`？  
-**A** :  参考 [这里](../guide/deploy.md) 。
+**A** :  参考 [这里](../guide/hustdb.md) 和 [这里](../advanced/hustdb/deploy.md) 。
 
 **Q** :  如何配置 `hustdb ha`？  
 **A** :  参考 [这里](../advanced/ha/nginx.md) 。

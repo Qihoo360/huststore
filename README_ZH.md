@@ -1,11 +1,11 @@
-[简体中文](README_ZH.md)
+[English](README.md)
 
-# huststore - High-performance Distributed Storage #
+# huststore - 高性能分布式存储服务 #
 ![huststore logo](res/logo.png)
 
 `huststore` 是一个高性能的分布式存储服务，不但提供了 **`100 thousand QPS`** 级别的 `kv` 存储的功能，还提供了 `hash`、`set`、`sort set` 等一系列数据结构的支持，并且支持 **二进制** 的 kv 存储，可以替代 `Redis` 相关的功能。此外，`huststore` 还结合特有的 `HA` 模块实现了分布式消息队列的功能，包括消息的流式推送，以及消息的 `发布-订阅` 等功能，可以替代 `rabbitmq or gearman` 相关的功能。
 
-## Features ##
+## 特性 ##
 `huststore` 分为 `hustdb` 以及 `HA` 模块两大部分。`hustdb` （存储引擎）的底层设计采用了自主开发的 `fastdb`。`HA` 以 `nginx` 模块的方式开发。`nginx` 是工业级的 `http server` 标准，得益于此，`huststore` 具备以下特性：
   
 * 高吞吐量  
@@ -23,23 +23,23 @@
 
 ## 运维 ##
 
-### Architect ###
+### 架构 ###
 ![architect](res/architect.png)
 
-### Deployment ###
+### 部署 ###
 * 分布式KV存储 = HA（hustdb ha） + DB（hustdb）
 * 分布式消息队列 = HA（hustmq ha） + DB（hustdb）
 
 ## 存储引擎(fastdb) ##
 ![hustdb](res/hustdb.png)
 
-## Dependency ##
+## 依赖 ##
 * [leveldb](https://github.com/google/leveldb)
 * [libcurl](https://curl.haxx.se/libcurl/)
 * [libevhtp](https://github.com/ellzey/libevhtp)
 * [zlog](https://github.com/HardySimpson/zlog)
 
-## Documents ##
+## 文档 ##
 
 ### 目录 ###
 * [hustdb](hustdb/doc/doc/index.md)
@@ -79,7 +79,7 @@
 `hustdb/ha` 服务于存储引擎，可以配置多个 `worker`。  
 `hustmq/ha` 服务于消息队列，**只能配置单个 `worker`**。
 
-## Performance ##
+## 性能 ##
 
 ### `hustdb` ###
 

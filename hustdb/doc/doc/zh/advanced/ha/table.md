@@ -111,11 +111,11 @@
 
 * [`increase`](table/increase.md) 的语义只允许将一个区间一分为二，且分解后的两个区间必须 **连续** ，例如 `[0, 1024]` 可分解为 `[0, 512]` 、`[512, 1024]` 。  
 具体做法参考下图：  
-![increase](increase.png)
+![increase](../../../res/increase.png)
 
 * [`decrease`](table/decrease.md) 的语义只允许针对连续的两个区间进行合并，例如  `[0, 512]` 、`[512, 1024]` 可合并为  `[0, 1024]` 。  
 具体做法参考下图：  
-![decrease](decrease.png)
+![decrease](../../../res/decrease.png)
 
 ### 一键生成负载均衡表 ###
 

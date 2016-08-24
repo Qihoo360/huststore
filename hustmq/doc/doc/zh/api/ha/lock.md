@@ -16,7 +16,7 @@
     curl -i -X GET "http://localhost:8080/lock?queue=test_queue&on=1"
 
 **动画效果:**
-![lock](lock.gif)
+![lock](../../../res/lock.gif)
 
 [上一级](../ha.md)
 

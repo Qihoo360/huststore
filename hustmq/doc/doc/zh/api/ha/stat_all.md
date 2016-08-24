@@ -46,7 +46,7 @@
 相关的字段含义可参考 [`/hustmq/stat_all`](../hustmq/stat_all.md) 。
 
 **动画效果:**
-![stat_all](stat_all.gif)
+![stat_all](../../../res/stat_all.gif)
 
 [上一级](../ha.md)
 

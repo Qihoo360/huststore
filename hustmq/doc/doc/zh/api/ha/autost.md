@@ -15,7 +15,7 @@
     curl -i -X GET "http://localhost:8080/autost"
 
 **动画效果:**
-![autost](autost.gif)
+![autost](../../../res/autost.gif)
 
 [上一级](../ha.md)
 

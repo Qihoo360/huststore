@@ -53,7 +53,7 @@ ha
     * `hustmq ha` 后台的 `autost` 过程会刷新 `hustmq` 集群状态，检测 `test_queue` 是否有数据可获取
     * `hustmq ha` 检测到 `test_queue` 有数据可获取， 从而自动生成获取 `test_queue` 数据的 `uri`（含 `sub` 接口），打包在 `http` 头部，向 `subscriber` 回复 `307`，`subscriber` 会利用新的 `uri` 获取最新的 `test_queue` 的数据  
 为了保证推送数据的最终一致性，`hustmq` 实现了一套轻量级的分布式滑动窗口，类似下图：  
-![push](ha/push.png)  
+![push](../../res/push.png)  
 其中 `[a, b, c, d, e]` 代表写入的数据，红色的部分表示写入失败的数据，`c:2` 代表在写入数据 `c` 的时候强制将 `idx` 更新为最新的值 `2`。当 `hustmq ha` 发现 `hustmq` 各个节点的 `idx` 不一致的时候，会自动通知各个节点将 `idx` 更新到最新的值，从而保证最终的一致性。
 
 * 关于 `long polling` 的运作机制  
@@ -63,7 +63,7 @@ ha
     * `hustmq ha` 后台的 `autost` 过程会刷新 `hustmq` 集群状态，检测 `test_queue` 是否有数据可获取
     * `hustmq ha` 检测到 `test_queue` 有数据可获取，从而自动生成获取 `test_queue` 数据的 `uri`，打包在 `http` 头部，向 `client A` 回复 `307`，`client A` 会利用新的 `uri` 获取最新的 `test_queue` 的数据  
     **动画效果:**  
-    ![longpolling](ha/longpolling.gif)
+    ![longpolling](../../res/longpolling.gif)
 
 * 基于 `http` 的分布式进程池的机制  
 传统的进程池的实现中，所有 `worker` 进程分布在同一台机器上，具有单点限制。[do_get](ha/do_get.md) 和 [do_post](ha/do_post.md) 配合可以实现基于 `http` 的分布式进程池。其具体的工作流程如下：  

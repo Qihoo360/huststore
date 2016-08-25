@@ -10,23 +10,23 @@ In addtion, `huststore` implements a distributed message queue by integrating a 
 ## Features ##
 `huststore` has two core components, `hustdb` and `HA`. `hustdb` uses `fastdb`,  a database engine developed by our own, in the fundamental architecture. `HA` is implemented as a `nginx` module. It is well-known that `nginx` is a industry-proven high quality code base, thus by inheriting it `huststore` gain the below advantages:
 
-* High Throughput
+* High Throughput  
 `hustdb` uses [libevhtp](https://github.com/ellzey/libevhtp), a open source network library, as inner network communication system, by incorporating it with `fastdb` storage engine, `hustdb` achieves a extremely high performance, the benchmark shows that `QPS` hits **100 thousand** and even more.
 
-* High Concurrency
+* High Concurrency  
 Please refer to concurrency report of `nginx`
 
-* High Availability
+* High Availability  
 `huststore` architecture supports `Replication` (master-master), `load balance`. Therefore, the availability of `HA` is guaranteed by `master-worker` design. When one of `worker` process is down, the `master` will load another `workder` process, multiple `worker`s work independently, therefore guarantee the `HA` will work stably.
 
 The fundamental design architecture of `huststore` guarantees the high availability, by using `master-master` architecture, when one of the storage node fails, `HA` module will re-direct the request to another live `master` node. Also, when a node failure happens, `HA` cluster will automatically re-balancing the data distribution, thus avoid single point of failure.
 
 In addition, `HA` cluster uses a distributed architecture design by incorporating LVS as the director, each `HA` node is separated and work independently. When one of the `HA` node is down, LVS will re-direct the request to other available `HA` node, thus avoids `HA`'s' failure on single point node.
 
-* Language-free Interface
+* Language-free Interface  
 `huststroe` use `http` as the communication protocol, therefore the client side implementation is not limited in any specific programming language.
 
-* Support Binary Key-Value
+* Support Binary Key-Value  
 
 ## Operation and Maintenance ##
 
@@ -72,17 +72,17 @@ Above includes detailed documents of design, deployment documents, `API` usage a
 
 ## Table Content ##
 
-`hustdb`
-　　`doc`
-　　`db`
-　　`ha`
-　　`sync`
-`hustmq`
-　　`doc`
-　　`ha`
+`hustdb`  
+　　`doc`  
+　　`db`  
+　　`ha`  
+　　`sync`    
+`hustmq`  
+　　`doc`  
+　　`ha`  
 
-`hustdb/ha` provide service for storage engine, could configured with multi `worker`。
-`hustmq/ha` provide service for message queue, can only configured with one **`worker`**。
+`hustdb/ha` provide service for storage engine, could configured with multi `worker`.  
+`hustmq/ha` provide service for message queue, can only configured with one **`worker`**.
 
 ## Performance ##
 
@@ -97,25 +97,25 @@ Above includes detailed documents of design, deployment documents, `API` usage a
 **Benchmark Result:**
 
     （1）PUT
-        <1>value：256B；     qps：95 thousand
-        <2>value：1KB；      qps：85 thousand
-        <3>value：4KB；      qps：25 thousand
-        <4>value：16KB；     qps：7 thousand
-        <5>value：64KB；     qps：2 thousand
+    	<1>value：256B；     qps：95 thousand
+	    <2>value：1KB；      qps：85 thousand
+	    <3>value：4KB；      qps：25 thousand
+	    <4>value：16KB；     qps：7 thousand
+	    <5>value：64KB；     qps：2 thousand
 
-    （2）GET
-        <1>value：256B；     qps：100 thousand
-        <2>value：1KB；      qps：10 thousand
-        <3>value：4KB；      qps：25 thousand
-        <4>value：16KB；     qps：7 thousand
-        <5>value：64KB；     qps：2 thousand
+	（2）GET
+	    <1>value：256B；     qps：100 thousand
+	    <2>value：1KB；      qps：10 thousand
+	    <3>value：4KB；      qps：25 thousand
+	    <4>value：16KB；     qps：7 thousand
+	    <5>value：64KB；     qps：2 thousand
 
-    （3）DEL
-        <1>value：256B；     qps：100 thousand
-        <2>value：1KB；      qps：100 thousand
-        <3>value：4KB；      qps：100 thousand
-        <4>value：16KB；     qps：100 thousand
-        <5>value：64KB；     qps：100 thousand
+	（3）DEL
+    	<1>value：256B；     qps：100 thousand
+	    <2>value：1KB；      qps：100 thousand
+    	<3>value：4KB；      qps：100 thousand
+    	<4>value：16KB；     qps：100 thousand
+    	<5>value：64KB；     qps：100 thousand
 
 ### `hustmq` ###
 
@@ -128,18 +128,18 @@ Above includes detailed documents of design, deployment documents, `API` usage a
 **Benchmark Result:**
 
     （1）PUT
-        <1>item：256B；     qps：30 thousand
-        <2>item：1KB；      qps：25 thousand
-        <3>item：4KB；      qps：20 thousand
-        <4>item：16KB；     qps：7 thousand
-        <5>item：64KB；     qps：2 thousand
+	    <1>item：256B；     qps：30 thousand
+	    <2>item：1KB；      qps：25 thousand
+	    <3>item：4KB；      qps：20 thousand
+	    <4>item：16KB；     qps：7 thousand
+	    <5>item：64KB；     qps：2 thousand
 
-    （2）GET
-        <1>item：256B；     qps：25 thousand
-        <2>item：1KB；      qps：20 thousand
-        <3>item：4KB；      qps：18 thousand
-        <4>item：16KB；     qps：7 thousand
-        <5>item：64KB；     qps：2 thousand
+	（2）GET
+	    <1>item：256B；     qps：25 thousand
+	    <2>item：1KB；      qps：20 thousand
+	    <3>item：4KB；      qps：18 thousand
+	    <4>item：16KB；     qps：7 thousand
+	    <5>item：64KB；     qps：2 thousand
 
 ## LICENSE ##
 
@@ -147,5 +147,5 @@ Above includes detailed documents of design, deployment documents, `API` usage a
 
 ## Authors ##
 
-* XuRuibo（hustxrb，hustxrb@163.com)
-* ChengZhuo（jobs，yao050421103@163.com)
+* XuRuibo（hustxrb，hustxrb@163.com)  
+* ChengZhuo（jobs，yao050421103@163.com)  

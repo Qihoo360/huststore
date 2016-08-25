@@ -42,26 +42,26 @@
 ## Documents ##
 
 ### 目录 ###
-* [hustdb](hustdb/doc/doc/index.md)
-* [hustmq](hustmq/doc/doc/index.md)
+* [hustdb](hustdb/doc/doc/en/index.md)
+* [hustmq](hustmq/doc/doc/en/index.md)
 
 以上包含了 `huststore` 从设计、部署、`API` 到测试样例的详细文档，并提供了 `FAQ` 对常见问题进行快速检索。
 
 ### 快速入门 ###
-* [hustdb](hustdb/doc/doc/guide/index.md)
-* [hustmq](hustmq/doc/doc/guide/index.md)
+* [hustdb](hustdb/doc/doc/en/guide/index.md)
+* [hustmq](hustmq/doc/doc/en/guide/index.md)
 
 ### API ###
-* [hustdb](hustdb/doc/doc/api/index.md)
-* [hustmq](hustmq/doc/doc/api/index.md)
+* [hustdb](hustdb/doc/doc/en/api/index.md)
+* [hustmq](hustmq/doc/doc/en/api/index.md)
 
 ### 进阶 ###
-* [hustdb](hustdb/doc/doc/advanced/index.md)
-* [hustmq](hustmq/doc/doc/advanced/index.md)
+* [hustdb](hustdb/doc/doc/en/advanced/index.md)
+* [hustmq](hustmq/doc/doc/en/advanced/index.md)
 
 ### FAQ ###
-* [hustdb](hustdb/doc/doc/appendix/faq.md)
-* [hustmq](hustmq/doc/doc/appendix/faq.md)
+* [hustdb](hustdb/doc/doc/en/appendix/faq.md)
+* [hustmq](hustmq/doc/doc/en/appendix/faq.md)
 
 ## 目录 ##
 

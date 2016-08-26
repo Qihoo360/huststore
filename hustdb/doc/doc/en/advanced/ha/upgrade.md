@@ -1,9 +1,9 @@
-平滑升级
+Smooth Upgrade
 --
 
-### 平滑升级脚本样例 ###
+### Script example for smooth upgrade###
 
-路径：`hustdb/ha/upgrade.sh`
+Path: `hustdb/ha/upgrade.sh`
 
 	#!/bin/bash
 	
@@ -35,10 +35,10 @@
 	
 	upgrade $*
 
-使用方法：
+Usage:
 
     sh upgrade.sh jobs # jobs 代表服务运行的账户名称
 
-[上一级](../ha.md)
+[Previous page](../ha.md)
 
-[根目录](../../index.md)
+[Root directory](../../index.md)

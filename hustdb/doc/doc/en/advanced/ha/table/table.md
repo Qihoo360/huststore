@@ -1,14 +1,14 @@
 table
 ----------
 
-**类型:** `array`
+**Type:** `array`
 
-**值:** `[<table_item>, <table_item>, ..., <table_item>]`
+**Value:** `[<table_item>, <table_item>, ..., <table_item>]`
 
-**父节点:** 无
+**Parent Node:** N/A
 
-负载均衡哈希表，每一个子项都是 [hash_item](hash_item.md)。
+Load balance hash table, every item is a [hash_item](hash_item.md).  
 
-[上一级](../table.md)
+[Previous page](../table.md)
 
-[根目录](../../../index.md)
+[Root directory](../../../index.md)

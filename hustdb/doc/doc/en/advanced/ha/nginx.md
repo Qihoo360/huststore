@@ -1,11 +1,11 @@
-nginx 配置文件
+nginx Configuration
 --
 
-路径：`hustdb/ha/nginx/conf/nginx.json`
+Configuration file Path: `hustdb/ha/nginx/conf/nginx.json`
 
-### 配置范例 ###
+### Configuration Examples ###
 
-以下是一个完整的配置文件：
+A complete example of configuration file: 
 
     {
         "module": "hustdb_ha",
@@ -125,46 +125,46 @@ nginx 配置文件
     }
 
 
-**以下字段根据实际生产环境配置合适的值：**
+**Set a suitable value for the below fields in your specific network environment**
 
-* `listen`: 监听端口
-* `http_basic_auth_file`: `http basic authentication` 的配置文件  
-（为保证 `hustdb ha` 的高性能，文件使用 **明文** 来配置认证信息）
+* `listen`: Listening port
+* `http_basic_auth_file`: configuration file for `http basic authentication`
+use **plain text** to save authentication to ensure the high performance of `hustdb ha`
 * `proxy`
-    * `auth`: `hustdb` 的 `http basic authentication` 认证字符串（进行 `base64` 加密）
-    * `backends`: `hustdb` 机器列表配置
+    * `auth`: the authentication string (encoded in `base64`) for `hustdb`  `http basic authentication`
+    * `backends`: machine list configuration for `hustdb`
 
-`main_conf` 中的如下字段均用于 [`ngx_http_fetch`](../../../../../hustmq/doc/doc/advanced/ha/components.md) :
+Below fields in `main_conf` are used in [`ngx_http_fetch`](../../../../../hustmq/doc/doc/advanced/ha/components.md):
 
-* `fetch_req_pool_size`：`ngx_http_fetch` 每个子请求申请的内存池大小，建议保持默认值
-* `keepalive_cache_size`：`ngx_http_fetch` 和 `hustmq` 机器所建立的连接中，保持 `keepalive` 状态的连接数量，建议保持默认值
-* `connection_cache_size`：`ngx_http_fetch` 连接池的大小，建议保持默认值
-* `fetch_connect_timeout`：`ngx_http_fetch` 连接的超时时间，可根据网络环境配置合适的值
-* `fetch_send_timeout`：`ngx_http_fetch` 发送数据包的超时时间，可根据网络环境配置合适的值
-* `fetch_read_timeout`：`ngx_http_fetch` 接收数据包的超时时间，可根据网络环境配置合适的值
-* `fetch_timeout`：`ngx_http_fetch` 和 `hustmq` 进行网络通讯的最大超时时间，可根据网络环境配置合适的值
-* `fetch_buffer_size`：`ngx_http_fetch` 收发数据包的缓冲区大小，建议保持默认值
+* `fetch_req_pool_size`: Memory pool for each sub request, default value recommanded
+* `keepalive_cache_size`: Number of `keepalive` connections set up by `ngx_http_fetch` and `hustmq`
+* `connection_cache_size`: Size of connection pool of `ngx_http_fetch`, default value recommanded
+* `fetch_connect_timeout`: Connection timeout of `ngx_http_fetch`, set a suitable value to your specific network environment
+* `fetch_send_timeout`: Package send timeout of `ngx_http_fetch`, set a suitable value to your specific network environment
+* `fetch_read_timeout`: Package read timeout of `ngx_http_fetch`, set a suitable value to your specific network environment
+* `fetch_timeout`: Maximum timeout of network communication between `ngx_http_fetch` and `hustmq`, set a suitable value to your specific network environment
+* `fetch_buffer_size`: Buffer size for sending/receiving packages of `ngx_http_fetch`, default value recommanded
 
-`main_conf` 中的如下字段均用于和 `sync_server` 的通信：
+Below fields in `main_conf` are used in communication with `sync_server`: 
 
-* `sync_port`: `sync_server` 监听的端口，请和 [`sync_server` 的配置](sync_conf.md) **保持一致**
-* `sync_status_uri`: `sync_server` 提供的状态请求服务地址，**请保持默认值**
-* `sync_user`: `sync_server` 进行 `http basic authentication` 的用户名，请和 [`sync_server` 的配置](sync_conf.md) **保持一致**
-* `sync_passwd`: `sync_server` 进行 `http basic authentication` 的密码，请和 [`sync_server` 的配置](sync_conf.md) **保持一致**
+* `sync_port`: Listening port of `sync_server`, **keep it the same as** in [`sync_server` configuration](sync_conf.md) 
+* `sync_status_uri`: Status request service address of `sync_server`, **Use default value!**
+* `sync_user`: Username for `sync_server` to do `http basic authentication`, **keep it the same as** in [`sync_server` configuration](sync_conf.md)
+* `sync_passwd`: Password for`sync_server` to do `http basic authentication`, **keep it the same as** in [`sync_server` configuration](sync_conf.md)
 
-**以下配置和 [set_table](../../api/ha/set_table.md) 相关**
+**Below fields are related to [set_table](../../api/ha/set_table.md)**
   
-* `hustdb_ha_shm_name`: 共享内存的名字  
-* `hustdb_ha_shm_size`: 共享内存的大小  
-* `public_pem`: RSA 加密的公钥  
-* `identifier_cache_size`: id 缓存的数量  
-* `identifier_timeout`: 分配的 id 的有效时长
+* `hustdb_ha_shm_name`: Name of shared memory  
+* `hustdb_ha_shm_size`: Size of shared memory  
+* `public_pem`: Public key of RSA  
+* `identifier_cache_size`: Number of cached id
+* `identifier_timeout`: Timout of each assigned id
 
-以上字段建议保持默认值。尤其是 `identifier_timeout` ， **出于安全性的考虑** ，不建议设置过大的值。
+Default value are recommanded for the above fields. In particular for `identifier_timeout`, it is not recommanded to set a big value considering the security issues.
 
-**除此之外的其他字段均建议保持默认值**。
+**Except of this, other fields are recommanded to use the default values.**
 
-大部分字段的含义以及配置方法和 nginx 官方的配置文件的含义一致，例如：
+The meaning and configuration method of most field are the same as nginx configuration, e.g.
 
 * `worker_processes`
 * `keepalive_timeout`
@@ -174,17 +174,19 @@ nginx 配置文件
 * `proxy_read_timeout`
 * `proxy_buffer_size`
 
-`health_check` 的配置可参考 [`nginx_upstream_check_module`](https://github.com/yaoweibin/nginx_upstream_check_module)
+config of `health_check`, please refer to [`nginx_upstream_check_module`](https://github.com/yaoweibin/nginx_upstream_check_module)
 
-### 配置文件生成工具 ###
+### Tool for generate configuration file ###
 
-路径：`hustdb/ha/nginx/conf/genconf.py`
+Path: `hustdb/ha/nginx/conf/genconf.py`
 
-配置好 `nginx.json` 之后，可使用 `genconf.py` 生成实际生产环境使用的配置文件 `nginx.conf`，命令如下：
+After complete configurate `nginx.json`, use `genconf.py` to generate `nginx.conf` for production environment.
+
+Command: 
 
     python genconf.py nginx.json
 
-生成之后的 `nginx.conf` 内容如下：
+Content of the generated `nginx.conf`:
 
     worker_processes  4;
     daemon on;
@@ -661,11 +663,11 @@ nginx 配置文件
         }
     }
 
-### 常见问题 ###
+### FAQ ###
 
-* 如何禁用 `http basic authentication` ？  
-配置 `nginx.json` 时，直接删掉 `"http_basic_auth_file"` 字段以及相应的值，利用 `genconf.py` 重新生成 `nginx.conf` 即可
+* How to disable `http basic authentication` ？  
+In `nginx.json`, delete `"http_basic_auth_file"` field and its value, use `genconf.py` script to re-generate `nginx.conf`.
 
-[上一级](conf.md)
+[Previous page](conf.md)
 
-[根目录](../../index.md)
+[Root directory](../../index.md)

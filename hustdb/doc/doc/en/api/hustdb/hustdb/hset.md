@@ -1,43 +1,43 @@
 ## hset ##
 
-**接口:** `/hustdb/hset`
+**Interface:** `/hustdb/hset`
 
-**方法:** `GET | POST`
+**Method:** `GET | POST`
 
-**参数:** 
+**Parameter:** 
 
-*  **tb** （必选）  
-*  **key** （必选）  
-*  **val** （必选，GET：val即参数 or POST：val即body）  
-*  **ttl** （可选，default：0）
-*  **ver** （可选，default：0）    
+*  **tb** (Required)  
+*  **key** (Required)  
+*  **val** (Required, GET：val is argument or POST：val is body)  
+*  **ttl** (Optional, default：0)
+*  **ver** (Optional, default：0)    
 
-**使用范例A:**
+**Sample A:**
 
     curl -i -X GET "http://localhost:8085/hustdb/hset?tb=test_table&key=test_key&val=test_val"
 
-**结果范例A1:**
+**Result A1:**
 
 	HTTP/1.1 412 Precondition Failed //tb maybe not hash，reject hash request；or tb not exist
 	Version: 0
 	VerError: false
 
-**结果范例A2:**
+**Result A2:**
 
 	HTTP/1.1 200 OK
 	Version: 1
 	VerError: false
 
-**使用范例B:**
+**Sample B:**
 
     curl -i -X GET "http://localhost:8085/hustdb/hset?tb=test_table&key=test_key&val=test_val&ver=2"
 
-**结果范例B1:**
+**Result B1:**
 
 	HTTP/1.1 401 Unauthorized
 	Version: 1
 	VerError: true
 
-[上一级](../hustdb.md)
+[Previous page](../hustdb.md)
 
-[根目录](../../../index.md)
+[Root directory](../../../index.md)

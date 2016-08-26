@@ -1,16 +1,18 @@
 key
 ----------
 
-**类型:** `array`
+**Type:** `array`
 
-**值:** `[<start>, <end>]`
+**Value:** `[<start>, <end>]`
 
-**父节点:** [item](item.md) | [low](low.md) | [high](high.md)
+**Parent Node:** [item](item.md) | [low](low.md) | [high](high.md)
 
-`key` 定义哈希的区间，用一个包含两个整数的数组描述，例如：
+`key` defines hash range, which is defined by an array of two integer values.   
+
+e.g.
 
     [0, 128]
 
-[上一级](../table.md)
+[Previous page](../table.md)
 
-[根目录](../../../index.md)
+[Root directory](../../../index.md)

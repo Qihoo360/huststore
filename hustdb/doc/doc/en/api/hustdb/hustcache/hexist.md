@@ -1,26 +1,26 @@
 ## hexist ##
 
-**接口:** `/hustcache/hexist`
+**Interface:** `/hustcache/hexist`
 
-**方法:** `GET`
+**Method:** `GET`
 
-**参数:** 
+**Parameter:** 
 
-*  **tb** （必选）  
-*  **key** （必选）  
+*  **tb** (Required)  
+*  **key** (Required)  
 
-**使用范例A:**
+**Sample A:**
 
     curl -i -X GET "http://localhost:8085/hustcache/hexist?tb=test_table&key=test_key"
 
-**结果范例A1:**
+**Result A1:**
 
 	HTTP/1.1 404 Not Found
 	
-**结果范例A2:**
+**Result A2:**
 
 	HTTP/1.1 200 OK
 
-[上一级](../hustdb.md)
+[Previous page](../hustdb.md)
 
-[根目录](../../../index.md)
+[Root directory](../../../index.md)

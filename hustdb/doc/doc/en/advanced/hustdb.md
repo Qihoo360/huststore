@@ -1,8 +1,8 @@
 hustdb
 --
 
-* [部署](hustdb/deploy.md)
+* [Deployment](hustdb/deploy.md)
 
-[上一级](index.md)
+[Previous Chapter](index.md)
 
-[根目录](../index.md)
+[Root Directory](../index.md)

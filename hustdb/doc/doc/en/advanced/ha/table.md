@@ -1,11 +1,11 @@
-负载均衡表
+Load Balance Table
 --
 
-路径：`hustdb/ha/nginx/conf/hustdbtable.json`
+Path: `hustdb/ha/nginx/conf/hustdbtable.json`
 
-### 配置范例 ###
+### Configuration Examples ###
 
-以下是 `hustdbtable` 的标准配置样例：
+A standard configuration example for `hustdbtable` 的标准配置样例：
 
     {
         "table":
@@ -19,7 +19,7 @@
         ]
     }
 
-以下是 `hustdbtable` 进行扩容的配置样例：
+A standard configuration example for `hustdbtable` to expand
 
     {
         "table":
@@ -51,7 +51,8 @@
         ]
     }
 
-以下是 `hustdbtable` 进行减容的配置样例：
+A standard configuration example for `hustdbtable` to shrink
+
 
     {
         "table":
@@ -83,7 +84,7 @@
         ]
     }
     
-### 字段结构 ###
+### Field structure ###
 
 [`table`](table/table.md)   
 　　[`hash_item`](table/hash_item.md)  
@@ -101,41 +102,39 @@
 　　　　　　[`remove`](table/remove.md)  
 　　　　　　[`replace_by`](table/replace_by.md)  
 
-### 字段约束 ###
+### Field restrictions ###
 
-* [`increase`](table/increase.md) 和 [`decrease`](table/decrease.md) 用于集群的扩容和减容，只能定义一种，不可以两种都定义。
+* [`increase`](table/increase.md) and [`decrease`](table/decrease.md) are used for cluster expansion and shrink, only one of them can be defined at the same time.
 
-* [`key`](table/key.md) 用于定义负载均衡的 `hash` 算法区间，其范围为 `[0, 1024)` ，实际的配置， **各个区间必须连续** ，否则会有部分的 `key` 无法 `hash` 到对应的存储机。
+* [`key`](table/key.md) is used to define `hash` range for load balance, the maximum legitimate range is `[0, 1024)`. In real configuration, **each range section must be continuous**, otherwise, some `key`s will be not be able to be `hash`ed to the corresponding storage node.
 
-* [`val`](table/val.md) 用于定义实际的存储机器列表，该字段的值分别存放存储的主节点以及备用主节点（目前的设计为 **主 - 主** 模型）
+* [`val`](table/val.md) is used to store machine list that will be store actual data. In fact, this value is used to store master node and backup master node (in **master - master** design)
 
-* [`increase`](table/increase.md) 的语义只允许将一个区间一分为二，且分解后的两个区间必须 **连续** ，例如 `[0, 1024]` 可分解为 `[0, 512]` 、`[512, 1024]` 。  
-具体做法参考下图：  
+* [`increase`](table/increase.md) cuts a range section into two sections, and the two sections must be **continuous**. e.g. `[0, 1024]` can be cut into `[0, 512]`, `[512, 1024]`.  
+Check this for more details 
 ![increase](../../../res/increase.png)
 
-* [`decrease`](table/decrease.md) 的语义只允许针对连续的两个区间进行合并，例如  `[0, 512]` 、`[512, 1024]` 可合并为  `[0, 1024]` 。  
-具体做法参考下图：  
+* [`decrease`](table/decrease.md) can only be used to join two continuous sections. e.g. `[0, 512]` and `[512, 1024]` can be joined into `[0, 1024]`.   
+Check this for more details  
 ![decrease](../../../res/decrease.png)
 
-### 一键生成负载均衡表 ###
+### Generate load balance table ###
 
-工具目录：`hustdb/ha/nginx/conf/gen_table.py`
-
-用法：
+Tool path: `hustdb/ha/nginx/conf/gen_table.py`
 
     usage:
         python gen_table.py [host_file] [output]
     sample:
-        python gen_table.py hosts hustdbtable.json
-举例，在目录 `hustdb/ha/nginx/conf` 下新建 `hosts` 文件，编辑内容如下：
+        python gen_table.py hosts hustdbtable.json  
+e.g. create a new file named `hosts` in directory `hustdb/ha/nginx/conf`, edit contents as below:
 
     192.168.1.101:9999
     192.168.1.102:9999
-    192.168.1.103:9999
-运行如下命令：
+    192.168.1.103:9999  
+Execute the command:
 
     python gen_table.py hosts hustdbtable.json
-打开 `hustdbtable.json` ，可以看到内容如下：
+Open `hustdbtable.json`, we can see the following contents:
     
     {
         "table": [
@@ -178,8 +177,8 @@
         ]
     }
 
-实际部署集群的时候， **强烈推荐用此方法生成负载均衡表** 。
+In real deployment environment, **it is strongly recommanded to use this methos to generate load balance table**.
 
-[上一级](conf.md)
+[Previous page](conf.md)
 
-[根目录](../../index.md)
+[Root directory](../../index.md)

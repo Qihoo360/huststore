@@ -1,26 +1,26 @@
-部署
+Deployment
 --
 
-### 程序 ###
+### Program ###
 
 * `hustdb/db/server/make/linux/hustdb`
 * `hustdb/db/server/make/linux/hustdb.conf`
 
-### 使用方法 ###
+### Usage ###
 
-#### 启动服务（守护进程方式，后台运行） ####
+#### Service Start (Daemon, work in background) ####
 
     ./hustdb
 
-#### 退出服务 ####
+#### Service Stop ####
 
     ./hustdb -q
 
-#### 启动服务（调试方式，前台运行） ####
+#### Service Start (Debug试, work in foreground) ####
 
     ./hustdb -d
 
-### 配置 ###
+### Configuration ###
 
     [server]
     tcp.port                        = 8085
@@ -103,6 +103,6 @@
     # UNIT MB, 16 ~ 128, default 64
     cache                           = 64            //contentdb缓存
 
-[上一级](../hustdb.md)
+[Previous page](../hustdb.md)
 
-[根目录](../../index.md)
+[Root directory](../../index.md)

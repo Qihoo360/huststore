@@ -1,14 +1,14 @@
 ## file_count ##
 
-**接口:** `/hustdb/file_count`
+**Interface:** `/hustdb/file_count`
 
-**方法:** `GET`
+**Method:** `GET`
 
-**使用范例A:**
+**Sample A:**
 
     curl -i -X GET "http://localhost:8085/hustdb/file_count"
 
-**结果范例A1:**
+**Result A1:**
 
 	HTTP/1.1 200 OK
 	Content-Length: 2
@@ -16,6 +16,6 @@
 
 	10
 
-[上一级](../hustdb.md)
+[Previous page](../hustdb.md)
 
-[根目录](../../../index.md)
+[Root directory](../../../index.md)

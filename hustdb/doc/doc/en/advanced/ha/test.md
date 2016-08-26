@@ -1,11 +1,11 @@
-测试
+Test
 --
 
-以下所有的脚本依赖于 [requests](https://github.com/request/request)。
+All the below scripts have dependencies on [requests](https://github.com/request/request).
 
-### 自动化测试脚本 ###
+### Script for automatic test ###
 
-路径：`hustdb/ha/nginx/test/autotest.py`
+Path: `hustdb/ha/nginx/test/autotest.py`
 
     usage:
         python autotest [uri] [action]
@@ -26,9 +26,9 @@
         python autotest.py localhost:8082 stat_all
         python autotest.py localhost:8082 sync_status
 
-### 压力测试脚本 ###
+### Script for stress test ###
 
-路径：`hustdb/ha/nginx/mutitest.py`
+Path: `hustdb/ha/nginx/mutitest.py`
 
     usage:
         python mutitest [number] [uri]
@@ -37,6 +37,6 @@
     sample:
         python mutitest.py 2 localhost:8082
 
-[上一级](../ha.md)
+[Previous page](../ha.md)
 
-[根目录](../../index.md)
+[Root directory](../../index.md)

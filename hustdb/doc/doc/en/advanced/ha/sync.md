@@ -1,93 +1,92 @@
-数据同步服务
+Data Synchronization Service
 --
 
-`sync server` 用于将本地日志同步到后端 `db` 中，主要包含 `libsync` 和 `network` 两个模块。
+`sync server` is used for synchronization local log to the backend `db`, it includes two main components: `libsync` and `network`.
 
 ### libsync ###
 
-目录：`hustdb/sync/module`
+Directory: `hustdb/sync/module` 
 #### `check_backend` ####
 
-功能：定时检测后端db存活。
+Description: Periodically detecting the aliveness of backend `db`s
 
-如果db可用，则通过 `pipe` 通知 `read_log` 模块读取该 `db` 下的日志文件，开始同步。
+if `db` is available, notify `read_log` module to read all log files of the `db` by `pipe` and start synchronizing.
 
 #### `release_file` ####
 
-功能： 定时清理同步完成的文件
+Description: Periodically clean files when synchronization is completed.
 
-通过位图检测 `release_queue` 中的文件是否同步完成，如果同步完成则删除文件并释放资源。
+Detecting whether synchronization in files of `release_queue` is completed or not by bitmap, if completed, delete all files and release resource.
 
 #### `monitor` ####
 
-功能：监控日志文件目录。
+Description: Monitor log directory
 
-如果产生日志文件，则将文件加入对应 `db` 的 `file_queue`。
+If log files are generated, add them into the queue of the corresponding `db`.
 
 #### `read_log` ####
 
-功能：读取日志文件。
+Description: Read log files
 
-从 `file_queue` 中取出日志文件，按行读取该日志文件，将数据加入线程池的 `data_queue`。
+Get log files out from `file_queue`, read each file line by line and put the data to `data_queue` of thread pool.
 
-将读取完成的文件加入到 `release_queue` 中。
+After a file is read completely put it into `release_queue`.
 
 #### `sync_threadpool` ####
 
-功能：线程池，同步数据。
+Description: thread pool, synchronizing data
 
-线程池中线程从 `data_queue` 中取出数据，进行 `base64` 解码，构造 `url`，`query` 等，`POST` 到后端 `db` 中。
+Each thread will fetch data from `data_queue`, decode `base64`, compose `url`, `query`, and then `POST` it to the backend `db`.
 
 ### network ###
 
-目录：`hustdb/sync/network`
+Directory: `hustdb/sync/network`
 
-该模块 **仅对 `HA` 模块提供 `http` 查询服务**。
+This module provide `http` service **only for `HA` component**.
 
-目前提供的接口包括如下两个：
+The two interfaces provided are:
 
 #### `status` ####
 
-**接口:** `/status.html`
+**Interface:** `/status.html`
 
-**方法:** `GET`
+**Method:** `GET`
 
-**参数:** 无
+**Parameters:** N/A 
 
-该接口用于判断 `sync server` 是否存活。  
-与 `HA` 对应的接口： [sync_alive](../../api/ha/sync_alive.md)
+This interface is used to check whether `sync server` is alive or not.
+Interface that are related to `HA`: [sync_alive](../../api/ha/sync_alive.md)
 
 #### `sync_status` ####
 
-**接口:** `/sync_status`
+**Interface:** `/sync_status`
 
-**方法:** `GET`
+**Method:** `GET`
 
-**参数:** 
+**Parameters:** 
 
-*  **backend_count** （必选）  
+*  **backend_count** (required)  
 
-该接口用于获取 `sync server` 进行数据同步的实时状态。  
-与 `HA` 对应的接口： [sync_status](../../api/ha/sync_status.md)
+This interface is used to fetch status from `sync server` when it's synchronizing data.
+Interface taht is related to `HA`: [sync_status](../../api/ha/sync_status.md)
 
+### Related Problems ###
 
-### 相关问题 ###
+**Q:**	How many threads that a `sync server` has?  
+**A:**	 `4+n`, including `main thread`, `check_backend&release_file`, `monitor` and `read_log`, and n threads in thread pool. 
 
-**Q:**	`sync server` 有多少线程？  
-**A:**	 `4+n` 个；包括 `主线程`，`check_backend&release_file` ， `monitor` ， `read_log` 等4个线程，以及线程池的n个工作线程 
+**Q:**  How do sub modules of `sync server` cooperate with each other? 
+**A:**  sub modules cooperate with each other through `pipe` or `queue`
 
-**Q:** `sync server` 模块各子模块间如何配合？  
-**A:** 子模块间通过 `pipe` 或者 `queue` 配合
+**Q:**  How does `sync server` communicate with `HA`?  
+**A:**  Use `libevhtp` as `http` framework to provide http service, `HA` uses sub request to query interface provided by `sync server`.
 
-**Q:** `sync server` 于 `HA` 如何通信？  
-**A:**  以 `libevhtp` 为基本框架封装成 `http` 服务，`HA` 通过子请求查询 `sync server` 提供的接口。
+**Q:**  What are restrictions and cost of `sync server`?  
+**A:**  For log generated before `sync server` started, `sync server` will not be able to automatically synchronize. If we want to synchronize these logs, we will have to copy them to the coressponding directory of `logs/` path manually.
 
-**Q:** `sync server` 的局限与风险？  
-**A:**  对于 `sync server` 开启前生成的日志， `sync server`无法自动同步。如果要同步这些日志，需要手动重新拷贝到 `logs`目录下对应的 `backends` 目录中。
+[Previous page](../ha.md)
 
-[上一级](../ha.md)
-
-[根目录](../../index.md)
+[Root directory](../../index.md)
 
 
 

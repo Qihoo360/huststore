@@ -1,14 +1,14 @@
 hustdb ha
 --
 
-首先安装 `hustdb ha` 所依赖的公共组件：  
+First, install all the dependent common modules for `hustdb ha`:  
 
 * [curl](https://github.com/curl/curl/releases)
 * [zlog-1.2.12](https://github.com/HardySimpson/zlog/releases)
 * [libevent-2.0.22-stable](https://github.com/libevent/libevent/releases/download/release-2.0.22-stable/libevent-2.0.22-stable.tar.gz)
 * [libevhtp-1.2.10](https://github.com/ellzey/libevhtp/releases)
 
-安装 `ha` 以及 `sync server`：
+Install `ha` and `sync server`：
 
     $ cd hustdb/ha/nginx
     $ ./configure --prefix=/data/hustdbha --add-module=src/addon
@@ -18,7 +18,7 @@ hustdb ha
     $ make -j
     $ make install
 
-修改 `hustdb/ha/nginx/conf/nginx.json` 内容如下，其中 **`backends` 请替换为真实的 `hustdb` 机器列表，至少要有两个：**
+Modify contents of `hustdb/ha/nginx/conf/nginx.json` as below ( **replace `backends` to your real `hustdb` machine list, at list two machine are required:**
 
     {
         "module": "hustdb_ha",
@@ -130,12 +130,12 @@ hustdb ha
         }
     }
 
-运行 `genconf.py` 生成 `nginx.conf`，并替换配置：
+Execute `genconf.py` to generate `nginx.conf`, and replace the configuration:
 
     $ python genconf.py
     $ cp nginx.conf /data/hustdbha/conf/
 
-编辑 `/data/hustdbha/conf/hustdbtable.json` 内容如下，其中 `val` 所配置的 `ip:port` **请替换为真实的 hustdb 节点**：
+Edit file `/data/hustdbha/conf/hustdbtable.json` as below(**replace `ip:port` of `val` to your real hustdb nodes**:
 
     {
         "table":
@@ -145,18 +145,18 @@ hustdb ha
         ]
     }
 
-配置完毕之后， **先后** 启动 `HA` 以及 `sync server`：
+After finish configuration, start `HA` and `sync server` in order:
 
     cd /data/hustdbha/sbin
     ./nginx
     cd /data/hustdbsync
     ./hustdbsync
 
-输入如下测试命令：
+Type in commands:
 
     curl -i -X GET 'localhost:8082/sync_alive'
 
-可以看到服务器返回如下内容：
+We should be able to see the below infomation:
 
     HTTP/1.1 200 OK
     Server: nginx/1.9.4
@@ -167,8 +167,8 @@ hustdb ha
     
     ok
 
-返回该结果说明服务器工作正常。
+The result shows that the servers work as expected
 
-[上一级](index.md)
+[Previous page](index.md)
 
-[根目录](../index.md)
+[Root directory](../index.md)

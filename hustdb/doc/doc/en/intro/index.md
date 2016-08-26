@@ -1,12 +1,12 @@
-简介
+Introduction
 --
 
-hustdb 是一套高性能分布式存储解决方案。目前包含如下组件：
+hustdb is a series of solution for high performance distributed storage service. It includes the below components:  
 
 * [`hustdb`](hustdb.md)
 * [`hustdb ha`](ha.md)
 
-整体结构如下：
+Overall Architecture:  
 ![architect](../../res/architect.png)
 
-[根目录](../index.md)
+[Root directory](../index.md)

@@ -1,12 +1,12 @@
 hustdb
 --
-高性能分布式存储服务
+High Performance Distributed Storage Service
 
-项目目录：`hustdb/db`
+Project directory: `hustdb/db`
 
-`hustdb` 的部署依赖于 `libevhtp`，其相关的配置可参考如下内容：
+`hustdb`'s deployment depends on `libevhtp`, for detailed config on `libevhtp`, please refer to:  
 > [libevhtp](http://ellzey.github.io/libevhtp/)
 
-[上一级](index.md)
+[Previous page](index.md)
 
-[根目录](../index.md)
+[Root directory](../index.md)

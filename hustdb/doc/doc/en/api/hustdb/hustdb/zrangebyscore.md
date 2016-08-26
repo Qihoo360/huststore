@@ -1,31 +1,31 @@
 ## zrangebyscore ##
 
-**接口:** `/hustdb/zrangebyscore`
+**Interface:** `/hustdb/zrangebyscore`
 
-**方法:** `GET`
+**Method:** `GET`
 
-**参数:** 
+**Parameter:** 
 
-*  **tb** （必选）
-*  **min** （必选）
-*  **max** （必选）
-*  **offset** （必选）
-*  **size** （必选）
-*  **start** （可选，default：0，>0 && <= 1024）  
-*  **end** （可选，default：1204，>0 && <= 1024）
-*  **noval** （可选，default：true）
+*  **tb** (Required)
+*  **min** (Required)
+*  **max** (Required)
+*  **offset** (Required)
+*  **size** (Required)
+*  **start**  (Optional, default：0，>0 && <= 1024)  
+*  **end**  (Optional, default：1204，>0 && <= 1024)
+*  **noval**  (Optional, default：true)
 
-**使用范例A:**
+**Sample A:**
 
     curl -i -X GET "http://localhost:8085/hustdb/zrangebyscore?tb=test_table&min=30&max=1987&offset=0&size=10&noval=false"
 
-**结果范例A1:**
+**Result A1:**
 
 	HTTP/1.1 412 Precondition Failed //tb maybe not sort set，reject sort set request；or tb not exist
 	Version: 0
 	VerError: false
 
-**结果范例A2:**
+**Result A2:**
 
 	HTTP/1.1 200 OK
 	Keys: 10 //number of item
@@ -36,6 +36,6 @@
 	//key format: base64
 	[{"key":"eHVydWlib196c2V0XzM=","val":"39","ver":1},{"key":"eHVydWlib196c2V0XzQ=","val":"87","ver":1},{"key":"eHVydWlib196c2V0XzU=","val":"345","ver":1},{"key":"eHVydWlib196c2V0XzY=","val":"569","ver":1},{"key":"eHVydWlib196c2V0Xzc=","val":"1986","ver":1}]
 
-[上一级](../hustdb.md)
+[Previous page](../hustdb.md)
 
-[根目录](../../../index.md)
+[Root directory](../../../index.md)

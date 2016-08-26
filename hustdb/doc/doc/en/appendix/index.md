@@ -1,6 +1,6 @@
-附录
+Appendix
 --
 
 * [FAQ](faq.md)
 
-[根目录](../index.md)
+[Root directory](../index.md)

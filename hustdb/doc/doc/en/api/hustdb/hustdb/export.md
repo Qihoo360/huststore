@@ -1,23 +1,23 @@
 ## export ##
 
-**接口:** `/hustdb/export`
+**Interface:** `/hustdb/export`
 
-**方法:** `GET`
+**Method:** `GET`
 
-**参数:** 
+**Parameter:** 
 
-*  **file** （必选，与tb二选一）
-*  **tb** （必选，与file二选一）  
-*  **start** （可选，default：0，>0 && <= 1024）  
-*  **end** （可选，default：1024，>0 && <= 1024）
-*  **noval** （可选，default：true）
-*  **cover** （可选，default：false）
+*  **file** (Required, choose one between file and tb)
+*  **tb** (Required, choose one between file and tb)
+*  **start** (Optional, default：0，>0 && <= 1024)  
+*  **end** (Optional, default：1024，>0 && <= 1024)
+*  **noval** (Optional, default：true)
+*  **cover** (Optional, default：false)
 
-**使用范例A:**
+**Sample A:**
 
     curl -i -X GET "http://localhost:8085/hustdb/export?file=0"
 
-**结果范例A1:**
+**Result A1:**
 
 	HTTP/1.1 200 OK
 	Content-Length: 15
@@ -25,15 +25,15 @@
 
 	140002579198016 //task token
 
-**结果范例A2:**
+**Result A2:**
 
 	HTTP/1.1 404 Not Found //If file0 has already done, you need to use cover
 
-**使用范例B:**
+**Sample B:**
 
     curl -i -X GET "http://localhost:8085/hustdb/export?file=0&cover=true"
 
-**结果范例B1:**
+**Result B1:**
 
 	HTTP/1.1 200 OK
 	Content-Length: 15
@@ -41,6 +41,6 @@
 
 	140002914742624 //task token
 
-[上一级](../hustdb.md)
+[Previous page](../hustdb.md)
 
-[根目录](../../../index.md)
+[Root directory](../../../index.md)

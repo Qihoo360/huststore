@@ -1,13 +1,13 @@
 hash_item
 ----------
 
-**类型:** `object`
+**Type:** `object`
 
-**值:** `["<key>": <value>, "<key>": <value>, ... , "<key>": <value>]`
+**Value:** `["<key>": <value>, "<key>": <value>, ... , "<key>": <value>]`
 
-**父节点:** [table](table.md)
+**Parent Node:** [table](table.md)
 
-描述结构体对象， `<key>` 包含如下值：
+Describe a struct object, `<key>` has the below values:
 
 - [item](item.md)
   
@@ -15,6 +15,6 @@ hash_item
 
 - [decrease](decrease.md) 
 
-[上一级](../table.md)
+[Previous page](../table.md)
 
-[根目录](../../../index.md)
+[Root directory](../../../index.md)

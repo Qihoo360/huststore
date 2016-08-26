@@ -1,30 +1,30 @@
 ## zscore ##
 
-**接口:** `/hustdb/zscore`
+**Interface:** `/hustdb/zscore`
 
-**方法:** `GET | POST`
+**Method:** `GET | POST`
 
-**参数:** 
+**Parameter:** 
 
-*  **tb** （必选）  
-*  **key** （必选，GET：key即参数 or POST：key即body）  
+*  **tb** (Required)  
+*  **key** (Required GET：key or POST：key is body)  
 
-**使用范例A:**
+**Sample A:**
 
     curl -i -X GET "http://localhost:8085/hustdb/zscore?tb=test_table&key=test_key"
 
-**结果范例A1:**
+**Result A1:**
 
 	HTTP/1.1 412 Precondition Failed //tb maybe not sort set，reject sort set request；or tb not exist
 	Version: 0
 	VerError: false
 
-**结果范例A2:**
+**Result A2:**
 
 	HTTP/1.1 404 Not Found
 	Version: 0
 
-**结果范例A3:**
+**Result A3:**
 
 	HTTP/1.1 200 OK
 	Version: 1
@@ -33,6 +33,6 @@
 
 	100
 
-[上一级](../hustdb.md)
+[Previous page](../hustdb.md)
 
-[根目录](../../../index.md)
+[Root directory](../../../index.md)

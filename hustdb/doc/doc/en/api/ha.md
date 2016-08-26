@@ -1,9 +1,9 @@
 ha
 --
 
-### 接口概要 ###
+### API synopsis ###
 
-以下是 `hustdb ha` 提供的 http 接口：
+HTTP interface provided by `hustdb ha`:
 
 * [get_table](ha/get_table.md)
 * [set_table](ha/set_table.md)
@@ -52,34 +52,35 @@ ha
     * [hincrby](ha/cache/hincrby.md)
     * [hincrbyfloat](ha/cache/hincrbyfloat.md)
 
-### 常见问题 ###
+### FAQ ###
 
-* 测试代码  
-所有接口的测试代码的写法均可以在测试脚本中找到。  
-脚本路径：`hustdb/ha/nginx/test/`
+* Test Scripts  
+Programming examples for testing all APIs can be found int test scripts  
+Scripts path: `hustdb/ha/nginx/test/`
 
-* 返回值  
-所有接口通过 `http code` 来表示执行结果，`200` 表示执行成功，`404` 表示执行失败。
+* Return Value  
+All APIs use `http code` as return value. e.g. `200` is SUCCEED, `404` is FAILURE.
 
-* 关于 `http basic authentication`  
-本节所有以 `curl` 命令描述的测试样例均假设 `http basic authentication` 被关闭。  
-具体做法可参考 [这一节](../advanced/ha/nginx.md) 的末尾对常见问题的解答。
+* About `http basic authentication`  
+All test examples that use `curl` command in this chapter  are in the assumption of `http basic authentication` is turned off.
 
-* `hustdb` 采用了最终一致性的设计，因此所有的写操作的处理方式为：
-	* `master1` 和 `master2` 均写入成功，返回 `http code` 为 `200`
-	* `master1` 和 `master2` 只有一台写入成功，返回 `http code` 为 `200`，但会在 `http` 头部加入 `Sync` 字段，值为写入失败，需要进行数据同步的机器（可参考测试脚本的做法： `hustdb/ha/nginx/test/autotest.py`）
-	* `master1` 和 `master2` 均写入失败，返回 `http code` 为 `404`  
+For more details, please refer to the explanations in FAQ at the end of [This Chapter](../advanced/ha/nginx.md) 
 
-* 关于 `get2`，`hget2`，`zscore2`  
-    * `get2` 和 `get` 的差别在于： **数据可靠性，性能** 。（另外两组接口类似）  
-    * `get2` 会将 `master1` 和 `master2` 节点的数据都取回来，进行比较，只有版本和值都一致，才返回 `200`，同时在 `http` 头部加上 `Version` 字段。如果版本不一致，则会将两个版本均添加到`http` 头部。如果值不一致，则会返回 `409`，同时将两个不一致的值打包在 `http body` 中返回，具体可参考 [get2](ha/get2.md) 。
-    * `get` 的做法是，先读取 `master1` 的数据，如果获取成功就直接返回给客户端；如果读取 `master1` 的数据失败，则读取`master2` 的数据，如果读取成功则返回 `master2` 的数据。
-    * 综合比较，`get2` 获取的数据是强一致的，但由于需要串行访问 `master1` 和 `master2`，因此 `QPS` 会比 `get` 低很多；`get` 获取的数据是弱一致的，但由于大部分情况下它只需要访问 `master1` 即可拿到数据，因此 `QPS` 会比 `get2` 高很多。
-    * 结论：`get` 是 **弱一致性，高 `QPS`** ；`get2` 是 **强一致性，低 `QPS`** 。如果业务需要保证数据的强一致性，同时对吞吐量没有很高的要求，可以选用 `get2`，例如金融类业务；如果业务需要很高的吞吐量，可以忍受部分读取数据的不一致，则 `get` 更合适，例如商品信息展示。
+* `hustdb` uses Eventual Consistency design, therefore all write operations will have the below features:
+    * Both of `master1` and `master2` write successfully, the return `http code` will be `200`
+    * Only one of `master1` and `master2` write successfully, the return `http code` will be `200`, but a field `Sync`, whose value indicates the failure of write operation, will be added to the `http header`. This essentially means that data synchronization may need to be done between different nodes.(Please refer to the usage in test scripts: `hustdb/ha/nginx/test/autotest.py`)
+    * Both of `master1` and `master2` write failed,  the return `http code` will be `404`
 
-* 关于 `cache`  
-    `cache` 相关的接口，数据均存储在内存中， **不会持久化到硬盘** 。其他的接口，数据会持久化到硬盘。
+* About `get2`, `hget2`, `zscore2`
+    * The differences between `get2` and `get` are: **Reliability and Performance**. The differences between other two pairs will be similar.
+    * `get2` will fetch data from both of `master1` and `master2`, compare them and will return `200` only when the version and value are exactly matched. Also, `get2` will add a field `Version` into `http header`. If both versions are not matched, `get2` will add these two versions into the `http header`. If both values are not matched, `get2` will pack these two values in `http body` and return `http code` as `409`. For more details, please refer to [get2](ha/get2.md).
+    * `get` will first fetch data from `master1`, if succeed, it will return it to client immediately. However, if it failed, it will then fetch data from `master2`, and if succeed, it will return data from `master2` to client.
+    * Overall Comparison: the data got from `get2` will be strongly consistent because before it return data to client it needs to access both `master1` and `master2`, this will cause its `QPS` be significantly lower than that of `get`.
+    * Conclusion: `get` is **Weakly Consistent**, but has a high `QPS`. `get2` is **Strongly Consistent**, but has a relatively low `QPS`. Using `get` or `get2` is totally depends on business requirement. If data consistency is strongly required (e.g. financial business) but throughput doesn't need to be very high, then `get` is preferred. Otherwise if business needs high throughput and could bear some inconsistency in data (e.g. Commodity Info Display), `get2` may be a better choice. 
 
-[上一级](index.md)
+* About `cache`
+    `cache` related APIs will store data only in memory, that means those data will not be dumped to disk for persistence. Other APIs will write data to disk for persistency.
 
-[根目录](../index.md)
+[Previous Chapter](index.md)
+
+[Root Directory](../index.md)

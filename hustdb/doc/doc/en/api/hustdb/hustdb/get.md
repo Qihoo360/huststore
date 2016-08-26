@@ -1,23 +1,23 @@
 ## get ##
 
-**接口:** `/hustdb/get`
+**Interface:** `/hustdb/get`
 
-**方法:** `GET`
+**Method:** `GET`
 
-**参数:** 
+**Parameter:** 
 
-*  **key** （必选）
+*  **key** (Required)
 
-**使用范例A:**
+**Sample A:**
 
     curl -i -X GET "http://localhost:8085/hustdb/get?key=test_key"
 
-**结果范例A1:**
+**Result A1:**
 
 	HTTP/1.1 404 Not Found
 	Version: 0
 
-**结果范例A2:**
+**Result A2:**
 
 	HTTP/1.1 200 OK
 	Version: 1
@@ -26,6 +26,6 @@
 
 	test_val
 
-[上一级](../hustdb.md)
+[Previous page](../hustdb.md)
 
-[根目录](../../../index.md)
+[Root directory](../../../index.md)

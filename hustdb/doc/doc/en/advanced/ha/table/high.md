@@ -1,14 +1,14 @@
 high
 ----------
 
-**类型:** `object`
+**Type:** `object`
 
-**值:** `{ "key": <key>, "val": <val> }`
+**Value:** `{ "key": <key>, "val": <val> }`
 
-**父节点:** [increase](increase.md)
+**Parent Node:** [increase](increase.md)
 
-`high` 表示扩容后的高位区间，包含 [key](key.md) 和 [val](val.md) 两个成员。
+`high` represents the high section after expand, it includes two member: [key](key.md) and [val](val.md).  
 
-[上一级](../table.md)
+[Previous page](../table.md)
 
-[根目录](../../../index.md)
+[Root directory](../../../index.md)

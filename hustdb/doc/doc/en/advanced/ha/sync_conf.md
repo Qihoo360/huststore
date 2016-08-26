@@ -1,12 +1,12 @@
-sync server 配置文件
+sync server configuration
 --
 
-### 服务配置 ###
+### Service Configuration ###
   
-源码路径：`hustdb/sync/module/sync_server.json`  
-安装路径：`/data/hustdbsync/sync_server.json`
+Source code path: `hustdb/sync/module/sync_server.json`  
+Installation path: `/data/hustdbsync/sync_server.json`
 
-以下是一个完整的配置文件：
+A complete example of configuration file: 
 
     {
         "network": 
@@ -39,38 +39,38 @@ sync server 配置文件
         }
     }
 
-**以下字段请保持默认值：**
+**Keep default value for the below fields**
 
 * `network`
-    * `access_allow`: `sync server` 的 `ip` 访问限制列表
+    * `access_allow`: ccess restriction list for `sync server`
 
-**以下字段请和 HA 的相关配置保持一致：**
+**Keep settings the of below fields same as that in HA configuration file**
 
 * `network`
-    * `port`: `sync server` 的监听端口
-    * `user`: `sync_server` 进行 `http basic authentication` 的用户名
-    * `passwd`: `sync_server` 进行 `http basic authentication` 的密码
+    * `port`: Listening port of `sync server`
+    * `user`: Username for `sync_server` to do `http basic authentication`
+    * `passwd`: Password for `sync_server` to do `http basic authentication`
 * `sync`
-    * `logs_path`: `HA` 输出日志的目录，该目录是 `sync server` 进行数据同步的输入源
-    * `ngx_path`: `HA` 部署的目录，`sync server` 会在该目录保存同步状态文件
-    * `auth_path`: `HA` 访问 `hustdb` 的用户名密码文件，`sync server` 需要以此作为 `http` 请求的参数
+    * `logs_path`: Path for `HA` output log, this log is use as the input for `sync server` to synchronize data
+    * `ngx_path`: Path for `HA` deployment, `sync server` will store synchronization status files in this directory
+    * `auth_path`: Path for files that store username and password for `HA` to access `hustdb`, will be used as arguments of `http` request by `sync server`
 
-**以下字段根据实际生产环境配置合适的值：**
+**Set a suitable value for the below field in your specific network environment**
 
 * `sync`
-    * `threads`: 数据同步的线程数
-    * `release_interval`: 检测日志文件是否同步完成的时间间隔，如果同步完成，会删除该日志文件。
-    * `checkdb_interval`: 检测后台 `db` 存活的时间间隔，只有后台 `db` 存活，才会开始同步
-    * `checklog_interval`: 检测日志文件是否已被写完的时间间隔，与 `zlog` 生成单一日志文件的速度保持一致
+    * `threads`: Number of threads for data synchronization
+    * `release_interval`: Time interval for detecting the completion status of log file synchronization. If synchronization is completed, the log file will be deleted
+    * `checkdb_interval`: Time interval for detecting aliveness of backend `db`, only when backend `db` is alived synchronization will begin
+    * `checklog_interval`: Time interval for detecting whether the write operations have been completed in log file, this value is the same as that of `zlog` generating log file
 
-**除此之外的其他字段均建议保持默认值**。
+**In exception of this, use default values for other fields.**
 
-### 日志配置 ###
+### Log Configuration ###
   
-源码路径：`hustdb/sync/module/zlog.conf`  
-安装路径：`data/hustdbsync/zlog.conf`
+Source code path: `hustdb/sync/module/zlog.conf`  
+Installation path: `data/hustdbsync/zlog.conf`
 
-以下是一个完整的配置文件：
+A complete example of configuration file: 
 
     [global]
     strict init = true
@@ -85,9 +85,9 @@ sync server 配置文件
     [rules]
     hustdbsync.*             "/data/hustdbsync/logs/%d(%Y-%m-%d).log"; default
 
-如果 `sync server` 的部署路径不是 `/data/hustdbsync`，则其中 `[rules]` 需要变更为对应的路径。
+If the deployment path of `sync server` is not `/data/hustdbsync`, then its `[rules]` should be changed to the corresponding path.
 
 
-[上一级](../ha.md)
+[Previous Page](../ha.md)
 
-[根目录](../../index.md)
+[Root Directory](../../index.md)

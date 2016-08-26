@@ -1,14 +1,14 @@
 ## stat_all ##
 
-**接口:** `/hustdb/stat_all`
+**Interface:** `/hustdb/stat_all`
 
-**方法:** `GET`
+**Method:** `GET`
 
-**使用范例A:**
+**Sample A:**
 
     curl -i -X GET "http://localhost:8085/hustdb/stat_all"
 
-**结果范例A1:**
+**Result A1:**
 
 	HTTP/1.1 200 OK
 	Content-Length: 74
@@ -16,6 +16,6 @@
 
 	[{"table":"","type":-1,"size":3},{"table":"test_table","type":2,"size":1}]
 
-[上一级](../hustdb.md)
+[Previous page](../hustdb.md)
 
-[根目录](../../../index.md)
+[Root directory](../../../index.md)

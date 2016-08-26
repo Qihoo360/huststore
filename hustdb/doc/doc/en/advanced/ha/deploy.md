@@ -1,9 +1,9 @@
-部署
+Deployment
 --
 
 ### zlog ###
 
-`hustdb ha` 运行时会将写入失败的数据记录为本地日志，供 `sync server` 进行同步。日志功能使用了开源的高性能日志服务模块 [zlog](http://hardysimpson.github.io/zlog/) 。
+`hustdb ha` will record failed write operation in local log files at runtime, these log files will be used by `sync server` for log synchronization, we adopt a high performance open source log library [zlog](http://hardysimpson.github.io/zlog/).
 
     Downloads: https://github.com/HardySimpson/zlog/releases
 
@@ -18,7 +18,7 @@
 
 ### libcurl ###
 
-`sync server` 同步时需要将数据 `POST` 到后端机。这里使用了开源的 `url` 传输库 [libcurl](https://curl.haxx.se)。
+`sync server` needs to `POST` data to the backend machines synchronizing. An open source library [libcurl](https://curl.haxx.se) is used for transproting data.
 
 	Downloads: https://curl.haxx.se/download.html
 
@@ -29,7 +29,7 @@
 
 ### libevent ###
 
-`sync server` 的网络层的事件模块由 `libevent` 提供。
+`sync server` uses `libevent` as the event driven module in network layer.
 
     $ wget https://github.com/libevent/libevent/releases/download/release-2.0.22-stable/libevent-2.0.22-stable.tar.gz
     $ tar -zxf libevent-2.0.22-stable.tar.gz
@@ -40,7 +40,7 @@
 
 ### libevhtp ###
 
-`sync server` 的网络层的 `http` 框架由 `libevhtp` 提供。编译 `libevhtp` 需要使用 `cmake`。
+`sync server` uses `libevhtp` as `http` framework. We need `cmake` to compile `libevhtp`.
 
     $ wget https://github.com/ellzey/libevhtp/archive/1.2.10.tar.gz -O libevhtp-1.2.10.tar.gz
     $ tar -zxf libevhtp-1.2.10.tar.gz
@@ -50,9 +50,10 @@
     $ cmake ..
     $ make
     $ sudo make install
-### 部署脚本样例 ###
 
-以下是一个完整的 **一键远程部署脚本** ，同时包含 `HA` 以及 `sync server` 的部署，供参考：
+### Script example for Deployment ###
+
+Below is a complete one-key script for remote deployment, it also includes deployment of `HA` and `sync server` for reference:
 
     #!/bin/bash
     echo '[192.168.1.101]...'
@@ -106,21 +107,21 @@
     echo 'finish!'
 
 
-### 限制 ###
+### Restrictions ###
 
-* `nginx.tar.gz` 为打包后的 `hustdb ha` 模块，其源代码路径为：`hustdb/ha/nginx` 。
+* `nginx.tar.gz` is the compressed package for `hustdb ha`, the source code path is `hustdb/ha/nginx`.
 
-* `upgrade.sh` 为 `hustdb ha` 平滑升级脚本，具体内容参考[这里](upgrade.md) 。
+* `upgrade.sh` is the smooth upgrade script for `hustdb ha`, check [here](upgrade.md) for more details. 
 
-* `sync.tar.gz` 是打包后的 `sync server`，源代码路径为： `hustdb/sync` 。
+* `sync.tar.gz` is the compressed package for `sync server`, the source code path is: `hustdb/sync`.
 
-* `nginx.tar.gz`、`upgrade.sh`、`sync.tar.gz` 需要和部署脚本在同一目录下。
+* `nginx.tar.gz`, `upgrade.sh` and `sync.tar.gz` need to be in the same directory. 
 
-* 样例中 `192.168.1.101` 代表生产环境所属的线上机，实际部署的时候替换为真实的机器即可。
+* In the above example, `192.168.1.101` represents the online machine in production environment, replace it to your real ip in production environment.
 
-* 假设该脚本运行的机器位于 `192.168.1.100` ，则 `192.168.1.100` 需要与 `192.168.1.101` 建立 ssh 信任关系，操作账户为 `jobs`，实际部署时，将 `jobs` 替换为真实的账户即可。
+* Suppose this script runs on `192.168.1.100`, then `192.168.1.100` needs to build SSH trust relationship (login passwordless) with `192.168.1.101`, operation account is `jobs`, replace it with your account in your real production environment.
 
-可参考如下脚本来打包以上内容：
+Below is a sample script for packaging the above contents:
 
     #!/bin/sh
     cd hustdb/
@@ -132,9 +133,9 @@
     tar -zcf sync.tar.gz sync
     cp sync.tar.gz deploy/
 
-### 远程部署 HA 脚本范例 ###
+### Script example for remote deployment of HA ###
 
-如果仅仅只需要重新部署 `HA` ，可以参考如下脚本：
+If only `HA` needs to be re-deployed, you can refer to the below scripts: 
 
     #!/bin/bash
     echo '[192.168.1.101]...'
@@ -176,9 +177,9 @@
     
     echo 'finish!'
 
-### 远程部署 sync server 脚本范例 ###
+### Script example for remote deployment of sync server ###
 
-如果仅仅只需要重新部署 `sync server` ，可以参考如下脚本：
+If only `sync server` needs to be re-deployed, you can refer to the below scripts: 
 
     echo '[192.168.1.101]...'
     
@@ -208,12 +209,12 @@
     
     echo 'finish!'
 
-在执行上述脚本之前，请先确保 `sync server` 进程已经退出。退出 `sync server` 的命令为：
+Make sure `sync server` has exit before executing the above script, command to exit `sync server` is :
 
     $ cd /data/hustdbsync
     $ ./hustdbsync -q
 
-远程操作的脚本如下：
+Script for remote operations:
 
     echo '[192.168.1.101]...'
 
@@ -226,6 +227,6 @@
     
     echo 'finish!'
 
-[上一级](../ha.md)
+[Previous page](../ha.md)
 
-[根目录](../../index.md)
+[Root directory](../../index.md)

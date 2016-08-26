@@ -1,14 +1,14 @@
 increase
 ----------
 
-**类型:** `object`
+**Type:** `object`
 
-**值:** `{ "low": <low>, "high": <high> }`
+**Value:** `{ "low": <low>, "high": <high> }`
 
-**父节点:** [hash_item](hash_item.md)
+**Parent Node:** [hash_item](hash_item.md)
 
-`increase` 用于定义负载均衡表的扩容语义，包含 [low](low.md) 和 [high](high.md) 两个成员。
+`increase` is used to describe the shrink semantics, it has two members: [low](low.md) and [high](high.md).
 
-[上一级](../table.md)
+[Previous page](../table.md)
 
-[根目录](../../../index.md)
+[Root directory](../../../index.md)

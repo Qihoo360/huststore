@@ -1,11 +1,11 @@
-zlog 配置文件
+zlog Configuration
 --
 
-路径：`hustdb/ha/nginx/conf/zlog.conf`
+Path: `hustdb/ha/nginx/conf/zlog.conf`
 
-### 配置范例 ###
+### Configuration Example ###
 
-以下是一个完整的配置文件：
+A complete configuration file example:
 
     [global]
 	strict init = true
@@ -21,13 +21,13 @@ zlog 配置文件
 	*.*             "/data/hustdbha/logs/%M(sync_dir)/%d(%Y-%m-%d-%H-%M).log"; default
 
 
-**以下字段根据实际生产环境配置合适的值：**
+**Set a suitable value for the below fields in your specific network environment**
 
-* `rules`: 日志规则  
-样例中 `/data/hustdbha` 代表安装目录，实际使用时替换为真实的路径即可。
+* `rules`: Log rules
+In the above example script, `/data/hustdbha` is installation path, replace it with your real path in your production environment.
 
-**除此之外的其他字段均建议保持默认值**。
+**In exception of this, use default values for other fields.**
 
-[上一级](conf.md)
+[Previous page](conf.md)
 
-[根目录](../../index.md)
+[Root directory](../../index.md)

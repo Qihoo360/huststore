@@ -1,7 +1,7 @@
-进阶
+Advanced
 --
 
 * [`hustdb`](hustdb.md)
 * [`hustdb ha`](ha.md)
 
-[根目录](../index.md)
+[Root directory](../index.md)

@@ -1,26 +1,26 @@
 ## expire ##
 
-**接口:** `/hustcache/expire`
+**Interface:** `/hustcache/expire`
 
-**方法:** `GET`
+**Method:** `GET`
 
-**参数:** 
+**Parameter:** 
 
-*  **key** （必选）    
-*  **ttl** （必选）
+*  **key** (Required)    
+*  **ttl** (Required)
 
-**使用范例A:**
+**Sample A:**
 
     curl -i -X GET "http://localhost:8085/hustcache/expire?key=test_key&ttl=60"
 
-**结果范例A1:**
+**Result A1:**
 
 	HTTP/1.1 404 Not Found
 		
-**结果范例A2:**
+**Result A2:**
 
 	HTTP/1.1 200 OK
 	
-[上一级](../hustdb.md)
+[Previous page](../hustdb.md)
 
-[根目录](../../../index.md)
+[Root directory](../../../index.md)

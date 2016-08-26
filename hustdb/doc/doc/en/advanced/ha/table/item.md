@@ -1,14 +1,14 @@
 item
 ----------
 
-**类型:** `object`
+**Type:** `object`
 
-**值:** `{ "key": <key>, "val": <val> }`
+**Value:** `{ "key": <key>, "val": <val> }`
 
-**父节点:** [hash_item](hash_item.md)
+**Parent Node:** [hash_item](hash_item.md)
 
-`item` 是定义负载均衡表的最小单位，包含 [key](key.md) 和 [val](val.md) 两个成员。
+`item` is the smallest unit for defining load balance table, it has two members: [key](key.md) and [val](val.md).  
 
-[上一级](../table.md)
+[Previous page](../table.md)
 
-[根目录](../../../index.md)
+[Root directory](../../../index.md)

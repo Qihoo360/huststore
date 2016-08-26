@@ -1,18 +1,18 @@
 ## stat ##
 
-**接口:** `/hustdb/stat`
+**Interface:** `/hustdb/stat`
 
-**方法:** `GET`
+**Method:** `GET`
 
-**参数:** 
+**Parameter:** 
 
-*  **tb** （可选；返回kv键值对数量，或者，返回对应table的键值对数量）  
+*  **tb** (Optional: return number of KV pairs, or return number of KV pairs of corresponding table)  
 
-**使用范例A:**
+**Sample A:**
 
     curl -i -X GET "http://localhost:8085/hustdb/stat"
 
-**结果范例A1:**
+**Result A1:**
 
 	HTTP/1.1 200 OK
 	Content-Length: 1
@@ -20,6 +20,6 @@
 
 	1
 
-[上一级](../hustdb.md)
+[Previous page](../hustdb.md)
 
-[根目录](../../../index.md)
+[Root directory](../../../index.md)

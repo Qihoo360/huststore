@@ -1,23 +1,23 @@
 ## zscore2 ##
 
-**接口:** `/zscore2`
+**Interface:** `/zscore2`
 
-**方法:** `GET | POST`
+**Method:** `GET | POST`
 
-**参数:** 
+**Parameter:** 
 
-*  **tb** （必选）  
-*  **key** （必选）  
+*  **tb** (Required)  
+*  **key** (Required)  
 
-该接口是 `/hustdb/zscore` 的代理接口，参数详情可参考 [这里](../hustdb/hustdb/zscore.md) 。
+This Interface is an proxy interface for `/hustdb/zscore`. See more details in [here](../hustdb/hustdb/zscore.md).  
 
-**使用范例:**
+**Sample:**
 
     curl -i -X POST "http://localhost:8082/zscore2?tb=test_table" -d "test_key"
 
-根据数据的版本以及值的一致性的情况，该接口的返回一共有如下几种：
+According to the version of data and consistency status of the value, this interface will return the following values: 
 
-**返回范例1（值一致，版本一致）:**
+**Return value 1(Both value and version are matched):**
 
     HTTP/1.1 200 OK
     Server: nginx/1.9.4
@@ -29,11 +29,11 @@
     
     60
 
-相关字段：
+Related fields: 
   
-* `Version` ：值的版本号。
+* `Version`: version of the value 
 
-**返回范例2（值一致，版本不一致）:**
+**Return value 2 (Value is matched, version is not matched):**
 
     HTTP/1.1 200 OK
     Server: nginx/1.9.4
@@ -46,12 +46,12 @@
     
     60
 
-相关字段：
+Related fields: 
 
-* `Version1`：`master1` 的值的版本号。  
-* `Version2`：`master2` 的值的版本号。
+* `Version1`: version of `master1`'s value.
+* `Version2`: version of `master2`'s value. 
 
-**返回范例3（值不一致，版本一致）:**
+**Return value 3 (Value is not matched, version is matched)**
 
     HTTP/1.1 409 Conflict
     Server: nginx/1.9.4
@@ -64,12 +64,12 @@
     
     60100
 
-相关字段：
+Related fields: 
 
-* `Version`：版本号。  
-* `Val-Offset`：两个值的分割点。可以看到 `60100` 以偏移为 `2` 的地方分开，可以得到两个子串，分别为 `60` 和 `100`，分别代表 `master1` 和 `master2` 存放的值。
+* `Version`: version  
+* `Val-Offset`: cut point of the two values. If we cut `60100` at the offset `2`, we get two sub values, `60` and `100`, representing the values stored at `master1` and `master2` separately. 
 
-**返回范例4（值不一致，版本不一致）:**
+**Return value 4 (Both value and version are not matched):**
 
     HTTP/1.1 409 Conflict
     Server: nginx/1.9.4
@@ -83,12 +83,12 @@
     
     60100
 
-相关字段：
+Related fields: 
 
-* `Version1`：`master1` 的值的版本号。  
-* `Version2`：`master2` 的值的版本号。
-* `Val-Offset`：两个值的分割点。参考 `返回范例3` 的解释。
+* `Version1`: version of `master1`'s value.  
+* `Version2`: version of `master2`'s value.
+* `Val-Offset`: cut point of the two values. See more details in `Return value 3`.
 
-[上一级](../ha.md)
+[Previous page](../ha.md)
 
-[根目录](../../index.md)
+[Root directory](../../index.md)

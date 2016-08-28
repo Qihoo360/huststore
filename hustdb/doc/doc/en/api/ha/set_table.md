@@ -1,34 +1,35 @@
 ## set_table ##
 
-**接口:** `/set_table`
+**Interface:** `/set_table`
 
-**方法:** `POST`
+**Method:** `POST`
 
-**参数:** 
+**Parameter:** 
 
-**场景 1**  （获取 `id`）
+**Situation 1**  (Fetch `id`)
 
-无
+N/A
 
-**场景 2**  （利用已经获得的 `id` 设置负载均衡表）
+**Situation 2**  (Use fetcded `id` to set load balance table)
 
-*  **id** （必选）  `hustdb ha` 分配的合法id
-*  **table** （必选）  新的负载均衡表，必须放在 `http body` 中
+*  **id** (Required)  an legal id assigned by `hustdb ha`
+*  **table** (Required)  new load balance table, must be put in `http body`. 
 
-该接口用于在运行时动态设置负载均衡表。在 `hustdb` 集群增加或者减少机器的时候，可以利用此接口更新 `hustdb ha` 集群的负载均衡表。
+This interface is used to set load balance table at runtime. It could be used to update load balance table when `hustdb ha` cluster expands or shrinks in the amount of machine
 
-说明： **此接口会导致 HA 重启，以便使得新的配置生效** 。基于这一点，该接口需要具备高安全性，因此 `hustdb ha` 会动态生成 id，并使用 `RSA` 进行加密，以此作为合法的身份认证标识。 
+Explanation: **This interface will restart HA so that the new config take effect.**. Because of this, security issue should be guaranteed when this interface is used. `hustdb ha` will dynamically generate an id and use `RSA` to encrypt it, so that it can be used as the legal identity. 
 
-该接口的工作模式为：  
-- `client` 向 `hustdb ha` 发送 `set_table` 命令（不带任何参数），获取由 `RSA` 加密后的 id  
-- `client` 利用私钥解密得到明文 id  
-- `client` 向 `hustdb ha` 发送 `set_table` 命令（以明文 id 作为参数，否则请求会被拒） 设置负载均衡表  
-- `hustdb ha` 校验 id 以及负载均衡表内容的合法性，校验通过则返回 `200`，同时更新现有的负载均衡表，重启服务
+The working process of this interface is:    
+- `client` sends `set_table` command to `hustdb ha` without any arugument, get an `RSA` encrypted id. 
+- `client` gets the plain text id decrypted by private key.  
+- `client` sends `set_table` command to `hustdb ha` (use plain text id as the argument, otherwise the requested will be denied), set load balance table.  
+- `hustdb ha` checks legality of id and contents of the load balance table, if passed check, it will return http code `200` and update the current load balance table, restart the service.
 
-**使用范例:**
 
-请参考脚本 `hustdb/ha/nginx/test/set_table.py`
+**Sample:**
 
-[上一级](../ha.md)
+See more details in `hustdb/ha/nginx/test/set_table.py`
 
-[根目录](../../index.md)
+[Previous page](../ha.md)
+
+[Root directory](../../index.md)

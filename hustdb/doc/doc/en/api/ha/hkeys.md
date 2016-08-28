@@ -1,28 +1,28 @@
 ## hkeys ##
 
-**接口:** `/hkeys`
+**Interface:** `/hkeys`
 
-**方法:** `GET`
+**Method:** `GET`
 
-**参数:** 
+**Parameter:** 
 
-*  **peer** （必选）  
-表示后端机节点索引，参考 [peer_count](peer_count.md)
-*  **tb** （必选）
-*  **offset** （必选）  
-*  **size** （必选）  
-*  **start** （可选）  
-*  **end** （可选）    
-*  **noval** （可选）   
-*  **async** （可选）    
+*  **peer** (Required)  
+This represents the indexes of backend servers. See more details in [peer_count](peer_count.md)
+*  **tb** (Required)
+*  **offset** (Required)  
+*  **size** (Required)  
+*  **start** (Optional)  
+*  **end** (Optional)    
+*  **noval** (Optional)   
+*  **async** (Optional)    
 
-该接口是 `/hustdb/hkeys` 的代理接口，参数详情可参考 [这里](../hustdb/hustdb/hkeys.md) 。
+This Interface is an proxy interface for `/hustdb/hkeys`. See more details in [here](../hustdb/hustdb/hkeys.md).  
 
-**使用范例:**
+**Sample:**
 
-参考测试脚本的写法。  
-脚本路径： `hustdb/ha/nginx/test/fetch.py`
+See more details in the example test script:  
+Script path: `hustdb/ha/nginx/test/fetch.py`
 
-[上一级](../ha.md)
+[Previous page](../ha.md)
 
-[根目录](../../index.md)
+[Root directory](../../index.md)

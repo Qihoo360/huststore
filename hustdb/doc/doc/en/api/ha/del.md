@@ -1,20 +1,20 @@
 ## del ##
 
-**接口:** `/del`
+**Interface:** `/del`
 
-**方法:** `GET`
+**Method:** `GET`
 
-**参数:** 
+**Parameter:** 
 
-*  **key** （必选）  
-*  **ver** （可选）  
+*  **key** (Required)  
+*  **ver** (Optional)  
 
-该接口是 `/hustdb/del` 的代理接口，参数详情可参考 [这里](../hustdb/hustdb/del.md) 。
+This Interface is an proxy interface for `/hustdb/del`. See more details in [here](../hustdb/hustdb/del.md).  
 
-**使用范例:**
+**Sample:**
 
     curl -i -X GET "http://localhost:8082/del?key=test_key"
 
-[上一级](../ha.md)
+[Previous page](../ha.md)
 
-[根目录](../../index.md)
+[Root directory](../../index.md)

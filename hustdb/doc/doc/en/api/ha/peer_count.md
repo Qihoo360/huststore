@@ -1,12 +1,12 @@
 ## peer_count ##
 
-**接口:** `/peer_count`
+**Interface:** `/peer_count`
 
-**方法:** `GET`
+**Method:** `GET`
 
-**参数:** 无
+**Parameter:** N/A
 
-该接口用于获取后端 `hustdb` 节点个数。依赖于该接口的 `API` 包括：  
+This interface is used to get the node count of the backend `hustdb`. Interfaces that depend on this `API` are:   
 
 * [stat](stat.md)
 * [stat_all](stat_all.md)
@@ -16,12 +16,12 @@
 * [export](export.md)
 * [file_count](file_count.md)
 
-以上接口均需要传入 `peer` 参数。假设 `peer_count` 的值为 **N**，则该参数的值的范围为 **[0, N-1]** 。
+The above interfaces need to pass `peer` argument. If `peer_count`'s value is **N**, then its value range will be in **[0, N-1]**. 
 
-**使用范例:**
+**Sample:**
 
     curl -i -X GET "http://localhost:8082/peer_count"
 
-[上一级](../ha.md)
+[Previous page](../ha.md)
 
-[根目录](../../index.md)
+[Root directory](../../index.md)

@@ -1,18 +1,18 @@
 ## sync_alive ##
 
-**接口:** `/sync_alive`
+**Interface:** `/sync_alive`
 
-**方法:** `GET`
+**Method:** `GET`
 
-**参数:** 无
+**Parameter:** N/A
 
-该接口用于判断 `sync server` 是否存活。
+This interface is used to detect whether `sync server` is alive.
 
-**使用范例:**
+**Sample:**
 
     curl -i -X GET "http://localhost:8082/sync_alive"
 
-**返回值范例:**
+**Return value:**
 
 	HTTP/1.1 200 OK
     Server: nginx/1.9.4
@@ -23,6 +23,6 @@
     
     ok
 
-[上一级](../ha.md)
+[Previous page](../ha.md)
 
-[根目录](../../index.md)
+[Root directory](../../index.md)

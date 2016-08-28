@@ -1,22 +1,22 @@
 ## sadd ##
 
-**接口:** `/sadd`
+**Interface:** `/sadd`
 
-**方法:** `POST`
+**Method:** `POST`
 
-**参数:** 
+**Parameter:** 
 
-*  **tb** （必选）  
-*  **key** （必选）  
-该参数必须放在 `http body` 中
-*  **ver** （可选）
+*  **tb** (Required)  
+*  **key** (Required)  
+This parameter must be put in `http body`.
+*  **ver** (Optional)
 
-该接口是 `/hustdb/sadd` 的代理接口，参数详情可参考 [这里](../hustdb/hustdb/sadd.md) 。
+This Interface is an proxy interface for `/hustdb/sadd`. See more details in [here](../hustdb/hustdb/sadd.md).  
 
-**使用范例:**
+**Sample:**
 
     curl -i -X POST "http://localhost:8082/sadd?tb=test_table" -d "test_key"
 
-[上一级](../ha.md)
+[Previous page](../ha.md)
 
-[根目录](../../index.md)
+[Root directory](../../index.md)

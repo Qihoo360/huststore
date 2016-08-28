@@ -1,19 +1,19 @@
 ## persist ##
 
-**接口:** `/cache/persist`
+**Interface:** `/cache/persist`
 
-**方法:** `GET`
+**Method:** `GET`
 
-**参数:** 
+**Parameter:** 
 
-*  **key** （必选）  
+*  **key** (Required)  
 
-该接口是 `/hustcache/persist` 的代理接口，参数详情可参考 [这里](../../hustdb/hustcache/persist.md) 。
+This Interface is an proxy interface for `/hustcache/persist`. See more details in [here](../../hustdb/hustcache/persist.md).  
 
-**使用范例:**
+**Sample:**
 
     curl -i -X GET "http://localhost:8082/cache/persist?key=test_key"
 	
-[上一级](../cache.md)
+[Previous page](../cache.md)
 
-[根目录](../../../index.md)
+[Root directory](../../../index.md)

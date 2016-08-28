@@ -1,22 +1,22 @@
 ## stat ##
 
-**接口:** `/stat`
+**Interface:** `/stat`
 
-**方法:** `GET`
+**Method:** `GET`
 
-**参数:** 
+**Parameter:** 
 
-*  **peer** （必选）  
-表示后端机节点索引，参考 [peer_count](peer_count.md)
-*  **tb** （可选）  
+*  **peer** (Required)  
+This represents the indexes of backend servers. See more details in [peer_count](peer_count.md)
+*  **tb** (Optional)  
 
-该接口是 `/hustdb/stat` 的代理接口，参数详情可参考 [这里](../hustdb/hustdb/stat.md) 。
+This Interface is an proxy interface for `/hustdb/stat`. See more details in [here](../hustdb/hustdb/stat.md).  
 
-**使用范例:**
+**Sample:**
 
-该接口的测试代码的写法相对复杂，可参考测试脚本的写法。  
-脚本路径： `hustdb/ha/nginx/test/stat.py`
+It's not quite trivial to write script for this interface, please refer to more details in the example test script:   
+Script path: `hustdb/ha/nginx/test/stat.py`
 
-[上一级](../ha.md)
+[Previous page](../ha.md)
 
-[根目录](../../index.md)
+[Root directory](../../index.md)

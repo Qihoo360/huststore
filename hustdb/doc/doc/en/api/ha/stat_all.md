@@ -1,21 +1,21 @@
 ## stat_all ##
 
-**接口:** `/stat_all`
+**Interface:** `/stat_all`
 
-**方法:** `GET`
+**Method:** `GET`
 
-**参数:** 
+**Parameter:** 
 
-*  **peer** （必选）  
-表示后端机节点索引，参考 [peer_count](peer_count.md)
+*  **peer** (Required)  
+This represents the indexes of backend servers. See more details in [peer_count](peer_count.md)
 
-该接口是 `/hustdb/stat_all` 的代理接口，参数详情可参考 [这里](../hustdb/hustdb/stat_all.md) 。
+This Interface is an proxy interface for `/hustdb/stat_all`. See more details in [here](../hustdb/hustdb/stat_all.md).  
 
-**使用范例:**
+**Sample:**
 
-参考测试脚本的写法。  
-脚本路径： `hustdb/ha/nginx/test/autotest.py`
+See more details in the example test script:  
+Script path: `hustdb/ha/nginx/test/autotest.py`
 
-[上一级](../ha.md)
+[Previous page](../ha.md)
 
-[根目录](../../index.md)
+[Root directory](../../index.md)

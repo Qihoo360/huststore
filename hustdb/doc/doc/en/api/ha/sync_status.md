@@ -1,18 +1,18 @@
 ## sync_status ##
 
-**接口:** `/sync_status`
+**Interface:** `/sync_status`
 
-**方法:** `GET`
+**Method:** `GET`
 
-**参数:** 无
+**Parameter:** N/A
 
-该接口用于获取 `sync server` 进行数据同步的实时状态。
+This interface is used to get sync status info of `sync server`.
 
-**使用范例:**
+**Sample:**
 
     curl -i -X GET "http://localhost:8082/sync_status"
 
-**返回值范例:**
+**Return value:**
 
 	{
 	   "status" : {
@@ -46,6 +46,6 @@
 	      "synced_items" : 0
 	   }
 	}
-[上一级](../ha.md)
+[Previous page](../ha.md)
 
-[根目录](../../index.md)
+[Root directory](../../index.md)

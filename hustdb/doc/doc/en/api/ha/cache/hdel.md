@@ -1,20 +1,20 @@
 ## hdel ##
 
-**接口:** `/cache/hdel`
+**Interface:** `/cache/hdel`
 
-**方法:** `GET`
+**Method:** `GET`
 
-**参数:** 
+**Parameter:** 
 
-*  **tb** （必选）  
-*  **key** （必选）  
+*  **tb** (Required)  
+*  **key** (Required)  
 
-该接口是 `/hustcache/hdel` 的代理接口，参数详情可参考 [这里](../../hustdb/hustcache/hdel.md) 。
+This Interface is an proxy interface for `/hustcache/hdel`. See more details in [here](../../hustdb/hustcache/hdel.md).  
 
-**使用范例:**
+**Sample:**
 
     curl -i -X GET "http://localhost:8082/cache/hdel?tb=test_table&key=test_key"
 
-[上一级](../cache.md)
+[Previous page](../cache.md)
 
-[根目录](../../../index.md)
+[Root directory](../../../index.md)

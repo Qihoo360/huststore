@@ -1,18 +1,18 @@
 ## get_table ##
 
-**接口:** `/get_table`
+**Interface:** `/get_table`
 
-**方法:** `GET`
+**Method:** `GET`
 
-**参数:** 无
+**Parameter:** N/A
 
-该接口用于读取负载均衡表。
+This interface is used to read load balance table.
 
-**使用范例:**
+**Sample:**
 
     curl -i -X GET "http://localhost:8082/get_table"
 
-**返回值范例:**
+**Return value:**
 
 	HTTP/1.1 200 OK
 	Server: nginx/1.9.4
@@ -33,6 +33,6 @@
 	    ]
 	}
 
-[上一级](../ha.md)
+[Previous page](../ha.md)
 
-[根目录](../../index.md)
+[Root directory](../../index.md)

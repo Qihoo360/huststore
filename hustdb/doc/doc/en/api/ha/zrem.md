@@ -1,21 +1,21 @@
 ## zrem ##
 
-**接口:** `/zrem`
+**Interface:** `/zrem`
 
-**方法:** `GET | POST`
+**Method:** `GET | POST`
 
-**参数:** 
+**Parameter:** 
 
-*  **tb** （必选）  
-*  **key** （必选）  
-*  **ver** （可选）
+*  **tb** (Required)  
+*  **key** (Required)  
+*  **ver** (Optional)
 
-该接口是 `/hustdb/zrem` 的代理接口，参数详情可参考 [这里](../hustdb/hustdb/zrem.md) 。
+This Interface is an proxy interface for `/hustdb/zrem`. See more details in [here](../hustdb/hustdb/zrem.md).  
 
-**使用范例:**
+**Sample:**
 
     curl -i -X POST "http://localhost:8082/zrem?tb=test_table" -d "test_key"
 
-[上一级](../ha.md)
+[Previous page](../ha.md)
 
-[根目录](../../index.md)
+[Root directory](../../index.md)

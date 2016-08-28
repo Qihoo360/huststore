@@ -1,20 +1,20 @@
 ## zismember ##
 
-**接口:** `/zismember`
+**Interface:** `/zismember`
 
-**方法:** `GET | POST`
+**Method:** `GET | POST`
 
-**参数:** 
+**Parameter:** 
 
-*  **tb** （必选）  
-*  **key** （必选）  
+*  **tb** (Required)  
+*  **key** (Required)  
 
-该接口是 `/hustdb/zismember` 的代理接口，参数详情可参考 [这里](../hustdb/hustdb/zismember.md) 。
+This Interface is an proxy interface for `/hustdb/zismember`. See more details in [here](../hustdb/hustdb/zismember.md).  
 
-**使用范例:**
+**Sample:**
 
     curl -i -X POST "http://localhost:8082/zismember?tb=test_table" -d "test_key"
 
-[上一级](../ha.md)
+[Previous page](../ha.md)
 
-[根目录](../../index.md)
+[Root directory](../../index.md)

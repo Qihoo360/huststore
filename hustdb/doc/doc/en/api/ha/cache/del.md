@@ -1,19 +1,19 @@
 ## del ##
 
-**接口:** `/cache/del`
+**Interface:** `/cache/del`
 
-**方法:** `GET`
+**Method:** `GET`
 
-**参数:** 
+**Parameter:** 
 
-*  **key** （必选）  
+*  **key** (Required)  
 
-该接口是 `/hustcache/del` 的代理接口，参数详情可参考 [这里](../../hustdb/hustcache/del.md) 。
+This Interface is an proxy interface for `/hustcache/del`. See more details in [here](../../hustdb/hustcache/del.md). 
 
-**使用范例:**
+**Sample:**
 
     curl -i -X GET "http://localhost:8082/cache/del?key=test_key"
 
-[上一级](../cache.md)
+[Previous page](../cache.md)
 
-[根目录](../../../index.md)
+[Root directory](../../../index.md)

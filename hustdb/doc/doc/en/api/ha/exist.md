@@ -1,19 +1,19 @@
 ## exist ##
 
-**接口:** `/exist`
+**Interface:** `/exist`
 
-**方法:** `GET`
+**Method:** `GET`
 
-**参数:** 
+**Parameter:** 
 
-*  **key** （必选）  
+*  **key** (Required)  
 
-该接口是 `/hustdb/exist` 的代理接口，参数详情可参考 [这里](../hustdb/hustdb/exist.md) 。
+This Interface is an proxy interface for `/hustdb/exist`. See more details in [here](../hustdb/hustdb/exist.md).  
 
-**使用范例:**
+**Sample:**
 
     curl -i -X GET "http://localhost:8082/exist?key=test_key"
 
-[上一级](../ha.md)
+[Previous page](../ha.md)
 
-[根目录](../../index.md)
+[Root directory](../../index.md)

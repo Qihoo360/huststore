@@ -1,23 +1,23 @@
 ## zadd ##
 
-**接口:** `/zadd`
+**Interface:** `/zadd`
 
-**方法:** `GET | POST`
+**Method:** `GET | POST`
 
-**参数:** 
+**Parameter:** 
 
-*  **tb** （必选）  
-*  **score** （必选）  
-*  **key** （必选）  
-*  **opt** （可选）
-*  **ver** （可选）
+*  **tb** (Required)  
+*  **score** (Required)  
+*  **key** (Required)  
+*  **opt** (Optional)
+*  **ver** (Optional)
 
-该接口是 `/hustdb/zadd` 的代理接口，参数详情可参考 [这里](../hustdb/hustdb/zadd.md) 。
+This Interface is an proxy interface for `/hustdb/zadd`. See more details in [here](../hustdb/hustdb/zadd.md).  
 
-**使用范例:**
+**Sample:**
 
     curl -i -X POST "http://localhost:8082/zadd?tb=test_table&score=60" -d "test_key"
 
-[上一级](../ha.md)
+[Previous page](../ha.md)
 
-[根目录](../../index.md)
+[Root directory](../../index.md)

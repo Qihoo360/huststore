@@ -1,21 +1,21 @@
 ## hset ##
 
-**接口:** `/cache/hset`
+**Interface:** `/cache/hset`
 
-**方法:** `GET | PUT | POST`
+**Method:** `GET | PUT | POST`
 
-**参数:** 
+**Parameter:** 
 
-*  **tb** （必选）  
-*  **key** （必选）  
-*  **val** （必选）  
+*  **tb** (Required)  
+*  **key** (Required)  
+*  **val** (Required)  
 
-该接口是 `/hustcache/hset` 的代理接口，参数详情可参考 [这里](../../hustdb/hustcache/hset.md) 。
+This Interface is an proxy interface for `/hustcache/hset`. See more details in [here](../../hustdb/hustcache/hset.md).  
 
-**使用范例:**
+**Sample:**
 
     curl -i -X GET "http://localhost:8082/cache/hset?tb=test_table&key=test_key&val=test_val"
 
-[上一级](../cache.md)
+[Previous page](../cache.md)
 
-[根目录](../../../index.md)
+[Root directory](../../../index.md)

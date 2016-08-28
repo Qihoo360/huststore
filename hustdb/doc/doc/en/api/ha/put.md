@@ -1,22 +1,22 @@
 ## put ##
 
-**接口:** `/put`
+**Interface:** `/put`
 
-**方法:** `GET | PUT | POST`
+**Method:** `GET | PUT | POST`
 
-**参数:** 
+**Parameter:** 
 
-*  **key** （必选）  
-*  **val** （必选）
-*  **ttl** （可选）
-*  **ver** （可选）  
+*  **key** (Required)  
+*  **val** (Required)
+*  **ttl** (Optional)
+*  **ver** (Optional)  
 
-该接口是 `/hustdb/put` 的代理接口，参数详情可参考 [这里](../hustdb/hustdb/put.md) 。
+This Interface is an proxy interface for `/hustdb/put`. See more details in [here](../hustdb/hustdb/put.md).  
 
-**使用范例:**
+**Sample:**
 
     curl -i -X GET "http://localhost:8082/put?key=test_key&val=test_val"
 
-[上一级](../ha.md)
+[Previous page](../ha.md)
 
-[根目录](../../index.md)
+[Root directory](../../index.md)

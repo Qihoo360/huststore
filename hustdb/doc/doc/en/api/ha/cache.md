@@ -16,6 +16,6 @@ cache
 * [hincrby](cache/hincrby.md)
 * [hincrbyfloat](cache/hincrbyfloat.md)
 
-[上一级](../ha.md)
+[Previous page](../ha.md)
 
-[根目录](../../index.md)
+[Root directory](../../index.md)

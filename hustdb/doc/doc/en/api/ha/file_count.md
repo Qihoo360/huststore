@@ -1,20 +1,20 @@
 ## file_count ##
 
-**接口:** `/file_count`
+**Interface:** `/file_count`
 
-**方法:** `GET`
+**Method:** `GET`
 
-**参数:** 
+**Parameter:** 
 
-*  **peer** （必选）  
-表示后端机节点索引，参考 [peer_count](peer_count.md)  
+*  **peer** (Required)  
+This represents the indexes of backend server. See more details in [peer_count](peer_count.md)  
 
-该接口是 `/hustdb/file_count` 的代理接口，参数详情可参考 [这里](../hustdb/hustdb/file_count.md) 。
+This Interface is an proxy interface for `/hustdb/file_count`. See more details in [here](../hustdb/hustdb/file_count.md).  
 
-**使用范例:**
+**Sample:**
 
     curl -i -X GET "http://localhost:8082/file_count?peer=0"
 
-[上一级](../ha.md)
+[Previous page](../ha.md)
 
-[根目录](../../index.md)
+[Root directory](../../index.md)

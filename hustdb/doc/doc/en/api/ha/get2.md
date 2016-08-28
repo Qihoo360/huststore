@@ -1,22 +1,22 @@
 ## get2 ##
 
-**接口:** `/get2`
+**Interface:** `/get2`
 
-**方法:** `GET`
+**Method:** `GET`
 
-**参数:** 
+**Parameter:** 
 
-*  **key** （必选）  
+*  **key** (Required)  
 
-该接口是 `/hustdb/get` 的代理接口，参数详情可参考 [这里](../hustdb/hustdb/get.md) 。
+This Interface is an proxy interface for `/hustdb/get`. See more details in [here](../hustdb/hustdb/get.md).  
 
-**使用范例:**
+**Sample:**
 
     curl -i -X GET "http://localhost:8082/get2?key=test_key"
 
-根据数据的版本以及值的一致性的情况，该接口的返回一共有如下几种：
+According to the version of data and consistency status of the value, this interface will return the following values: 
 
-**返回范例1（值一致，版本一致）:**
+**Return value 1 (Both value and version are matched):**
 
     HTTP/1.1 200 OK
     Server: nginx/1.9.4
@@ -28,11 +28,11 @@
     
     hustdbhavalue
 
-相关字段：
+Related fields:
   
-* `Version` ：值的版本号。
+* `Version` :version of the value.
 
-**返回范例2（值一致，版本不一致）:**
+**eturn value 1 (Value is matched, version is not matched):**
 
     HTTP/1.1 200 OK
     Server: nginx/1.9.4
@@ -45,12 +45,12 @@
     
     hustdbhavalue
 
-相关字段：
+Related fields: 
 
-* `Version1`：`master1` 的值的版本号。  
-* `Version2`：`master2` 的值的版本号。
+* `Version1`:version of `master1`'s value. 
+* `Version2`:version of `master2`'s value.
 
-**返回范例3（值不一致，版本一致）:**
+**Return value 3 (Value is not matched, version is matched):**
 
     HTTP/1.1 409 Conflict
     Server: nginx/1.9.4
@@ -63,12 +63,12 @@
     
     hustdbhavalue0000000000000
 
-相关字段：
+Related fields:
 
-* `Version`：版本号。  
-* `Val-Offset`：两个值的分割点。可以看到 `hustdbhavalue0000000000000` 以偏移为 `13` 的地方分开，可以得到两个子串，分别为 `hustdbhavalue` 和 `0000000000000`，分别代表 `master1` 和 `master2` 存放的值。
+* `Version`: version of the value.  
+* `Val-Offset`: cut point of the two values. e.g. If we cut the value `hustdbhavalue0000000000000` at the offset of `13`, we get two sub values, `hustdbhavalue` and `0000000000000`, representing the values stored in `master1` and `master2` separately.
 
-**返回范例4（值不一致，版本不一致）:**
+**Return value 4 (Both value and version are not matched):**
 
     HTTP/1.1 409 Conflict
     Server: nginx/1.9.4
@@ -82,12 +82,12 @@
     
     hustdbhavalue0000000000000
 
-相关字段：
+Related fields:
 
-* `Version1`：`master1` 的值的版本号。  
-* `Version2`：`master2` 的值的版本号。
-* `Val-Offset`：两个值的分割点。参考 `返回范例3` 的解释。
+* `Version1`: version of `master1`'s value
+* `Version2`:version of `master2`'s value
+* `Val-Offset`:cut point of the two values. See more details in `Return value 3`.  
 
-[上一级](../ha.md)
+[Previous page](../ha.md)
 
-[根目录](../../index.md)
+[Root directory](../../index.md)

@@ -1,13 +1,13 @@
 ## timeout ##
 
-**接口:** `/timeout`
+**Interface:** `/timeout`
 
-**方法:** `GET`
+**Method:** `GET`
 
-**参数:** 
+**Parameter:** 
 
-*  **queue** （必选）  
-*  **minute** （必选）  
+*  **queue** (Required)  
+*  **minute** (Required)  
   
 该接口是 `/hustmq/timeout` 的代理接口，参数详情可参考 [这里](../hustmq/timeout.md)。
 
@@ -24,6 +24,6 @@
     Content-Length: 0
     Connection: keep-alive
 
-[上一级](../ha.md)
+[Previous](../ha.md)
 
-[根目录](../../index.md)
+[Home](../../index.md)

@@ -1,11 +1,11 @@
-测试
+Test
 --
 
-以下所有的脚本依赖于 [requests](https://github.com/request/request)。
+All of the following scripts rely on [requests](https://github.com/request/request).  
 
-### 自动化测试脚本 ###
+### Automated test script ###
 
-路径：`hustmq/ha/nginx/test/autotest.py`
+Path: `hustmq/ha/nginx/test/autotest.py`
 
     usage:
         python autotest [option] [action]
@@ -27,15 +27,15 @@
         python autotest.py stat_all
         python autotest.py 192.168.1.101 stat_all
 
-**备注**
+**Notes**
 
-`evget` 和 `evput` 需要成对配合进行测试，具体操作可以分别在两个终端上开启脚本（`evsub` 和 `evpub` 同理）
+`evget` and `evput` need to be tested in pair, you can start them separately in two terminals. (Same process for `evsub` and `evpub`) 
 
     # terminal 1
     $ python autotest.py evget
     # terminal 2
     $ python autotest.py evput
 
-[上一级](index.md)
+[Previous](index.md)
 
-[根目录](../../index.md)
+[Home](../../index.md)

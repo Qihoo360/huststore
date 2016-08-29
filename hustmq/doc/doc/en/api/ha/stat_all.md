@@ -1,20 +1,20 @@
 ## stat_all ##
 
-**接口:** `/stat_all`
+**Interface:** `/stat_all`
 
-**方法:** `GET`
+**Method:** `GET`
 
-**参数:**  无
+**Parameter:**  N/A
 
-该接口用于获取 `hustmq` 集群状态（缓存）。需要说明的是，**接口返回的并非实时数据，而是缓存**（参考 [autost](autost.md)）。如果需要获取实时状态，可以在调用此接口之前先调用 [autost](autost.md) 。
+This interface is used to query the status of `hustmq` cluster (cache), it's worthy to note that **the returned value is not real time data, but cached data.**(Check [autost](autost.md)).  If you want to get the real time status, you should call [autost](autost.md) before you call this interface. 
 
-**使用范例:**
+**Example:**
 
     curl -i -X GET "http://localhost:8080/stat_all"
 
-**返回值范例:**
+**Return value:**
 
-接口返回的数据格式为 `json`，格式化之后的效果类似如下：
+The data type of the returned data is `json`, it should look like this after formatted:
 
     [ 
         {
@@ -43,11 +43,11 @@
         }
     ]
 
-相关的字段含义可参考 [`/hustmq/stat_all`](../hustmq/stat_all.md) 。
+See more details in [`/hustmq/stat_all`](../hustmq/stat_all.md). 
 
-**动画效果:**
+**Animation:**
 ![stat_all](../../../res/stat_all.gif)
 
-[上一级](../ha.md)
+[Previous](../ha.md)
 
-[根目录](../../index.md)
+[Home](../../index.md)

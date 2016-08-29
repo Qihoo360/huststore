@@ -1,19 +1,19 @@
 ## worker ##
 
-**接口:** `/worker`
+**Interface:** `/worker`
 
-**方法:** `GET`
+**Method:** `GET`
 
-**参数:**  
+**Parameter:**  
 
-*  **queue** （必选）
+*  **queue** (Required) 
 
-该接口是 `/hustmq/worker` 的代理接口，参数详情可参考 [这里](../hustmq/worker.md)。
+This interface is the proxy interface for `/hustmq/worker`. See more details in [here](../hustmq/worker.md)。
 
-**使用范例:**
+**Example**
 
     curl -i -X GET "http://localhost:8080/worker?queue=test_queue"
 
-[上一级](../ha.md)
+[Previous](../ha.md)
 
-[根目录](../../index.md)
+[Home](../../index.md)

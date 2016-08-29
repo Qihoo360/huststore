@@ -1,15 +1,15 @@
 ## pub ##
 
-**接口:** `/pub`
+**Interface:** `/pub`
 
-**方法:** `GET | POST`
+**Method:** `GET | POST`
 
-**参数:** 
+**Parameter:** 
 
-*  **queue** （必选）  
-*  **item** （必选）  
-*  **idx** （可选）
-*  **ttl** （可选）
+*  **queue** (Required)  
+*  **item** (Required)  
+*  **idx** (Optional)
+*  **ttl** (Optional)
   
 该接口是 `/hustmq/pub` 的代理接口，参数详情可参考 [这里](../hustmq/pub.md)。
 
@@ -17,6 +17,6 @@
 
     curl -i -X GET "http://localhost:8080/pub?queue=test_queue&item=test_value"
 
-[上一级](../ha.md)
+[Previous](../ha.md)
 
-[根目录](../../index.md)
+[Home](../../index.md)

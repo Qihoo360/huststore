@@ -1,14 +1,14 @@
 ## evget ##
 
-**接口:** `/evget`
+**Interface:** `/evget`
 
-**方法:** `GET`
+**Method:** `GET`
 
-**参数:** 
+**Parameter:** 
 
-*  **queue** （必选）  
-*  **worker** （必选）  
-*  **ack** （可选）
+*  **queue** (Required)  
+*  **worker** (Required)  
+*  **ack** (Optional)
 
 该接口和 [put](put.md) 相配合实现 `long polling` 机制。
 
@@ -16,6 +16,6 @@
 
     curl -i -X GET "http://localhost:8080/evget?queue=test_queue&worker=test_worker"
 
-[上一级](../ha.md)
+[Previous](../ha.md)
 
-[根目录](../../index.md)
+[Home](../../index.md)

@@ -1,21 +1,21 @@
 ## do_get ##
 
-**接口:** `/do_get`
+**Interface:** `/do_get`
 
-**方法:** `POST`
+**Method:** `POST`
 
-**参数:** 
+**Parameter:** 
 
-*  **queue** （必选）  任务的名称
-*  **args** （必选） 任务的参数，必须放在 `http body` 中
+*  **queue** (Required)  the name of task
+*  **args** (Required) the arguments of task, must be put in `http body`
   
-该接口用于远程投递任务。
+This interface is used to deliver task remotely.
 
-**使用范例:**
+**Example:**
 
     curl -i -X POST 'localhost:8080/do_get?queue=fibonacci' -d '10'
 
-**返回样例:**
+**Return value:**
 
     HTTP/1.1 200 OK
     Server: nginx/1.9.4
@@ -26,8 +26,8 @@
     
     50
 
-更加详尽的测试代码可参考 `hustmq/ha/nginx/test/do_get.py`
+See more details of test script in `hustmq/ha/nginx/test/do_get.py`
 
-[上一级](../ha.md)
+[Previous](../ha.md)
 
-[根目录](../../index.md)
+[Home](../../index.md)

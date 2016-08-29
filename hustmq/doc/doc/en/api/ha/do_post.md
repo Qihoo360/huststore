@@ -1,20 +1,20 @@
 ## do_post ##
 
-**接口:** `/do_post`
+**Interface:** `/do_post`
 
-**方法:** `POST`
+**Method:** `POST`
 
-**参数:** 
+**Parameter:** 
 
-**场景 1**  （认领任务）
+**Scene 1**  Claim a task
 
-无
+N/A
 
-**使用范例:**
+**Example:**
 
     curl -i -X POST 'localhost:8080/do_post'
 
-**返回样例:**
+**Return value:**
 
     HTTP/1.1 200 OK
     Server: nginx/1.9.4
@@ -26,18 +26,18 @@
     Token: 1459234528278661
     
     10
-返回的 `http` 头部中，`Queue` 代表任务的名字，`Token` 是本次任务处理过程的唯一标识符，在返回处理结果的时候必须带上。`10` 是任务的参数，在 `http body` 中。
+In the returned `http` header, `Queue` represents the name of the task, `Token` is the identity of the task, it must be returned in along with the result. `10` is the argument of the task, should be put in `http body`.
 
-**场景 2**  （返回处理结果）
+**Scene 2**  Return the process result
   
-*  **token** （必选）  任务的唯一标识符号
-*  **result** （必选）  处理结果，必须放在 `http body` 中
+*  **token** (Required)  the only identity of the task
+*  **result** (Required)  process result, must be put in `http body`
 
-**使用范例:**
+**Example:**
 
     curl -i -X GET "http://localhost:8080/do_post?token=1459234528278661" -d "50"
 
-**返回样例:**
+**Return value:**
 
     HTTP/1.1 200 OK
     Server: nginx/1.9.4
@@ -46,8 +46,8 @@
     Content-Length: 0
     Connection: keep-alive
     
-更加详尽的测试代码可参考 `hustmq/ha/nginx/test/do_post.py`
+See more details in `hustmq/ha/nginx/test/do_post.py`
 
-[上一级](../ha.md)
+[Previous](../ha.md)
 
-[根目录](../../index.md)
+[Home](../../index.md)

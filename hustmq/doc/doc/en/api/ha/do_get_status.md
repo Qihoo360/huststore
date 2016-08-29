@@ -1,20 +1,20 @@
 ## do_get_status ##
 
-**接口:** `/do_get_status`
+**Interface:** `/do_get_status`
 
-**方法:** `GET`
+**Method:** `GET`
 
-**参数:** 
+**Parameter:** 
 
-无
+N/A
   
-该接口用于实时获取 [`do_get`](do_get.md) 任务的状态。
+This interface is used to fetch the status of task [`do_get`](do_get.md) in real time.
 
-**使用范例:**
+**Example:**
 
     curl -i -X GET 'localhost:8080/do_get_status'
 
-**返回样例:**
+**Return value:**
 
     HTTP/1.1 200 OK
     Server: nginx/1.9.4
@@ -25,13 +25,13 @@
     
     {"unassigned_tasks":2,"assigned_tasks":0,"free_tasks":1022,"total":1024}
 
-备注：`total = unassigned_tasks + assigned_tasks + free_tasks`
+Note: `total = unassigned_tasks + assigned_tasks + free_tasks`
 
-* unassigned_tasks: 表示已经投递，但尚未被 [`do_post`](do_post.md) 认领的任务
-* assigned_tasks: 表示已经投递，且被 [`do_post`](do_post.md) 认领的任务
-* free_tasks: 剩余可被分配的任务数量，每来一个 [`do_get`](do_get.md) 请求，该值都会减一，相应的 `unassigned_tasks` 或者 `assigned_tasks` 会加一
-* total: 分配的任务缓存总数
+* unassigned_tasks: tasks delivered but not claimed by [`do_post`](do_post.md)
+* assigned_tasks: tasks delivered and claimed [`do_post`](do_post.md) 
+* free_tasks: the remaining amount of tasks that can be assigned, when a [`do_get`](do_get.md) request comes, its value will reduce by one, and the corresponding `unassigned_tasks` or `assigned_tasks` will increase by one.
+* total: total size of task cache assigned.
 
-[上一级](../ha.md)
+[Previous](../ha.md)
 
-[根目录](../../index.md)
+[Home](../../index.md)

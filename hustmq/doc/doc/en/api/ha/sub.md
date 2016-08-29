@@ -1,13 +1,13 @@
 ## sub ##
 
-**接口:** `/sub`
+**Interface:** `/sub`
 
-**方法:** `GET`
+**Method:** `GET`
 
-**参数:** 
+**Parameter:** 
 
-*  **queue** （必选）  
-*  **idx** （必选）  推送数据的索引号
+*  **queue** (Required)  
+*  **idx** (Required)  推送数据的索引号
   
 该接口是 `/hustmq/sub` 的代理接口，参数详情可参考 [这里](../hustmq/sub.md)。。
 
@@ -15,6 +15,6 @@
 
     curl -i -X GET "http://localhost:8080/sub?queue=test_queue&idx=1"
 
-[上一级](../ha.md)
+[Previous](../ha.md)
 
-[根目录](../../index.md)
+[Home](../../index.md)

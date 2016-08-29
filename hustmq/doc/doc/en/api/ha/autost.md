@@ -1,22 +1,22 @@
 ## autost ##
 
-**接口:** `/autost`
+**Interface:** `/autost`
 
-**方法:** `GET`
+**Method:** `GET`
 
-**参数:**  无
+**Parameter:**  N/A 
 
-该接口用于实时刷新 `hustmq` 集群状态，会调用 [`/hustmq/stat_all`](../hustmq/stat_all.md) 接口查询所有后端 `hustmq` 节点的实时状态，并对结果进行合并，保存到本地内存中。
+This interface is used to reflesh `hustmq` cluster status in real time, it will call [`/hustmq/stat_all`](../hustmq/stat_all.md) to query the real time status of all the backend `hustmq` servers, merge the result and save it to the local memory.
 
-需要说明的是，`hustmq ha` 会自动在后台周期性地调用 [`/hustmq/stat_all`](../hustmq/stat_all.md) 方法更新集群状态，默认的间隔是 `200` 毫秒，具体可参考 [`autost_interval`](../../advanced/ha/nginx.md)。
+It's worthy to note that `hustmq ha` will periodically call [`/hustmq/stat_all`](../hustmq/stat_all.md) in the background to reflesh the cluster status, the default interval is `200` millisecond. Please see more details in [`autost_interval`](../../advanced/ha/nginx.md).
 
-**使用范例:**
+**Example**
 
     curl -i -X GET "http://localhost:8080/autost"
 
-**动画效果:**
+**Animation**
 ![autost](../../../res/autost.gif)
 
-[上一级](../ha.md)
+[Previous](../ha.md)
 
-[根目录](../../index.md)
+[Home](../../index.md)

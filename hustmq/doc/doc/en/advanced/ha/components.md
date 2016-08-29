@@ -1,9 +1,9 @@
-组件
+Components
 --
 
 ### `ngx_http_fetch_module` ###
 
-路径：`hustmq/ha/nginx/src/http/modules`
+Path: `hustmq/ha/nginx/src/http/modules`
 
 * `ngx_http_fetch_utils.h`
 * `ngx_http_fetch_utils.c`
@@ -23,33 +23,33 @@
 * `ngx_http_fetch.c`
 * `ngx_http_fetch_module.c`
 
-该模块提供上下文无关的 http 访问接口（`context-free`），你可以在不依赖于任何外部 `ngx_http_request_t` 的条件下构造一个完全独立的 `ngx_http_request_t` 对象，并向上游主机发起 http 请求（`upstream`）。
+This component provides `context-free` http interface, you can construct `ngx_http_request_t` object that is completely independent of any outer `ngx_http_request_t`, and send a http request to the `upstream` servers.
 
-**所有编写过 `subrequest` 代码的朋友，想必都了解这一点（`context-free`）意味着什么 ^_^**
+**Those who have experience in writing `subrequest`, should know how beneficial `context-free` could be.**
 
-通常情况下，如果你想构造一个 `subrequest` ，你必须配置 nginx 反向代理的接口，并且要由客户端来驱动该子请求的产生。 **在这种设计下，一个子请求的生成必须依赖于一个父请求的上下文。**
+In general, if you want to construct a `subrequest`, you will have to config the reverse proxy interface of nginx, and the subrequest must come from client side. **Under such condition, a subrequest relies on the context of the parent.**
 
-但是在特殊情况下，你所构造的子请求并不需要依赖于父请求（例如，周期性地向上游主机抓取数据，这通常开一个定时任务即可）， `ngx_http_fetch_module` 正是为解决此类问题而出现。
+Under special circumstances, the subrequest you construct does not necessarily rely on parent's request. (e.g. There is only one timed task need when we need to periodically fetch data from upstream server), and `ngx_http_fetch_module` is born to solve problem like this.
 
-此外， `ngx_http_fetch_module` 提供的接口使得编写如下形式的代码成为可能：
+Also, `ngx_http_fetch_module` provides interfaces which make the following code work properly: 
 
     for (i = 0; i < size; ++i)
     {
         ngx_http_fetch(args_list[i], auth);
     }
 
-`ngx_http_fetch_module` 的设计大量参考了 nginx 源代码，包括：
+The design of `ngx_http_fetch_module` takes a lot of thinking from nginx, include:  
 
 - `ngx_http_proxy_module.c`  
 - `ngx_http_upstream_keepalive_module.c`
 - `ngx_http_core_module.c`
 
-`ngx_http_fetch_module` 的使用非常简单，只需要了解如下接口：
+Usage of `ngx_http_fetch_module` is simple, please check the this interface: 
 
     ngx_int_t ngx_http_fetch(const ngx_http_fetch_args_t * args, const ngx_http_auth_basic_key_t * auth);
 
-具体的使用方法可以参考 `hustmq/ha/nginx/src/addon/hustmq_ha_fetch_stat.c`
+See more details in `hustmq/ha/nginx/src/addon/hustmq_ha_fetch_stat.c`
 
-[上一级](index.md)
+[Previous](index.md)
 
-[根目录](../../index.md)
+[Home](../../index.md)

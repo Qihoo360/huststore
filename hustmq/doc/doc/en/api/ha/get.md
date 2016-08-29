@@ -1,14 +1,14 @@
 ## get ##
 
-**接口:** `/get`
+**Interface:** `/get`
 
-**方法:** `GET`
+**Method:** `GET`
 
-**参数:** 
+**Parameter:** 
 
-*  **queue** （必选）  
-*  **worker** （必选）  
-*  **ack** （可选）
+*  **queue** (Required)  
+*  **worker** (Required)  
+*  **ack** (Optional)
   
 该接口是 `/hustmq/get` 的代理接口，参数详情可参考 [这里](../hustmq/get.md)。
 
@@ -28,6 +28,6 @@
 **动画效果:**
 ![get](../../../res/get.gif)
 
-[上一级](../ha.md)
+[Previous](../ha.md)
 
-[根目录](../../index.md)
+[Home](../../index.md)

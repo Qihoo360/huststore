@@ -1,20 +1,20 @@
 ## do_post_status ##
 
-**接口:** `/do_post_status`
+**Interface:** `/do_post_status`
 
-**方法:** `GET`
+**Method:** `GET`
 
-**参数:** 
+**Parameter:** 
 
-无
+N/A
   
-该接口用于实时获取 [`do_post`](do_post.md) 任务的状态。
+This interface is used to fetch [`do_post`](do_post.md) task status in real time. 
 
-**使用范例:**
+**Example:**
 
     curl -i -X GET 'localhost:8080/do_post_status'
 
-**返回样例:**
+**Return value:**
 
     HTTP/1.1 200 OK
     Server: nginx/1.9.4
@@ -25,10 +25,10 @@
     
     {"cache_workers":2,"free_workers":1022,"total":1024}
 
-* cache_workers: 表示尚未认领 [`do_get`](do_get.md) 投递的任务的 `worker`
-* free_workers: 剩余可被分配的 `worker` 数量，每来一个 [`do_post`](do_post.md) 请求，该值都会减一，相应的 `cache_executers` 会加一
-* total: 分配的 `worker` 缓存总数
+* cache_workers: haven't yet claimed the `worker` of the delivered [`do_get`](do_get.md) task
+* free_workers: the remaining number of `worker`s that can be assigned, each time a [`do_post`](do_post.md) request comes, this value will reduce by 1, and the corresponding `cache_executers` will increase by one.
+* total: total size of `worker` cache assigned. 
 
-[上一级](../ha.md)
+[Previous](../ha.md)
 
-[根目录](../../index.md)
+[Home](../../index.md)

@@ -44,7 +44,7 @@ hustdb
 	* [hincrby](hustdb/hustcache/hincrby.md)
 	* [hincrbyfloat](hustdb/hustcache/hincrbyfloat.md)
 
-### 参数说明 ###
+### Arguments ###
 
 #### `tb` ####
 Table name, used for hash，set   

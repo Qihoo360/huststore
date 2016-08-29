@@ -13,4 +13,4 @@ replace_by
 
 [Previous page](../table.md)
 
-[Root directory](../../../index.md)
+[Home](../../../index.md)

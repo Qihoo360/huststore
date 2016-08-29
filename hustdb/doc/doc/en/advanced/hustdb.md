@@ -5,4 +5,4 @@ hustdb
 
 [Previous Chapter](index.md)
 
-[Root Directory](../index.md)
+[Home](../index.md)

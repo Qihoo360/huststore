@@ -19,4 +19,4 @@ This Interface is an proxy interface for `/hustdb/put`. See more details in [her
 
 [Previous page](../ha.md)
 
-[Root directory](../../index.md)
+[Home](../../index.md)

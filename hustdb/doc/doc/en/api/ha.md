@@ -83,4 +83,4 @@ For more details, please refer to the explanations in FAQ at the end of [This Ch
 
 [Previous Chapter](index.md)
 
-[Root Directory](../index.md)
+[Home](../index.md)

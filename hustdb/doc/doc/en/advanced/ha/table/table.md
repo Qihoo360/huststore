@@ -11,4 +11,4 @@ Load balance hash table, every item is a [hash_item](hash_item.md).
 
 [Previous page](../table.md)
 
-[Root directory](../../../index.md)
+[Home](../../../index.md)

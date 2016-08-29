@@ -20,4 +20,4 @@ This Interface is an proxy interface for `/hustdb/hset`. See more details in [he
 
 [Previous page](../ha.md)
 
-[Root directory](../../index.md)
+[Home](../../index.md)

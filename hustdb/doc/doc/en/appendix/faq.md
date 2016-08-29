@@ -29,4 +29,4 @@ This chapter provides answers for faq of `hustdb`:
     
 [Previous page](index.md)
 
-[Root directory](../index.md)
+[Home](../index.md)

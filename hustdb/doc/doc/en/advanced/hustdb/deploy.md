@@ -105,4 +105,4 @@ Deployment
 
 [Previous page](../hustdb.md)
 
-[Root directory](../../index.md)
+[Home](../../index.md)

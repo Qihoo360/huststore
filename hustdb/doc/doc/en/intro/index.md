@@ -9,4 +9,4 @@ hustdb is a series of solution for high performance distributed storage service.
 Overall Architecture:  
 ![architect](../../res/architect.png)
 
-[Root directory](../index.md)
+[Home](../index.md)

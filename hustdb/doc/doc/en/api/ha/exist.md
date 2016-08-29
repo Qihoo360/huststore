@@ -16,4 +16,4 @@ This Interface is an proxy interface for `/hustdb/exist`. See more details in [h
 
 [Previous page](../ha.md)
 
-[Root directory](../../index.md)
+[Home](../../index.md)

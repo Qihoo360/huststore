@@ -90,4 +90,4 @@ If the deployment path of `sync server` is not `/data/hustdbsync`, then its `[ru
 
 [Previous Page](../ha.md)
 
-[Root Directory](../../index.md)
+[Home](../../index.md)

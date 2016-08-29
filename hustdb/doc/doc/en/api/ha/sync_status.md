@@ -48,4 +48,4 @@ This interface is used to get sync status info of `sync server`.
 	}
 [Previous page](../ha.md)
 
-[Root directory](../../index.md)
+[Home](../../index.md)

@@ -25,4 +25,4 @@ This interface is used to detect whether `sync server` is alive.
 
 [Previous page](../ha.md)
 
-[Root directory](../../index.md)
+[Home](../../index.md)

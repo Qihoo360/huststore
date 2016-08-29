@@ -8,4 +8,4 @@ Configuration
 
 [Previous Chapter](../ha.md)
 
-[Root Directory](../../index.md)
+[Home](../../index.md)

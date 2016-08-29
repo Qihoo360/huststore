@@ -670,4 +670,4 @@ In `nginx.json`, delete `"http_basic_auth_file"` field and its value, use `genco
 
 [Previous page](conf.md)
 
-[Root directory](../../index.md)
+[Home](../../index.md)

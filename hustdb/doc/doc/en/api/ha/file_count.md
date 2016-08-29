@@ -17,4 +17,4 @@ This Interface is an proxy interface for `/hustdb/file_count`. See more details 
 
 [Previous page](../ha.md)
 
-[Root directory](../../index.md)
+[Home](../../index.md)

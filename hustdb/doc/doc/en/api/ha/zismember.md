@@ -17,4 +17,4 @@ This Interface is an proxy interface for `/hustdb/zismember`. See more details i
 
 [Previous page](../ha.md)
 
-[Root directory](../../index.md)
+[Home](../../index.md)

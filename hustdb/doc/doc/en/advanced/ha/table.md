@@ -181,4 +181,4 @@ In real deployment environment, **it is strongly recommanded to use this methos 
 
 [Previous page](conf.md)
 
-[Root directory](../../index.md)
+[Home](../../index.md)

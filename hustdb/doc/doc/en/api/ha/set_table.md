@@ -32,4 +32,4 @@ See more details in `hustdb/ha/nginx/test/set_table.py`
 
 [Previous page](../ha.md)
 
-[Root directory](../../index.md)
+[Home](../../index.md)

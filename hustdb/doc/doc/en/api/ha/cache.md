@@ -16,6 +16,6 @@ cache
 * [hincrby](cache/hincrby.md)
 * [hincrbyfloat](cache/hincrbyfloat.md)
 
-[Previous page](../ha.md)
+[Previous](../ha.md)
 
-[Root directory](../../index.md)
+[Home](../../index.md)

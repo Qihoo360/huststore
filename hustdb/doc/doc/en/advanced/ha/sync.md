@@ -86,7 +86,7 @@ Interface taht is related to `HA`: [sync_status](../../api/ha/sync_status.md)
 
 [Previous page](../ha.md)
 
-[Root directory](../../index.md)
+[Home](../../index.md)
 
 
 

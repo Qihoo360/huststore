@@ -12,4 +12,4 @@ For detailed deployment and configuration, please check:
 * [hustdb ha load balance table configuration](../advanced/ha/table.md)
 * [hustdb ha log configuration](../advanced/ha/zlog.md)
 
-[Root directory](../index.md)
+[Home](../index.md)

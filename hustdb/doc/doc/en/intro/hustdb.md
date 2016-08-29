@@ -9,4 +9,4 @@ Project directory: `hustdb/db`
 
 [Previous page](index.md)
 
-[Root directory](../index.md)
+[Home](../index.md)

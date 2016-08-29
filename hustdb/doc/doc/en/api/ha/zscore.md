@@ -17,4 +17,4 @@ This Interface is an proxy interface for `/hustdb/zscore`. See more details in [
 
 [Previous page](../ha.md)
 
-[Root directory](../../index.md)
+[Home](../../index.md)

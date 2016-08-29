@@ -18,4 +18,4 @@ Script path: `hustdb/ha/nginx/test/autotest.py`
 
 [Previous page](../ha.md)
 
-[Root directory](../../index.md)
+[Home](../../index.md)

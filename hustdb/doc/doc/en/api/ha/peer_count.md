@@ -24,4 +24,4 @@ The above interfaces need to pass `peer` argument. If `peer_count`'s value is **
 
 [Previous page](../ha.md)
 
-[Root directory](../../index.md)
+[Home](../../index.md)

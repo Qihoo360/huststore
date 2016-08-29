@@ -35,4 +35,4 @@ This interface is used to read load balance table.
 
 [Previous page](../ha.md)
 
-[Root directory](../../index.md)
+[Home](../../index.md)

@@ -35,4 +35,4 @@ For common problems in nginx configuration, please refer to:
 
 [Previous page](index.md)
 
-[Root directory](../index.md)
+[Home](../index.md)

@@ -30,4 +30,4 @@ In the above example script, `/data/hustdbha` is installation path, replace it w
 
 [Previous page](conf.md)
 
-[Root directory](../../index.md)
+[Home](../../index.md)

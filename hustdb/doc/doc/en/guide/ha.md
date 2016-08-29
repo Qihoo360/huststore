@@ -171,4 +171,4 @@ The result shows that the servers work as expected
 
 [Previous page](index.md)
 
-[Root directory](../index.md)
+[Home](../index.md)

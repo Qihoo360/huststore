@@ -71,4 +71,4 @@ Whether get key list from snapshot, please refer to [export](export.md)
 
 [Previous page](../hustdb.md)
 
-[Root directory](../../../index.md)
+[Home](../../../index.md)

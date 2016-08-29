@@ -25,4 +25,4 @@ Script path: `hustdb/ha/nginx/test/fetch.py`
 
 [Previous page](../ha.md)
 
-[Root directory](../../index.md)
+[Home](../../index.md)

@@ -17,4 +17,4 @@ This Interface is an proxy interface for `/hustcache/hget`. See more details in 
 
 [Previous page](../cache.md)
 
-[Root directory](../../../index.md)
+[Home](../../../index.md)

@@ -26,6 +26,6 @@ hustdb
 * [zrangebyrank](hustdb/zrangebyrank.md)
 * [zrangebyscore](hustdb/zrangebyscore.md)
 
-[上一级](../hustdb.md)
+[Previous](../hustdb.md)
 
-[根目录](../../index.md)
+[Home](../../index.md)

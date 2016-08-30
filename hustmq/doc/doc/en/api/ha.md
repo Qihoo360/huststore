@@ -61,11 +61,11 @@ Notice:  `[a, b, c, d, e]` represent written data, read part represent write fai
     * `client A` send `evget` request to queue `test_queue`, and it will supends by `hustmq ha`
     * `client B` send `put` request to queue `test_queue`
     *  The background system of `hustmq ha` check whether there is any data, by `autost` to refresh `hustmq` cluster status
-    * When `hustmq ha` discover any data from queue `test_queue`,  and fetch `uri` from queue `test_queue`, then package into `http` header, and reply `307` to `client A`, and `client A` get latest data from queue `test_queue` by latest `uri` 
+    * When `hustmq ha` discover any data from queue `test_queue`,  and fetch `uri` from queue `test_queue`, then package into `http` header, and reply `307` to `client A`, and `client A` get latest data from queue `test_queue` by latest `uri`     
     **Animation: **  
     ![longpolling](../../res/longpolling.gif)
 
-* `http` based mechanisms of distributed processes pool
+* Distributed Processes Pool based on `http`     
 For traditional processes pool implementation, all `worker` processes distributed on same machine, and with a single point limit. [do_get](ha/do_get.md) and [do_post](ha/do_post.md) can implement `http` based mechanisms of distributed processes pool. The process is as followed:  
     * `worker` send `do_post` request to `hustmq ha`, and it suspended. It called "Claim Tasks"
     * `client` send `do_get` request to `hustmq ha`, and it suspended. It called "Delivery Task"

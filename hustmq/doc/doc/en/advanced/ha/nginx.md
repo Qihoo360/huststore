@@ -86,7 +86,7 @@ The following is complete configuration file:
 **Please configure the appropriate value based on actual production environment for the following fields**
 
 * `listen`: listening port
-* `http_basic_auth_file`: the configuration file of `http basic authentication` 
+* `http_basic_auth_file`: the configuration file of `http basic authentication`    
 (To ensure the high performance of `hustmq ha`, please use **Plain Text** to configure certification information)
 * `main_conf`
     * `username`: `http basic authentication` user name used by `hustmq` machine

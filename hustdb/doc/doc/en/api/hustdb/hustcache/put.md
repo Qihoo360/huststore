@@ -8,7 +8,7 @@
 
 *  **key** (Required)  
 *  **val** (Required, GET：val is argument or POST：val is body)  
-*  **ttl** (Optional, default：N/A)
+*  **ttl** (Optional, default：)
 
 **Sample A:**
 

@@ -4,7 +4,7 @@
 
 **Method:** `GET`
 
-**Parameter:** N/A
+**Parameter:** 
 
 This interface is used to detect whether `sync server` is alive.
 

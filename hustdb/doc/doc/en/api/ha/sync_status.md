@@ -4,7 +4,7 @@
 
 **Method:** `GET`
 
-**Parameter:** N/A
+**Parameter:** 
 
 This interface is used to get sync status info of `sync server`.
 

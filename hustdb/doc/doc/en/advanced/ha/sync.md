@@ -16,7 +16,7 @@ if `db` is available, notify `read_log` module to read all log files of the `db`
 
 Description: Periodically clean files when synchronization is completed.
 
-Detecting whether synchronization in files of `release_queue` is completed or not by bitmap, if completed, delete all files and release resource.
+Detect whether synchronization in files of `release_queue` is completed or not using bitmap, if completed, delete all files and release the resource.
 
 #### `monitor` ####
 
@@ -52,7 +52,7 @@ The two interfaces provided are:
 
 **Method:** `GET`
 
-**Parameters:** N/A 
+**Parameters:**  
 
 This interface is used to check whether `sync server` is alive or not.
 Interface that are related to `HA`: [sync_alive](../../api/ha/sync_alive.md)

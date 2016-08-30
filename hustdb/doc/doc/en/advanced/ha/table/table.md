@@ -5,7 +5,7 @@ table
 
 **Value:** `[<table_item>, <table_item>, ..., <table_item>]`
 
-**Parent Node:** N/A
+**Parent Node:** 
 
 Load balance hash table, every item is a [hash_item](hash_item.md).  
 

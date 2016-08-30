@@ -4,7 +4,7 @@
 
 **Method:** `GET`
 
-**Parameter:** N/A
+**Parameter:** 
 
 This interface is used to get the node count of the backend `hustdb`. Interfaces that depend on this `API` are:   
 

@@ -8,7 +8,7 @@
 
 **Situation 1**  (Fetch `id`)
 
-N/A
+
 
 **Situation 2**  (Use fetcded `id` to set load balance table)
 

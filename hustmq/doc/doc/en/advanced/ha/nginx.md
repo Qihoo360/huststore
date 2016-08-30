@@ -1,11 +1,11 @@
-nginx 配置文件
+Nginx Configuration File
 --
 
-路径：`hustmq/ha/nginx/conf/nginx.json`
+Path: `hustmq/ha/nginx/conf/nginx.json`
 
-### 配置范例 ###
+### Configuration Examples ###
 
-以下是一个完整的配置文件：
+The following is complete configuration file:
 
     {
         "module": "hustmq_ha",
@@ -83,49 +83,49 @@ nginx 配置文件
         }
     }
 
-**以下字段根据实际生产环境配置合适的值：**
+**Please configure the appropriate value based on actual production environment for the following fields**
 
-* `listen`: 监听端口
-* `http_basic_auth_file`: `http basic authentication` 的配置文件  
-（为保证 `hustmq ha` 的高性能，文件使用 **明文** 来配置认证信息）
+* `listen`: listening port
+* `http_basic_auth_file`: the configuration file of `http basic authentication` 
+(To ensure the high performance of `hustmq ha`, please use **Plain Text** to configure certification information)
 * `main_conf`
-    * `username`：`hustmq` 存储机器进行 `http basic authentication` 认证的用户名
-    * `password`：`hustmq` 存储机器进行 `http basic authentication` 认证的密码
-    * `autost_interval`：`hustmq ha` 自动更新集群状态的时间间隔
+    * `username`: `http basic authentication` user name used by `hustmq` machine
+    * `password`: `http basic authentication` password used by `hustmq` machine
+    * `autost_interval`: Automatically update the cluster status interval used by `hustmq ha` 
 * `proxy`
-    * `auth`: `hustmq` 的 `http basic authentication` 认证字符串（进行 `base64` 加密）
-    * `backends`: `hustmq` 机器列表配置
+    * `auth`: `http basic authentication` authentication string (`base64` encryption) used by `hustmq` machine
+    * `backends`: configuration of `hustmq` machine list
 
-其中 `main_conf` 中的如下字段均用于 [`ngx_http_fetch`](components.md) :
+The field of `main_conf` is used [`ngx_http_fetch`](components.md):
 
-* `fetch_req_pool_size`：`ngx_http_fetch` 每个子请求申请的内存池大小，建议保持默认值
-* `keepalive_cache_size`：`ngx_http_fetch` 和 `hustmq` 机器所建立的连接中，保持 `keepalive` 状态的连接数量，建议保持默认值
-* `connection_cache_size`：`ngx_http_fetch` 连接池的大小，建议保持默认值
-* `fetch_connect_timeout`：`ngx_http_fetch` 连接的超时时间，可根据网络环境配置合适的值
-* `fetch_send_timeout`：`ngx_http_fetch` 发送数据包的超时时间，可根据网络环境配置合适的值
-* `fetch_read_timeout`：`ngx_http_fetch` 接收数据包的超时时间，可根据网络环境配置合适的值
-* `fetch_timeout`：`ngx_http_fetch` 和 `hustmq` 进行网络通讯的最大超时时间，可根据网络环境配置合适的值
-* `fetch_buffer_size`：`ngx_http_fetch` 收发数据包的缓冲区大小，建议保持默认值
+* `fetch_req_pool_size`: Memory pool size of each sub-request application for `nginx http fetch`, and the default value is recommended.
+* `keepalive_cache_size`: The number of `keepalive` connection of `ngx_http_fetch` and `hustmq`, and the default value is recommended.
+* `connection_cache_size`:  Memory pool size of `ngx_http_fetch, and the default value is recommended.
+* `fetch_connect_timeout`: Connection timeout of `ngx_http_fetch`, and you can configure the appropriate value based on the actual network environment
+* `fetch_send_timeout`: Send data timeout of `ngx_http_fetch`, and you can configure the appropriate value based on the actual network environment
+* `fetch_read_timeout`: Receive data timeout of `ngx_http_fetch`, and you can configure the appropriate value based on the actual network environment
+* `fetch_timeout`: The maximum network communication timeout between `ngx_http_fetch` and `hustmq`, and you can configure the appropriate value based on the actual network environment.
+* `fetch_buffer_size`: The buffer size of send and receive data for `ngx_http_fetch`, and the default value is recommended.
 
-**`queue_hash` 参数详解**  
+**Parameter Description of `queue_hash`**  
 
-`main_conf` 中 `queue_hash` 字段用于配置负载均衡的方式，用于 [`put`](../../api/ha/put.md) 接口。
-
-配置为 `on`，表示根据队列名称计算 `hash` 来进行负载均衡。
-
-* 优势：可以保证当存储节点正常工作时，取队列数据的顺序是固定的（先进先出）。  
-* 劣势：当针对一个固定队列写入数据时，`QPS` 将受限于单个存储节点。  
-
-配置为 `off`，将以默认的 `round robin` （轮询）实现来进行负载均衡。  
-
-* 优势：当针对一个固定队列写入数据时，`QPS` 不会受限于单个存储节点。  
-* 劣势：取队列数据的顺序不是固定的。  
+Field `queue_hash` is used to configure load balance, used for [`put`](../../api/ha/put.md) interface.
 
 
-**除此之外的其他字段均建议保持默认值**。
+Use queue name to compute `hash` for load balance, if it configure to `on`.
 
-大部分字段的含义以及配置方法和 nginx 官方的配置文件的含义一致，例如：
+* Advantage: it can ensure the sequence of fetched data is fixed, when storage node is working.
+* Disadvantage: `QPS` is limited to single storage point, when write data to a specific queue.
 
+Use default `round robin` for load balance, if it configured to `off`.
+
+* Advantage: `QPS` is not limited to single storage point, when write data to a specific queue. 
+* Disadvantage: the sequence of fetched data is not fixed.
+
+
+**The default value is recommended expect the following fields.**
+
+The meaning of most fields are consistent with nginx official configuration, for example:
 * `keepalive_timeout`
 * `keepalive`
 * `proxy_connect_timeout`
@@ -133,17 +133,17 @@ nginx 配置文件
 * `proxy_read_timeout`
 * `proxy_buffer_size`
 
-`health_check` 的配置可参考 [`nginx_upstream_check_module`](https://github.com/yaoweibin/nginx_upstream_check_module)
+The configuration of `health_check` can refer to [`nginx_upstream_check_module`](https://github.com/yaoweibin/nginx_upstream_check_module)
 
-### 配置文件生成工具 ###
+### Configuration Generator###
 
-路径：`hustmq/ha/nginx/conf/genconf.py`
+Path: `hustmq/ha/nginx/conf/genconf.py`
 
-配置好 `nginx.json` 之后，可使用 `genconf.py` 生成实际生产环境使用的配置文件 `nginx.conf`，命令如下：
+After configure `nginx.json`, it generate configuration file `nginx.conf` by using `genconf.py`. The command is as followed:
 
     python genconf.py nginx.json
 
-生成之后的 `nginx.conf` 内容如下：
+The content of `nginx.conf` is as followed:
 
     worker_processes  1;
     daemon on;
@@ -428,11 +428,11 @@ nginx 配置文件
         }
     }
 
-### 常见问题 ###
+### Common Problem ###
 
-* 如何禁用 `http basic authentication` ？  
-配置 `nginx.json` 时，直接删掉 `"http_basic_auth_file"` 字段以及相应的值，利用 `genconf.py` 重新生成 `nginx.conf` 即可
+* How to disable `http basic authentication`?   
+When configure `nginx.json`, delete the field of `"http_basic_auth_file"`. Use `genconf.py` to regenerate `nginx.conf`.
 
-[上一级](index.md)
+[Pervious](index.md)
 
-[根目录](../../index.md)
+[Home](../../index.md)

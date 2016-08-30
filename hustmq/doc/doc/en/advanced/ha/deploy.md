@@ -1,9 +1,9 @@
-部署
+Deployment
 --
 
-### 部署脚本样例 ###
+### Example of Deployment Script ###
 
-以下是一个完整的 **一键远程部署脚本** ，供参考：
+The following is complete **Automatic Remote Deployment Script**, just for refer:
 
     #!/bin/sh
     echo '[192.168.1.101]...'
@@ -47,19 +47,19 @@
     echo 'finish!'
 
 
-### 限制 ###
+### Restriction ###
 
-* `nginx.tar.gz` 为打包后的 `hustmq ha` 模块，其源代码路径为：`hustmq/ha/nginx` 。
+* `nginx.tar.gz` is packed `hustmq ha` module, the path of source code: `hustmq/ha/nginx`.
 
-* `upgrade.sh` 为 `hustmq ha` 平滑升级脚本，具体内容参考[这里](upgrade.md) 。
+* `upgrade.sh` is smooth upgrade script of `hustmq ha`, and please refer to [Here](upgrade.md).
 
-* `nginx.tar.gz`、`upgrade.sh` 需要和部署脚本在同一目录下。
+* `nginx.tar.gz` and `upgrade.sh` needed to deploy on the same directory.
 
-* 样例中 `192.168.1.101` 代表生产环境所属的线上机，实际部署的时候替换为真实的机器即可。
+* In the example, `192.168.1.101` represent online machine, it can replaced with your machine for your deployment.
 
-* 假设该脚本运行的机器位于 `192.168.1.100` ，则 `192.168.1.100` 需要与 `192.168.1.101` 建立 ssh 信任关系，操作账户为 `jobs`，实际部署时，将 `jobs` 替换为真实的账户即可。
+* Assume that the script is run on the machine `192.168.1.100`, then `192.168.1.100` needs establish ssl trust relation with `192.168.1.101` with user `jobs`. It can replace `jobs` with your account for your deployment.
 
-可参考如下脚本来打包以上内容：
+It can refer to the following script to pack the above content.
 
     #!/bin/sh
     cd hustmq/
@@ -68,6 +68,6 @@
     tar -zcf nginx.tar.gz nginx
     cp upgrade.sh nginx.tar.gz ../deploy/
 
-[上一级](index.md)
+[Pervious](index.md)
 
-[根目录](../../index.md)
+[Home](../../index.md)

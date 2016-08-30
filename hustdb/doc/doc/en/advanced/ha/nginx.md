@@ -160,7 +160,7 @@ Below fields in `main_conf` are used in communication with `sync_server`:
 * `identifier_cache_size`: Number of cached id
 * `identifier_timeout`: Timout of each assigned id
 
-Default value are recommanded for the above fields. In particular for `identifier_timeout`, it is not recommanded to set a big value considering the security issues.
+Default value are recommanded for the above fields. In particular for `identifier_timeout`, it is not recommanded to set a big value **considering the security issues**.
 
 **Except of this, other fields are recommanded to use the default values.**
 

@@ -79,7 +79,7 @@ For more details, please refer to the explanations in FAQ at the end of [This Ch
     * Conclusion: `get` is **Weakly Consistent**, but has a high `QPS`. `get2` is **Strongly Consistent**, but has a relatively low `QPS`. Using `get` or `get2` is totally depends on business requirement. If data consistency is strongly required (e.g. financial business) but throughput doesn't need to be very high, then `get` is preferred. Otherwise if business needs high throughput and could bear some inconsistency in data (e.g. Commodity Info Display), `get2` may be a better choice. 
 
 * About `cache`
-    `cache` related APIs will store data only in memory, that means those data will not be dumped to disk for persistence. Other APIs will write data to disk for persistency.
+    `cache` related APIs will store data only in memory, that means those data **will not be dumped to disk for persistence**. Other APIs will write data to disk for persistency.
 
 [Previous Chapter](index.md)
 

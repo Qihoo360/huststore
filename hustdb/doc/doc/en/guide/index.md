@@ -1,7 +1,7 @@
 Quick Introduction
 --
 
-If you want to build a environment quickly so that the service can run as soon as possible, you can check [here](hustdb.md), and  [here](ha.md).
+If you want to **build a environment quickly** so that the service can run as soon as possible, you can check [here](hustdb.md), and  [here](ha.md).
 
 
 For detailed deployment and configuration, please check:

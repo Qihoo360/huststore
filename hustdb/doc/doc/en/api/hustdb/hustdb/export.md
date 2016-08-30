@@ -6,8 +6,8 @@
 
 **Parameter:** 
 
-*  **file** (Required, choose one between file and tb)
-*  **tb** (Required, choose one between file and tb)
+*  **file** (Required, choose one between `file` and `tb`)
+*  **tb** (Required, choose one between `file` and `tb`)
 *  **start** (Optional, default：0，>0 && <= 1024)  
 *  **end** (Optional, default：1024，>0 && <= 1024)
 *  **noval** (Optional, default：true)

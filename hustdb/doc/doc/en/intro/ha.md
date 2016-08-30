@@ -7,7 +7,7 @@ hustdb ha
 
 ![ha](../../../../../res/ha.png)
 
-`HA` will write data to local log when it failed to write to backend `db`, `sync server` will synchronize these data to the backend `db`. In archtecture design, `sync server` provides service for `HA`, it is transparent to users. Users can use interfaces provided by `HA` to query information of `sync server`.
+`HA` will write data to local log when it failed to write to backend `db`, `sync server` will synchronize these data to the backend `db`. In archtecture design, `sync server` provides service for `HA`, **it is transparent to users**. Users can use interfaces provided by `HA` to query information of `sync server`.
 
 Project directories :
 

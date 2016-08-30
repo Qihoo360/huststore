@@ -54,7 +54,7 @@ The two interfaces provided are:
 
 **Parameters:**  
 
-This interface is used to check whether `sync server` is alive or not.
+This interface is used to check whether `sync server` is alive or not.  
 Interface that are related to `HA`: [sync_alive](../../api/ha/sync_alive.md)
 
 #### `sync_status` ####
@@ -67,8 +67,8 @@ Interface that are related to `HA`: [sync_alive](../../api/ha/sync_alive.md)
 
 *  **backend_count** (required)  
 
-This interface is used to fetch status from `sync server` when it's synchronizing data.
-Interface taht is related to `HA`: [sync_status](../../api/ha/sync_status.md)
+This interface is used to fetch status from `sync server` when it's synchronizing data.  
+Interface that is related to `HA`: [sync_status](../../api/ha/sync_status.md)
 
 ### Related Problems ###
 

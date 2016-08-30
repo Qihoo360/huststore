@@ -11,8 +11,8 @@ hustdb ha
 	* [load balance configuration](ha/table.md)
 	* [zlog configuration](ha/zlog.md)
 	* [sync server configuration](ha/sync_conf.md)
-* [test](ha/test.md)
-* [smooth upgrade](ha/upgrade.md)
+* [Test](ha/test.md)
+* [Smooth Upgrade](ha/upgrade.md)
 
 [Previous Chapter](index.md)
 

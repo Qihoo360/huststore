@@ -53,7 +53,7 @@ Deployment
 
 ### Script example for Deployment ###
 
-Below is a complete one-key script for remote deployment, it also includes deployment of `HA` and `sync server` for reference:
+Below is a complete **one-key script for remote deployment**, it also includes deployment of `HA` and `sync server` for reference:
 
     #!/bin/bash
     echo '[192.168.1.101]...'

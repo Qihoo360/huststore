@@ -30,6 +30,6 @@ The working process of this interface is:
 
 See more details in `hustdb/ha/nginx/test/set_table.py`
 
-[Previous page](../ha.md)
+[Previous](../ha.md)
 
 [Home](../../index.md)

@@ -9,6 +9,6 @@ item
 
 `item` is the smallest unit for defining load balance table, it has two members: [key](key.md) and [val](val.md).  
 
-[Previous page](../table.md)
+[Previous](../table.md)
 
 [Home](../../../index.md)

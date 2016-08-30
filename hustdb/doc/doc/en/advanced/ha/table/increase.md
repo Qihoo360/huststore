@@ -9,6 +9,6 @@ increase
 
 `increase` is used to describe the shrink semantics, it has two members: [low](low.md) and [high](high.md).
 
-[Previous page](../table.md)
+[Previous](../table.md)
 
 [Home](../../../index.md)

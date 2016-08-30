@@ -27,6 +27,6 @@ This chapter provides answers for faq of `hustdb`:
 **Q** :  What are the differences between `/cache/xxx` and `/xxx` in `hustdb ha`?  e.g. `/cache/put` and `put`?   
 **A** :  Check [here](../api/ha.md) .
     
-[Previous page](index.md)
+[Previous](index.md)
 
 [Home](../index.md)

@@ -15,6 +15,6 @@ This Interface is an proxy interface for `/hustdb/file_count`. See more details 
 
     curl -i -X GET "http://localhost:8082/file_count?peer=0"
 
-[Previous page](../ha.md)
+[Previous](../ha.md)
 
 [Home](../../index.md)

@@ -23,6 +23,6 @@ This Interface is an proxy interface for `/hustdb/smembers`. See more details in
 Please refer to test script for more details:  
 Script path: `hustdb/ha/nginx/test/fetch.py`
 
-[Previous page](../ha.md)
+[Previous](../ha.md)
 
 [Home](../../index.md)

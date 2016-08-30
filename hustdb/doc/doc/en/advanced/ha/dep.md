@@ -51,6 +51,6 @@ Dependency
     $ make
     $ sudo make install
 
-[Previous page](../ha.md)
+[Previous](../ha.md)
 
 [Home](../../index.md)

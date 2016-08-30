@@ -16,6 +16,6 @@ This Interface is an proxy interface for `/hustcache/hincrby`. See more details 
 
     curl -i -X GET "http://localhost:8082/cache/hincrby?tb=test_table&key=test_key&val=7"
 
-[Previous page](../cache.md)
+[Previous](../cache.md)
 
 [Home](../../../index.md)

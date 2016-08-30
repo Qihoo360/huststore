@@ -88,6 +88,6 @@ A complete example of configuration file:
 If the deployment path of `sync server` is not `/data/hustdbsync`, then its `[rules]` should be changed to the corresponding path.
 
 
-[Previous Page](../ha.md)
+[Previous](../ha.md)
 
 [Home](../../index.md)

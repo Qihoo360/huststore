@@ -227,6 +227,6 @@ Script for remote operations:
     
     echo 'finish!'
 
-[Previous page](../ha.md)
+[Previous](../ha.md)
 
 [Home](../../index.md)

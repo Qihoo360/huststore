@@ -14,6 +14,6 @@ This Interface is an proxy interface for `/hustcache/persist`. See more details 
 
     curl -i -X GET "http://localhost:8082/cache/persist?key=test_key"
 	
-[Previous page](../cache.md)
+[Previous](../cache.md)
 
 [Home](../../../index.md)

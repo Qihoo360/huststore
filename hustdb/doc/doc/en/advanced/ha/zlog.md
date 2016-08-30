@@ -28,6 +28,6 @@ In the above example script, `/data/hustdbha` is installation path, replace it w
 
 **In exception of this, use default values for other fields.**
 
-[Previous page](conf.md)
+[Previous](conf.md)
 
 [Home](../../index.md)

@@ -169,6 +169,6 @@ We should be able to see the below infomation:
 
 The result shows that the servers work as expected
 
-[Previous page](index.md)
+[Previous](index.md)
 
 [Home](../index.md)

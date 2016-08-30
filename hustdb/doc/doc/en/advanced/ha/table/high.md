@@ -9,6 +9,6 @@ high
 
 `high` represents the high section after expand, it includes two member: [key](key.md) and [val](val.md).  
 
-[Previous page](../table.md)
+[Previous](../table.md)
 
 [Home](../../../index.md)

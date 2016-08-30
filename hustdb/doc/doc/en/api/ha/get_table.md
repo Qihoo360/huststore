@@ -33,6 +33,6 @@ This interface is used to read load balance table.
 	    ]
 	}
 
-[Previous page](../ha.md)
+[Previous](../ha.md)
 
 [Home](../../index.md)

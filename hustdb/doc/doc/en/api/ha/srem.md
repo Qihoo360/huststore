@@ -17,6 +17,6 @@ This Interface is an proxy interface for `/hustdb/srem`. See more details in [he
 
     curl -i -X POST "http://localhost:8082/srem?tb=test_table" -d "test_key"
 
-[Previous page](../ha.md)
+[Previous](../ha.md)
 
 [Home](../../index.md)

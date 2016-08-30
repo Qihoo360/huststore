@@ -33,6 +33,6 @@ For common problems in nginx configuration, please refer to:
 `hustdb ha` deployment depends on `zlog`, for detailed config on zlog, please refer to:  
 > [zlog user manual](https://hardysimpson.github.io/zlog/UsersGuide-CN.html)
 
-[Previous page](index.md)
+[Previous](index.md)
 
 [Home](../index.md)

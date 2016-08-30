@@ -18,6 +18,6 @@ This Interface is an proxy interface for `/hustdb/zadd`. See more details in [he
 
     curl -i -X POST "http://localhost:8082/zadd?tb=test_table&score=60" -d "test_key"
 
-[Previous page](../ha.md)
+[Previous](../ha.md)
 
 [Home](../../index.md)

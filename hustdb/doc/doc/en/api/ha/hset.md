@@ -18,6 +18,6 @@ This Interface is an proxy interface for `/hustdb/hset`. See more details in [he
 
     curl -i -X GET "http://localhost:8082/hset?tb=test_table&key=test_key&val=test_val"
 
-[Previous page](../ha.md)
+[Previous](../ha.md)
 
 [Home](../../index.md)

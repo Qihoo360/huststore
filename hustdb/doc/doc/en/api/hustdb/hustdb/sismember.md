@@ -29,6 +29,6 @@
 	HTTP/1.1 200 OK
 	Version: 1
 
-[Previous page](../hustdb.md)
+[Previous](../hustdb.md)
 
 [Home](../../../index.md)

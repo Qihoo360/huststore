@@ -16,6 +16,6 @@ This Interface is an proxy interface for `/hustdb/stat_all`. See more details in
 See more details in the example test script:  
 Script path: `hustdb/ha/nginx/test/autotest.py`
 
-[Previous page](../ha.md)
+[Previous](../ha.md)
 
 [Home](../../index.md)

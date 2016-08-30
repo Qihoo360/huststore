@@ -15,6 +15,6 @@ Describe a struct object, `<key>` has the below values:
 
 - [decrease](decrease.md) 
 
-[Previous page](../table.md)
+[Previous](../table.md)
 
 [Home](../../../index.md)

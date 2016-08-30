@@ -41,6 +41,6 @@
 
 	140002914742624 //task token
 
-[Previous page](../hustdb.md)
+[Previous](../hustdb.md)
 
 [Home](../../../index.md)

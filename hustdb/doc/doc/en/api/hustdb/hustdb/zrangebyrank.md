@@ -51,6 +51,6 @@ Whether get key list from snapshot, please refer to [export](export.md)
 	//key format: base64
 	[{"key":"eHVydWlib196c2V0XzE=","val":"9","ver":1},{"key":"eHVydWlib196c2V0XzI=","val":"13","ver":1},{"key":"eHVydWlib196c2V0XzM=","val":"39","ver":1},{"key":"eHVydWlib196c2V0XzQ=","val":"87","ver":1},{"key":"eHVydWlib196c2V0XzU=","val":"345","ver":1},{"key":"eHVydWlib196c2V0XzY=","val":"569","ver":1},{"key":"eHVydWlib196c2V0Xzc=","val":"1986","ver":1},{"key":"eHVydWlib196c2V0Xzg=","val":"4756","ver":1},{"key":"eHVydWlib196c2V0Xzk=","val":"7654","ver":1},{"key":"eHVydWlib196c2V0XzEw","val":"14567","ver":1}]
 
-[Previous page](../hustdb.md)
+[Previous](../hustdb.md)
 
 [Home](../../../index.md)

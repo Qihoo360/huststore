@@ -16,6 +16,6 @@ This Interface is an proxy interface for `/hustcache/hset`. See more details in 
 
     curl -i -X GET "http://localhost:8082/cache/hset?tb=test_table&key=test_key&val=test_val"
 
-[Previous page](../cache.md)
+[Previous](../cache.md)
 
 [Home](../../../index.md)

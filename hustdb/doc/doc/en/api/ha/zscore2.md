@@ -89,6 +89,6 @@ Related fields:
 * `Version2`: version of `master2`'s value.
 * `Val-Offset`: cut point of the two values. See more details in `Return value 3`.
 
-[Previous page](../ha.md)
+[Previous](../ha.md)
 
 [Home](../../index.md)

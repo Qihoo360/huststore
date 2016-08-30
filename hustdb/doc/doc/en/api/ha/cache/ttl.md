@@ -14,6 +14,6 @@ This Interface is an proxy interface for `/hustcache/ttl`. See more details in [
 
     curl -i -X GET "http://localhost:8082/cache/ttl?key=test_key"
 	
-[Previous page](../cache.md)
+[Previous](../cache.md)
 
 [Home](../../../index.md)

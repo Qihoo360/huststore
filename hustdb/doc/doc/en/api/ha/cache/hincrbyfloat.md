@@ -16,6 +16,6 @@ This Interface is an proxy interface for `/hustcache/hincrbyfloat`. See more det
 
     curl -i -X GET "http://localhost:8082/cache/hincrbyfloat?tb=test_table&key=test_key&val=5.9"
 
-[Previous page](../cache.md)
+[Previous](../cache.md)
 
 [Home](../../../index.md)

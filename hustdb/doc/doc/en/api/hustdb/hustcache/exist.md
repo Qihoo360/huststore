@@ -20,6 +20,6 @@
 
 	HTTP/1.1 200 OK
 	
-[Previous page](../hustdb.md)
+[Previous](../hustdb.md)
 
 [Home](../../../index.md)

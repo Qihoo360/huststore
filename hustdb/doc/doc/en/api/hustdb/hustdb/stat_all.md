@@ -16,6 +16,6 @@
 
 	[{"table":"","type":-1,"size":3},{"table":"test_table","type":2,"size":1}]
 
-[Previous page](../hustdb.md)
+[Previous](../hustdb.md)
 
 [Home](../../../index.md)

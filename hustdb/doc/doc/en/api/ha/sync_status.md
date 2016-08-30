@@ -46,6 +46,6 @@ This interface is used to get sync status info of `sync server`.
 	      "synced_items" : 0
 	   }
 	}
-[Previous page](../ha.md)
+[Previous](../ha.md)
 
 [Home](../../index.md)

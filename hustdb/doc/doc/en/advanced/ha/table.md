@@ -179,6 +179,6 @@ Open `hustdbtable.json`, we can see the following contents:
 
 In real deployment environment, **it is strongly recommanded to use this methos to generate load balance table**.
 
-[Previous page](conf.md)
+[Previous](conf.md)
 
 [Home](../../index.md)

@@ -16,6 +16,6 @@
 
 	10
 
-[Previous page](../hustdb.md)
+[Previous](../hustdb.md)
 
 [Home](../../../index.md)

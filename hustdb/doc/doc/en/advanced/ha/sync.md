@@ -84,7 +84,7 @@ Interface taht is related to `HA`: [sync_status](../../api/ha/sync_status.md)
 **Q:**  What are restrictions and cost of `sync server`?  
 **A:**  For log generated before `sync server` started, `sync server` will not be able to automatically synchronize. If we want to synchronize these logs, we will have to copy them to the coressponding directory of `logs/` path manually.
 
-[Previous page](../ha.md)
+[Previous](../ha.md)
 
 [Home](../../index.md)
 

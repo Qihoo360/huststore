@@ -15,6 +15,6 @@ This Interface is an proxy interface for `/hustdb/zscore`. See more details in [
 
     curl -i -X POST "http://localhost:8082/zscore?tb=test_table" -d "test_key"
 
-[Previous page](../ha.md)
+[Previous](../ha.md)
 
 [Home](../../index.md)

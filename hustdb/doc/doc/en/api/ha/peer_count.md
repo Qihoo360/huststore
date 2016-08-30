@@ -22,6 +22,6 @@ The above interfaces need to pass `peer` argument. If `peer_count`'s value is **
 
     curl -i -X GET "http://localhost:8082/peer_count"
 
-[Previous page](../ha.md)
+[Previous](../ha.md)
 
 [Home](../../index.md)

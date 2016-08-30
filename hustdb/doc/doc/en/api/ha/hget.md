@@ -15,6 +15,6 @@ This Interface is an proxy interface for `/hustdb/hget`. See more details in [he
 
     curl -i -X GET "http://localhost:8082/hget?tb=test_table&key=test_key"
 
-[Previous page](../ha.md)
+[Previous](../ha.md)
 
 [Home](../../index.md)

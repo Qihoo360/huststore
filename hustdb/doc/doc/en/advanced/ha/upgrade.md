@@ -39,6 +39,6 @@ Usage:
 
     sh upgrade.sh jobs # jobs 代表服务运行的账户名称
 
-[Previous page](../ha.md)
+[Previous](../ha.md)
 
 [Home](../../index.md)

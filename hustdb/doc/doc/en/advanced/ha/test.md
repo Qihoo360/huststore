@@ -37,6 +37,6 @@ Path: `hustdb/ha/nginx/mutitest.py`
     sample:
         python mutitest.py 2 localhost:8082
 
-[Previous page](../ha.md)
+[Previous](../ha.md)
 
 [Home](../../index.md)

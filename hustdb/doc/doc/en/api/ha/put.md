@@ -17,6 +17,6 @@ This Interface is an proxy interface for `/hustdb/put`. See more details in [her
 
     curl -i -X GET "http://localhost:8082/put?key=test_key&val=test_val"
 
-[Previous page](../ha.md)
+[Previous](../ha.md)
 
 [Home](../../index.md)

@@ -42,6 +42,6 @@
 	Version: 2
 	VerError: false
 
-[Previous page](../hustdb.md)
+[Previous](../hustdb.md)
 
 [Home](../../../index.md)

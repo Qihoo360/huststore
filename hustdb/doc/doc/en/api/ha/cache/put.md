@@ -16,6 +16,6 @@ This Interface is an proxy interface for `/hustcache/put`. See more details in [
 
     curl -i -X GET "http://localhost:8082/cache/put?key=test_key&val=test_val"
 	
-[Previous page](../cache.md)
+[Previous](../cache.md)
 
 [Home](../../../index.md)

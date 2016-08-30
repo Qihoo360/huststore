@@ -23,6 +23,6 @@ This interface is used to detect whether `sync server` is alive.
     
     ok
 
-[Previous page](../ha.md)
+[Previous](../ha.md)
 
 [Home](../../index.md)

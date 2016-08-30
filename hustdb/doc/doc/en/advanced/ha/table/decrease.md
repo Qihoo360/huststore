@@ -9,6 +9,6 @@ decrease
 
 `decrease` is used to describe the shrink semantics, it has two members: [remove](remove.md) and [replace_by](replace_by.md).  
 
-[Previous page](../table.md)
+[Previous](../table.md)
 
 [Home](../../../index.md)

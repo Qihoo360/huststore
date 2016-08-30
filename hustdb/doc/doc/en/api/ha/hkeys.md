@@ -23,6 +23,6 @@ This Interface is an proxy interface for `/hustdb/hkeys`. See more details in [h
 See more details in the example test script:  
 Script path: `hustdb/ha/nginx/test/fetch.py`
 
-[Previous page](../ha.md)
+[Previous](../ha.md)
 
 [Home](../../index.md)

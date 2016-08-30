@@ -11,6 +11,6 @@ val
 
     ["10.120.100.178:9999", "10.120.100.178:9998"]
 
-[Previous page](../table.md)
+[Previous](../table.md)
 
 [Home](../../../index.md)

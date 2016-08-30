@@ -13,6 +13,6 @@ e.g.
 
     [0, 128]
 
-[Previous page](../table.md)
+[Previous](../table.md)
 
 [Home](../../../index.md)

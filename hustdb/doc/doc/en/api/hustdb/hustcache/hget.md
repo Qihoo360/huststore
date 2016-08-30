@@ -25,6 +25,6 @@
 
 	test_val
 
-[Previous page](../hustdb.md)
+[Previous](../hustdb.md)
 
 [Home](../../../index.md)

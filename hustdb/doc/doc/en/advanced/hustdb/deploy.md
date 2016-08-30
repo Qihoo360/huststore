@@ -103,6 +103,6 @@ Deployment
     # UNIT MB, 16 ~ 128, default 64
     cache                           = 64            //contentdb缓存
 
-[Previous page](../hustdb.md)
+[Previous](../hustdb.md)
 
 [Home](../../index.md)

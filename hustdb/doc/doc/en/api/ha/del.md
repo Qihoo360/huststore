@@ -15,6 +15,6 @@ This Interface is an proxy interface for `/hustdb/del`. See more details in [her
 
     curl -i -X GET "http://localhost:8082/del?key=test_key"
 
-[Previous page](../ha.md)
+[Previous](../ha.md)
 
 [Home](../../index.md)

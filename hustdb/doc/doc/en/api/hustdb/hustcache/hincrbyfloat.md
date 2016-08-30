@@ -22,6 +22,6 @@
 
 	7.5 //if original value of test_key is 1.7, 1.7 + 5.8 = 7.5
 
-[Previous page](../hustdb.md)
+[Previous](../hustdb.md)
 
 [Home](../../../index.md)

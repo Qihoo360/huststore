@@ -15,6 +15,6 @@ This Interface is an proxy interface for `/hustcache/expire`. See more details i
 
     curl -i -X GET "http://localhost:8082/cache/expire?key=test_key&ttl=60"
 	
-[Previous page](../cache.md)
+[Previous](../cache.md)
 
 [Home](../../../index.md)

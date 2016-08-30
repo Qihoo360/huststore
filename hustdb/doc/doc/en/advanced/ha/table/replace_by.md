@@ -11,6 +11,6 @@ replace_by
 
     "10.120.100.179:9999"
 
-[Previous page](../table.md)
+[Previous](../table.md)
 
 [Home](../../../index.md)

@@ -11,9 +11,9 @@
 *  **max** (Required)
 *  **offset** (Required)
 *  **size** (Required)
-*  **start**  (Optional, default：0, >0 && <= 1024)  
-*  **end**  (Optional, default：1024, >0 && <= 1024)
-*  **noval**  (Optional, default：true)
+*  **start**  (Optional, default: 0, >0 && <= 1024)  
+*  **end**  (Optional, default: 1024, >0 && <= 1024)
+*  **noval**  (Optional, default: true)
 
 **Sample A:**
 

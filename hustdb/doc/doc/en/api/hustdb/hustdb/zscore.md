@@ -7,7 +7,7 @@
 **Parameter:** 
 
 *  **tb** (Required)  
-*  **key** (Required GET：key or POST：key is body)  
+*  **key** (Required GET: key or POST: key is body)  
 
 **Sample A:**
 

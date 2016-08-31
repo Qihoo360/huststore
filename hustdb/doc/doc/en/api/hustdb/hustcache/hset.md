@@ -8,7 +8,7 @@
 
 *  **tb** (Required)  
 *  **key** (Required)  
-*  **val** (Required, GET：val is argument or POST：val is body)  
+*  **val** (Required, GET: val is argument or POST: val is body)  
 
 **Sample A:**
 

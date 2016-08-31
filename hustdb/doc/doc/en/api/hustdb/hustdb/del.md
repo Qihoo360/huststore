@@ -7,7 +7,7 @@
 **Parameter:** 
 
 *  **key** (Required)  
-*  **ver** (Optional, default：0)  
+*  **ver** (Optional, default: 0)  
 
 
 **SampleA:**

@@ -8,10 +8,10 @@
 
 *  **tb** (Required)  
 *  **score** (Required)
-*  **key** (Required, GET：key is argument or POST：key is body)   
-*  **opt** (Optional, 0,1,-1；default：0)
-*  **ttl** (Optional, default：0)
-*  **ver** (Optional, default：0)
+*  **key** (Required, GET: key is argument or POST: key is body)   
+*  **opt** (Optional, 0,1,-1；default: 0)
+*  **ttl** (Optional, default: 0)
+*  **ver** (Optional, default: 0)
 
 **Sample A:**
 

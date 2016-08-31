@@ -8,7 +8,7 @@ First, install all the dependent common modules for `hustdb ha`:
 * [libevent-2.0.22-stable](https://github.com/libevent/libevent/releases/download/release-2.0.22-stable/libevent-2.0.22-stable.tar.gz)
 * [libevhtp-1.2.10](https://github.com/ellzey/libevhtp/releases)
 
-Install `ha` and `sync server`：
+Install `ha` and `sync server`:  
 
     $ cd hustdb/ha/nginx
     $ ./configure --prefix=/data/hustdbha --add-module=src/addon

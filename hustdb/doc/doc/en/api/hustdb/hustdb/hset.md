@@ -8,9 +8,9 @@
 
 *  **tb** (Required)  
 *  **key** (Required)  
-*  **val** (Required, GET：val is argument or POST：val is body)  
-*  **ttl** (Optional, default：0)
-*  **ver** (Optional, default：0)    
+*  **val** (Required, GET: val is argument or POST: val is body)  
+*  **ttl** (Optional, default: 0)
+*  **ver** (Optional, default: 0)    
 
 **Sample A:**
 

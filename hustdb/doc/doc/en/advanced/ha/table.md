@@ -5,7 +5,7 @@ Path: `hustdb/ha/nginx/conf/hustdbtable.json`
 
 ### Configuration Examples ###
 
-A standard configuration example for `hustdbtable` 的标准配置样例：
+A standard configuration example for `hustdbtable` 的标准配置样例:   
 
     {
         "table":

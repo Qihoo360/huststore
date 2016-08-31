@@ -8,7 +8,7 @@
 
 *  **tb** (Required)  
 *  **key** (Required)  
-*  **ver** (Optional, default：0)  
+*  **ver** (Optional, default: 0)  
 
 **Sample A:**
 

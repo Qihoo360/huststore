@@ -54,7 +54,7 @@ Assume that queue name is `test_queue`, data is `test_data`.
     * `hustmq ha` check any data from queue `test_queue`, and fetch `uri` from queue `test_queue` (include `sub`), then package into `http` header, and reply `307` to `subscriber`, and `subscriber` get latest data from queue `test_queue` by latest `uri` 
 In order to ensures eventual consistency of pushing data, and `hustmq` implements distributed lightweight sliding window mechanism. Similar to the following picture:  
 ![push](../../res/push.png)  
-Notice:  `[a, b, c, d, e]` represent written data, read part represent write failure data, `c:2` represent that it update `idx` to latest value forcibly when write data `c`. When `hustmq ha` discovers `idx` is inconsistent between   `hustmq` nodes, it will notifies those nodes to update `idx` to latest value, thus ensuring eventual consistency. 
+Notice:  `[a, b, c, d, e]` represent written data, read part represent write failure data, `c:2` represent that it update `idx` to latest value `2` forcibly when write data `c`. When `hustmq ha` discovers `idx` is inconsistent between   `hustmq` nodes, it will notifies those nodes to update `idx` to latest value, thus ensuring eventual consistency. 
 
 * About the Operation Mechanism of `long polling`
 [evget](ha/evget.md) and [put](ha/put.md) implement `long polling` mechanism. The process is as followed:
@@ -75,6 +75,6 @@ For traditional processes pool implementation, all `worker` processes distribute
 
 For the above process, it is synchronous for `client`'s perspective. `client` can handle message queue by synchronous way without maintain context, thus simplifying coding; It is asynchronous for `worker`'s perspective, it act like `worker` process of traditional processes pool without single point or language limit. It is new `RPC` design with flexible and simple deployment. The realization of each `worker` may not necessarily be limited to a particular programming language, just need called by follow `do_post` specification.
 
-[Pervious](index.md)
+[Previous](index.md)
 
 [Home](../index.md)

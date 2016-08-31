@@ -433,6 +433,6 @@ The content of `nginx.conf` is as followed:
 * How to disable `http basic authentication`?   
 When configure `nginx.json`, delete the field of `"http_basic_auth_file"`. Use `genconf.py` to regenerate `nginx.conf`.
 
-[Pervious](index.md)
+[Previous](index.md)
 
 [Home](../../index.md)

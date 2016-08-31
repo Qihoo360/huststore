@@ -9,10 +9,10 @@
 *  **tb** (Required)    
 *  **offset** (Required)  
 *  **size** (Required)  
-*  **start** (Optional, default：0，>0 && <= 1024)  
-*  **end** (Optional, default：1204，>0 && <= 1024)
+*  **start** (Optional, default：0, >0 && <= 1024)  
+*  **end** (Optional, default：1204, >0 && <= 1024)
 *  **noval** (Optional, default：true)
-*  **async** (Optional, default：false，db dump；true，snapshot dump)  
+*  **async** (Optional, default：false, db dump；true, snapshot dump)  
 Whether get key list from snapshot, please refer to [export](export.md)
   
 **Sample A:**
@@ -21,7 +21,7 @@ Whether get key list from snapshot, please refer to [export](export.md)
 
 **Result A1:**
 
-	HTTP/1.1 412 Precondition Failed //tb maybe not hash，reject hash request；or tb not exist
+	HTTP/1.1 412 Precondition Failed //tb maybe not hash, reject hash request；or tb not exist
 	Version: 0
 	VerError: false
 

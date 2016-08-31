@@ -47,7 +47,7 @@ hustdb
 ### Arguments ###
 
 #### `tb` ####
-Table name, used for hash，set   
+Table name, used for hash, set   
 
 #### `key` ####
 key

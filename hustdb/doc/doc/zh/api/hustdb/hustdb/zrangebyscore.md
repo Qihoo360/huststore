@@ -12,7 +12,7 @@
 *  **offset** （必选）
 *  **size** （必选）
 *  **start** （可选，default：0，>0 && <= 1024）  
-*  **end** （可选，default：1204，>0 && <= 1024）
+*  **end** （可选，default：1024，>0 && <= 1024）
 *  **noval** （可选，default：true）
 
 **使用范例A:**

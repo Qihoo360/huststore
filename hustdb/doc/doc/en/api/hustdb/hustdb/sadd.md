@@ -17,7 +17,7 @@
 
 **Result A1:**
 
-	HTTP/1.1 412 Precondition Failed //tb maybe not set，reject set request；or tb not exist
+	HTTP/1.1 412 Precondition Failed //tb maybe not set, reject set request；or tb not exist
 	Version: 0
 	VerError: false
 

@@ -68,6 +68,6 @@ It can refer to the following script to pack the above content.
     tar -zcf nginx.tar.gz nginx
     cp upgrade.sh nginx.tar.gz ../deploy/
 
-[Pervious](index.md)
+[Previous](index.md)
 
 [Home](../../index.md)

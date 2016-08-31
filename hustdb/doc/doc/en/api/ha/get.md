@@ -8,7 +8,7 @@
 
 *  **key** (Required)  
 
-This Interface is a proxy interface for `/hustdb/get`. See more details in [here](../hustdb/hustdb/get.md).  
+This interface is a proxy interface for `/hustdb/get`. See more details in [here](../hustdb/hustdb/get.md).  
 
 **Sample:**
 

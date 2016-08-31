@@ -107,7 +107,7 @@ A standard configuration example for `hustdbtable` to shrink:
 
 * [`key`](table/key.md) is used to define `hash` range for load balance, the maximum legitimate range is `[0, 1024)`. In real configuration, **each range section must be continuous**, otherwise, some `key`s will be not be able to be `hash`ed to the corresponding storage node.
 
-* [`val`](table/val.md) is used to store machine list that store actual data. In fact, this value is used to store master node and backup master node (in **master - master** architecture)
+* [`val`](table/val.md) is used to store a list of machines that store actual data. In fact, this value is used to store master node and backup master node (in **master - master** architecture)
 
 * [`increase`](table/increase.md) cuts a range section into two sections, and the two sections must be **continuous**. e.g. `[0, 1024]` can be cut into `[0, 512]`, `[512, 1024]`.  
 Check this for more details  
@@ -177,7 +177,7 @@ Open `hustdbtable.json`, we can see the following contents:
         ]
     }
 
-In real deployment environment, **it is strongly recommanded to use this method to generate load balance table**.
+In real deployment environment, **it is strongly recommended to use this method to generate load balance table**.
 
 [Previous](conf.md)
 

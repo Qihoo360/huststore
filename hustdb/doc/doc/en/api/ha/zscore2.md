@@ -9,7 +9,7 @@
 *  **tb** (Required)  
 *  **key** (Required)  
 
-This Interface is a proxy interface for `/hustdb/zscore`. See more details in [here](../hustdb/hustdb/zscore.md).  
+This interface is a proxy interface for `/hustdb/zscore`. See more details in [here](../hustdb/hustdb/zscore.md).  
 
 **Sample:**
 
@@ -67,7 +67,7 @@ Related fields:
 Related fields: 
 
 * `Version`: version  
-* `Val-Offset`: cut point of the two values. If we cut `60100` at the offset `2`, we get two sub values, `60` and `100`, representing the values stored at `master1` and `master2` separately. 
+* `Val-Offset`: cut point of the two values. If we cut `60100` at the offset `2`, we get two sub values, `60` and `100`, representing the values stored in `master1` and `master2` separately. 
 
 **Return value 4 (Both value and version are not matched):**
 

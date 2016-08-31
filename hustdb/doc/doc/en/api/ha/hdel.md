@@ -10,7 +10,7 @@
 *  **key** (Required)  
 *  **ver** (Optional)  
 
-This Interface is a proxy interface for `/hustdb/hdel`. See more details in [here](../hustdb/hustdb/hdel.md).  
+This interface is a proxy interface for `/hustdb/hdel`. See more details in [here](../hustdb/hustdb/hdel.md).  
 
 **Sample:**
 

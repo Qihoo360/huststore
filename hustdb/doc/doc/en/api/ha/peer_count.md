@@ -6,7 +6,7 @@
 
 **Parameter:** 
 
-This interface is used to get the node count of the backend `hustdb`. Interfaces that depend on this `API` are:   
+This interface is used to get the node count of the backend `hustdb`. Interfaces that rely on this `API` are:   
 
 * [stat](stat.md)
 * [stat_all](stat_all.md)

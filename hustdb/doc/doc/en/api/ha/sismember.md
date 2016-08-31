@@ -10,7 +10,7 @@
 *  **key** (Required)  
 This parameter must be put in `http body`.
 
-This Interface is a proxy interface for `/hustdb/sismember`. See more details in [here](../hustdb/hustdb/sismember.md).  
+This interface is a proxy interface for `/hustdb/sismember`. See more details in [here](../hustdb/hustdb/sismember.md).  
 
 **Sample:**
 

@@ -7,7 +7,7 @@
 **Parameter:** 
 
 *  **peer** (Required)  
-This represents the indexes of backend servers. See more details in [peer_count](peer_count.md)
+This represents the indexes of backend serverss. See more details in [peer_count](peer_count.md)
 *  **tb** (Required)
 *  **offset** (Required)  
 *  **size** (Required)  
@@ -16,7 +16,7 @@ This represents the indexes of backend servers. See more details in [peer_count]
 *  **noval** (Optional)   
 *  **async** (Optional)    
 
-This Interface is a proxy interface for `/hustdb/hkeys`. See more details in [here](../hustdb/hustdb/hkeys.md).  
+This interface is a proxy interface for `/hustdb/hkeys`. See more details in [here](../hustdb/hustdb/hkeys.md).  
 
 **Sample:**
 

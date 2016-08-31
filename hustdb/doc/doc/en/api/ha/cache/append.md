@@ -9,7 +9,7 @@
 *  **key** (Required)  
 *  **val** (Required)  
 
-This Interface is a proxy interface for `/hustcache/append`. See more details in [here](../../hustdb/hustcache/append.md). 
+This interface is a proxy interface for `/hustcache/append`. See more details in [here](../../hustdb/hustcache/append.md). 
 
 **Sample:**
 

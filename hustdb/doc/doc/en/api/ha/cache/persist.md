@@ -8,7 +8,7 @@
 
 *  **key** (Required)  
 
-This Interface is a proxy interface for `/hustcache/persist`. See more details in [here](../../hustdb/hustcache/persist.md).  
+This interface is a proxy interface for `/hustcache/persist`. See more details in [here](../../hustdb/hustcache/persist.md).  
 
 **Sample:**
 

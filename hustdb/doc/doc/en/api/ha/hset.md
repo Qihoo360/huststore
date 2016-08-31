@@ -12,7 +12,7 @@
 *  **ttl** (Optional)  
 *  **ver** (Optional)  
 
-This Interface is a proxy interface for `/hustdb/hset`. See more details in [here](../hustdb/hustdb/hset.md).  
+This interface is a proxy interface for `/hustdb/hset`. See more details in [here](../hustdb/hustdb/hset.md).  
 
 **Sample:**
 

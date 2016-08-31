@@ -8,10 +8,10 @@
 
 *  **tb** (Required)  
 *  **key** (Required)  
-This parameter must be put in `http body`.
+This parameter must be put in `http body`.  
 *  **ver** (Optional)
 
-This Interface is a proxy interface for `/hustdb/sadd`. See more details in [here](../hustdb/hustdb/sadd.md).  
+This interface is a proxy interface for `/hustdb/sadd`. See more details in [here](../hustdb/hustdb/sadd.md).  
 
 **Sample:**
 

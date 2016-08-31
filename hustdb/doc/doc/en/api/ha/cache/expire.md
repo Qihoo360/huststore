@@ -9,7 +9,7 @@
 *  **key** (Required)    
 *  **ttl** (Required)
 
-This Interface is a proxy interface for `/hustcache/expire`. See more details in [here](../../hustdb/hustcache/expire.md).  
+This interface is a proxy interface for `/hustcache/expire`. See more details in [here](../../hustdb/hustcache/expire.md).  
 
 **Sample:**
 

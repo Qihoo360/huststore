@@ -136,14 +136,14 @@ use **plain text** to save authentication to ensure the high performance of `hus
 
 Below fields in `main_conf` are used in [`ngx_http_fetch`](../../../../../hustmq/doc/doc/advanced/ha/components.md):
 
-* `fetch_req_pool_size`: Memory pool for each sub request, default value recommanded
+* `fetch_req_pool_size`: Memory pool for each sub request, default value recommended
 * `keepalive_cache_size`: Number of `keepalive` connections set up by `ngx_http_fetch` and `hustmq`
-* `connection_cache_size`: Size of connection pool of `ngx_http_fetch`, default value recommanded
+* `connection_cache_size`: Size of connection pool of `ngx_http_fetch`, default value recommended
 * `fetch_connect_timeout`: Connection timeout of `ngx_http_fetch`, set a suitable value to your specific network environment
 * `fetch_send_timeout`: Package send timeout of `ngx_http_fetch`, set a suitable value to your specific network environment
 * `fetch_read_timeout`: Package read timeout of `ngx_http_fetch`, set a suitable value to your specific network environment
 * `fetch_timeout`: Maximum timeout of network communication between `ngx_http_fetch` and `hustmq`, set a suitable value to your specific network environment
-* `fetch_buffer_size`: Buffer size for sending/receiving packages of `ngx_http_fetch`, default value recommanded
+* `fetch_buffer_size`: Buffer size for sending/receiving packages of `ngx_http_fetch`, default value recommended
 
 Below fields in `main_conf` are used in communication with `sync_server`: 
 
@@ -160,9 +160,9 @@ Below fields in `main_conf` are used in communication with `sync_server`:
 * `identifier_cache_size`: Number of cached id
 * `identifier_timeout`: Timout of each assigned id
 
-Default value are recommanded for the above fields. In particular for `identifier_timeout`, it is not recommanded to set a big value **considering the security issues**.
+Default value are recommended for the above fields. In particular for `identifier_timeout`, it is not recommended to set a big value **considering the security issues**.
 
-**Except of this, other fields are recommanded to use the default values.**
+**Except of this, other fields are recommended to use the default values.**
 
 The meaning and configuration method of most field are the same as nginx configuration, e.g.
 

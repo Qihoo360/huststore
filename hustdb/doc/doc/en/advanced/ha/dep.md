@@ -18,7 +18,7 @@ Dependency
 
 ### libcurl ###
 
-`sync server` needs to `POST` data to the backend machines synchronizing. An open source library [libcurl](https://curl.haxx.se) is used for transproting data.
+`sync server` needs to `POST` data to the backend machines which are synchronizing. An open source library [libcurl](https://curl.haxx.se) is used for transporting data.
 
 	Downloads: https://curl.haxx.se/download.html
 
@@ -40,7 +40,7 @@ Dependency
 
 ### libevhtp ###
 
-`sync server` uses `libevhtp` as `http` framework. We need `cmake` to compile `libevhtp`.
+`sync server` uses `libevhtp` as `http` framework. You need `cmake` to compile `libevhtp`.
 
     $ wget https://github.com/ellzey/libevhtp/archive/1.2.10.tar.gz -O libevhtp-1.2.10.tar.gz
     $ tar -zxf libevhtp-1.2.10.tar.gz

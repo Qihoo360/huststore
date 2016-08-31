@@ -9,7 +9,7 @@
 *  **peer** (Required)  
 This represents the indexes of backend servers. See more details in [peer_count](peer_count.md)
 
-This Interface is a proxy interface for `/hustdb/stat_all`. See more details in [here](../hustdb/hustdb/stat_all.md).  
+This interface is a proxy interface for `/hustdb/stat_all`. See more details in [here](../hustdb/hustdb/stat_all.md).  
 
 **Sample:**
 

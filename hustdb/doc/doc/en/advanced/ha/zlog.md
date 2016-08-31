@@ -5,7 +5,7 @@ Path: `hustdb/ha/nginx/conf/zlog.conf`
 
 ### Configuration Example ###
 
-A complete configuration file example:
+A complete example of configuration file :
 
     [global]
 	strict init = true

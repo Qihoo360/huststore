@@ -9,7 +9,7 @@
 *  **tb** (Required)  
 *  **key** (Required)  
 
-This Interface is a proxy interface for `/hustcache/hexist`. See more details in [here](../../hustdb/hustcache/hexist.md).  
+This interface is a proxy interface for `/hustcache/hexist`. See more details in [here](../../hustdb/hustcache/hexist.md).  
 
 **Sample:**
 

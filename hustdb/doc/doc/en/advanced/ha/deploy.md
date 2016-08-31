@@ -29,7 +29,7 @@ Deployment
 
 ### libevent ###
 
-`sync server` uses `libevent` as the event driven module in network layer.
+`sync server` uses `libevent` as the event driven module in the network layer.
 
     $ wget https://github.com/libevent/libevent/releases/download/release-2.0.22-stable/libevent-2.0.22-stable.tar.gz
     $ tar -zxf libevent-2.0.22-stable.tar.gz
@@ -113,9 +113,9 @@ Below is a complete **one-key script for remote deployment**, it also includes d
 
 * `upgrade.sh` is the smooth upgrade script for `hustdb ha`, check [here](upgrade.md) for more details. 
 
-* `sync.tar.gz` is the compressed package for `sync server`, the source code path is: `hustdb/sync`.
+* `sync.tar.gz` is the compressed package for `sync server`, the source code path is: `hustdb/sync`.  
 
-* `nginx.tar.gz`, `upgrade.sh` and `sync.tar.gz` need to be in the same directory. 
+* `nginx.tar.gz`, `upgrade.sh` and `sync.tar.gz` need to be in the same directory.  
 
 * In the above example, `192.168.1.101` represents the online machine in production environment, replace it to your real ip in production environment.
 

@@ -7,9 +7,9 @@
 **Parameter:** 
 
 *  **peer** (Required)  
-This represents the indexes of backend server. See more details in [peer_count](peer_count.md)  
+This represents the indexes of backend servers. See more details in [peer_count](peer_count.md)  
 
-This Interface is a proxy interface for `/hustdb/file_count`. See more details in [here](../hustdb/hustdb/file_count.md).  
+This interface is a proxy interface for `/hustdb/file_count`. See more details in [here](../hustdb/hustdb/file_count.md).  
 
 **Sample:**
 

@@ -8,7 +8,7 @@
 
 *  **key** (Required)  
 
-This Interface is a proxy interface for `/hustdb/get`. See more details in [here](../hustdb/hustdb/get.md).  
+This interface is a proxy interface for `/hustdb/get`. See more details in [here](../hustdb/hustdb/get.md).  
 
 **Sample:**
 
@@ -30,7 +30,7 @@ According to the version of data and consistency status of the value, this inter
 
 Related fields:
   
-* `Version` :version of the value.
+* `Version` : version of the value.
 
 **eturn value 1 (Value is matched, version is not matched):**
 
@@ -47,8 +47,8 @@ Related fields:
 
 Related fields: 
 
-* `Version1`:version of `master1`'s value. 
-* `Version2`:version of `master2`'s value.
+* `Version1`: version of `master1`'s value. 
+* `Version2`: version of `master2`'s value.
 
 **Return value 3 (Value is not matched, version is matched):**
 

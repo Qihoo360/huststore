@@ -8,7 +8,7 @@
 
 *  **key** (Required)  
 
-This Interface is a proxy interface for `/hustcache/del`. See more details in [here](../../hustdb/hustcache/del.md). 
+This interface is a proxy interface for `/hustcache/del`. See more details in [here](../../hustdb/hustcache/del.md). 
 
 **Sample:**
 

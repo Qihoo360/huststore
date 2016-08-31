@@ -10,7 +10,7 @@
 *  **val** (Required)  
 *  **ttl** (Optional)
 
-This Interface is a proxy interface for `/hustcache/put`. See more details in [here](../../hustdb/hustcache/put.md).  
+This interface is a proxy interface for `/hustcache/put`. See more details in [here](../../hustdb/hustcache/put.md).  
 
 **Sample:**
 

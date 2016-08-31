@@ -9,7 +9,7 @@
 *  **tb** (Required)  
 *  **key** (Required)  
 
-This Interface is a proxy interface for `/hustcache/hdel`. See more details in [here](../../hustdb/hustcache/hdel.md).  
+This interface is a proxy interface for `/hustcache/hdel`. See more details in [here](../../hustdb/hustcache/hdel.md).  
 
 **Sample:**
 

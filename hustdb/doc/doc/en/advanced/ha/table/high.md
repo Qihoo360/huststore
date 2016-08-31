@@ -7,7 +7,7 @@ high
 
 **Parent Node:** [increase](increase.md)
 
-`high` represents the higher range section after expand, it has two member: [key](key.md) and [val](val.md).  
+`high` represents the higher range section after expand, it has two members: [key](key.md) and [val](val.md).  
 
 [Previous](../table.md)
 

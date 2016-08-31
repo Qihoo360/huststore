@@ -10,7 +10,7 @@
 *  **key** (Required)  
 *  **val** (Required)  
 
-This Interface is a proxy interface for `/hustcache/hincrbyfloat`. See more details in [here](../../hustdb/hustcache/hincrbyfloat.md).  
+This interface is a proxy interface for `/hustcache/hincrbyfloat`. See more details in [here](../../hustdb/hustcache/hincrbyfloat.md).  
 
 **Sample:**
 

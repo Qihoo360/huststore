@@ -12,7 +12,7 @@
 *  **opt** (Optional)
 *  **ver** (Optional)
 
-This Interface is a proxy interface for `/hustdb/zadd`. See more details in [here](../hustdb/hustdb/zadd.md).  
+This interface is a proxy interface for `/hustdb/zadd`. See more details in [here](../hustdb/hustdb/zadd.md).  
 
 **Sample:**
 

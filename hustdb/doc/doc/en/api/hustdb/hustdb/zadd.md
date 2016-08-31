@@ -9,7 +9,7 @@
 *  **tb** (Required)  
 *  **score** (Required)
 *  **key** (Required, GET: key is argument or POST: key is body)   
-*  **opt** (Optional, 0,1,-1；default: 0)
+*  **opt** (Optional, 0,1,-1;default: 0)
 *  **ttl** (Optional, default: 0)
 *  **ver** (Optional, default: 0)
 
@@ -19,7 +19,7 @@
 
 **Result A1:**
 
-	HTTP/1.1 412 Precondition Failed //tb maybe not sort set, reject sort set request；or tb not exist
+	HTTP/1.1 412 Precondition Failed //tb maybe not sort set, reject sort set request;or tb not exist
 	Version: 0
 	VerError: false
 

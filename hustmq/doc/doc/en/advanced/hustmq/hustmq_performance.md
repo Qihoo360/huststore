@@ -1,13 +1,13 @@
 hustmq performance
 --
 
-**机器配置:** `24core，64gb，1tb sata(7200rpm)`
+**Machine Configuration:** `24core，64gb，1tb sata(7200rpm)`
 
-**压测参数:** `100 concurrent，1000 thousand querys，single queue`
+**Stress Test Parameters:** `100 concurrent，1000 thousand querys，single queue`
 
-**DB CONF:** `single instance，thread model，10 workers`
+**DB Configuration:** `single instance，thread model，10 workers`
 
-**测试结果:**
+**Benchmark Result:**
 
     （1）PUT
 	    <1>item：256B；     qps：30 thousand

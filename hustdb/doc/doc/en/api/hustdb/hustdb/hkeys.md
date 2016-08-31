@@ -10,7 +10,7 @@
 *  **offset** (Required)  
 *  **size** (Required)  
 *  **start** (Optional, default：0, >0 && <= 1024)  
-*  **end** (Optional, default：1204, >0 && <= 1024)
+*  **end** (Optional, default：1024, >0 && <= 1024)
 *  **noval** (Optional, default：true)
 *  **async** (Optional, default：false, db dump；true, snapshot dump)  
 Whether get key list from a snapshot, see more details in [export](export.md)

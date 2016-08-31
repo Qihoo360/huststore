@@ -1,9 +1,9 @@
 hustmq
 --
 
-### 接口概要 ###
+### API Synopsis ###
 
-以下是 `hustmq` 提供的 http 接口：
+This following is http interface provided by `hustmq`:
 
 * [stat_all](hustmq/stat_all.md)
 * [put](hustmq/put.md)
@@ -17,41 +17,43 @@ hustmq
 * [pub](hustmq/pub.md)
 * [sub](hustmq/sub.md)
 
-### 参数说明 ###
+### Arguments ###
 
 #### `queue` ####
-队列名称   
+Queue name  
 
 #### `item` ####
-消息数据
+Message 
 
 #### `ack` ####
-获取消息，是否立即确认（删除）
+Whether confirm it immediately(deleted) when fetching data
 
 #### `token` ####
-用于消息异步确认（删除）
+Used for asynchronous confirmation of message(deleted) 
 
 #### `priori` ####
-消息优先级，0~2，优先级由低至高
+Message priority, 0~2 From low to high priority
 
 #### `worker` ####
-worker信息，用于get接口，保存worker相关数据
+Worker name used for get interface
 
 #### `ttl` ####
-time to live，存活时间（过期删除），0表示永久存储
+Time to live (delete it if expired), and 0 means permanent storage
 
 #### `minute` ####
-设置队列消息处理超时时间，单位：分钟
+Set up queue message timeout, Unit: minute
+
 
 #### `on` ####
-lock开关，0~1，限制队列put操作
+Lock switch. 0 means turn off lock, and put operation is allowed; 1 means turn on lock, and put operation is not allowed.
 
 #### `num` ####
-max数值，限制队列最大消息数量
+The maximum message number for this queue
 
 #### `idx` ####
-订阅消息滑动窗口索引值
+Sliding window index of subscribe message queue 
 
-[上一级](index.md)
 
-[根目录](../index.md)
+[Previous](index.md)
+
+[Home](../index.md)

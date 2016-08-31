@@ -10,7 +10,7 @@
 *  **item** (Required)
 *  **priori** (Optional)
 
-This is the proxy interface of `/hustmq/put`, see more details in [here](../hustmq/put.md).
+This is proxy interface for `/hustmq/put`, please refer to [here](../hustmq/put.md).
 
 **Example:**
 

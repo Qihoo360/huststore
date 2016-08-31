@@ -1,18 +1,18 @@
 ## worker ##
 
-**接口:** `/hustmq/worker`
+**Interface:** `/hustmq/worker`
 
-**方法:** `GET`
+**Method:** `GET`
 
-**参数:** 
+**Parameter:** 
 
-*  **queue** （必选）  
+*  **queue** (Required)  
 
-**使用范例A:**
+**Example A:**
 
     curl -i -X GET "http://localhost:8085/hustmq/worker?queue=test_queue"
 
-**结果范例A1:**
+**Return Example A1:**
 
 	HTTP/1.1 200 OK
 	Content-Length: 73
@@ -20,6 +20,6 @@
 
 	[{"w":"s1.bjdt|9998","t":1458815637},{"w":"s1.bjdt|9999","t":1458815632}]
 
-[上一级](../hustmq.md)
+[Previous](../hustmq.md)
 
-[根目录](../../index.md)
+[Home](../../index.md)

@@ -1,7 +1,7 @@
 hustmq
 --
-高性能分布式消息队列
+Distributed Message Queue With high performance
 
-[上一级](index.md)
+[Previous](index.md)
 
-[根目录](../index.md)
+[Home](../index.md)

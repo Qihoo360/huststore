@@ -9,13 +9,13 @@
 *  **queue** (Required)  
 *  **minute** (Required)  
   
-该接口是 `/hustmq/timeout` 的代理接口，参数详情可参考 [这里](../hustmq/timeout.md)。
+This is proxy interface of `/hustmq/timeout`, please refer to [Here](../hustmq/timeout.md).
 
-**使用范例:**
+**Example:**
 
     curl -i -X GET "http://localhost:8080/timeout?queue=test_queue&minute=1"
 
-**返回范例:**
+**Return Example:**
 
     HTTP/1.1 200 OK
     Server: nginx/1.9.4

@@ -1,27 +1,27 @@
 ## put ##
 
-**接口:** `/hustmq/put`
+**Interface:** `/hustmq/put`
 
-**方法:** `GET | POST`
+**Method:** `GET | POST`
 
-**参数:**  
+**Parameter:**  
 
-*  **queue** （必选）  
-*  **item** （必选，GET：val即参数 or POST：val即body）  
-*  **priori** （可选，0~2，default：0）    
+*  **queue** (Required)  
+*  **item** (Required. GET: val is parameter; POST: val is body) 
+*  **priori** (Optional, 0~2, default: 0)  
 
-**使用范例A:**
+**Example A:**
 
     curl -i -X GET "http://localhost:8085/hustmq/put?queue=test_queue&item=test_item"
 
-**结果范例A1:**
+**Return Example A1:**
 
 	HTTP/1.1 412 Precondition Failed //queue number exceeded the threshold
 
-**结果范例A2:**
+**Return Example A2:**
 
 	HTTP/1.1 200 OK
 
-[上一级](../hustmq.md)
+[Previous](../hustmq.md)
 
-[根目录](../../index.md)
+[Home](../../index.md)

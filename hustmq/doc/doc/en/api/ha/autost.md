@@ -10,11 +10,11 @@ This interface is used to reflesh `hustmq` cluster status in real time, it will 
 
 It's worthy to note that `hustmq ha` will periodically call [`/hustmq/stat_all`](../hustmq/stat_all.md) in the background to reflesh the cluster status, the default interval is `200` millisecond. Please see more details in [`autost_interval`](../../advanced/ha/nginx.md).
 
-**Example**
+**Example:**
 
     curl -i -X GET "http://localhost:8080/autost"
 
-**Animation**
+**Animation:**
 ![autost](../../../res/autost.gif)
 
 [Previous](../ha.md)

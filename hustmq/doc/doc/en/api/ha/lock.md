@@ -1,23 +1,23 @@
 ## lock ##
 
-**接口:** `/lock`
+**Interface:** `/lock`
 
-**方法:** `GET`
+**Method:** `GET`
 
-**参数:** 
+**Parameter:** 
 
-*  **queue** （必选）  
-*  **on** （必选）  
+*  **queue** (Required)  
+*  **on** (Required)  
 
-该接口是 `/hustmq/lock` 的代理接口，参数详情可参考 [这里](../hustmq/lock.md)。
+This is proxy interface for `/hustmq/lock`, please refer to [Here](../hustmq/lock.md).
 
-**使用范例:**
+**Example:**
 
     curl -i -X GET "http://localhost:8080/lock?queue=test_queue&on=1"
 
-**动画效果:**
+**Animation:**
 ![lock](../../../res/lock.gif)
 
-[上一级](../ha.md)
+[Previous](../ha.md)
 
-[根目录](../../index.md)
+[Home](../../index.md)

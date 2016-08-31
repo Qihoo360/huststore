@@ -1,28 +1,28 @@
 ## sub ##
 
-**接口:** `/hustmq/sub`
+**Interface:** `/hustmq/sub`
 
-**方法:** `GET`
+**Method:** `GET`
 
-**参数:** 
+**Parameter:** 
 
-*  **queue** （必选）  
-*  **idx** （必选）  
+*  **queue** (Required)   
+*  **idx** (Required)   
 
-**使用范例:**
+**Example:**
 
     curl -i -X GET "http://localhost:8085/hustmq/sub?queue=test_queue&idx=0"
 
-**结果范例A1:**
+**Return Example A1:**
 
 	HTTP/1.1 412 Precondition Failed //queue not exist
 
-**结果范例A2:**
+**Return Example A2:**
 
 	HTTP/1.1 401 Unauthorized
 	Index: 0-2 //idx must be >0 && <= 2
 
-**结果范例A3:**
+**Return Example A3:**
 
 	HTTP/1.1 200 OK
 	Content-Length: 9
@@ -30,6 +30,6 @@
 
 	test_item
 
-[上一级](../hustmq.md)
+[Previous](../hustmq.md)
 
-[根目录](../../index.md)
+[Home](../../index.md)

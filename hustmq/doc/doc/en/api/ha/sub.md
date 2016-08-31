@@ -7,11 +7,11 @@
 **Parameter:** 
 
 *  **queue** (Required)  
-*  **idx** (Required)  推送数据的索引号
+*  **idx** (Required)  the index number of push data
   
-该接口是 `/hustmq/sub` 的代理接口，参数详情可参考 [这里](../hustmq/sub.md)。。
+This is the proxy interface of `/hustmq/sub`, please refer to [Here](../hustmq/sub.md).
 
-**使用范例:**
+**Example:**
 
     curl -i -X GET "http://localhost:8080/sub?queue=test_queue&idx=1"
 

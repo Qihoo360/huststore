@@ -1,26 +1,26 @@
 ## max ##
 
-**接口:** `/hustmq/max`
+**Interface:** `/hustmq/max`
 
-**方法:** `GET`
+**Method:** `GET`
 
-**参数:** 
+**Parameter:** 
 
-*  **queue** （必选）  
-*  **num** （必选）
+*  **queue** (Required)  
+*  **num** (Required)
 
-**使用范例A:**
+**Example A:**
 
     curl -i -X GET "http://localhost:8085/hustmq/max?queue=test_queue&num=10000"
 
-**结果范例A1:**
+**Return Example A1:**
 
 	HTTP/1.1 412 Precondition Failed //queue not exist
 
-**结果范例A2:**
+**Return Example A2:**
 
 	HTTP/1.1 200 OK
 
-[上一级](../hustmq.md)
+[Previous](../hustmq.md)
 
-[根目录](../../index.md)
+[Home](../../index.md)

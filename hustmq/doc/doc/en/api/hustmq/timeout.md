@@ -1,26 +1,26 @@
 ## timeout ##
 
-**接口:** `/hustmq/timeout`
+**Interface:** `/hustmq/timeout`
 
-**方法:** `GET`
+**Method:** `GET`
 
-**参数:** 
+**Parameter:** 
 
-*  **queue** （必选）  
-*  **minute** （必选，单位：分钟，范围：1 ~ 255）
+*  **queue** (Required)  
+*  **minute** (Required, Unit: minute, Range: 1 ~ 255)
 
-**使用范例A:**
+**Example A:**
 
     curl -i -X GET "http://localhost:8085/hustmq/timeout?queue=test_queue&minute=5"
 
-**结果范例A1:**
+**Return Example A1:**
 
 	HTTP/1.1 412 Precondition Failed //queue not exist
 
-**结果范例A2:**
+**Return Example A2:**
 
 	HTTP/1.1 200 OK
 
-[上一级](../hustmq.md)
+[Previous](../hustmq.md)
 
-[根目录](../../index.md)
+[Home](../../index.md)

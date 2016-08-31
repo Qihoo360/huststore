@@ -1,12 +1,12 @@
-简介
+Intro
 --
 
-hustmq 是一套高性能分布式消息队列。目前包含如下组件：
+hustmq is distributed message queue With high performance, and consists of the following components:
 
 * [`hustmq`](hustmq.md)
 * [`hustmq ha`](ha.md)
 
-整体结构如下：
+The overall structure is as follows:
 ![architect](../../res/architect.png)
 
-[根目录](../index.md)
+[Home](../index.md)

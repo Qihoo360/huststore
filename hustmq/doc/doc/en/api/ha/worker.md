@@ -8,9 +8,9 @@
 
 *  **queue** (Required) 
 
-This interface is the proxy interface for `/hustmq/worker`. See more details in [here](../hustmq/worker.md)。
+This is proxy interface of `/hustmq/worker`, please refer to [here](../hustmq/worker.md).
 
-**Example**
+**Example:**
 
     curl -i -X GET "http://localhost:8080/worker?queue=test_queue"
 

@@ -1,18 +1,18 @@
 ## stat ##
 
-**接口:** `/hustmq/stat`
+**Interface:** `/hustmq/stat`
 
-**方法:** `GET`
+**Method:** `GET`
 
-**参数:**  
+**Parameter:**  
 
-*  **queue** （必选）  
+*  **queue** (Required)   
 
-**使用范例A:**
+**Example A:**
 
     curl -i -X GET "http://localhost:8085/hustmq/stat?queue=test_queue"
 
-**结果范例A1:**
+**Return Example A1:**
 
 	HTTP/1.1 200 OK
 	Content-Length: 94
@@ -20,6 +20,6 @@
 
 	{"queue":"test_queue","ready":[0,0,0],"unacked":1,"max":0,"lock":0,"type":0,"timeout":5,"si":1,"ci":1,"tm":1458812893}
 
-[上一级](../hustmq.md)
+[Previous](../hustmq.md)
 
-[根目录](../../index.md)
+[Home](../../index.md)

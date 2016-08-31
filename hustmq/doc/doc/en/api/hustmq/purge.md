@@ -1,26 +1,26 @@
 ## purge ##
 
-**接口:** `/hustmq/purge`
+**Interface:** `/hustmq/purge`
 
-**方法:** `GET`
+**Method:** `GET`
 
-**参数:**  
+**Parameter:**  
 
-*  **queue** （必选）  
-*  **priori** （必选）    
+*  **queue** (Required)  
+*  **priori** (Required)    
 
-**使用范例A:**
+**Example A:**
 
     curl -i -X GET "http://localhost:8085/hustmq/purge?queue=test_queue&priori=0"
 
-**结果范例A1:**
+**Return Example A1:**
 
 	HTTP/1.1 412 Precondition Failed //queue number exceeded the threshold
 
-**结果范例A2:**
+**Return Example A2:**
 
 	HTTP/1.1 200 OK
 
-[上一级](../hustmq.md)
+[Previous](../hustmq.md)
 
-[根目录](../../index.md)
+[Home](../../index.md)

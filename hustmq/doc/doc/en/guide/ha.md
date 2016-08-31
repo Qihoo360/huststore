@@ -1,14 +1,14 @@
 hustmq ha
 --
 
-安装 `hustmq ha` 以及 `libsync` ：
+Install `hustmq ha` and `libsync`:
 
     $ cd hustmq/ha/nginx
     $ ./configure --prefix=/data/hustmqha --add-module=src/addon
     $ make -j
     $ make install
 
-修改 `hustmq/ha/nginx/conf/nginx.json` 内容如下，其中 **`backends` 请替换为真实的 `hustmq` 机器列表，至少要有一个：**
+Modify contents of `hustmq/ha/nginx/conf/nginx.json` as below, notice that **replace `backends` to your real `hustdb` machine list, at least one is required:**
 
     {
         "module": "hustmq_ha",
@@ -83,21 +83,21 @@ hustmq ha
         }
     }
 
-运行 `genconf.py` 生成 `nginx.conf`，并替换配置：
+Run `genconf.py` to generate `nginx.conf`, and replace configuration as followed:
 
     $ python genconf.py
     $ cp nginx.conf /data/hustmqha/conf/
 
-配置完毕之后，启动 nginx：
+After configuration, start nginx:
 
     cd /data/hustmqha/sbin
     ./nginx
 
-输入如下测试命令：
+Input the following test command:
 
     curl -i -X GET 'localhost:8080/autost'
 
-可以看到服务器返回如下内容：
+Then server will output the following information:
 
     HTTP/1.1 200 OK
     Server: nginx/1.9.4
@@ -106,8 +106,8 @@ hustmq ha
     Content-Length: 0
     Connection: keep-alive
 
-返回该结果说明服务器工作正常。
+Server works just fine if the above result is returned.
 
-[上一级](index.md)
+[Previous](index.md)
 
-[根目录](../index.md)
+[Home](../index.md)

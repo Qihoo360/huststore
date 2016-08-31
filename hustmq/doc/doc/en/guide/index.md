@@ -1,7 +1,7 @@
-快速入门
+Getting Started
 --
 
 * [`hustmq`](hustmq.md)
 * [`hustmq ha`](ha.md)
 
-[根目录](../index.md)
+[Home](../index.md)

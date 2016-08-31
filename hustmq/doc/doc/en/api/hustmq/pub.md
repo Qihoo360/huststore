@@ -1,28 +1,28 @@
 ## pub ##
 
-**接口:** `/hustmq/pub`
+**Interface:** `/hustmq/pub`
 
-**方法:** `GET | POST`
+**Method:** `GET | POST`
 
-**参数:**  
+**Parameter:**  
 
-*  **queue** （必选）  
-*  **item** （必选，GET：val即参数 or POST：val即body）  
-*  **idx** （可选）
-*  **ttl** （可选，default：900）    
+*  **queue** (Required)   
+*  **item** (Required. GET: val is parameter; POST: val is body)   
+*  **idx** (Optional) 
+*  **ttl** (Optional, default: 900)    
 
-**使用范例A:**
+**Example A:**
 
     curl -i -X GET "http://localhost:8085/hustmq/pub?queue=test_queue&item=test_item"
 
-**结果范例A1:**
+**Return Example A1:**
 
 	HTTP/1.1 412 Precondition Failed //queue number exceeded the threshold
 
-**结果范例A2:**
+**Return Example A2:**
 
 	HTTP/1.1 200 OK
 
-[上一级](../hustmq.md)
+[Previous](../hustmq.md)
 
-[根目录](../../index.md)
+[Home](../../index.md)

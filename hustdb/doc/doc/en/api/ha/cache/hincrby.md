@@ -10,7 +10,7 @@
 *  **key** (Required)  
 *  **val** (Required)  
 
-This Interface is an proxy interface for `/hustcache/hincrby`. See more details in [here](../../hustdb/hustcache/hincrby.md).  
+This Interface is a proxy interface for `/hustcache/hincrby`. See more details in [here](../../hustdb/hustcache/hincrby.md).  
 
 **Sample:**
 

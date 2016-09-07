@@ -9,7 +9,7 @@
 *  **tb** (Required)  
 *  **key** (Required)  
 
-This Interface is an proxy interface for `/hustdb/zscore`. See more details in [here](../hustdb/hustdb/zscore.md).  
+This Interface is a proxy interface for `/hustdb/zscore`. See more details in [here](../hustdb/hustdb/zscore.md).  
 
 **Sample:**
 

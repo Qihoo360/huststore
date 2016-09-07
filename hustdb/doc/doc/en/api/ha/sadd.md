@@ -11,7 +11,7 @@
 This parameter must be put in `http body`.
 *  **ver** (Optional)
 
-This Interface is an proxy interface for `/hustdb/sadd`. See more details in [here](../hustdb/hustdb/sadd.md).  
+This Interface is a proxy interface for `/hustdb/sadd`. See more details in [here](../hustdb/hustdb/sadd.md).  
 
 **Sample:**
 

@@ -209,7 +209,7 @@ If only `sync server` needs to be re-deployed, you can refer to the below script
     
     echo 'finish!'
 
-Make sure `sync server` has exit before executing the above script, command to exit `sync server` is :
+Make sure `sync server` has exit before executing the above script, command to exit `sync server` is:
 
     $ cd /data/hustdbsync
     $ ./hustdbsync -q

@@ -9,7 +9,7 @@
 *  **tb** (Required)  
 *  **key** (Required)  
 
-This Interface is an proxy interface for `/hustcache/hget`. See more details in [here](../../hustdb/hustcache/hget.md).  
+This Interface is a proxy interface for `/hustcache/hget`. See more details in [here](../../hustdb/hustcache/hget.md).  
 
 **Sample:**
 

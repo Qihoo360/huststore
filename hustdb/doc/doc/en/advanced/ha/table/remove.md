@@ -7,7 +7,7 @@ remove
 
 **Parent Node:** [decrease](decrease.md)
 
-`remove` represents the backend nodes to be removed, for example:
+`remove` represents the backend nodes to be removed, e.g.  
 
     "10.120.100.178:9998"
 

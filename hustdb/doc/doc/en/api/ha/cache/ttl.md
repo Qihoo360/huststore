@@ -8,7 +8,7 @@
 
 *  **key** (Required)  
 
-This Interface is an proxy interface for `/hustcache/ttl`. See more details in [here](../../hustdb/hustcache/ttl.md).  
+This Interface is a proxy interface for `/hustcache/ttl`. See more details in [here](../../hustdb/hustcache/ttl.md).  
 
 **Sample:**
 

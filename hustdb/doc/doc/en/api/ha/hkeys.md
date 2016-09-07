@@ -16,7 +16,7 @@ This represents the indexes of backend servers. See more details in [peer_count]
 *  **noval** (Optional)   
 *  **async** (Optional)    
 
-This Interface is an proxy interface for `/hustdb/hkeys`. See more details in [here](../hustdb/hustdb/hkeys.md).  
+This Interface is a proxy interface for `/hustdb/hkeys`. See more details in [here](../hustdb/hustdb/hkeys.md).  
 
 **Sample:**
 

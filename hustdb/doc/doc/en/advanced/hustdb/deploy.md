@@ -16,7 +16,7 @@ Deployment
 
     ./hustdb -q
 
-#### Service Start (Debug试, work in foreground) ####
+#### Service Start (Debug, work in foreground) ####
 
     ./hustdb -d
 

@@ -62,24 +62,24 @@ Scripts path: `hustdb/ha/nginx/test/`
 All APIs use `http code` as return value. e.g. `200` is SUCCEED, `404` is FAILURE.
 
 * About `http basic authentication`  
-All test examples that use `curl` command in this chapter  are in the assumption of `http basic authentication` is turned off.
+All test examples that use `curl` command in this chapter are under the assumption of `http basic authentication` is turned off.
 
 For more details, please refer to the explanations in FAQ at the end of [This Chapter](../advanced/ha/nginx.md) 
 
 * `hustdb` uses Eventual Consistency design, therefore all write operations will have the below features:
     * Both of `master1` and `master2` write successfully, the return `http code` will be `200`
     * Only one of `master1` and `master2` write successfully, the return `http code` will be `200`, but a field `Sync`, whose value indicates the failure of write operation, will be added to the `http header`. This essentially means that data synchronization may need to be done between different nodes.(Please refer to the usage in test scripts: `hustdb/ha/nginx/test/autotest.py`)
-    * Both of `master1` and `master2` write failed,  the return `http code` will be `404`
+    * Both of `master1` and `master2` write failed, the return `http code` will be `404`
 
 * About `get2`, `hget2`, `zscore2`
     * The differences between `get2` and `get` are: **Reliability and Performance**. The differences between other two pairs will be similar.
-    * `get2` will fetch data from both of `master1` and `master2`, compare them and will return `200` only when the version and value are exactly matched. Also, `get2` will add a field `Version` into `http header`. If both versions are not matched, `get2` will add these two versions into the `http header`. If both values are not matched, `get2` will pack these two values in `http body` and return `http code` as `409`. For more details, please refer to [get2](ha/get2.md).
-    * `get` will first fetch data from `master1`, if succeed, it will return it to client immediately. However, if it failed, it will then fetch data from `master2`, and if succeed, it will return data from `master2` to client.
-    * Overall Comparison: the data got from `get2` will be strongly consistent because before it return data to client it needs to access both `master1` and `master2`, this will cause its `QPS` be significantly lower than that of `get`.
-    * Conclusion: `get` is **Weakly Consistent**, but has a high `QPS`. `get2` is **Strongly Consistent**, but has a relatively low `QPS`. Using `get` or `get2` is totally depends on business requirement. If data consistency is strongly required (e.g. financial business) but throughput doesn't need to be very high, then `get` is preferred. Otherwise if business needs high throughput and could bear some inconsistency in data (e.g. Commodity Info Display), `get2` may be a better choice. 
+    * `get2` will fetch data from both of `master1` and `master2`, compare them and will return `200` only when the version and value are exactly matched. Also, `get2` will add a field `Version` into `http header`. If both versions are not matched, `get2` will add these two versions into the `http header`. If both values are not matched, `get2` will pack these two values into the `http body` and return `http code` as `409`. For more details, please refer to [get2](ha/get2.md).
+    * `get` will first fetch data from `master1`, if succeed, it will return it to client immediately. However, if it failed, it will then fetch data from `master2`, return data from `master2` to client on success.
+    * Overall Comparison: the data got from `get2` will be strongly consistent because before `get2` return data to client it needs to access both `master1` and `master2`, this will cause its `QPS` be significantly lower than that of `get`.
+    * Conclusion: `get` is **Weakly Consistent**, but has a high `QPS`. `get2` is **Strongly Consistent**, but has a relatively low `QPS`. Using `get` or `get2` is totally depends on specific business requirement. If data consistency is strongly demanded (e.g. financial business) but throughput doesn't need to be very high, then `get` is preferred. However, if business requires high throughput but could bear some inconsistency in data (e.g. Commodity Info Display), `get2` may be a better choice. 
 
 * About `cache`
-    `cache` related APIs will store data only in memory, that means those data **will not be dumped to disk for persistence**. Other APIs will write data to disk for persistency.
+    `cache` related APIs will store data only in memory, that means the data **will not be dumped to disk for persistence**. Other APIs will write data to disk for persistency.
 
 [Previous Chapter](index.md)
 

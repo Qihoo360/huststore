@@ -9,7 +9,7 @@
 *  **tb** (Required)  
 *  **key** (Required)  
 
-This Interface is an proxy interface for `/hustdb/hget`. See more details in [here](../hustdb/hustdb/hget.md).  
+This Interface is a proxy interface for `/hustdb/hget`. See more details in [here](../hustdb/hustdb/hget.md).  
 
 **Sample:**
 

@@ -11,7 +11,7 @@
 This parameter must be put in `http body`.  
 *  **ver** (Optional)
 
-This Interface is an proxy interface for `/hustdb/srem`. See more details in [here](../hustdb/hustdb/srem.md).  
+This Interface is a proxy interface for `/hustdb/srem`. See more details in [here](../hustdb/hustdb/srem.md).  
 
 **Sample:**
 

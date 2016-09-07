@@ -75,7 +75,7 @@ Interface that is related to `HA`: [sync_status](../../api/ha/sync_status.md)
 **Q:**	How many threads that a `sync server` has?  
 **A:**	 `4+n`, including `main thread`, `check_backend&release_file`, `monitor` and `read_log`, and n threads in thread pool. 
 
-**Q:**  How do sub modules of `sync server` cooperate with each other? 
+**Q:**  How do sub-modules of `sync server` cooperate with each other? 
 **A:**  sub modules cooperate with each other through `pipe` or `queue`
 
 **Q:**  How does `sync server` communicate with `HA`?  

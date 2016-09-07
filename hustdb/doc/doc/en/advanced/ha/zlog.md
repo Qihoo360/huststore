@@ -1,4 +1,4 @@
-zlog Configuration
+Zlog Configuration
 --
 
 Path: `hustdb/ha/nginx/conf/zlog.conf`
@@ -26,7 +26,7 @@ A complete configuration file example:
 * `rules`: Log rules
 In the above example script, `/data/hustdbha` is installation path, replace it with your real path in your production environment.
 
-**In exception of this, use default values for other fields.**
+**In exception of this, default values should be used for other fields.**
 
 [Previous](conf.md)
 

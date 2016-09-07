@@ -1,4 +1,4 @@
-sync server configuration
+Sync Server Configuration
 --
 
 ### Service Configuration ###
@@ -42,7 +42,7 @@ A complete example of configuration file:
 **Keep default value for the below fields**
 
 * `network`
-    * `access_allow`: ccess restriction list for `sync server`
+    * `access_allow`: access restriction list for `sync server`
 
 **Keep settings the of below fields same as that in HA configuration file**
 

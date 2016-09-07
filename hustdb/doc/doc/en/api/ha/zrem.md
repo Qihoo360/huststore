@@ -10,7 +10,7 @@
 *  **key** (Required)  
 *  **ver** (Optional)
 
-This Interface is an proxy interface for `/hustdb/zrem`. See more details in [here](../hustdb/hustdb/zrem.md).  
+This Interface is a proxy interface for `/hustdb/zrem`. See more details in [here](../hustdb/hustdb/zrem.md).  
 
 **Sample:**
 

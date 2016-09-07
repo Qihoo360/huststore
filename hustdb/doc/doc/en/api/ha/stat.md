@@ -10,7 +10,7 @@
 This represents the indexes of backend servers. See more details in [peer_count](peer_count.md)
 *  **tb** (Optional)  
 
-This Interface is an proxy interface for `/hustdb/stat`. See more details in [here](../hustdb/hustdb/stat.md).  
+This Interface is a proxy interface for `/hustdb/stat`. See more details in [here](../hustdb/hustdb/stat.md).  
 
 **Sample:**
 

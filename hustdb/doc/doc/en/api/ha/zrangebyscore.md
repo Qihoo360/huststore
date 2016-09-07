@@ -15,7 +15,7 @@
 *  **end** (Optional)    
 *  **noval** (Optional)   
 
-This Interface is an proxy interface for `/hustdb/zrangebyscore`. See more details in [here](../hustdb/hustdb/zrangebyscore.md).  
+This Interface is a proxy interface for `/hustdb/zrangebyscore`. See more details in [here](../hustdb/hustdb/zrangebyscore.md).  
 
 **Sample:**
 

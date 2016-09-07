@@ -1,7 +1,7 @@
 Test
 --
 
-All the below scripts have dependencies on [requests](https://github.com/request/request).
+All the below scripts rely on [requests](https://github.com/request/request).
 
 ### Script for automatic test ###
 

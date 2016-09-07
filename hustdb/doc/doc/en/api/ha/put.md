@@ -11,7 +11,7 @@
 *  **ttl** (Optional)
 *  **ver** (Optional)  
 
-This Interface is an proxy interface for `/hustdb/put`. See more details in [here](../hustdb/hustdb/put.md).  
+This Interface is a proxy interface for `/hustdb/put`. See more details in [here](../hustdb/hustdb/put.md).  
 
 **Sample:**
 

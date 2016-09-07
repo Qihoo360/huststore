@@ -1,4 +1,4 @@
-nginx Configuration
+Nginx Configuration
 --
 
 Configuration file Path: `hustdb/ha/nginx/conf/nginx.json`
@@ -174,7 +174,7 @@ The meaning and configuration method of most field are the same as nginx configu
 * `proxy_read_timeout`
 * `proxy_buffer_size`
 
-config of `health_check`, please refer to [`nginx_upstream_check_module`](https://github.com/yaoweibin/nginx_upstream_check_module)
+Configuration of `health_check`, please check [`nginx_upstream_check_module`](https://github.com/yaoweibin/nginx_upstream_check_module)
 
 ### Tool for generate configuration file ###
 

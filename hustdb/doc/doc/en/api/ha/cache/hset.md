@@ -10,7 +10,7 @@
 *  **key** (Required)  
 *  **val** (Required)  
 
-This Interface is an proxy interface for `/hustcache/hset`. See more details in [here](../../hustdb/hustcache/hset.md).  
+This Interface is a proxy interface for `/hustcache/hset`. See more details in [here](../../hustdb/hustcache/hset.md).  
 
 **Sample:**
 

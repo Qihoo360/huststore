@@ -9,7 +9,7 @@
 *  **tb** (Required)  
 *  **key** (Required)  
 
-This Interface is an proxy interface for `/hustdb/zismember`. See more details in [here](../hustdb/hustdb/zismember.md).  
+This Interface is a proxy interface for `/hustdb/zismember`. See more details in [here](../hustdb/hustdb/zismember.md).  
 
 **Sample:**
 

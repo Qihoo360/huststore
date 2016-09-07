@@ -8,7 +8,7 @@
 
 *  **key** (Required)
 
-This Interface is an proxy interface for `/hustcache/get`. See more details in [here](../../hustdb/hustcache/get.md).  
+This Interface is a proxy interface for `/hustcache/get`. See more details in [here](../../hustdb/hustcache/get.md).  
 
 **Sample:**
 

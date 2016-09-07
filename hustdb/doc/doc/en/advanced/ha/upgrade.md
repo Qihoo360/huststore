@@ -37,7 +37,7 @@ Path: `hustdb/ha/upgrade.sh`
 
 Usage:
 
-    sh upgrade.sh jobs # jobs 代表服务运行的账户名称
+    sh upgrade.sh jobs # jobs is the user account 
 
 [Previous](../ha.md)
 

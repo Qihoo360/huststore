@@ -52,11 +52,11 @@ In addition, `HA` cluster uses a distributed architecture design by incorporatin
 
 Above includes detailed documents of design, deployment documents, `API` usage and test samples. You can refer quickly to common problems in `FAQ` part.
 
-### Fast Introduction ###
+### Guide ###
 * [hustdb](hustdb/doc/doc/en/guide/index.md)
 * [hustmq](hustmq/doc/doc/en/guide/index.md)
 
-### API ###
+### API manual ###
 * [hustdb](hustdb/doc/doc/en/api/index.md)
 * [hustmq](hustmq/doc/doc/en/api/index.md)
 

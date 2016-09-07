@@ -86,58 +86,58 @@ Above includes detailed documents of design, deployment documents, `API` usage a
 
 ### `hustdb` ###
 
-**Machine Configuration:** `24core，64gb，1tb sata(7200rpm)`
+**Machine Configuration:** `24core, 64gb, 1tb sata(7200rpm)`
 
-**Stress Test:** `100 concurrent，1000 thousand querys`
+**Stress Test:** `100 concurrent, 1000 thousand querys`
 
-**DB CONF:** `single instance，thread model，10 workers`
+**DB CONF:** `single instance, thread model, 10 workers`
 
 **Benchmark Result:**
 
     （1）PUT
-    	<1>value：256B；     qps：95 thousand
-	    <2>value：1KB；      qps：85 thousand
-	    <3>value：4KB；      qps：25 thousand
-	    <4>value：16KB；     qps：7 thousand
-	    <5>value：64KB；     qps：2 thousand
+    	<1>value: 256B;      qps: 95 thousand
+	    <2>value: 1KB;       qps: 85 thousand
+	    <3>value: 4KB;       qps: 25 thousand
+	    <4>value: 16KB;      qps: 7 thousand
+	    <5>value: 64KB;      qps: 2 thousand
 
 	（2）GET
-	    <1>value：256B；     qps：100 thousand
-	    <2>value：1KB；      qps：10 thousand
-	    <3>value：4KB；      qps：25 thousand
-	    <4>value：16KB；     qps：7 thousand
-	    <5>value：64KB；     qps：2 thousand
+	    <1>value: 256B;      qps: 100 thousand
+	    <2>value: 1KB;       qps: 10 thousand
+	    <3>value: 4KB;       qps: 25 thousand
+	    <4>value: 16KB;      qps: 7 thousand
+	    <5>value: 64KB;      qps: 2 thousand
 
 	（3）DEL
-    	<1>value：256B；     qps：100 thousand
-	    <2>value：1KB；      qps：100 thousand
-    	<3>value：4KB；      qps：100 thousand
-    	<4>value：16KB；     qps：100 thousand
-    	<5>value：64KB；     qps：100 thousand
+    	<1>value: 256B;      qps: 100 thousand
+	    <2>value: 1KB;       qps: 100 thousand
+    	<3>value: 4KB;       qps: 100 thousand
+    	<4>value: 16KB;      qps: 100 thousand
+    	<5>value: 64KB;      qps: 100 thousand
 
 ### `hustmq` ###
 
-**Machine Configuration:** `24core，64gb，1tb sata(7200rpm)`
+**Machine Configuration:** `24core, 64gb, 1tb sata(7200rpm)`
 
-**Stress Test Parameters:** `100 concurrent，1000 thousand querys，single queue`
+**Stress Test Parameters:** `100 concurrent, 1000 thousand querys, single queue`
 
-**DB Configuration:** `single instance，thread model，10 workers`
+**DB Configuration:** `single instance, thread model, 10 workers`
 
 **Benchmark Result:**
 
     （1）PUT
-	    <1>item：256B；     qps：30 thousand
-	    <2>item：1KB；      qps：25 thousand
-	    <3>item：4KB；      qps：20 thousand
-	    <4>item：16KB；     qps：7 thousand
-	    <5>item：64KB；     qps：2 thousand
+	    <1>item: 256B;      qps: 30 thousand
+	    <2>item: 1KB;       qps: 25 thousand
+	    <3>item: 4KB;       qps: 20 thousand
+	    <4>item: 16KB;      qps: 7 thousand
+	    <5>item: 64KB;      qps: 2 thousand
 
 	（2）GET
-	    <1>item：256B；     qps：25 thousand
-	    <2>item：1KB；      qps：20 thousand
-	    <3>item：4KB；      qps：18 thousand
-	    <4>item：16KB；     qps：7 thousand
-	    <5>item：64KB；     qps：2 thousand
+	    <1>item: 256B;      qps: 25 thousand
+	    <2>item: 1KB;       qps: 20 thousand
+	    <3>item: 4KB;       qps: 18 thousand
+	    <4>item: 16KB;      qps: 7 thousand
+	    <5>item: 64KB;      qps: 2 thousand
 
 ## LICENSE ##
 
@@ -145,5 +145,5 @@ Above includes detailed documents of design, deployment documents, `API` usage a
 
 ## Authors ##
 
-* XuRuibo（hustxrb，hustxrb@163.com)  
-* ChengZhuo（jobs，yao050421103@163.com)  
+* XuRuibo（hustxrb, hustxrb@163.com)  
+* ChengZhuo（jobs, yao050421103@163.com)  

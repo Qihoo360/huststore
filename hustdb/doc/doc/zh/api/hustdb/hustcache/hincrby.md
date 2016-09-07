@@ -22,6 +22,6 @@
 
 	16 //if original value of test_key is 9, 9 + 7 = 16
 
-[上一级](../hustdb.md)
+[上一级](../hustcache.md)
 
 [根目录](../../../index.md)

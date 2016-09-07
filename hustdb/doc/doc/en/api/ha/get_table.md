@@ -4,7 +4,7 @@
 
 **Method:** `GET`
 
-**Parameter:** 
+**Parameter:** None
 
 This interface is used to read load balance table.
 

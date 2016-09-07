@@ -3,6 +3,6 @@ hustdb
 
 * [Deployment](hustdb/deploy.md)
 
-[Previous Chapter](index.md)
+[Previous](index.md)
 
 [Home](../index.md)

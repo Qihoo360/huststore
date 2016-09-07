@@ -17,6 +17,6 @@
 
 	HTTP/1.1 200 OK
 	
-[Previous](../hustdb.md)
+[Previous](../hustcache.md)
 
 [Home](../../../index.md)

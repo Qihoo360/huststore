@@ -3,7 +3,7 @@
 # huststore - High-performance Distributed Storage #
 ![huststore logo](res/logo.png)
 
-`huststore` is a open source high performance distributed database system. It not only provides key-value storage service with extremely high performance, up to 100 thousand QPS, but also supports data structures like `hash`, `set`, `sorted set`, etc. Also, it can store binary data as value from a key-value pair, and thus can be used as an alternative of Redis.
+`huststore` is a open source high performance distributed database system. It not only provides key-value storage service with extremely high performance, up to 100 thousand QPS, but also supports data structures like `hash`, `set`, `sorted set`, etc. Also, it can store **binary** data as value from a key-value pair, and thus can be used as an alternative of Redis.
 
 In addtion, `huststore` implements a distributed message queue by integrating a special `HA` module, features including message Push Stream, and message Publish-SubScribe, these features can be used to as replacements of the corresponding features in rabbitmq and gearman.
 
@@ -17,10 +17,8 @@ In addtion, `huststore` implements a distributed message queue by integrating a 
 Please refer to concurrency report of `nginx`
 
 * High Availability  
-`huststore` architecture supports `Replication` (master-master), `load balance`. Therefore, the availability of `HA` is guaranteed by `master-worker` design. When one of `worker` process is down, the `master` will load another `workder` process, multiple `worker`s work independently, therefore guarantee the `HA` will work stably.
-
-The fundamental design architecture of `huststore` guarantees the high availability, by using `master-master` architecture, when one of the storage node fails, `HA` module will re-direct the request to another live `master` node. Also, when a node failure happens, `HA` cluster will automatically re-balancing the data distribution, thus avoid single point of failure.
-
+`huststore` architecture supports `Replication` (master-master), `load balance`. Therefore, the availability of `HA` is guaranteed by `master-worker` design. When one of `worker` process is down, the `master` will load another `workder` process, multiple `worker`s work independently, therefore guarantee the `HA` will work stably.  
+The fundamental design architecture of `huststore` guarantees the high availability, by using `master-master` architecture, when one of the storage node fails, `HA` module will re-direct the request to another live `master` node. Also, when a node failure happens, `HA` cluster will automatically re-balancing the data distribution, thus avoid single point of failure.  
 In addition, `HA` cluster uses a distributed architecture design by incorporating LVS as the director, each `HA` node is separated and work independently. When one of the `HA` node is down, LVS will re-direct the request to other available `HA` node, thus avoids `HA`'s' failure on single point node.
 
 * Language-free Interface  
@@ -82,7 +80,7 @@ Above includes detailed documents of design, deployment documents, `API` usage a
 　　`ha`  
 
 `hustdb/ha` provide service for storage engine, could configured with multi `worker`.  
-`hustmq/ha` provide service for message queue, can only configured with one **`worker`**.
+`hustmq/ha` provide service for message queue, **can only configured with one `worker`**.
 
 ## Performance ##
 

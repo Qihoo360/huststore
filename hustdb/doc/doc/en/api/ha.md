@@ -62,8 +62,7 @@ Scripts path: `hustdb/ha/nginx/test/`
 All APIs use `http code` as return value. e.g. `200` is SUCCEED, `404` is FAILURE.
 
 * About `http basic authentication`  
-All test examples that use `curl` command in this chapter are under the assumption of `http basic authentication` is turned off.
-
+All test examples that use `curl` command in this chapter are under the assumption of `http basic authentication` is turned off.  
 For more details, please refer to the explanations in FAQ at the end of [This Chapter](../advanced/ha/nginx.md) 
 
 * `hustdb` uses Eventual Consistency design, therefore all write operations will have the below features:
@@ -81,6 +80,6 @@ For more details, please refer to the explanations in FAQ at the end of [This Ch
 * About `cache`
     `cache` related APIs will store data only in memory, that means the data **will not be dumped to disk for persistence**. Other APIs will write data to disk for persistency.
 
-[Previous Chapter](index.md)
+[Previous](index.md)
 
 [Home](../index.md)

@@ -22,6 +22,6 @@
 
 	16 //if original value of test_key is 9, 9 + 7 = 16
 
-[Previous](../hustdb.md)
+[Previous](../hustcache.md)
 
 [Home](../../../index.md)

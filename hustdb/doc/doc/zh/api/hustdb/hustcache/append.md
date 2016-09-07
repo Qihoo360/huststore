@@ -17,6 +17,6 @@
 
 	HTTP/1.1 200 OK
 	
-[上一级](../hustdb.md)
+[上一级](../hustcache.md)
 
 [根目录](../../../index.md)

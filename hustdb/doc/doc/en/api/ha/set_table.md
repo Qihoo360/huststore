@@ -8,14 +8,14 @@
 
 **Situation 1**  (Fetch `id`)
 
-
+None
 
 **Situation 2**  (Use fetcded `id` to set load balance table)
 
 *  **id** (Required)  a legal id assigned by `hustdb ha`.  
 *  **table** (Required)  new load balance table, must be put in `http body`.  
 
-This interface is used to set load balance table at runtime. It could be used to update load balance table when `hustdb ha` cluster expands or shrinks in the number of machine
+This interface is used to set load balance table at runtime. It could be used to update `hustdb ha`'s load balance table when `hustdb` cluster expands or shrinks in the number of machine
 
 Explanation: **This interface will restart HA so that the new config take effect.** Because of this, security should be guaranteed when this interface is used. `hustdb ha` will dynamically generate an id encrypted by `RSA`, so that it can be used as the legal identity.  
 

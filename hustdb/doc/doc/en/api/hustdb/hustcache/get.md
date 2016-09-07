@@ -24,6 +24,6 @@
 
 	test_val
 
-[Previous](../hustdb.md)
+[Previous](../hustcache.md)
 
 [Home](../../../index.md)

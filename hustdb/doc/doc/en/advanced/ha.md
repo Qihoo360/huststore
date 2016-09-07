@@ -14,6 +14,6 @@ hustdb ha
 * [Test](ha/test.md)
 * [Smooth Upgrade](ha/upgrade.md)
 
-[Previous Chapter](index.md)
+[Previous](index.md)
 
 [Home](../index.md)

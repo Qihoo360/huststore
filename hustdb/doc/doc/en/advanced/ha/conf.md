@@ -6,6 +6,6 @@ Configuration
 * [zlog configuration](zlog.md)
 * [sync server configuration](sync_conf.md)
 
-[Previous Chapter](../ha.md)
+[Previous](../ha.md)
 
 [Home](../../index.md)

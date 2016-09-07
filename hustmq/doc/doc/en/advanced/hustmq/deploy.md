@@ -29,9 +29,9 @@ Deployment
     tcp.enable_nodelay              = true
     tcp.enable_defer_accept         = true
     tcp.max_body_size               = 16777216
-    tcp.max_keepalive_requests      = 1024          //Max number of requests for a single connection单链接最大请求数 
-    tcp.recv_timeout                = 300           //Max live time for for a single connection单链接最长存活时间
-    tcp.send_timeout                = 300           //Timeout for a single connection单链接发送数据超时
+    tcp.max_keepalive_requests      = 1024          //Max number of requests for a single connection 
+    tcp.recv_timeout                = 300           //Max live time for for a single connection
+    tcp.send_timeout                = 300           //Timeout for a single connection
 
     tcp.worker_count                = 10            //Number of worker thread
 

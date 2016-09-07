@@ -30,7 +30,7 @@
 
 	test_item
 
-***Example:**
+**Example:**
 
     curl -i -X GET "http://localhost:8085/hustmq/get?queue=test_queue&worker=xx.xxx.9999&ack=false"
 

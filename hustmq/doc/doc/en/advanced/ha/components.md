@@ -25,7 +25,7 @@ Path: `hustmq/ha/nginx/src/http/modules`
 
 This component provides `context-free` http interface, you can construct `ngx_http_request_t` object that is completely independent of any outer `ngx_http_request_t`, and send a http request to the `upstream` servers.
 
-**Those who have experience in writing `subrequest`, should know how beneficial `context-free` could be.**
+**Those who have experience in writing `subrequest`, should know how beneficial `context-free` could be. ^_^**
 
 In general, if you want to construct a `subrequest`, you will have to config the reverse proxy interface of nginx, and the subrequest must come from client side. **Under such condition, a subrequest relies on the context of the parent.**
 

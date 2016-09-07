@@ -6,7 +6,7 @@
 
 **Parameter:** 
 
-**Scene 1**  Claim a task
+**Scene 1**  (Claim a task)
 
 N/A
 
@@ -28,7 +28,7 @@ N/A
     10
 In the returned `http` header, `Queue` represents the name of the task, `Token` is the identity of the task, it must be returned in along with the result. `10` is the argument of the task, should be put in `http body`.
 
-**Scene 2**  Return the process result
+**Scene 2**  (Return the process result)
   
 *  **token** (Required)  the only identity of the task
 *  **result** (Required)  process result, must be put in `http body`

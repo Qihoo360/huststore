@@ -343,19 +343,13 @@ int kv_array_t::put_from_md5db (
 }
 
 int kv_array_t::put_from_binlog (
-                                  const md5db::block_id_t &   block_id,
-                                  const char *                table,
-                                  size_t                      table_len,
-                                  const char *                val,
-                                  size_t                      val_len,
-                                  const char *                host,
-                                  size_t                      host_len,
-                                  item_ctxt_t * &             ctxt
+                                  const char * key,
+                                  size_t key_len,
+                                  const char * val,
+                                  size_t val_len
                                   )
 {
-    const char * key        = NULL;
-    size_t       key_len    = 0;
-    uint32_t     file_id    = m_file_count + 1;
+    uint32_t     bl_file_id = m_file_count + 1;
     
     if ( unlikely ( ! m_ok ) )
     {
@@ -363,29 +357,17 @@ int kv_array_t::put_from_binlog (
         return EINVAL;
     }
 
-    i_kv_t * kv = m_files[ file_id ];
+    i_kv_t * kv = m_files[ bl_file_id ];
     if ( unlikely ( NULL == kv ) )
     {
-        LOG_ERROR ( "[kv_array][file_id=%u]file is NULL", file_id );
+        LOG_ERROR ( "[kv_array][bl_file_id=%u]file is NULL", bl_file_id );
         return EFAULT;
     }
-    
-    ctxt->key.append ( host, host_len );
-    
-    if ( table_len > 0 )
-    {
-        ctxt->key.append ( table, table_len );
-    }
-    
-    ctxt->key.append ( ( const char * ) & block_id, sizeof ( md5db::block_id_t ) );
-    
-    key     = ctxt->key.c_str ();
-    key_len = ctxt->key.size ();
     
     int r = kv->put ( key, key_len, val, val_len );
     if ( unlikely ( 0 != r ) )
     {
-        LOG_ERROR ( "[kv_array][file_id=%u]put return %d", file_id, r );
+        LOG_ERROR ( "[kv_array][bl_file_id=%u]put return %d", bl_file_id, r );
         return r;
     }
 
@@ -459,6 +441,36 @@ int kv_array_t::del_from_md5db (
     }
 
     return r;
+}
+
+int kv_array_t::del_from_binlog (
+                                  const char * key,
+                                  size_t key_len
+                                  )
+{
+    uint32_t     bl_file_id = m_file_count + 1;
+
+    if ( unlikely ( ! m_ok ) )
+    {
+        LOG_ERROR ( "[kv_array]not ready" );
+        return EINVAL;
+    }
+
+    i_kv_t * kv = m_files[ bl_file_id ];
+    if ( unlikely ( NULL == kv ) )
+    {
+        LOG_ERROR ( "[kv_array][bl_file_id=%u]file is NULL", bl_file_id );
+        return EFAULT;
+    }
+
+    int r = kv->del ( key, key_len );
+    if ( unlikely ( 0 != r ) )
+    {
+        LOG_ERROR ( "[kv_array][bl_file_id=%u]del return %d", bl_file_id, r );
+        return r;
+    }
+
+    return 0;
 }
 
 void kv_array_t::hash ( const char * key, size_t key_len, conn_ctxt_t conn, item_ctxt_t * & ctxt )

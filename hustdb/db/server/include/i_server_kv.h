@@ -11,10 +11,10 @@
 
 enum kv_type_t
 {
-    NEW_KV = 0,
-    EXIST_KV = 1,
+    NEW_KV      = 0,
+    EXIST_KV    = 1,
     CONFLICT_KV = 2,
-    ERROR_KV = 3
+    ERROR_KV    = 3
 };
 
 struct conn_ctxt_t
@@ -92,6 +92,18 @@ struct export_cb_param_t
     int file_id;
     bool noval;
     bool async;
+
+} __attribute__ ( ( aligned ( 64 ) ) );
+
+typedef void ( * binlog_callback_t )(
+                                      void * param
+                                      );
+
+struct binlog_cb_param_t
+{
+    void * db;
+    char key[ 128 ];
+    uint32_t key_len;
 
 } __attribute__ ( ( aligned ( 64 ) ) );
 
@@ -178,13 +190,12 @@ public:
                            ) = 0;
 
     virtual int binlog (
-                         const char * table,
-                         size_t table_len,
                          const char * user_key,
                          size_t user_key_len,
                          const char * host,
                          size_t host_len,
                          uint8_t cmd_type,
+                         bool is_rem,
                          conn_ctxt_t conn
                          ) = 0;
 

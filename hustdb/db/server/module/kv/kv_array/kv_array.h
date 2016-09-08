@@ -116,6 +116,11 @@ public:
                          item_ctxt_t * & ctxt
                          );
 
+    int del_from_binlog (
+                          const char * key,
+                          size_t key_len
+                          );
+
     int put_from_md5db (
                          const md5db::block_id_t & block_id,
                          uint32_t file_id,
@@ -128,14 +133,10 @@ public:
                          );
 
     int put_from_binlog (
-                          const md5db::block_id_t & block_id,
-                          const char * table,
-                          size_t table_len,
+                          const char * key,
+                          size_t key_len,
                           const char * val,
-                          size_t val_len,
-                          const char * host,
-                          size_t host_len,
-                          item_ctxt_t * & ctxt
+                          size_t val_len
                           );
 
     int get_from_md5db (
@@ -168,13 +169,12 @@ public:
                            );
 
     virtual int binlog (
-                         const char * table,
-                         size_t table_len,
                          const char * user_key,
                          size_t user_key_len,
                          const char * host,
                          size_t host_len,
                          uint8_t cmd_type,
+                         bool is_rem,
                          conn_ctxt_t conn
                          )
     {

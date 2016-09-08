@@ -2856,6 +2856,7 @@ int hustdb_t::hustdb_binlog (
                               )
 {
     int                  r            = 0;
+    bool                 is_rem       = false;
 
     if ( unlikely ( ! tb_name_check ( table, table_len ) ||
                    CHECK_STRING ( key ) ||
@@ -2870,23 +2871,27 @@ int hustdb_t::hustdb_binlog (
     
     switch ( cmd_type )
     {
-        case HUSTDB_METHOD_PUT:
         case HUSTDB_METHOD_DEL:
+            is_rem = true;
+        case HUSTDB_METHOD_PUT:
             m_storage->set_inner_table ( NULL, 0, KV_ALL, conn );
             break;
             
-        case HUSTDB_METHOD_HSET:
         case HUSTDB_METHOD_HDEL:
+            is_rem = true;
+        case HUSTDB_METHOD_HSET:
             m_storage->set_inner_table ( table, table_len, HASH_TB, conn );
             break;
             
-        case HUSTDB_METHOD_SADD:
         case HUSTDB_METHOD_SREM:
+            is_rem = true;
+        case HUSTDB_METHOD_SADD:
             m_storage->set_inner_table ( table, table_len, SET_TB, conn );
             break;
             
-        case HUSTDB_METHOD_ZADD:
         case HUSTDB_METHOD_ZREM:
+            is_rem = true;
+        case HUSTDB_METHOD_ZADD:
             m_storage->set_inner_table ( table, table_len, ZSET_IN, conn );
             break;
             
@@ -2895,7 +2900,7 @@ int hustdb_t::hustdb_binlog (
             return EKEYREJECTED;
     }
 
-    r = m_storage->binlog ( table, table_len, key, key_len, host, host_len, cmd_type, conn );
+    r = m_storage->binlog ( key, key_len, host, host_len, cmd_type, is_rem, conn );
     if ( 0 != r )
     {
         LOG_ERROR ( "[hustdb][db_binlog]binlog return %d", r );

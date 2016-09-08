@@ -39,13 +39,13 @@ typedef struct fmap_t
 
 typedef enum
 {
-    LOG_ALL = 0,
-    LOG_DEBUG = 1,
-    LOG_INFO = 2,
-    LOG_WARNING = 3,
-    LOG_ERROR = 4,
-    LOG_FATAL = 5,
-    LOG_NONE = 6,
+    LOG_ALL         = 0,
+    LOG_DEBUG       = 1,
+    LOG_INFO        = 2,
+    LOG_WARNING     = 3,
+    LOG_ERROR       = 4,
+    LOG_FATAL       = 5,
+    LOG_NONE        = 6,
 
     LOG_LEVEL_COUNT = 7
 } log_level_t;

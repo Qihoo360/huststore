@@ -65,7 +65,8 @@ bool kv_array_t::open ( config_t & config )
 {
     try
     {
-        int count = (( hustdb_t * ) G_APPTOOL->get_hustdb ())->get_worker_count () + 1;
+        int count = (( hustdb_t * ) G_APPTOOL->get_hustdb ())->get_worker_count () + 2;
+        
         m_get_buffers.resize ( count );
         for ( int i = 0; i < count; ++ i )
         {
@@ -87,7 +88,7 @@ bool kv_array_t::open ( config_t & config )
 
     try
     {
-        m_files.resize ( m_file_count + 1, NULL );
+        m_files.resize ( m_file_count + 2, NULL );
     }
     catch ( ... )
     {
@@ -300,7 +301,7 @@ int kv_array_t::put_from_md5db (
     i_kv_t * kv = m_files[ file_id ];
     if ( unlikely ( NULL == kv ) )
     {
-        LOG_ERROR ( "[kv_array][file_id=%u]file is NULL" );
+        LOG_ERROR ( "[kv_array][file_id=%u]file is NULL", file_id );
         return EFAULT;
     }
 
@@ -338,6 +339,56 @@ int kv_array_t::put_from_md5db (
         }
     }
     
+    return 0;
+}
+
+int kv_array_t::put_from_binlog (
+                                  const md5db::block_id_t &   block_id,
+                                  const char *                table,
+                                  size_t                      table_len,
+                                  const char *                val,
+                                  size_t                      val_len,
+                                  const char *                host,
+                                  size_t                      host_len,
+                                  item_ctxt_t * &             ctxt
+                                  )
+{
+    const char * key        = NULL;
+    size_t       key_len    = 0;
+    uint32_t     file_id    = m_file_count + 1;
+    
+    if ( unlikely ( ! m_ok ) )
+    {
+        LOG_ERROR ( "[kv_array]not ready" );
+        return EINVAL;
+    }
+
+    i_kv_t * kv = m_files[ file_id ];
+    if ( unlikely ( NULL == kv ) )
+    {
+        LOG_ERROR ( "[kv_array][file_id=%u]file is NULL", file_id );
+        return EFAULT;
+    }
+    
+    ctxt->key.append ( host, host_len );
+    
+    if ( table_len > 0 )
+    {
+        ctxt->key.append ( table, table_len );
+    }
+    
+    ctxt->key.append ( ( const char * ) & block_id, sizeof ( md5db::block_id_t ) );
+    
+    key     = ctxt->key.c_str ();
+    key_len = ctxt->key.size ();
+    
+    int r = kv->put ( key, key_len, val, val_len );
+    if ( unlikely ( 0 != r ) )
+    {
+        LOG_ERROR ( "[kv_array][file_id=%u]put return %d", file_id, r );
+        return r;
+    }
+
     return 0;
 }
 

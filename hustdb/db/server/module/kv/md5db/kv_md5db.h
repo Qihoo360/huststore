@@ -13,6 +13,21 @@ namespace md5db
 
 using md5db::bucket_t;
 
+static void export_md5db_record (
+                                  void * param,
+                                  const char * & key,
+                                  size_t & key_len,
+                                  const char * & val,
+                                  size_t & val_len,
+                                  const char * table,
+                                  size_t table_len,
+                                  uint32_t & version,
+                                  uint32_t & ttl,
+                                  std::string & content,
+                                  bool * ignore_this_record,
+                                  bool * break_the_loop
+                                  );
+
 class kv_md5db_t : public i_server_kv_t
 {
 public:
@@ -98,6 +113,17 @@ public:
                            void * callback_param = NULL
                            );
 
+    virtual int binlog (
+                         const char * table,
+                         size_t table_len,
+                         const char * user_key,
+                         size_t user_key_len,
+                         const char * host,
+                         size_t host_len,
+                         uint8_t cmd_type,
+                         conn_ctxt_t conn
+                         );
+
     virtual int hash_info (
                             int user_file_id,
                             int & inner_file_id
@@ -130,12 +156,21 @@ public:
                                            conn_ctxt_t conn
                                            );
 
-    uint32_t find_version_by_key (
-                                   const char * key,
-                                   size_t key_len,
-                                   const char * table,
-                                   size_t table_len
-                                   );
+    uint32_t md5db_info_by_key (
+                                 const char * key,
+                                 size_t key_len,
+                                 const char * table,
+                                 size_t table_len,
+                                 md5db::block_id_t & block_id
+                                 );
+
+    uint32_t md5db_info_by_inner_key (
+                                       const char * key,
+                                       size_t key_len,
+                                       const char * inner_key,
+                                       size_t inner_key_len,
+                                       md5db::block_id_t & block_id
+                                       );
 
 public:
 

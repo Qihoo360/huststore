@@ -41,6 +41,15 @@
 #define CHECK_STRING(key)             ( ! key || key##_len <= 0 )
 #define CHECK_VERSION                 ( ver < 0 || ver >= 0xFFFFFFFF )
 
+#define HUSTDB_METHOD_PUT        1
+#define HUSTDB_METHOD_DEL        2
+#define HUSTDB_METHOD_HSET       3
+#define HUSTDB_METHOD_HDEL       4
+#define HUSTDB_METHOD_SADD       5
+#define HUSTDB_METHOD_SREM       6
+#define HUSTDB_METHOD_ZADD       7
+#define HUSTDB_METHOD_ZREM       8
+
 enum table_type_t
 {
     QUEUE_TB    = 0,
@@ -539,6 +548,19 @@ public:
                         item_ctxt_t * & ctxt
                         );
     
+public:
+
+    int hustdb_binlog (
+                        const char * table,
+                        size_t table_len,
+                        const char * key,
+                        size_t key_len,
+                        const char * host,
+                        size_t host_len,
+                        uint8_t cmd_type,
+                        conn_ctxt_t conn
+                        );
+
 public:
 
     int hustmq_put (

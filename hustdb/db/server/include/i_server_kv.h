@@ -177,6 +177,17 @@ public:
                            void * callback_param = NULL
                            ) = 0;
 
+    virtual int binlog (
+                         const char * table,
+                         size_t table_len,
+                         const char * user_key,
+                         size_t user_key_len,
+                         const char * host,
+                         size_t host_len,
+                         uint8_t cmd_type,
+                         conn_ctxt_t conn
+                         ) = 0;
+
     virtual int hash_info (
                             int user_file_id,
                             int & inner_file_id

@@ -248,7 +248,7 @@ bool kv_md5db_t::open ( )
     m_inner->m_query_ctxts.resize ( 0 );
     try
     {
-        m_inner->m_query_ctxts.resize ( ( ( hustdb_t * ) G_APPTOOL->get_hustdb () )->get_worker_count () + 1 );
+        m_inner->m_query_ctxts.resize ( ( ( hustdb_t * ) G_APPTOOL->get_hustdb () )->get_worker_count () + 2 );
     }
     catch ( ... )
     {
@@ -2270,7 +2270,7 @@ int kv_md5db_t::del_inner (
         return EINVAL;
     }
 
-    char        inner_key[ 16 ]  = { };
+    char        inner_key[ 16 ];
     size_t      inner_key_len    = 16;
 
     if ( unlikely ( ! check_user_key ( user_key, user_key_len ) ) )
@@ -2986,135 +2986,16 @@ void kv_md5db_t::info (
     ss << "}";
 }
 
-static void export_md5db_record (
-                                  void *                  param,
-                                  const char * &          key,
-                                  size_t &                key_len,
-                                  const char * &          val,
-                                  size_t &                val_len,
-                                  const char *            table,
-                                  size_t                  table_len,
-                                  uint32_t &              version,
-                                  uint32_t &              ttl,
-                                  std::string &           content,
-                                  bool *                  ignore_this_record,
-                                  bool *                  break_the_loop
-                                  )
-{
-    if ( ! param )
-    {
-        LOG_ERROR ( "[md5db][db]GOD! invalid callback param" );
-        * ignore_this_record = true;
-        return;
-    }
-
-    struct export_cb_param_t * cb_pm = ( struct export_cb_param_t * ) param;
-    kv_md5db_t * db       = ( kv_md5db_t * ) cb_pm->db;
-    uint16_t     start    = cb_pm->start;
-    uint16_t     end      = cb_pm->end;
-    bool         noval    = cb_pm->noval;
-
-    if ( db->get_inner ()->m_contents.is_open () )
-    {
-        if ( NULL == val || val_len != sizeof ( data_item_for_content_db_t ) )
-        {
-            LOG_ERROR ( "[md5db][db]GOD! invalid user key len" );
-            * ignore_this_record = true;
-            return;
-        }
-
-        data_item_for_content_db_t addr;
-        memcpy ( & addr, val, sizeof ( data_item_for_content_db_t ) );
-        if ( 0 == addr.data_len )
-        {
-            LOG_ERROR ( "[md5db][db]GOD! invalid size 0" );
-            * ignore_this_record = true;
-            return;
-        }
-
-        try
-        {
-            content.resize ( addr.data_len );
-        }
-        catch ( ... )
-        {
-            LOG_ERROR ( "[md5db][db]GOD! bad_alloc" );
-            * ignore_this_record = true;
-            return;
-        }
-
-        bool b;
-        {
-            b = db->get_inner ()->m_contents.get ( addr.file_id, addr.data_id, addr.data_len, & content[ 0 ] );
-        }
-        if ( ! b )
-        {
-            LOG_ERROR ( "[md5db][db]GOD! get content failed" );
-            * ignore_this_record = true;
-            return;
-
-        }
-
-        val = content.c_str ();
-        val_len = content.size ();
-    }
-
-    uint8_t idx_len = sizeof ( uint32_t ) * 2;
-    if ( NULL == val || val_len <= idx_len )
-    {
-        LOG_ERROR ( "[md5db][db]GOD! invalid user key len" );
-        * ignore_this_record = true;
-        return;
-    }
-
-    fast_memcpy ( & ttl, & val[ val_len - sizeof (uint32_t ) ], sizeof (uint32_t ) );
-
-    uint32_t kl;
-    fast_memcpy ( & kl, & val[ val_len - idx_len ], sizeof (uint32_t ) );
-    if ( 0 == kl )
-    {
-        LOG_ERROR ( "[md5db][db]GOD! invalid user key len" );
-        * ignore_this_record = true;
-        return;
-    }
-
-    const char * uk;
-    if ( val_len < idx_len + kl )
-    {
-        LOG_ERROR ( "[md5db][db]GOD! invalid data_len %d, ukey_len=%d", ( int ) val_len, ( int ) kl );
-        * ignore_this_record = true;
-        return;
-    }
-    uk = ( const char * ) & val[ val_len - idx_len - kl ];
-
-    uint16_t hash = G_APPTOOL->bucket_hash ( uk, kl );
-    if ( hash < start || hash >= end )
-    {
-        * ignore_this_record = true;
-        return;
-    }
-
-    * ignore_this_record = false;
-    
-    uint32_t vl = val_len - idx_len - kl;
-
-    key         = uk;
-    key_len     = kl;
-    val_len     = noval ? 0 : vl;
-
-    version = db->find_version_by_key ( key, key_len, table, table_len );
-}
-
-uint32_t kv_md5db_t::find_version_by_key (
+uint32_t kv_md5db_t::md5db_info_by_key (
                                            const char *                key,
                                            size_t                      key_len,
                                            const char *                table,
-                                           size_t                      table_len
+                                           size_t                      table_len,
+                                           md5db::block_id_t &         block_id
                                            )
 {
     char        inner_key[ 16 ];
-    block_id_t  block_id;
-    uint32_t    version = 0;
+    size_t      inner_key_len    = 16;
 
     if ( table && table_len > 0 )
     {
@@ -3128,10 +3009,23 @@ uint32_t kv_md5db_t::find_version_by_key (
         user_key_to_inner ( inner_key, key, key_len );
     }
 
-    bucket_t & bucket = m_inner->m_buckets.get_bucket ( inner_key, 16 );
+    return md5db_info_by_inner_key ( key, key_len, inner_key, inner_key_len, block_id );
+}
 
+uint32_t kv_md5db_t::md5db_info_by_inner_key (
+                                               const char *                key,
+                                               size_t                      key_len,
+                                               const char *                inner_key,
+                                               size_t                      inner_key_len,
+                                               md5db::block_id_t &         block_id
+                                               )
+{
+    uint32_t                version = 0;
     bucket_data_item_t *    item    = NULL;
-    int r = bucket.find ( inner_key, 16, item );
+    
+    bucket_t & bucket = m_inner->m_buckets.get_bucket ( inner_key, inner_key_len );
+
+    int r = bucket.find ( inner_key, inner_key_len, item );
     if ( NULL == item )
     {
         LOG_ERROR ( "[md5db][db]find return %d, NULL", r );
@@ -3144,24 +3038,25 @@ uint32_t kv_md5db_t::find_version_by_key (
     switch ( item->type )
     {
         case BUCKET_DIRECT_DATA:
-            r = check_same_key ( bucket, item->block_id, inner_key, 16, key, key_len );
+            r = check_same_key ( bucket, item->block_id, inner_key, inner_key_len, key, key_len );
+            block_id = item->block_id;
+
             if ( r < 0 )
             {
                 return 0;
             }
+
             if ( 0 == r )
             {
-                // same key
                 return item->version;
             }
             else
             {
-                // not same key, not found
                 return 0;
             }
 
         case BUCKET_CONFLICT_DATA:
-            r = get_conflict_block_id ( inner_key, 16, block_id, version );
+            r = get_conflict_block_id ( inner_key, inner_key_len, block_id, version );
             if ( 0 != r )
             {
                 return 0;
@@ -3270,6 +3165,89 @@ int kv_md5db_t::ttl_scan (
         return r;
     }
 
+    return 0;
+}
+
+int kv_md5db_t::binlog (
+                         const char * table,
+                         size_t table_len,
+                         const char * user_key,
+                         size_t user_key_len,
+                         const char * host,
+                         size_t host_len,
+                         uint8_t cmd_type,
+                         conn_ctxt_t conn
+                         )
+{
+    char                inner_key[ 16 ];
+    size_t              inner_key_len    = 16;
+    uint32_t            version          = 0;
+    uint8_t             host_u8          = ( uint8_t ) host_len;
+    item_ctxt_t *       ctxt             = NULL;
+    block_id_t          block_id;
+
+    if ( unlikely ( ! check_user_key ( user_key, user_key_len ) ) )
+    {
+        LOG_ERROR ( "[md5db][db]invalid user key[user_key=%p][user_key_len=%d]", user_key, ( int ) user_key_len );
+        return EINVAL;
+    }
+
+    size_t new_user_key_len = user_key_len;
+    const char * new_user_key = get_inner_tbkey ( user_key, new_user_key_len, conn );
+    user_key_to_inner ( inner_key, new_user_key, new_user_key_len );
+
+    query_ctxt_t * tmp_ctxt;
+    tmp_ctxt = & m_inner->m_query_ctxts[ conn.worker_id ];
+
+    int r = 0;
+    if ( tmp_ctxt->tbkey.empty () )
+    {
+        r = m_inner->m_data.hash_with_md5db ( inner_key, inner_key_len, conn, ctxt );
+    }
+    else if ( tmp_ctxt->table_len > ZSET_SCORE_LEN &&
+              tmp_ctxt->tbkey.at ( tmp_ctxt->table_len - ZSET_SCORE_LEN - 1 ) == ZSET_TB
+              )
+    {
+        r = m_inner->m_data.hash_with_md5db ( tmp_ctxt->tbkey.c_str (), tmp_ctxt->table_len - ZSET_SCORE_LEN, conn, ctxt );
+    }
+    else
+    {
+        r = m_inner->m_data.hash_with_md5db ( tmp_ctxt->tbkey.c_str (), tmp_ctxt->table_len, conn, ctxt );
+    }
+
+    if ( 0 != r )
+    {
+        LOG_ERROR ( "[md5db][db]hash failed" );
+        return r;
+    }
+    
+    version = md5db_info_by_inner_key ( user_key, user_key_len, inner_key, inner_key_len, block_id );
+    if ( version == 0 )
+    {
+        LOG_ERROR ( "[md5db][db]inner key not found" );
+        return ENOENT;
+    }
+    
+    tmp_ctxt->value.resize ( 0 );
+    tmp_ctxt->value.append ( 1, ( char ) cmd_type );
+    tmp_ctxt->value.append ( ( const char * ) & host_u8, sizeof ( uint8_t ) );
+
+    r = m_inner->m_data.put_from_binlog ( block_id,
+                                         table,
+                                         table_len,
+                                         tmp_ctxt->value.c_str (),
+                                         tmp_ctxt->value.size (),
+                                         host,
+                                         host_len,
+                                         ctxt );
+    if ( 0 != r )
+    {
+        LOG_ERROR ( "[md5db][db]m_data.put_from_binlog"
+                   "( %d.%u ) return %d",
+                   ( int ) block_id.bucket_id (), block_id.data_id (), r );
+        return r;
+    }
+    
     return 0;
 }
 
@@ -3386,4 +3364,124 @@ const char * kv_md5db_t::get_inner_tbkey (
     key_len = tmp_ctxt->tbkey.size ();
 
     return tmp_ctxt->tbkey.c_str ();
+}
+
+static void export_md5db_record (
+                                  void *                  param,
+                                  const char * &          key,
+                                  size_t &                key_len,
+                                  const char * &          val,
+                                  size_t &                val_len,
+                                  const char *            table,
+                                  size_t                  table_len,
+                                  uint32_t &              version,
+                                  uint32_t &              ttl,
+                                  std::string &           content,
+                                  bool *                  ignore_this_record,
+                                  bool *                  break_the_loop
+                                  )
+{
+    if ( ! param )
+    {
+        LOG_ERROR ( "[md5db][db]GOD! invalid callback param" );
+        * ignore_this_record = true;
+        return;
+    }
+
+    struct export_cb_param_t * cb_pm = ( struct export_cb_param_t * ) param;
+    kv_md5db_t * db       = ( kv_md5db_t * ) cb_pm->db;
+    uint16_t     start    = cb_pm->start;
+    uint16_t     end      = cb_pm->end;
+    bool         noval    = cb_pm->noval;
+
+    if ( db->get_inner ()->m_contents.is_open () )
+    {
+        if ( NULL == val || val_len != sizeof ( data_item_for_content_db_t ) )
+        {
+            LOG_ERROR ( "[md5db][db]GOD! invalid user key len" );
+            * ignore_this_record = true;
+            return;
+        }
+
+        data_item_for_content_db_t addr;
+        memcpy ( & addr, val, sizeof ( data_item_for_content_db_t ) );
+        if ( 0 == addr.data_len )
+        {
+            LOG_ERROR ( "[md5db][db]GOD! invalid size 0" );
+            * ignore_this_record = true;
+            return;
+        }
+
+        try
+        {
+            content.resize ( addr.data_len );
+        }
+        catch ( ... )
+        {
+            LOG_ERROR ( "[md5db][db]GOD! bad_alloc" );
+            * ignore_this_record = true;
+            return;
+        }
+
+        bool b;
+        {
+            b = db->get_inner ()->m_contents.get ( addr.file_id, addr.data_id, addr.data_len, & content[ 0 ] );
+        }
+        if ( ! b )
+        {
+            LOG_ERROR ( "[md5db][db]GOD! get content failed" );
+            * ignore_this_record = true;
+            return;
+
+        }
+
+        val = content.c_str ();
+        val_len = content.size ();
+    }
+
+    uint8_t idx_len = sizeof ( uint32_t ) * 2;
+    if ( NULL == val || val_len <= idx_len )
+    {
+        LOG_ERROR ( "[md5db][db]GOD! invalid user key len" );
+        * ignore_this_record = true;
+        return;
+    }
+
+    fast_memcpy ( & ttl, & val[ val_len - sizeof (uint32_t ) ], sizeof (uint32_t ) );
+
+    uint32_t kl;
+    fast_memcpy ( & kl, & val[ val_len - idx_len ], sizeof (uint32_t ) );
+    if ( 0 == kl )
+    {
+        LOG_ERROR ( "[md5db][db]GOD! invalid user key len" );
+        * ignore_this_record = true;
+        return;
+    }
+
+    const char * uk;
+    if ( val_len < idx_len + kl )
+    {
+        LOG_ERROR ( "[md5db][db]GOD! invalid data_len %d, ukey_len=%d", ( int ) val_len, ( int ) kl );
+        * ignore_this_record = true;
+        return;
+    }
+    uk = ( const char * ) & val[ val_len - idx_len - kl ];
+
+    uint16_t hash = G_APPTOOL->bucket_hash ( uk, kl );
+    if ( hash < start || hash >= end )
+    {
+        * ignore_this_record = true;
+        return;
+    }
+
+    * ignore_this_record = false;
+    
+    uint32_t vl = val_len - idx_len - kl;
+
+    key         = uk;
+    key_len     = kl;
+    val_len     = noval ? 0 : vl;
+
+    block_id_t block_id;
+    version = db->md5db_info_by_key ( key, key_len, table, table_len, block_id );
 }

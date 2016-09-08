@@ -262,7 +262,7 @@ bool config_t::open (
 
         try
         {
-            m_files.resize ( max_file_count + 1, "" );
+            m_files.resize ( max_file_count + 2, "" );
         }
         catch ( ... )
         {
@@ -275,7 +275,7 @@ bool config_t::open (
 
         r = 0;
 
-        for ( int i = 0; i <= max_file_count; ++ i )
+        for ( int i = 0; i < max_file_count + 2; ++ i )
         {
             /*int user_file = hash.inner_file_2_user_file ( i );
             if ( user_file < 0 )

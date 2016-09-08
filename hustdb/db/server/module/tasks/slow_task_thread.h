@@ -8,10 +8,10 @@
 
 enum slow_task_type_t
 {
-    TASK_UNDO = 0,
-    TASK_DOING = 1,
-    TASK_DONE = 2,
-    TASK_UNKNOW = 3
+    TASK_UNDO    = 0,
+    TASK_DOING   = 1,
+    TASK_DONE    = 2,
+    TASK_UNKNOW  = 3
 };
 
 #define THREAD_STRUCT( name )                                       \

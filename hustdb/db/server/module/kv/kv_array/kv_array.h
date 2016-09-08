@@ -42,6 +42,7 @@ public:
                       item_ctxt_t * & ctxt
                       )
     {
+        return 0;
     }
 
     virtual int put (
@@ -55,6 +56,7 @@ public:
                       item_ctxt_t * & ctxt
                       )
     {
+        return 0;
     }
 
     virtual int get (
@@ -66,6 +68,7 @@ public:
                       item_ctxt_t * & ctxt
                       )
     {
+        return 0;
     }
 
     virtual int exists (
@@ -76,6 +79,7 @@ public:
                          item_ctxt_t * & ctxt
                          )
     {
+        return 0;
     }
 
     void hash (
@@ -123,6 +127,17 @@ public:
                          item_ctxt_t * & ctxt
                          );
 
+    int put_from_binlog (
+                          const md5db::block_id_t & block_id,
+                          const char * table,
+                          size_t table_len,
+                          const char * val,
+                          size_t val_len,
+                          const char * host,
+                          size_t host_len,
+                          item_ctxt_t * & ctxt
+                          );
+
     int get_from_md5db (
                          const md5db::block_id_t & block_id,
                          uint32_t file_id,
@@ -151,6 +166,20 @@ public:
                            export_record_callback_t callback = NULL,
                            void * callback_param = NULL
                            );
+
+    virtual int binlog (
+                         const char * table,
+                         size_t table_len,
+                         const char * user_key,
+                         size_t user_key_len,
+                         const char * host,
+                         size_t host_len,
+                         uint8_t cmd_type,
+                         conn_ctxt_t conn
+                         )
+    {
+        return 0;
+    }
 
     virtual int hash_info (
                             int user_file_id,

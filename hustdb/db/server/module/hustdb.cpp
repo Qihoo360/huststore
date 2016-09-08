@@ -3,6 +3,7 @@
 #include "tasks/task_ttl_scan.h"
 #include "kv/kv_array/key_hash.h"
 #include "perf_target.h"
+#include "kv/md5db/bucket.h"
 #include <sstream>
 
 void hustdb_t::kill_me ( )
@@ -2839,6 +2840,66 @@ int hustdb_t::hustdb_zrange (
 
     hits                    = cb_pm.size;
     total                   = cb_pm.total;
+
+    return r;
+}
+
+int hustdb_t::hustdb_binlog (
+                              const char * table,
+                              size_t table_len,
+                              const char * key,
+                              size_t key_len,
+                              const char * host,
+                              size_t host_len,
+                              uint8_t cmd_type,
+                              conn_ctxt_t conn
+                              )
+{
+    int                  r            = 0;
+
+    if ( unlikely ( ! tb_name_check ( table, table_len ) ||
+                   CHECK_STRING ( key ) ||
+                   CHECK_STRING ( host ) ||
+                   host_len > 32
+                   )
+         )
+    {
+        LOG_DEBUG ( "[hustdb][db_binlog]params error" );
+        return EKEYREJECTED;
+    }
+    
+    switch ( cmd_type )
+    {
+        case HUSTDB_METHOD_PUT:
+        case HUSTDB_METHOD_DEL:
+            m_storage->set_inner_table ( NULL, 0, KV_ALL, conn );
+            break;
+            
+        case HUSTDB_METHOD_HSET:
+        case HUSTDB_METHOD_HDEL:
+            m_storage->set_inner_table ( table, table_len, HASH_TB, conn );
+            break;
+            
+        case HUSTDB_METHOD_SADD:
+        case HUSTDB_METHOD_SREM:
+            m_storage->set_inner_table ( table, table_len, SET_TB, conn );
+            break;
+            
+        case HUSTDB_METHOD_ZADD:
+        case HUSTDB_METHOD_ZREM:
+            m_storage->set_inner_table ( table, table_len, ZSET_IN, conn );
+            break;
+            
+        default:
+            LOG_DEBUG ( "[hustdb][db_binlog]cmd_type error" );
+            return EKEYREJECTED;
+    }
+
+    r = m_storage->binlog ( table, table_len, key, key_len, host, host_len, cmd_type, conn );
+    if ( 0 != r )
+    {
+        LOG_ERROR ( "[hustdb][db_binlog]binlog return %d", r );
+    }
 
     return r;
 }

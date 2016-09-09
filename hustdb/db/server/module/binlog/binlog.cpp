@@ -103,10 +103,10 @@ bool binlog_t::add_task (
     return false;
 }
 
-void binlog_t::get_alive_hosts ( std::vector<std::string> & lists )
+void binlog_t::get_alive_hosts ( std::vector<std::string> & alive_lists, std::vector<std::string> & unalive_lists )
 {
     host_info_t & host_info = singleton_t<host_info_t>::instance();
-    host_info.get_alive_hosts ( lists );
+    host_info.get_alive_hosts ( alive_lists, unalive_lists );
 }
 
 bool binlog_t::add_host ( const std::string & host )

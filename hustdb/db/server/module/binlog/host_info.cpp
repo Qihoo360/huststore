@@ -217,13 +217,15 @@ bool host_info_t::remove_host ( const std::string & host )
     return true;
 }
 
-void host_info_t::get_alive_hosts ( std::vector<std::string> & lists )
+void host_info_t::get_alive_hosts ( std::vector<std::string> & alive_lists, std::vector<std::string> & unalive_lists )
 {
     rw_lock_guard_t lock ( _rwlock, RLOCK );
 
     for ( std::map<std::string, binlog_status_t>::iterator it = _status.begin(); it != _status.end(); ++it ) {
         if ( is_alive ( it->first ) && it->second.remain.get() == 0 ) {
-            lists.push_back ( it->first );
+            alive_lists.push_back ( it->first );
+        } else {
+            unalive_lists.push_back ( it->first );
         }
     }
 }

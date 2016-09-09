@@ -42,7 +42,8 @@ int main()
         sleep ( 5 );
 
         std::vector<std::string> alive_hosts;
-        log.get_alive_hosts ( alive_hosts );
+        std::vector<std::string> unalive_hosts;
+        log.get_alive_hosts ( alive_hosts , unalive_hosts );
 
         std::cout << alive_hosts.size() << std::endl;
         alive_hosts.clear();
@@ -71,7 +72,7 @@ int main()
         }
         */
         sleep ( 3 );
-        log.get_alive_hosts ( alive_hosts );
+        log.get_alive_hosts ( alive_hosts, unalive_hosts );
         std::cout << alive_hosts.size() << std::endl;
     }
 

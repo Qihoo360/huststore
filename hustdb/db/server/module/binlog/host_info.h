@@ -39,7 +39,7 @@ public:
     bool has_host ( const std::string & host );
     bool remove_host ( const std::string & host );
 
-    void get_alive_hosts ( std::vector<std::string> & );
+    void get_alive_hosts ( std::vector<std::string> &, std::vector<std::string> & );
 
     void check_db();
     void redeliver();

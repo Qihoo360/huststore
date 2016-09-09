@@ -19,7 +19,7 @@ public:
     ~binlog_t();
 
     bool init ( int num_threads, size_t max_queue_size, size_t max_backup_queue_size );
-    void get_alive_hosts ( std::vector<std::string> & lists );
+    void get_alive_hosts ( std::vector<std::string> & alive_lists, std::vector<std::string> & unalive_lists );
     bool remove_host ( const std::string & host );
     bool add_host ( const std::string & host );
 

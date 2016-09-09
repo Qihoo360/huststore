@@ -1,8 +1,9 @@
 CC = g++
 CXXFLAGS = -O0 -g3 -Wall -fmessage-length=0
-LIBS =	-levent -levent_pthreads -levent_openssl -lssl -lcrypto -levhtp -ldl -lrt -lpthread -lcurl -lzlog
-LINK = -L /usr/local/lib  \
-	/usr/local/lib/libevhtp.a
+LIBS =	-levent -levent_pthreads -levent_openssl -lssl -lcrypto -levhtp -ldl -lrt -lpthread -lzlog -lz -lidn
+LINK = -L /usr/local/lib
+CURL_DEPS = ../../third_party/curl-curl-7_50_2/
+CURL_LIB = $(CURL_DEPS)lib/.libs/libcurl.a
 
 BIN  = ./bin/
 TARGET = hustdbsync
@@ -41,6 +42,7 @@ OBJS = $(BIN)main.o \
 
 INCS = -I /usr/local/include/evhtp \
 	-I /usr/local/include/event2 \
+	-I $(CURL_DEPS)include \
 	-I $(INCLUDE)rapidjson \
 	-I $(INCLUDE)
 
@@ -51,7 +53,7 @@ LOG_CONF = zlog.conf
 
 $(TARGET):	$(OBJS)
 
-	$(CXX) -o $(TARGET) $(INCS) $(LINK) $(OBJS) $(LIBS)
+	$(CXX) -o $(TARGET) $(INCS) $(OBJS) $(CURL_LIB) $(LINK) $(LIBS)
 
 	chmod a+x $(TARGET)
 	cp $(MODULE_SRC)$(SERVER_CONF) $(SERVER_CONF)

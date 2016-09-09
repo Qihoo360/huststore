@@ -1,4 +1,4 @@
-sudo yum install openssl-devel -y
+sudo yum install -y openssl-devel
 
 rm -fr libevent-2.0.22-stable
 tar -zxvf libevent-2.0.22-stable.tar.gz

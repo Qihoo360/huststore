@@ -4,7 +4,7 @@ CC          = gcc -std=gnu99
 CPPC        = g++
 BIN         = ./o/
 SERVER      = ../../
-DEPS        = ../../../third_party/
+DEPS        = ../../../../../third_party/
 INCLUDE     = -I $(SERVER)include -I $(MDB_SRC)lib -I $(SERVER)module/rdb/lib -I $(DEPS)leveldb/include
 LIB         = -L /usr/lib -L /usr/local/lib -lpthread -lssl -lcrypto -pthread -lrt
 MALLOC      = -Wl,-wrap,malloc  -Wl,-wrap,free  -Wl,-wrap,realloc

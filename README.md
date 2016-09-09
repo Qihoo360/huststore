@@ -39,8 +39,10 @@ In addition, `HA` cluster uses a distributed architecture design by incorporatin
 ![hustdb](res/hustdb.png)
 
 ## Dependency ##
+* [cmake](https://cmake.org/download/)
 * [leveldb](https://github.com/google/leveldb)
 * [libcurl](https://curl.haxx.se/libcurl/)
+* [libevent](http://libevent.org/)
 * [libevhtp](https://github.com/ellzey/libevhtp)
 * [zlog](https://github.com/HardySimpson/zlog)
 

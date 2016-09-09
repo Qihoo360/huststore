@@ -9,18 +9,19 @@
 
 class task_t;
 
-class queue_t {
+class queue_t
+{
 public:
-    explicit queue_t(size_t max_queue_size);
+    explicit queue_t ( size_t max_queue_size );
     ~queue_t();
 
-    bool put_with_check(task_t *);
-    bool put(task_t *);
+    bool put_with_check ( task_t * );
+    bool put ( task_t * );
     task_t * take();
 
 private:
-    queue_t(const queue_t &);
-    const queue_t & operator= (const queue_t &);
+    queue_t ( const queue_t & );
+    const queue_t & operator= ( const queue_t & );
 
     size_t size() const;
     bool is_full();

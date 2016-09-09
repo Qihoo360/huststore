@@ -5,9 +5,10 @@
 
 #include <pthread.h>
 
-class condition_t {
+class condition_t
+{
 public:
-    explicit condition_t(mutex_lock_t & mutex);
+    explicit condition_t ( mutex_lock_t & mutex );
     ~condition_t();
 
     void wait();

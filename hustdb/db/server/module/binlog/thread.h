@@ -3,11 +3,12 @@
 
 #include <pthread.h>
 
-typedef void *(* thread_func_t)(void *);
+typedef void * ( * thread_func_t ) ( void * );
 
-class thread_t {
+class thread_t
+{
 public:
-    thread_t(thread_func_t thread_func);
+    thread_t ( thread_func_t thread_func );
     ~thread_t();
 
     bool init();
@@ -19,8 +20,8 @@ private:
     bool _running;
     pthread_t _tid;
     thread_func_t _thread_func;
-    void *_data;
-    int *_stop_pipe;
+    void * _data;
+    int * _stop_pipe;
 };
 
 #endif

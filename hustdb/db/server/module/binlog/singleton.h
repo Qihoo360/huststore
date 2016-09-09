@@ -5,25 +5,30 @@
 #include <cstdlib>
 
 template <typename T>
-class singleton_t {
+class singleton_t
+{
 public:
-    static T & instance() {
-        pthread_once(&_pounce, &singleton_t::init);
+    static T & instance()
+    {
+        pthread_once ( &_pounce, &singleton_t::init );
         return *_value;
     }
 private:
     singleton_t();
     ~singleton_t();
 
-    static void init() {
+    static void init()
+    {
         _value = new T();
-        ::atexit(destroy);
+        ::atexit ( destroy );
     }
 
-    static void destroy(void) {
-        if(_value) {
+    static void destroy ( void )
+    {
+        if ( _value ) {
             delete _value;
         }
+
         _value = NULL;
     }
 

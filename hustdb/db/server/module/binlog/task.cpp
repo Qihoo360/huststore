@@ -74,14 +74,14 @@ bool task_t::make_task (
         case HUSTDB_METHOD_HSET:
             _method = "POST";
             _path.assign ( "/hustdb/hset" );
-            sprintf ( query_string, "key=%s&ver=%u&ttl=%u&tb=%s&is_dup=true", key_safe, ver, ttl, table );
+            sprintf ( query_string, "key=%s&ver=%u&ttl=%u&tb=%.*s&is_dup=true", key_safe, ver, ttl, int ( table_len ), table );
             _value.assign ( value, value_len );
             break;
 
         case HUSTDB_METHOD_SADD:
             _method = "POST";
             _path.assign ( "/hustdb/sadd" );
-            sprintf ( query_string, "ver=%u&tb=%s&is_dup=true", ver, table );
+            sprintf ( query_string, "ver=%u&tb=%.*s&is_dup=true", ver, int ( table_len ), table );
             _value.assign ( key, key_safe_len );
             break;
 

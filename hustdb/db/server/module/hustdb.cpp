@@ -927,6 +927,8 @@ int hustdb_t::find_table_type (
 {
     table_stat_t *           tstat        = NULL;
 
+    scope_rlock_t tb_locker ( m_tb_locker );
+    
     table_map_t::iterator it = m_table_map.find ( table );
     if ( it != m_table_map.end () )
     {
@@ -949,25 +951,31 @@ int hustdb_t::find_table_offset (
     uint32_t                 i            = 0;
     table_stat_t *           tstat        = NULL;
 
-    table_map_t::iterator it = m_table_map.find ( table );
-    if ( it != m_table_map.end () )
+    do
     {
-        tstat = ( table_stat_t * ) ( m_table_index.ptr + it->second );
+        scope_rlock_t tb_locker ( m_tb_locker );
 
-        if ( unlikely ( type != COMMON_TB && tstat->type != type ) )
+        table_map_t::iterator it = m_table_map.find ( table );
+        if ( it != m_table_map.end () )
         {
-            return - 1;
-        }
+            tstat = ( table_stat_t * ) ( m_table_index.ptr + it->second );
 
-        return it->second;
+            if ( unlikely ( type != COMMON_TB && tstat->type != type ) )
+            {
+                return - 1;
+            }
+
+            return it->second;
+        }
     }
+    while ( 0 );
 
     if ( ! create )
     {
         return - 1;
     }
 
-    scope_lock_t tb_locker ( m_tb_locker );
+    scope_wlock_t tb_locker ( m_tb_locker );
 
     for ( i = TABLE_STAT_LEN; i < TABLE_INDEX_FILE_LEN; i += TABLE_STAT_LEN )
     {
@@ -1012,7 +1020,7 @@ void hustdb_t::set_table_size (
 
     if ( tstat->size <= 0 && offset > 0 )
     {
-        scope_lock_t tb_locker ( m_tb_locker );
+        scope_wlock_t tb_locker ( m_tb_locker );
 
         table_map_t::iterator it = m_table_map.find ( tstat->table );
         if ( it != m_table_map.end () )
@@ -1040,6 +1048,8 @@ int hustdb_t::get_table_size (
     {
         std::string inner_table ( table, table_len );
 
+        scope_rlock_t tb_locker ( m_tb_locker );
+        
         table_map_t::iterator it = m_table_map.find ( inner_table );
         if ( it != m_table_map.end () )
         {
@@ -1082,54 +1092,60 @@ int hustdb_t::find_queue_offset (
     uint32_t                 i            = 0;
     queue_stat_t *           qstat        = NULL;
 
-    queue_map_t::iterator it = m_queue_map.find ( queue );
-    if ( it != m_queue_map.end () )
+    do
     {
-        queue_info = & it->second;
+        scope_rlock_t mq_locker ( m_mq_locker );
 
-        do
+        queue_map_t::iterator it = m_queue_map.find ( queue );
+        if ( it != m_queue_map.end () )
         {
-            if ( ! worker || worker_len <= 0 )
-            {
-                break;
-            }
+            queue_info = & it->second;
 
-            std::string inner_worker ( worker, worker_len );
-
-            worker_t * wmap = it->second.worker;
-
-            worker_t::iterator wit = wmap->find ( inner_worker );
-            if ( wit != wmap->end () )
+            do
             {
-                wit->second = m_current_timestamp;
-            }
-            else
-            {
-                if ( unlikely ( wmap->size () > 1024 ) )
+                if ( ! worker || worker_len <= 0 )
                 {
                     break;
                 }
 
-                wmap->insert (std::pair<std::string, uint32_t>( inner_worker, m_current_timestamp ));
+                std::string inner_worker ( worker, worker_len );
+
+                worker_t * wmap = it->second.worker;
+
+                worker_t::iterator wit = wmap->find ( inner_worker );
+                if ( wit != wmap->end () )
+                {
+                    wit->second = m_current_timestamp;
+                }
+                else
+                {
+                    if ( unlikely ( wmap->size () > 1024 ) )
+                    {
+                        break;
+                    }
+
+                    wmap->insert (std::pair<std::string, uint32_t>( inner_worker, m_current_timestamp ));
+                }
             }
-        }
-        while ( 0 );
+            while ( 0 );
 
-        qstat = ( queue_stat_t * ) ( m_queue_index.ptr + it->second.offset );
-        if ( unlikely ( type != COMMON_TB && qstat->type != type ) )
-        {
-            return - 1;
-        }
+            qstat = ( queue_stat_t * ) ( m_queue_index.ptr + it->second.offset );
+            if ( unlikely ( type != COMMON_TB && qstat->type != type ) )
+            {
+                return - 1;
+            }
 
-        return it->second.offset;
+            return it->second.offset;
+        }
     }
+    while ( 0 );
 
     if ( ! create )
     {
         return - 1;
     }
 
-    scope_lock_t mqlocker ( m_mq_locker );
+    scope_wlock_t mq_locker ( m_mq_locker );
 
     for ( i = 0; i < QUEUE_INDEX_FILE_LEN; i += QUEUE_STAT_LEN )
     {
@@ -1616,6 +1632,8 @@ void hustdb_t::hustdb_stat_all (
 
     stats += stat;
 
+    scope_rlock_t tb_locker ( m_tb_locker );
+    
     for ( table_map_t::iterator it = m_table_map.begin (); it != m_table_map.end (); it ++ )
     {
         table_stat_t * tstat = ( table_stat_t * ) ( m_table_index.ptr + it->second );
@@ -3329,11 +3347,11 @@ void hustdb_t::hustmq_stat_all (
     char            stat[ 1024 ]            = { };
     queue_info_t *  queue_info              = NULL;
 
-    scope_lock_t mqlocker ( m_mq_locker );
-
     stats.resize ( 0 );
     stats.reserve ( 1048576 );
     stats += "[";
+    
+    scope_rlock_t mq_locker ( m_mq_locker );
 
     for ( queue_map_t::iterator it = m_queue_map.begin (); it != m_queue_map.end (); it ++ )
     {
@@ -3565,7 +3583,7 @@ int hustdb_t::hustmq_purge (
 
     if ( real <= 0 )
     {
-        scope_lock_t mqlocker ( m_mq_locker );
+        scope_wlock_t mq_locker ( m_mq_locker );
 
         queue_map_t::iterator it = m_queue_map.find ( inner_queue );
         if ( it != m_queue_map.end () )

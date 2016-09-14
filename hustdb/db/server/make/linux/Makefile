@@ -5,11 +5,10 @@ CPPC        = g++
 BIN         = ./o/
 SERVER      = ../../
 DEPS        = ../../../../../third_party/
-INCLUDE     = -I $(SERVER)include -I $(MDB_SRC)lib -I $(SERVER)module/rdb/lib -I $(DEPS)leveldb/include
+INCLUDE     = -I $(SERVER)include -I $(MDB_SRC)lib -I $(SERVER)module/rdb/lib -I $(DEPS)leveldb/include -I $(DEPS)curl-curl-7_50_2/include
 LIB         = -L /usr/lib -L /usr/local/lib -lpthread -lssl -lcrypto -pthread -lrt
-MALLOC      = -Wl,-wrap,malloc  -Wl,-wrap,free  -Wl,-wrap,realloc
 CFLAGS      = -fPIC -O0 -g3 -fmessage-length=0 -D_FILE_OFFSET_BITS=64 -D_LARGE_FILE -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -DUSE_TCMALLOC
-LEVELDB_LIB = $(DEPS)leveldb/libleveldb.a $(DEPS)snappy-1.1.1/.libs/libsnappy.a
+STATIC_LIB = $(DEPS)leveldb/libleveldb.a $(DEPS)snappy-1.1.1/.libs/libsnappy.a $(DEPS)curl-curl-7_50_2/lib/.libs/libcurl.a
 
 $(BIN)module_%.o: $(SERVER)module/%.cpp
 	$(CPPC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
@@ -78,7 +77,7 @@ MDB_OBJECTS =                                                   \
 	$(BIN)jenkins_hash.o                                      \
 	$(BIN)murmur3_hash.o                                      \
 	$(BIN)slabs.o                                             \
-	$(BIN)thread.o                                            \
+	$(BIN)mdb_thread.o                                            \
 	$(BIN)mdb_util.o                                          \
 	$(BIN)mdb.o
 	
@@ -106,15 +105,27 @@ RDB_OBJECTS =                                                   \
 	$(BIN)lzf_d.o 	                                        \
 	$(BIN)rdb.o
 
+BINLOG_OBJECTS =               \
+	$(BIN)binlog.o 		\
+	$(BIN)condition.o 	\
+	$(BIN)host_info.o 	\
+	$(BIN)http.o 		\
+	$(BIN)husthttp.o 	\
+	$(BIN)mutex.o 		\
+	$(BIN)queue.o 		\
+	$(BIN)task.o 		\
+	$(BIN)binlog_thread.o 		\
+	$(BIN)thread_pool.o 
+
 TARGET = ./hustdb
 INCS = $(INCLUDE) -I $(SERVER)module -I /usr/local/include -I /usr/local/include/evhtp -I /usr/local/include/event2
-LIBS =	$(LIB) -levent -levent_pthreads -levent_openssl -levhtp -ldl -lz -ltcmalloc
+LIBS =	$(LIB) -levent -levent_pthreads -levent_openssl -levhtp -ldl -lz -ltcmalloc -lidn
 
-all: $(MDB_OBJECTS) $(RDB_OBJECTS) $(MODULE_OBJECTS) $(SVR_OBJECTS)
+all: $(MDB_OBJECTS) $(RDB_OBJECTS) $(BINLOG_OBJECTS) $(MODULE_OBJECTS) $(SVR_OBJECTS)
 
 	$(CPPC) -rdynamic -o $(TARGET) $(INCS) \
-			$(MODULE_OBJECTS) $(MDB_OBJECTS) $(RDB_OBJECTS) $(SVR_OBJECTS) \
-			$(LEVELDB_LIB) $(LIBS)
+			$(MODULE_OBJECTS) $(BINLOG_OBJECTS) $(MDB_OBJECTS) $(RDB_OBJECTS) $(SVR_OBJECTS) \
+			$(STATIC_LIB) $(LIBS)
 
 	chmod a+x $(TARGET)
 	cp $(SERVER)module/hustdb.conf hustdb.conf
@@ -122,61 +133,61 @@ all: $(MDB_OBJECTS) $(RDB_OBJECTS) $(MODULE_OBJECTS) $(SVR_OBJECTS)
 NETWORK     = $(SERVER)network/
 
 $(BIN)main.o:	$(SERVER)main.cpp
-	$(CPPC) -c $(CFLAGS)  $(INCS) -o $(BIN)main.o $(SERVER)main.cpp
+	$(CPPC) $(CFLAGS) $(INCS) -c -o $(BIN)main.o $(SERVER)main.cpp
 
 $(BIN)server_utils.o:	$(SERVER)server_utils.cpp
-	$(CPPC) -c $(CFLAGS)  $(INCS) -o $(BIN)server_utils.o $(SERVER)server_utils.cpp
+	$(CPPC) $(CFLAGS) $(INCS) -c -o $(BIN)server_utils.o $(SERVER)server_utils.cpp
 
 $(BIN)hustdb_network.o:	$(NETWORK)hustdb_network.cpp
-	$(CPPC) -c $(CFLAGS)  $(INCS) -o $(BIN)hustdb_network.o $(NETWORK)hustdb_network.cpp
+	$(CPPC) $(CFLAGS) $(INCS) -c -o $(BIN)hustdb_network.o $(NETWORK)hustdb_network.cpp
 
 $(BIN)hustdb_handler_frame.o:	$(NETWORK)hustdb_handler_frame.cpp
-	$(CPPC) -c $(CFLAGS)  $(INCS) -o $(BIN)hustdb_handler_frame.o $(NETWORK)hustdb_handler_frame.cpp
+	$(CPPC) $(CFLAGS) $(INCS) -c -o $(BIN)hustdb_handler_frame.o $(NETWORK)hustdb_handler_frame.cpp
 
 $(BIN)hustdb_handler.o:	$(NETWORK)hustdb_handler.cpp
-	$(CPPC) -c $(CFLAGS)  $(INCS) -o $(BIN)hustdb_handler.o $(NETWORK)hustdb_handler.cpp
+	$(CPPC) $(CFLAGS) $(INCS) -c -o $(BIN)hustdb_handler.o $(NETWORK)hustdb_handler.cpp
 
 $(BIN)hustdb_handler_def.o:	$(NETWORK)hustdb_handler_def.cpp
-	$(CPPC) -c $(CFLAGS)  $(INCS) -o $(BIN)hustdb_handler_def.o $(NETWORK)hustdb_handler_def.cpp
+	$(CPPC) $(CFLAGS) $(INCS) -c -o $(BIN)hustdb_handler_def.o $(NETWORK)hustdb_handler_def.cpp
 
 $(BIN)hustdb_network_utils.o:	$(NETWORK)hustdb_network_utils.cpp
-	$(CPPC) -c $(CFLAGS)  $(INCS) -o $(BIN)hustdb_network_utils.o $(NETWORK)hustdb_network_utils.cpp
+	$(CPPC) $(CFLAGS) $(INCS) -c -o $(BIN)hustdb_network_utils.o $(NETWORK)hustdb_network_utils.cpp
 
 $(BIN)libevhtp_utils.o:	$(NETWORK)libevhtp_utils.cpp
-	$(CPPC) -c $(CFLAGS)  $(INCS) -o $(BIN)libevhtp_utils.o $(NETWORK)libevhtp_utils.cpp
+	$(CPPC) $(CFLAGS) $(INCS) -c -o $(BIN)libevhtp_utils.o $(NETWORK)libevhtp_utils.cpp
 
 $(BIN)hustdb_utils.o:	$(NETWORK)hustdb_utils.cpp
-	$(CPPC) -c $(CFLAGS)  $(INCS) -o $(BIN)hustdb_utils.o $(NETWORK)hustdb_utils.cpp
+	$(CPPC) $(CFLAGS) $(INCS) -c -o $(BIN)hustdb_utils.o $(NETWORK)hustdb_utils.cpp
 
 
 MDB_SRC     = $(SERVER)module/mdb/
 
 $(BIN)memcached.o: $(MDB_SRC)src/memcached.c $(MDB_SRC)lib/memcached.h
-	$(CC) $(INCLUDE) -c -o $@ $<
+	$(CC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
 	
 $(BIN)items.o: $(MDB_SRC)src/items.c $(MDB_SRC)lib/items.h $(MDB_SRC)lib/memcached.h
-	$(CC) $(INCLUDE) -c -o $@ $<
+	$(CC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
 	
 $(BIN)assoc.o: $(MDB_SRC)src/assoc.c $(MDB_SRC)lib/assoc.h $(MDB_SRC)lib/memcached.h
-	$(CC) $(INCLUDE) -c -o $@ $<
+	$(CC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
 	
 $(BIN)hash.o: $(MDB_SRC)src/hash.c $(MDB_SRC)lib/hash.h $(MDB_SRC)lib/jenkins_hash.h $(MDB_SRC)lib/murmur3_hash.h $(MDB_SRC)lib/memcached.h
-	$(CC) $(INCLUDE) -c -o $@ $<
+	$(CC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
 	
 $(BIN)jenkins_hash.o: $(MDB_SRC)src/jenkins_hash.c $(MDB_SRC)lib/jenkins_hash.h $(MDB_SRC)lib/memcached.h
-	$(CC) $(INCLUDE) -c -o $@ $<
+	$(CC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
 	
 $(BIN)murmur3_hash.o: $(MDB_SRC)src/murmur3_hash.c $(MDB_SRC)lib/murmur3_hash.h $(MDB_SRC)lib/memcached.h
-	$(CC) $(INCLUDE) -c -o $@ $<
+	$(CC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
 	
 $(BIN)slabs.o: $(MDB_SRC)src/slabs.c $(MDB_SRC)lib/slabs.h $(MDB_SRC)lib/memcached.h
-	$(CC) $(INCLUDE) -c -o $@ $<
+	$(CC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
 	
-$(BIN)thread.o: $(MDB_SRC)src/thread.c $(MDB_SRC)lib/memcached.h
-	$(CC) $(INCLUDE) -c -o $@ $<
+$(BIN)mdb_thread.o: $(MDB_SRC)src/thread.c $(MDB_SRC)lib/memcached.h
+	$(CC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
 	
 $(BIN)mdb_util.o: $(MDB_SRC)src/util.c $(MDB_SRC)lib/util.h $(MDB_SRC)lib/memcached.h
-	$(CC) $(INCLUDE) -c -o $@ $<
+	$(CC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
 	
 $(BIN)mdb.o: $(MDB_SRC)mdb.cpp $(MDB_SRC)mdb.h $(MDB_SRC)lib/memcached.h
 	$(CPPC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
@@ -184,69 +195,101 @@ $(BIN)mdb.o: $(MDB_SRC)mdb.cpp $(MDB_SRC)mdb.h $(MDB_SRC)lib/memcached.h
 RDB_SRC     = $(SERVER)module/rdb/
 
 $(BIN)adlist.o : $(RDB_SRC)src/adlist.c $(RDB_SRC)lib/adlist.h $(RDB_SRC)lib/zmalloc.h
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(CC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
 
 $(BIN)bitops.o : $(RDB_SRC)src/bitops.c $(RDB_SRC)lib/server.h
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(CC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
 
 $(BIN)db.o : $(RDB_SRC)src/db.c $(RDB_SRC)lib/server.h
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(CC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
 
 $(BIN)dict.o : $(RDB_SRC)src/dict.c $(RDB_SRC)lib/dict.h $(RDB_SRC)lib/zmalloc.h $(RDB_SRC)lib/redis.h
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(CC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
 
 $(BIN)intset.o : $(RDB_SRC)src/intset.c $(RDB_SRC)lib/intset.h $(RDB_SRC)lib/zmalloc.h
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(CC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
 
 $(BIN)object.o : $(RDB_SRC)src/object.c $(RDB_SRC)lib/server.h
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(CC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
 
 $(BIN)pqsort.o : $(RDB_SRC)src/pqsort.c $(RDB_SRC)lib/pqsort.h
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(CC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
 
 $(BIN)quicklist.o : $(RDB_SRC)src/quicklist.c $(RDB_SRC)lib/quicklist.h $(RDB_SRC)lib/zmalloc.h $(RDB_SRC)lib/ziplist.h $(RDB_SRC)lib/util.h
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(CC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
 
 $(BIN)sds.o : $(RDB_SRC)src/sds.c $(RDB_SRC)lib/sds.h $(RDB_SRC)lib/sdsalloc.h
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(CC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
 
 $(BIN)server.o : $(RDB_SRC)src/server.c $(RDB_SRC)lib/server.h $(RDB_SRC)lib/sds.h $(RDB_SRC)lib/dict.h $(RDB_SRC)lib/adlist.h $(RDB_SRC)lib/zmalloc.h $(RDB_SRC)lib/ziplist.h $(RDB_SRC)lib/intset.h $(RDB_SRC)lib/util.h $(RDB_SRC)lib/quicklist.h $(RDB_SRC)lib/redis.h
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(CC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
 
 $(BIN)sort.o : $(RDB_SRC)src/sort.c $(RDB_SRC)lib/server.h $(RDB_SRC)lib/pqsort.h
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(CC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
 
 $(BIN)t_hash.o : $(RDB_SRC)src/t_hash.c $(RDB_SRC)lib/server.h
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(CC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
 
 $(BIN)t_list.o : $(RDB_SRC)src/t_list.c $(RDB_SRC)lib/server.h
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(CC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
 
 $(BIN)t_set.o : $(RDB_SRC)src/t_set.c $(RDB_SRC)lib/server.h
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(CC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
 
 $(BIN)t_string.o : $(RDB_SRC)src/t_string.c $(RDB_SRC)lib/server.h
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(CC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
 
 $(BIN)t_zset.o : $(RDB_SRC)src/t_zset.c $(RDB_SRC)lib/server.h
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(CC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
 
 $(BIN)rdb_util.o : $(RDB_SRC)src/util.c $(RDB_SRC)lib/util.h $(RDB_SRC)lib/fmacros.h	
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(CC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
 
 $(BIN)ziplist.o : $(RDB_SRC)src/ziplist.c $(RDB_SRC)lib/ziplist.h $(RDB_SRC)lib/util.h
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(CC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
 
 $(BIN)zmalloc.o : $(RDB_SRC)src/zmalloc.c $(RDB_SRC)lib/zmalloc.h
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(CC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
 
 $(BIN)lzf_c.o : $(RDB_SRC)src/lzf_c.c $(RDB_SRC)lib/lzf.h $(RDB_SRC)lib/lzfP.h
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(CC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
 
 $(BIN)lzf_d.o : $(RDB_SRC)src/lzf_d.c $(RDB_SRC)lib/lzf.h $(RDB_SRC)lib/lzfP.h
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(CC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
 	
 $(BIN)rdb.o: $(RDB_SRC)rdb.cpp $(RDB_SRC)rdb.h $(RDB_SRC)lib/redis.h
+	$(CPPC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
+	
+BINLOG_SRC     = $(SERVER)module/binlog/
+
+$(BIN)binlog.o: $(BINLOG_SRC)binlog.cpp $(BINLOG_SRC)binlog.h $(BINLOG_SRC)singleton.h $(BINLOG_SRC)thread_pool.h $(BINLOG_SRC)host_info.h $(BINLOG_SRC)task.h
+	$(CPPC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
+
+$(BIN)condition.o: $(BINLOG_SRC)condition.cpp $(BINLOG_SRC)condition.h
+	$(CPPC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
+
+$(BIN)host_info.o: $(BINLOG_SRC)host_info.cpp $(BINLOG_SRC)host_info.h $(BINLOG_SRC)queue.h $(BINLOG_SRC)task.h $(BINLOG_SRC)thread_pool.h $(BINLOG_SRC)husthttp.h $(BINLOG_SRC)thread.h $(BINLOG_SRC)singleton.h $(BINLOG_SRC)atomic2.h
+	$(CPPC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
+
+$(BIN)http.o: $(BINLOG_SRC)http.cpp $(BINLOG_SRC)http.h
+	$(CPPC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
+
+$(BIN)husthttp.o: $(BINLOG_SRC)husthttp.cpp $(BINLOG_SRC)husthttp.h $(BINLOG_SRC)http.h
+	$(CPPC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
+
+$(BIN)mutex.o: $(BINLOG_SRC)mutex.cpp $(BINLOG_SRC)mutex.h
+	$(CPPC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
+
+$(BIN)queue.o: $(BINLOG_SRC)queue.cpp $(BINLOG_SRC)queue.h $(BINLOG_SRC)task.h
+	$(CPPC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
+
+$(BIN)task.o: $(BINLOG_SRC)task.cpp $(BINLOG_SRC)task.h $(BINLOG_SRC)husthttp.h $(BINLOG_SRC)singleton.h $(BINLOG_SRC)host_info.h
+	$(CPPC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
+
+$(BIN)binlog_thread.o: $(BINLOG_SRC)thread.cpp $(BINLOG_SRC)thread.h 
+	$(CPPC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
+
+$(BIN)thread_pool.o: $(BINLOG_SRC)thread_pool.cpp $(BINLOG_SRC)thread_pool.h $(BINLOG_SRC)husthttp.h $(BINLOG_SRC)task.h
 	$(CPPC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
 	
 clean:

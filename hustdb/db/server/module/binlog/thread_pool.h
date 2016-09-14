@@ -14,24 +14,24 @@ class task_t;
 class thread_pool_t
 {
 public:
-    thread_pool_t();
+    thread_pool_t ( );
     thread_pool_t ( int num_threads, size_t max_queue_size );
-    ~thread_pool_t();
+    ~thread_pool_t ( );
 
-    bool init_threadpool();
+    bool init_threadpool ( );
     void exec_thread ( int client_id );
-    void destroy_threadpool();
+    void destroy_threadpool ( );
 
     bool add_task ( task_t * task );
-    task_t * take_task();
+    task_t * take_task ( );
 
-    size_t queue_size() const;
+    size_t queue_size ( ) const;
 
 private:
     thread_pool_t ( const thread_pool_t & );
     const thread_pool_t & operator= ( const thread_pool_t & );
 
-    bool is_full();
+    bool is_full ( );
 
     int _num_threads;
     bool _running;

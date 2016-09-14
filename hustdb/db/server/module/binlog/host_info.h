@@ -5,7 +5,7 @@
 #include <string>
 #include <map>
 
-#include "atomic.h"
+#include "atomic2.h"
 #include "mutex.h"
 
 #define RLOCK 0
@@ -17,8 +17,12 @@ class thread_pool_t;
 class husthttp_t;
 class thread_t;
 
-struct binlog_status_t {
-    binlog_status_t() : status ( 0 ), remain() {}
+struct binlog_status_t
+{
+
+    binlog_status_t ( ) : status ( 0 ), remain ( )
+    {
+    }
 
     int32_t status;
     atomic_int32_t remain;
@@ -27,8 +31,8 @@ struct binlog_status_t {
 class host_info_t
 {
 public:
-    host_info_t();
-    ~host_info_t();
+    host_info_t ( );
+    ~host_info_t ( );
 
     bool init ( thread_pool_t * tp, size_t redeliver_size );
 
@@ -39,14 +43,14 @@ public:
     bool has_host ( const std::string & host );
     bool remove_host ( const std::string & host );
 
-    void get_alive_hosts ( std::vector<std::string> &, std::vector<std::string> & );
+    void get_alives ( std::map<std::string, char> & alives );
 
-    void check_db();
-    void redeliver();
+    void check_db ( );
+    void redeliver ( );
 
     void increment_with_lock ( const std::string & host );
 
-    void kill_me();
+    void kill_me ( );
 
 private:
 

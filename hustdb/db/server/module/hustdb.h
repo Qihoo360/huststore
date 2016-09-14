@@ -41,15 +41,6 @@
 #define CHECK_STRING(key)             ( ! key || key##_len <= 0 )
 #define CHECK_VERSION                 ( ver < 0 || ver >= 0xFFFFFFFF )
 
-#define HUSTDB_METHOD_PUT        1
-#define HUSTDB_METHOD_DEL        2
-#define HUSTDB_METHOD_HSET       3
-#define HUSTDB_METHOD_HDEL       4
-#define HUSTDB_METHOD_SADD       5
-#define HUSTDB_METHOD_SREM       6
-#define HUSTDB_METHOD_ZADD       7
-#define HUSTDB_METHOD_ZREM       8
-
 enum table_type_t
 {
     QUEUE_TB    = 0,
@@ -763,14 +754,13 @@ private:
     
     fmap_t m_queue_index;
     queue_map_t m_queue_map;
-    lockable_t m_mq_locker;
+    rwlockable_t m_mq_locker;
     
     locker_vec_t m_lockers;
 
     fmap_t m_table_index;
     table_map_t m_table_map;
-
-    lockable_t m_tb_locker;
+    rwlockable_t m_tb_locker;
 
     server_conf_t m_server_conf;
     store_conf_t m_store_conf;

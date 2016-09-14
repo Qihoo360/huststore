@@ -13,20 +13,28 @@ namespace md5db
 
 using md5db::bucket_t;
 
-static void export_md5db_record (
-                                  void * param,
-                                  const char * & key,
-                                  size_t & key_len,
-                                  const char * & val,
-                                  size_t & val_len,
-                                  const char * table,
-                                  size_t table_len,
-                                  uint32_t & version,
-                                  uint32_t & ttl,
-                                  std::string & content,
-                                  bool * ignore_this_record,
-                                  bool * break_the_loop
-                                  );
+static void export_md5db_record_callback (
+                                           void * param,
+                                           const char * & key,
+                                           size_t & key_len,
+                                           const char * & val,
+                                           size_t & val_len,
+                                           const char * table,
+                                           size_t table_len,
+                                           uint32_t & version,
+                                           uint32_t & ttl,
+                                           std::string & content,
+                                           bool * ignore_this_record,
+                                           bool * break_the_loop
+                                           );
+
+static void check_alive_callback (
+                                   void * param
+                                   );
+
+static void binlog_task_callback (
+                                   void * param
+                                   );
 
 static void binlog_done_callback (
                                    void * param
@@ -100,22 +108,30 @@ public:
     virtual int export_db (
                             int file_id,
                             const char * path,
-                            export_record_callback_t callback = NULL,
-                            void * callback_param = NULL
+                            export_record_callback_t callback,
+                            void * callback_param
                             );
 
     virtual int export_db_mem (
                                 conn_ctxt_t conn,
                                 std::string * & rsp,
                                 item_ctxt_t * & ctxt,
-                                export_record_callback_t callback = NULL,
-                                void * callback_param = NULL
+                                export_record_callback_t callback,
+                                void * callback_param
                                 );
 
     virtual int ttl_scan (
-                           export_record_callback_t callback = NULL,
-                           void * callback_param = NULL
+                           export_record_callback_t callback,
+                           void * callback_param
                            );
+
+    virtual int binlog_scan (
+                              binlog_callback_t task_cb,
+                              binlog_callback_t alive_cb,
+                              void * alive_cb_param,
+                              export_record_callback_t export_cb,
+                              void * export_cb_param
+                              );
 
     virtual int binlog (
                          const char * user_key,

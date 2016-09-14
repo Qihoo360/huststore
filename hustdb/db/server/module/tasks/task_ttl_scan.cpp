@@ -62,6 +62,7 @@ void task_ttl_scan_t::process_ttl_scan ( )
         cb_pm.start        = m_start;
         cb_pm.end          = m_end;
         cb_pm.size         = m_size;
+        cb_pm.noval        = true;
 
         int r = db->ttl_scan ( NULL, & cb_pm );
         if ( 0 != r )

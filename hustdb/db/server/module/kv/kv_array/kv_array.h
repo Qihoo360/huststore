@@ -151,22 +151,30 @@ public:
     virtual int export_db (
                             int file_id,
                             const char * path,
-                            export_record_callback_t callback = NULL,
-                            void * callback_param = NULL
+                            export_record_callback_t callback,
+                            void * callback_param
                             );
 
     virtual int export_db_mem (
                                 conn_ctxt_t conn,
                                 std::string * & rsp,
                                 item_ctxt_t * & ctxt,
-                                export_record_callback_t callback = NULL,
-                                void * callback_param = NULL
+                                export_record_callback_t callback,
+                                void * callback_param
                                 );
 
     virtual int ttl_scan (
-                           export_record_callback_t callback = NULL,
-                           void * callback_param = NULL
+                           export_record_callback_t callback,
+                           void * callback_param
                            );
+
+    virtual int binlog_scan (
+                              binlog_callback_t task_cb,
+                              binlog_callback_t alive_cb,
+                              void * alive_cb_param,
+                              export_record_callback_t export_cb,
+                              void * export_cb_param
+                              );
 
     virtual int binlog (
                          const char * user_key,

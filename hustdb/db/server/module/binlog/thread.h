@@ -9,12 +9,12 @@ class thread_t
 {
 public:
     thread_t ( thread_func_t thread_func );
-    ~thread_t();
+    ~thread_t ( );
 
-    bool init();
+    bool init ( );
 
-    bool start();
-    bool stop();
+    bool start ( );
+    bool stop ( );
 
 private:
     bool _running;

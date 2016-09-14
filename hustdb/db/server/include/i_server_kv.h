@@ -5,9 +5,19 @@
 #include "i_kv.h"
 #include <sstream>
 #include <vector>
+#include <string>
 
 #define HASH_TB_LEN         80
 #define EXPORT_DB_ALL       "db.all@"
+
+#define HUSTDB_METHOD_PUT   1
+#define HUSTDB_METHOD_DEL   2
+#define HUSTDB_METHOD_HSET  3
+#define HUSTDB_METHOD_HDEL  4
+#define HUSTDB_METHOD_SADD  5
+#define HUSTDB_METHOD_SREM  6
+#define HUSTDB_METHOD_ZADD  7
+#define HUSTDB_METHOD_ZREM  8
 
 enum kv_type_t
 {
@@ -99,7 +109,35 @@ typedef void ( * binlog_callback_t )(
                                       void * param
                                       );
 
-struct binlog_cb_param_t
+struct check_alive_cb_param_t
+{
+    void * db;
+    void * alives;
+    void * host;
+    char   cursor_type;
+
+} __attribute__ ( ( aligned ( 64 ) ) );
+
+struct binlog_task_cb_param_t
+{
+    void *       db;
+    const char * host;
+    size_t       host_len;
+    const char * table;
+    size_t       table_len;
+    const char * key;
+    size_t       key_len;
+    const char * value;
+    size_t       value_len;
+    uint32_t     ver;
+    uint32_t     ttl;
+    uint8_t      cmd_type;
+    void *       param;
+    char         cursor_type;
+
+} __attribute__ ( ( aligned ( 64 ) ) );
+
+struct binlog_done_cb_param_t
 {
     void * db;
     char key[ 128 ];
@@ -172,22 +210,30 @@ public:
     virtual int export_db (
                             int file_id,
                             const char * path,
-                            export_record_callback_t callback = NULL,
-                            void * callback_param = NULL
+                            export_record_callback_t callback,
+                            void * callback_param
                             ) = 0;
 
     virtual int export_db_mem (
                                 conn_ctxt_t conn,
                                 std::string * & rsp,
                                 item_ctxt_t * & ctxt,
-                                export_record_callback_t callback = NULL,
-                                void * callback_param = NULL
+                                export_record_callback_t callback,
+                                void * callback_param
                                 ) = 0;
 
     virtual int ttl_scan (
-                           export_record_callback_t callback = NULL,
-                           void * callback_param = NULL
+                           export_record_callback_t callback,
+                           void * callback_param
                            ) = 0;
+
+    virtual int binlog_scan (
+                              binlog_callback_t task_cb,
+                              binlog_callback_t alive_cb,
+                              void * alive_cb_param,
+                              export_record_callback_t export_cb,
+                              void * export_cb_param
+                              ) = 0;
 
     virtual int binlog (
                          const char * user_key,

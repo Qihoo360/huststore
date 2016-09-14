@@ -22,23 +22,23 @@ public:
     ~husthttp_t ( );
 
     bool open (
-        const char * method,
-        const char * path,
-        const char * query_string,
-        const char * data,
-        size_t data_len,
-        int conn_timeout,
-        int recv_timeout
-    );
+                const char * method,
+                const char * path,
+                const char * query_string,
+                const char * data,
+                size_t data_len,
+                int conn_timeout,
+                int recv_timeout
+                );
 
     bool open2 (
-        std::string & method,
-        std::string & path,
-        std::string & query_string,
-        std::string & data,
-        int conn_timeout,
-        int recv_timeout
-    );
+                 std::string & method,
+                 std::string & path,
+                 std::string & query_string,
+                 std::string & data,
+                 int conn_timeout,
+                 int recv_timeout
+                 );
 
 private:
 

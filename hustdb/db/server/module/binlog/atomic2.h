@@ -5,11 +5,12 @@ template <typename T>
 class atomic_integer_t
 {
 public:
-    atomic_integer_t() : _value ( 0 )
+
+    atomic_integer_t ( ) : _value ( 0 )
     {
     }
 
-    T get()
+    T get ( )
     {
         return __sync_val_compare_and_swap ( &_value, 0, 0 );
     }
@@ -24,24 +25,24 @@ public:
         return __sync_add_and_fetch ( &_value, x );
     }
 
-    T increment_and_get()
+    T increment_and_get ( )
     {
         return add_and_fetch ( 1 );
     }
 
-    T decrement_and_get()
+    T decrement_and_get ( )
     {
         return add_and_fetch ( -1 );
     }
 
-    void increment()
+    void increment ( )
     {
-        increment_and_get();
+        increment_and_get ( );
     }
 
-    void decrement()
+    void decrement ( )
     {
-        decrement_and_get();
+        decrement_and_get ( );
     }
 
 private:

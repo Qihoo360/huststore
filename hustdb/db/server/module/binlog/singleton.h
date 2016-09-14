@@ -8,24 +8,26 @@ template <typename T>
 class singleton_t
 {
 public:
-    static T & instance()
+
+    static T & instance ( )
     {
         pthread_once ( &_pounce, &singleton_t::init );
         return *_value;
     }
 private:
-    singleton_t();
-    ~singleton_t();
+    singleton_t ( );
+    ~singleton_t ( );
 
-    static void init()
+    static void init ( )
     {
-        _value = new T();
+        _value = new T ( );
         ::atexit ( destroy );
     }
 
     static void destroy ( void )
     {
-        if ( _value ) {
+        if ( _value )
+        {
             delete _value;
         }
 

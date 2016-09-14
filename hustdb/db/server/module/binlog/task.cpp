@@ -8,8 +8,8 @@
 #include "singleton.h"
 #include "host_info.h"
 
-#define HUSTDB_METHOD_PUT 1
-#define HUSTDB_METHOD_DEL 2
+#define HUSTDB_METHOD_PUT  1
+#define HUSTDB_METHOD_DEL  2
 #define HUSTDB_METHOD_HSET 3
 #define HUSTDB_METHOD_HDEL 4
 #define HUSTDB_METHOD_SADD 5
@@ -18,52 +18,55 @@
 #define HUSTDB_METHOD_ZREM 8
 
 task_t::task_t (
-    const char * host,
-    size_t host_len,
-    callback_func_t callback_func,
-    void * param,
-    const std::string & auth )
-    : _url ( auth )
-    , _callback_func ( callback_func )
-    , _cb_param ( param )
-    , _http_code ( 0 )
+                 const char * host,
+                 size_t host_len,
+                 callback_func_t callback_func,
+                 void * param,
+                 const std::string & auth )
+: _url ( auth )
+, _callback_func ( callback_func )
+, _cb_param ( param )
+, _http_code ( 0 )
 {
     _host.assign ( host, host_len );
 }
 
-task_t::~task_t()
+task_t::~ task_t ( )
 {
 }
 
 bool task_t::make_task (
-    const char * host,
-    size_t host_len,
-    const char * table,
-    size_t table_len,
-    const char * key,
-    size_t key_len,
-    const char * value,
-    size_t value_len,
-    uint32_t ver,
-    uint32_t ttl,
-    uint64_t score,
-    int8_t opt,
-    uint8_t cmd_type )
+                         const char * host,
+                         size_t host_len,
+                         const char * table,
+                         size_t table_len,
+                         const char * key,
+                         size_t key_len,
+                         const char * value,
+                         size_t value_len,
+                         uint32_t ver,
+                         uint32_t ttl,
+                         uint8_t cmd_type )
 {
+    if ( ! _url.empty () )
+    {
+        _url.append ( "@" );
+    }
 
-    _url.append ( "@" );
     _url.append ( host, host_len );
 
     size_t key_safe_len = 3 * key_len + 1;
     char key_safe[key_safe_len];
 
-    if ( !url_encode_all ( key, int ( key_len ), key_safe, ( int * ) &key_safe_len ) ) {
+    if ( ! url_encode_all ( key, int ( key_len ), key_safe, ( int * ) &key_safe_len ) )
+    {
         return false;
     }
 
     char query_string[key_safe_len + 128];
 
-    switch ( cmd_type ) {
+    switch ( cmd_type )
+    {
         case HUSTDB_METHOD_PUT:
             _method = "POST";
             _path.assign ( "/hustdb/put" );
@@ -82,14 +85,14 @@ bool task_t::make_task (
             _method = "POST";
             _path.assign ( "/hustdb/sadd" );
             sprintf ( query_string, "ver=%u&tb=%.*s&is_dup=true", ver, int ( table_len ), table );
-            _value.assign ( key, key_safe_len );
+            _value.assign ( key, key_len );
             break;
 
         case HUSTDB_METHOD_ZADD:
             _method = "POST";
             _path.assign ( "/hustdb/zadd" );
-            sprintf ( query_string, "ver=%u&tb=%s&score=%lu&opt=%d&is_dup=true", ver, table, score, opt );
-            _value.assign ( key, key_safe_len );
+            sprintf ( query_string, "ver=%u&tb=%.*s&score=%.*s&opt=0&is_dup=true", ver, int ( table_len ), table, int ( value_len ), value );
+            _value.assign ( key, key_len );
             break;
 
         case HUSTDB_METHOD_DEL:
@@ -101,19 +104,21 @@ bool task_t::make_task (
         case HUSTDB_METHOD_HDEL:
             _method = "GET";
             _path.assign ( "/hustdb/hdel" );
-            sprintf ( query_string, "key=%s&ver=%u&tb=%s&is_dup=true", key_safe, ver, table );
+            sprintf ( query_string, "key=%s&ver=%u&tb=%.*s&is_dup=true", key_safe, ver, int ( table_len ), table );
             break;
 
         case HUSTDB_METHOD_SREM:
-            _method = "GET";
+            _method = "POST";
             _path.assign ( "/hustdb/srem" );
-            sprintf ( query_string, "key=%s&ver=%u&tb=%s&is_dup=true", key_safe, ver, table );
+            sprintf ( query_string, "ver=%u&tb=%.*s&is_dup=true", ver, int ( table_len ), table );
+            _value.assign ( key, key_len );
             break;
 
         case HUSTDB_METHOD_ZREM:
-            _method = "GET";
+            _method = "POST";
             _path.assign ( "/hustdb/zrem" );
-            sprintf ( query_string, "key=%s&ver=%u&tb=%s&is_dup=true", key_safe, ver, table );
+            sprintf ( query_string, "ver=%u&tb=%.*s&is_dup=true", ver, int ( table_len ), table );
+            _value.assign ( key, key_len );
             break;
 
         default:
@@ -126,13 +131,16 @@ bool task_t::make_task (
 
 bool task_t::run ( husthttp_t * client )
 {
-    host_info_t & host_info = singleton_t<host_info_t>::instance();
+    host_info_t & host_info = singleton_t<host_info_t>::instance ();
 
-    if ( inner_handle ( client ) ) {
-        if ( _callback_func ) {
+    if ( inner_handle ( client ) )
+    {
+        if ( _callback_func )
+        {
             _callback_func ( _cb_param );
 
-            if ( _cb_param != NULL ) {
+            if ( _cb_param != NULL )
+            {
                 free ( _cb_param );
                 _cb_param = NULL;
             }
@@ -140,8 +148,11 @@ bool task_t::run ( husthttp_t * client )
 
         host_info.finish_task ( _host );
         return true;
-    } else {
-        if ( !host_info.has_host ( _host ) ) {
+    }
+    else
+    {
+        if ( ! host_info.has_host ( _host ) )
+        {
             return true;
         }
 
@@ -153,23 +164,27 @@ bool task_t::run ( husthttp_t * client )
 
 bool task_t::inner_handle ( husthttp_t * client )
 {
-    if ( !client ) {
+    if ( ! client )
+    {
         return false;
     }
 
-    client->set_host ( _url.c_str(), _url.size() );
+    client->set_host ( _url.c_str (), _url.size () );
 
-    if ( !client->open2 ( _method, _path, _query_string, _value, 5, 5 ) ) {
+    if ( ! client->open2 ( _method, _path, _query_string, _value, 5, 5 ) )
+    {
         return false;
     }
 
     int _tmp;
 
-    if ( !client->process ( &_tmp ) ) {
+    if ( ! client->process ( &_tmp ) )
+    {
         return false;
     }
 
-    if ( !client->get_response ( _body, _head, _http_code ) ) {
+    if ( ! client->get_response ( _body, _head, _http_code ) )
+    {
         return false;
     }
 
@@ -178,13 +193,14 @@ bool task_t::inner_handle ( husthttp_t * client )
 
 bool task_t::is_success ( int * http_code )
 {
-    return ( *http_code == 200 || *http_code == 400 || *http_code == 412 );
+    return ( *http_code == 200 || * http_code == 400 || * http_code == 412 );
 }
 
 bool task_t::url_encode_all ( const char * src, int src_len, char * dst, int * dst_len )
 {
 
-    typedef struct url_encode_item_t {
+    typedef struct url_encode_item_t
+    {
         int             len;
         const char   *  ptr;
     } url_encode_item_t;
@@ -453,15 +469,18 @@ bool task_t::url_encode_all ( const char * src, int src_len, char * dst, int * d
     unsigned char    *    dest;
     const url_encode_item_t  *  p;
 
-    if ( unlikely ( NULL == src || NULL == dst || NULL == dst_len ) ) {
-        if ( dst_len ) {
+    if ( unlikely ( NULL == src || NULL == dst || NULL == dst_len ) )
+    {
+        if ( dst_len )
+        {
             * dst_len = 0;
         }
 
         return false;
     }
 
-    if ( src_len < 0 ) {
+    if ( src_len < 0 )
+    {
         src_len = ( int ) strlen ( src );
     }
 
@@ -470,14 +489,16 @@ bool task_t::url_encode_all ( const char * src, int src_len, char * dst, int * d
 
     assert ( dst && dst_len );
 
-    if ( unlikely ( * dst_len < src_len * 3 + 1 ) ) {
+    if ( unlikely ( * dst_len < src_len * 3 + 1 ) )
+    {
         * dst_len = 0;
         return false;
     }
 
     dest = ( unsigned char * ) dst;
 
-    while ( source + 8 < source_end ) {
+    while ( source + 8 < source_end )
+    {
         // 1
         p = & tables[ * source ++ ];
         * ( ( unsigned int * ) dest ) = * ( ( unsigned int * ) p->ptr );
@@ -520,7 +541,8 @@ bool task_t::url_encode_all ( const char * src, int src_len, char * dst, int * d
     }
 
     //
-    while ( source < source_end ) {
+    while ( source < source_end )
+    {
         p = & tables[ * source ++ ];
         * ( ( unsigned int * ) dest ) = * ( ( unsigned int * ) p->ptr );
         dest += p->len;

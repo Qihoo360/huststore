@@ -9,11 +9,11 @@ class condition_t
 {
 public:
     explicit condition_t ( mutex_lock_t & mutex );
-    ~condition_t();
+    ~condition_t ( );
 
-    void wait();
-    void notify();
-    void notify_all();
+    void wait ( );
+    void notify ( );
+    void notify_all ( );
 
 private:
     mutex_lock_t & _mutex;

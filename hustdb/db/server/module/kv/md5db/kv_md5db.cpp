@@ -7,6 +7,7 @@
 #include "conflict_array.h"
 #include "fast_conflict_array.h"
 #include "../kv_array/kv_array.h"
+#include "../../binlog/binlog.h"
 #include "../../hustdb.h"
 
 using namespace md5db;
@@ -74,6 +75,7 @@ public:
     , m_conflicts ( )
     , m_query_ctxts ( )
     , m_data ( )
+    , m_binlog ( )
     {
     }
 
@@ -94,6 +96,7 @@ public:
     conflict_array_t        m_conflicts;
     query_ctxts_t           m_query_ctxts;
     kv_array_t              m_data;
+    binlog_t                m_binlog;
 } ;
 
 void kv_md5db_t::kill_me ( )
@@ -245,10 +248,12 @@ bool kv_md5db_t::open ( )
         }
     }
 
+    hustdb_t * hustdb = ( hustdb_t * ) G_APPTOOL->get_hustdb ();
+
     m_inner->m_query_ctxts.resize ( 0 );
     try
     {
-        m_inner->m_query_ctxts.resize ( ( ( hustdb_t * ) G_APPTOOL->get_hustdb () )->get_worker_count () + 2 );
+        m_inner->m_query_ctxts.resize ( hustdb->get_worker_count () + 2 );
     }
     catch ( ... )
     {
@@ -259,16 +264,17 @@ bool kv_md5db_t::open ( )
     // data
     if ( ! m_inner->m_data.open ( ) )
     {
-        LOG_ERROR ( "[md5db][db]open failed" );
+        LOG_ERROR ( "[md5db][db]kvs open failed" );
         return false;
     }
+    LOG_INFO ( "[md5db][db]kvs opened OK" );
 
     // content
     if ( content_array_t::enable ( HUSTDB_CONFIG ) )
     {
         if ( ! m_inner->m_contents.open ( DB_CONTENTS_DIR, HUSTDB_CONFIG ) )
         {
-            LOG_ERROR ( "[md5db][db]m_contents.open failed" );
+            LOG_ERROR ( "[md5db][db]contents open failed" );
             return false;
         }
         LOG_INFO ( "[md5db][db]contents opened OK" );
@@ -281,7 +287,7 @@ bool kv_md5db_t::open ( )
     // bucket
     if ( ! m_inner->m_buckets.open ( DB_BUCKETS_DIR ) )
     {
-        LOG_ERROR ( "[md5db][db]m_buckets.open failed" );
+        LOG_ERROR ( "[md5db][db]buckets open failed" );
         return false;
     }
     LOG_INFO ( "[md5db][db]buckets opened OK" );
@@ -289,7 +295,7 @@ bool kv_md5db_t::open ( )
     // fullkey
     if ( ! m_inner->m_fullkeys.open ( DB_FULLKEY_DIR ) )
     {
-        LOG_ERROR ( "[md5db][db]create failed" );
+        LOG_ERROR ( "[md5db][db]fullkeys create failed" );
         return false;
     }
     LOG_INFO ( "[md5db][db]fullkeys opened OK" );
@@ -299,26 +305,32 @@ bool kv_md5db_t::open ( )
     // fast conflict
     if ( ! m_inner->m_fast_conflicts.open ( DB_FAST_CONFLICT_DIR, & m_inner->m_buckets, HUSTDB_CONFIG ) )
     {
-        LOG_ERROR ( "[md5db][db]open failed" );
+        LOG_ERROR ( "[md5db][db]fast_conflicts open failed" );
         return false;
     }
-    LOG_INFO ( "[md5db][db]fast_conflict opened OK" );
+    LOG_INFO ( "[md5db][db]fast_conflicts opened OK" );
 
     // conflict
     if ( ! m_inner->m_conflicts.open ( DB_CONFLICT_DIR, HUSTDB_CONFIG ) )
     {
-        LOG_ERROR ( "[md5db][db]open failed" );
+        LOG_ERROR ( "[md5db][db]conflicts open failed" );
         return false;
     }
-    LOG_INFO ( "[md5db][db]conflict opened OK" );
+    LOG_INFO ( "[md5db][db]conflicts opened OK" );
+
+    // binlog
+    const char * username = hustdb->get_server_conf ().http_security_user.c_str ();
+    const char * password = hustdb->get_server_conf ().http_security_passwd.c_str ();
+    if ( ! m_inner->m_binlog.init ( 2, 1000, 1000, username, password ) )
+    {
+        LOG_ERROR ( "[md5db][db]binlog open failed" );
+        return false;
+    }
+    LOG_INFO ( "[md5db][db]binlog opened OK" );
+
+    m_inner->m_binlog.set_callback ( binlog_done_callback );
 
     m_ok = true;
-
-    if ( NULL == m_inner )
-    {
-        LOG_ERROR ( "[md5db][db] m_inner is NULL" );
-        return false;
-    }
 
     LOG_INFO ( "[md5db][db]open OK" );
 
@@ -997,9 +1009,9 @@ int kv_md5db_t::set_conflict_data (
     int         r;
     bool        b;
     uint32_t    user_version;
-    block_id_t  block_id;    
+    block_id_t  block_id;
     bool        found_in_fast_conflict = false;
-    
+
     user_version = version;
     version      = 0;
     is_found     = false;
@@ -1026,7 +1038,7 @@ int kv_md5db_t::set_conflict_data (
         r = m_inner->m_conflicts.get ( inner_key, ( unsigned int ) inner_key_len, block_id, version );
     }
     while ( 0 );
-    
+
     if ( 0 != r )
     {
         if ( r != ENOENT )
@@ -1160,7 +1172,7 @@ int kv_md5db_t::set_conflict_data (
 
         LOG_DEBUG ( "[md5db][db][block_id=%u][version=%u][conflict_count=%u]add conflict ok",
                    block_id.data_id (), version, item->get_conflict_count () );
-        
+
         return 0;
     }
 
@@ -2061,10 +2073,10 @@ int kv_md5db_t::delete_direct_data (
     {
         bool found          = false;
         std::string * rsp   = NULL;
-        
+
         data_item_for_content_db_t  addr;
         memset ( & addr, 0, sizeof ( addr ) );
-        
+
         do
         {
             {
@@ -2888,7 +2900,7 @@ void kv_md5db_t::hash (
 {
     char inner_key[ 16 ];
     size_t inner_key_len = 16;
-    
+
     if ( unlikely ( ! check_user_key ( user_key, user_key_len ) ) )
     {
         LOG_INFO ( "[md5db][db]invalid user key" );
@@ -2948,17 +2960,17 @@ void kv_md5db_t::info (
     write_perf_info ( ss, file_id, "data_del", m_perf_data_del, true );
 
     ss << "},";
-    
+
     ss << "\"leveldb\":{";
     m_inner->m_data.info ( ss );
     ss << "},";
-    
+
     ss << "\"conflictdb_count\":{";
     for ( size_t i = 0; i < COUNT_OF ( m_count_conflicts ); ++ i )
     {
         char key[ 128 ];
         sprintf ( key, "%d", ( int ) i );
-        
+
         if ( i == COUNT_OF ( m_count_conflicts ) - 1 )
         {
             write_single_count ( ss, file_id, key, m_count_conflicts[ i ], true );
@@ -2967,7 +2979,7 @@ void kv_md5db_t::info (
         {
             write_single_count ( ss, file_id, key, m_count_conflicts[ i ] );
         }
-        
+
     }
     ss << "},";
 
@@ -2982,17 +2994,17 @@ void kv_md5db_t::info (
     ss << "\"fast_conflictdb\":{";
     m_inner->m_fast_conflicts.info ( ss );
     ss << "}";
-    
+
     ss << "}";
 }
 
 uint32_t kv_md5db_t::md5db_info_by_key (
-                                           const char *                key,
-                                           size_t                      key_len,
-                                           const char *                table,
-                                           size_t                      table_len,
-                                           md5db::block_id_t &         block_id
-                                           )
+                                         const char *                key,
+                                         size_t                      key_len,
+                                         const char *                table,
+                                         size_t                      table_len,
+                                         md5db::block_id_t &         block_id
+                                         )
 {
     char        inner_key[ 16 ];
     size_t      inner_key_len    = 16;
@@ -3022,7 +3034,7 @@ uint32_t kv_md5db_t::md5db_info_by_inner_key (
 {
     uint32_t                version = 0;
     bucket_data_item_t *    item    = NULL;
-    
+
     bucket_t & bucket = m_inner->m_buckets.get_bucket ( inner_key, inner_key_len );
 
     int r = bucket.find ( inner_key, inner_key_len, item );
@@ -3083,9 +3095,9 @@ int kv_md5db_t::export_db (
     }
 
     struct export_cb_param_t * cb_pm = ( struct export_cb_param_t * ) callback_param;
-    cb_pm->db = this;
+    cb_pm->db                        = this;
 
-    int r = m_inner->m_data.export_db ( file_id, path, export_md5db_record, cb_pm );
+    int r = m_inner->m_data.export_db ( file_id, path, export_md5db_record_callback, cb_pm );
     if ( 0 != r )
     {
         LOG_ERROR ( "[md5db][export]export_db return %d", r );
@@ -3132,9 +3144,9 @@ int kv_md5db_t::export_db_mem (
     ctxt->key = ( strncmp ( tmp_ctxt->tbkey.c_str (), EXPORT_DB_ALL, sizeof ( EXPORT_DB_ALL ) - 1 ) != 0 ) ? tmp_ctxt->tbkey : EXPORT_DB_ALL;
 
     struct export_cb_param_t * cb_pm = ( struct export_cb_param_t * ) callback_param;
-    cb_pm->db = this;
+    cb_pm->db                        = this;
 
-    r = m_inner->m_data.export_db_mem ( conn, rsp, ctxt, export_md5db_record, cb_pm );
+    r = m_inner->m_data.export_db_mem ( conn, rsp, ctxt, export_md5db_record_callback, cb_pm );
     if ( 0 != r )
     {
         LOG_ERROR ( "[md5db][export_db_mem]export_db return %d", r );
@@ -3154,14 +3166,49 @@ int kv_md5db_t::ttl_scan (
         LOG_ERROR ( "[md5db][ttl_scan]m_inner is NULL" );
         return EFAULT;
     }
-    
+
     struct export_cb_param_t * cb_pm = ( struct export_cb_param_t * ) callback_param;
-    cb_pm->db = this;
-    
-    int r = m_inner->m_data.ttl_scan ( export_md5db_record, cb_pm );
+    cb_pm->db                        = this;
+
+    int r = m_inner->m_data.ttl_scan ( export_md5db_record_callback, cb_pm );
     if ( 0 != r )
     {
         LOG_ERROR ( "[md5db][ttl_scan]ttl_scan return %d", r );
+        return r;
+    }
+
+    return 0;
+}
+
+int kv_md5db_t::binlog_scan (
+                              binlog_callback_t task_cb,
+                              binlog_callback_t alive_cb,
+                              void * alive_cb_param,
+                              export_record_callback_t export_cb,
+                              void * export_cb_param
+                              )
+{
+    if ( NULL == m_inner )
+    {
+        LOG_ERROR ( "[md5db][binlog_scan]m_inner is NULL" );
+        return EFAULT;
+    }
+
+    std::map<std::string, char> alives;
+
+    m_inner->m_binlog.get_alives ( alives );
+
+    struct check_alive_cb_param_t * alive_cb_pm = ( struct check_alive_cb_param_t * ) alive_cb_param;
+    alive_cb_pm->db                             = this;
+    alive_cb_pm->alives                         = & alives;
+
+    struct export_cb_param_t * export_cb_pm     = ( struct export_cb_param_t * ) export_cb_param;
+    export_cb_pm->db                            = this;
+
+    int r = m_inner->m_data.binlog_scan ( binlog_task_callback, check_alive_callback, alive_cb_pm, export_md5db_record_callback, export_cb_pm );
+    if ( 0 != r )
+    {
+        LOG_ERROR ( "[md5db][binlog_scan]binlog_scan return %d", r );
         return r;
     }
 
@@ -3224,11 +3271,11 @@ int kv_md5db_t::binlog (
     {
         item_ctxt->key.append ( tmp_ctxt->tbkey.c_str (), tmp_ctxt->table_len );
     }
-    
+
     tmp_ctxt->value.resize ( 0 );
     tmp_ctxt->value.append ( 1, ( char ) cmd_type );
     tmp_ctxt->value.append ( ( const char * ) & host_u8, sizeof ( uint8_t ) );
-    
+
     if ( ! is_rem )
     {
         uint32_t ver = md5db_info_by_inner_key ( user_key, user_key_len, inner_key, inner_key_len, block_id );
@@ -3238,13 +3285,11 @@ int kv_md5db_t::binlog (
         }
 
         item_ctxt->key.append ( ( const char * ) & block_id, sizeof ( md5db::block_id_t ) );
-        
         tmp_ctxt->value.append ( ( const char * ) & item_ctxt->inner_file_id, sizeof ( int ) );
     }
     else
     {
-        item_ctxt->key.append ( inner_key, inner_key_len );        
-        
+        item_ctxt->key.append ( inner_key, inner_key_len );
         tmp_ctxt->value.append ( user_key, user_key_len );
     }
 
@@ -3257,7 +3302,7 @@ int kv_md5db_t::binlog (
         LOG_ERROR ( "[md5db][binlog]m_data.put_from_binlog error, return %d", r );
         return r;
     }
-    
+
     return 0;
 }
 
@@ -3341,7 +3386,7 @@ void kv_md5db_t::set_inner_table (
         tmp_ctxt->tbkey.append ( table, table_len );
         tmp_ctxt->tbkey.append ( 1, ( char ) type );
         tmp_ctxt->table_len = table_len + 1;
-        
+
         if ( added )
         {
             int added_len = strlen ( added );
@@ -3375,39 +3420,39 @@ const char * kv_md5db_t::get_inner_tbkey (
     return tmp_ctxt->tbkey.c_str ();
 }
 
-static void export_md5db_record (
-                                  void *                  param,
-                                  const char * &          key,
-                                  size_t &                key_len,
-                                  const char * &          val,
-                                  size_t &                val_len,
-                                  const char *            table,
-                                  size_t                  table_len,
-                                  uint32_t &              version,
-                                  uint32_t &              ttl,
-                                  std::string &           content,
-                                  bool *                  ignore_this_record,
-                                  bool *                  break_the_loop
-                                  )
+static void export_md5db_record_callback (
+                                           void *                  param,
+                                           const char * &          key,
+                                           size_t &                key_len,
+                                           const char * &          val,
+                                           size_t &                val_len,
+                                           const char *            table,
+                                           size_t                  table_len,
+                                           uint32_t &              version,
+                                           uint32_t &              ttl,
+                                           std::string &           content,
+                                           bool *                  ignore_this_record,
+                                           bool *                  break_the_loop
+                                           )
 {
     if ( unlikely ( ! param ) )
     {
-        LOG_ERROR ( "[md5db][export_md5db_record]GOD! invalid callback param" );
+        LOG_ERROR ( "[md5db][export_md5db_record_callback]GOD! invalid callback param" );
         * ignore_this_record = true;
         return;
     }
 
     struct export_cb_param_t * cb_pm = ( struct export_cb_param_t * ) param;
-    kv_md5db_t * db       = ( kv_md5db_t * ) cb_pm->db;
-    uint16_t     start    = cb_pm->start;
-    uint16_t     end      = cb_pm->end;
-    bool         noval    = cb_pm->noval;
+    kv_md5db_t * db                  = ( kv_md5db_t * ) cb_pm->db;
+    uint16_t     start               = cb_pm->start;
+    uint16_t     end                 = cb_pm->end;
+    bool         noval               = cb_pm->noval;
 
     if ( db->get_inner ()->m_contents.is_open () )
     {
         if ( NULL == val || val_len != sizeof ( data_item_for_content_db_t ) )
         {
-            LOG_ERROR ( "[md5db][export_md5db_record]GOD! invalid user key len" );
+            LOG_ERROR ( "[md5db][export_md5db_record_callback]GOD! invalid user key len" );
             * ignore_this_record = true;
             return;
         }
@@ -3416,7 +3461,7 @@ static void export_md5db_record (
         memcpy ( & addr, val, sizeof ( data_item_for_content_db_t ) );
         if ( 0 == addr.data_len )
         {
-            LOG_ERROR ( "[md5db][export_md5db_record]GOD! invalid size 0" );
+            LOG_ERROR ( "[md5db][export_md5db_record_callback]GOD! invalid size 0" );
             * ignore_this_record = true;
             return;
         }
@@ -3427,7 +3472,7 @@ static void export_md5db_record (
         }
         catch ( ... )
         {
-            LOG_ERROR ( "[md5db][export_md5db_record]GOD! bad_alloc" );
+            LOG_ERROR ( "[md5db][export_md5db_record_callback]GOD! bad_alloc" );
             * ignore_this_record = true;
             return;
         }
@@ -3438,7 +3483,7 @@ static void export_md5db_record (
         }
         if ( ! b )
         {
-            LOG_ERROR ( "[md5db][export_md5db_record]GOD! get content failed" );
+            LOG_ERROR ( "[md5db][export_md5db_record_callback]GOD! get content failed" );
             * ignore_this_record = true;
             return;
 
@@ -3451,7 +3496,7 @@ static void export_md5db_record (
     uint8_t idx_len = sizeof ( uint32_t ) * 2;
     if ( NULL == val || val_len <= idx_len )
     {
-        LOG_ERROR ( "[md5db][export_md5db_record]GOD! invalid user key len" );
+        LOG_ERROR ( "[md5db][export_md5db_record_callback]GOD! invalid user key len" );
         * ignore_this_record = true;
         return;
     }
@@ -3462,7 +3507,7 @@ static void export_md5db_record (
     fast_memcpy ( & kl, & val[ val_len - idx_len ], sizeof (uint32_t ) );
     if ( 0 == kl )
     {
-        LOG_ERROR ( "[md5db][export_md5db_record]GOD! invalid user key len" );
+        LOG_ERROR ( "[md5db][export_md5db_record_callback]GOD! invalid user key len" );
         * ignore_this_record = true;
         return;
     }
@@ -3470,7 +3515,7 @@ static void export_md5db_record (
     const char * uk;
     if ( val_len < idx_len + kl )
     {
-        LOG_ERROR ( "[md5db][export_md5db_record]GOD! invalid data_len %d, ukey_len=%d", ( int ) val_len, ( int ) kl );
+        LOG_ERROR ( "[md5db][export_md5db_record_callback]GOD! invalid data_len %d, ukey_len=%d", ( int ) val_len, ( int ) kl );
         * ignore_this_record = true;
         return;
     }
@@ -3484,7 +3529,7 @@ static void export_md5db_record (
     }
 
     * ignore_this_record = false;
-    
+
     uint32_t vl = val_len - idx_len - kl;
 
     key         = uk;
@@ -3493,6 +3538,65 @@ static void export_md5db_record (
 
     block_id_t block_id;
     version = db->md5db_info_by_key ( key, key_len, table, table_len, block_id );
+}
+
+static void check_alive_callback (
+                                   void * param
+                                   )
+{
+    if ( unlikely ( ! param ) )
+    {
+        LOG_ERROR ( "[md5db][check_alive_callback]GOD! invalid callback param" );
+        return;
+    }
+
+    struct check_alive_cb_param_t * cb_pm = ( struct check_alive_cb_param_t * ) param;
+    kv_md5db_t * db                       = ( kv_md5db_t * ) cb_pm->db;
+    std::map<std::string, char> * alives  = ( std::map<std::string, char> * ) cb_pm->alives;
+    std::string * host                    = ( std::string * ) cb_pm->host;
+
+    std::map<std::string, char>::iterator alive_it = alives->find ( * host );
+    if ( alive_it == alives->end () )
+    {
+        db->get_inner ()->m_binlog.add_host ( * host );
+        cb_pm->cursor_type = '-';
+    }
+    else
+    {
+        cb_pm->cursor_type = alive_it->second;
+    }
+}
+
+static void binlog_task_callback (
+                                   void * param
+                                   )
+{
+    if ( unlikely ( ! param ) )
+    {
+        LOG_ERROR ( "[md5db][binlog_task_callback]GOD! invalid callback param" );
+        return;
+    }
+    
+    struct binlog_task_cb_param_t * cb_pm = ( struct binlog_task_cb_param_t * ) param;
+    kv_md5db_t * db                       = ( kv_md5db_t * ) cb_pm->db;
+
+
+    bool b = db->get_inner ()->m_binlog.add_task (
+                                                  cb_pm->host,
+                                                  cb_pm->host_len,
+                                                  cb_pm->table,
+                                                  cb_pm->table_len,
+                                                  cb_pm->key,
+                                                  cb_pm->key_len,
+                                                  cb_pm->value,
+                                                  cb_pm->value_len,
+                                                  cb_pm->ver,
+                                                  cb_pm->ttl,
+                                                  cb_pm->cmd_type,
+                                                  cb_pm->param
+                                                  );
+    
+    cb_pm->cursor_type = b ? '+' : '-';
 }
 
 static void binlog_done_callback (
@@ -3505,12 +3609,14 @@ static void binlog_done_callback (
         return;
     }
 
-    struct binlog_cb_param_t * cb_pm = ( struct binlog_cb_param_t * ) param;
-    kv_md5db_t * db       = ( kv_md5db_t * ) cb_pm->db;
+    struct binlog_done_cb_param_t * cb_pm = ( struct binlog_done_cb_param_t * ) param;
+    kv_md5db_t * db                       = ( kv_md5db_t * ) cb_pm->db;
 
     int r = db->get_inner ()->m_data.del_from_binlog ( cb_pm->key, cb_pm->key_len );
     if ( unlikely ( r != 0 ) )
     {
         LOG_ERROR ( "[md5db][binlog_done_callback]GOD! del_from_binlog error, return %d", r );
     }
+
+    free ( param );
 }

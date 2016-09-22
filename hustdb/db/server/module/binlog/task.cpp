@@ -33,6 +33,11 @@ task_t::task_t (
 
 task_t::~ task_t ( )
 {
+    if ( _cb_param != NULL )
+    {
+        free ( _cb_param );
+        _cb_param = NULL;
+    }
 }
 
 bool task_t::make_task (
@@ -138,12 +143,6 @@ bool task_t::run ( husthttp_t * client )
         if ( _callback_func )
         {
             _callback_func ( _cb_param );
-
-            if ( _cb_param != NULL )
-            {
-                free ( _cb_param );
-                _cb_param = NULL;
-            }
         }
 
         host_info.finish_task ( _host );

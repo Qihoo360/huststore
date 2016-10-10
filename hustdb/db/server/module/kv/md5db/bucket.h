@@ -156,7 +156,7 @@ namespace md5db
             return m_fullkey;
         }
 
-        lockable_t & get_lock ( )
+        rwlockable_t & get_lock ( )
         {
             return m_lock;
         }
@@ -176,7 +176,7 @@ namespace md5db
 
         fmap_t m_data;
         fullkey_t * m_fullkey;
-        lockable_t m_lock;
+        rwlockable_t m_lock;
 
     private:
         // disable

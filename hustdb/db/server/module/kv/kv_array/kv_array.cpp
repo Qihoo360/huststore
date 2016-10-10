@@ -1414,8 +1414,10 @@ int kv_array_t::ttl_scan (
             kv_data = m_files[ file_id ];
             if ( unlikely ( NULL == kv_data ) )
             {
+                ttl_key.resize ( 0 );
                 LOG_ERROR ( "[kv_array][ttl_scan][local=%u]file is NULL", file_id );
-                return EFAULT;
+                r = EFAULT;
+                continue;
             }
 
             r = kv_data->get ( key, key_len, content );
@@ -1530,8 +1532,8 @@ int kv_array_t::binlog_scan (
     uint32_t            timestamp             = 0;
     uint32_t            ttl                   = 0;
     uint32_t            file_id               = 0;
-    uint32_t            die_success           = 0;
-    uint32_t            die_fail              = 0;
+    uint32_t            binlog_success        = 0;
+    uint32_t            binlog_fail           = 0;
     uint32_t            bl_file_id            = m_file_count + 1;
     size_t              key_len               = 0;
     const char *        key                   = NULL;
@@ -1549,10 +1551,12 @@ int kv_array_t::binlog_scan (
     bool                break_the_loop        = false;
     i_kv_t *            kv_binlog             = NULL;
     i_kv_t *            kv_data               = NULL;
+    std::string         ttl_key;
     std::string         host;
     std::string         content;
     binlog_task_cb_param_t task_cb_pm;
 
+    ttl_key.reserve ( RESERVE_BYTES_FOR_RSP_BUFER );
     content.reserve ( RESERVE_BYTES_FOR_RSP_BUFER );
 
     kv_binlog  = m_files[ bl_file_id ];
@@ -1580,9 +1584,21 @@ int kv_array_t::binlog_scan (
         }
 
         it->seek_first ();
+        
+        ttl_key.resize ( 0 );
 
         for ( i = 0; it->valid (); it->next (), i ++ )
         {
+            if ( ! ttl_key.empty () )
+            {
+                r = kv_binlog->del ( ttl_key.c_str (), ttl_key.size () );
+                if ( unlikely ( 0 != r ) )
+                {
+                    LOG_ERROR ( "[kv_array][binlog_scan][file_id=%u]del return %d", file_id, r );
+                }
+            }
+            
+            r          = 0;
             version    = 0;
             key        = it->key ( & key_len );
             val        = it->value ( & val_len );
@@ -1602,9 +1618,8 @@ int kv_array_t::binlog_scan (
             
             if ( alive_cb_pm->cursor_type != '+' )
             {
+                r = EFAULT;
                 continue;
-                
-                //seek
             }
             
             real_key     = key + host_u8;
@@ -1630,6 +1645,8 @@ int kv_array_t::binlog_scan (
             done_cb_pm->db                      = alive_cb_pm->db;
             done_cb_pm->key_len                 = key_len;
             fast_memcpy ( done_cb_pm->key, key, key_len );
+            
+            ttl_key.resize ( 0 );
             
             switch ( cmd_type )
             {
@@ -1663,21 +1680,29 @@ int kv_array_t::binlog_scan (
 
                     if ( file_id >= m_file_count )
                     {
+                        free ( done_cb_pm );
+                        ttl_key.append ( key, key_len );
                         LOG_ERROR ( "[kv_array][binlog_scan][local=%d][files=%d]invalid local_id", file_id, m_file_count );
+                        r = EFAULT;
                         break;
                     }
 
                     kv_data = m_files[ file_id ];
                     if ( unlikely ( NULL == kv_data ) )
                     {
+                        free ( done_cb_pm );
                         LOG_ERROR ( "[kv_array][binlog_scan][local=%u]file is NULL", file_id );
-                        return EFAULT;
+                        r = EFAULT;
+                        break;
                     }
 
                     r = kv_data->get ( real_key, real_key_len, content );
                     if ( unlikely ( 0 != r ) )
                     {
+                        free ( done_cb_pm );
+                        ttl_key.append ( key, key_len );
                         LOG_ERROR ( "[kv_array][binlog_scan][file_id=%u]get return %d", file_id, r );
+                        r = EFAULT;
                         break;
                     }
 
@@ -1699,6 +1724,10 @@ int kv_array_t::binlog_scan (
                     
                     if ( ttl > 0 && ttl <= timestamp )
                     {
+                        free ( done_cb_pm );
+                        ttl_key.append ( key, key_len );
+                        LOG_ERROR ( "[kv_array][binlog_scan][ttl=%u][timestamp=%u]timeout", ttl, timestamp );
+                        r = EFAULT;
                         break;
                     }
                     
@@ -1715,27 +1744,28 @@ int kv_array_t::binlog_scan (
                     task_cb_pm.cmd_type   = cmd_type;
                     task_cb_pm.param      = done_cb_pm;
                     
-                    task_cb ( ( void * ) & task_cb_pm );
+                    task_cb ( & task_cb_pm );
                     alive_cb_pm->cursor_type = task_cb_pm.cursor_type;
                     
                     break;
 
                 default:
-                    LOG_DEBUG ( "need deleted" );
-                    return EKEYREJECTED;
+                    ttl_key.append ( key, key_len );
+                    r = EFAULT;
+                    break;
             }
 
             if ( likely ( 0 == r ) )
             {
-                die_success ++;
+                binlog_success ++;
             }
             else
             {
-                die_fail ++;
+                binlog_fail ++;
             }
         }
 
-        LOG_INFO ( "[kv_array][binlog_scan][count=%d][success=%d][fail=%d]", i, die_success, die_fail );
+        LOG_INFO ( "[kv_array][binlog_scan][count=%d][success=%d][fail=%d]", i, binlog_success, binlog_fail );
 
         r = 0;
 

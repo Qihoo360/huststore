@@ -1527,8 +1527,7 @@ int kv_md5db_t::exists (
         return r;
     }
 
-    // read, lock free
-    // scope_lock_t lock( bucket.get_lock() );
+    scope_rlock_t lock( bucket.get_lock() );
 
     switch ( item->type )
     {
@@ -1673,8 +1672,7 @@ int kv_md5db_t::get (
         return r;
     }
 
-    // read, lock free
-    // scope_lock_t lock( bucket.get_lock() );
+    scope_rlock_t lock( bucket.get_lock() );
 
     switch ( item->type )
     {
@@ -2338,8 +2336,7 @@ int kv_md5db_t::del_inner (
         return r;
     }
 
-    // lock bucket
-    scope_lock_t lock ( bucket.get_lock () );
+    scope_wlock_t lock ( bucket.get_lock () );
 
     switch ( item->type )
     {
@@ -2625,8 +2622,7 @@ int kv_md5db_t::put_inner (
         return r;
     }
 
-    // lock bucket
-    scope_lock_t lock ( bucket.get_lock () );
+    scope_wlock_t lock ( bucket.get_lock () );
 
     switch ( item->type )
     {
@@ -3044,8 +3040,7 @@ uint32_t kv_md5db_t::md5db_info_by_inner_key (
         return 0;
     }
 
-    // read, lock free
-    // scope_lock_t lock( bucket.get_lock() );
+    scope_rlock_t lock( bucket.get_lock() );
 
     switch ( item->type )
     {
@@ -3617,6 +3612,4 @@ static void binlog_done_callback (
     {
         LOG_ERROR ( "[md5db][binlog_done_callback]GOD! del_from_binlog error, return %d", r );
     }
-
-    free ( param );
 }

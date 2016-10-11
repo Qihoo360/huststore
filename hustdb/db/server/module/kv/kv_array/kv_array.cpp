@@ -1486,7 +1486,7 @@ int kv_array_t::ttl_scan (
             }
         }
 
-        LOG_INFO ( "[kv_array][ttl_scan][count=%d][success=%d][fail=%d]", i, die_success, die_fail );
+        LOG_INFO ( "[kv_array][ttl_scan][count=%d][success=%d][fail=%d][consume=%d]", i, die_success, die_fail, g_hustdb->get_current_timestamp () - timestamp );
 
         if ( ! ttl_key.empty () )
         {
@@ -1765,7 +1765,7 @@ int kv_array_t::binlog_scan (
             }
         }
 
-        LOG_INFO ( "[kv_array][binlog_scan][count=%d][success=%d][fail=%d]", i, binlog_success, binlog_fail );
+        LOG_INFO ( "[kv_array][binlog_scan][count=%d][success=%d][fail=%d][consume=%d]", i, binlog_success, binlog_fail, g_hustdb->get_current_timestamp () - timestamp );
 
         r = 0;
 

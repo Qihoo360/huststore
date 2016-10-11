@@ -158,6 +158,7 @@ typedef struct store_conf_s
     int32_t mq_ttl_maximum;
     int32_t db_ttl_maximum;
     int32_t db_ttl_scan_interval;
+    int32_t db_binlog_scan_interval;
     int32_t mq_queue_maximum;
     int32_t db_table_maximum;
     int32_t db_ttl_scan_count;
@@ -178,6 +179,7 @@ typedef struct store_conf_s
 static void timestamp_cb         ( void * ctx );
 static void over_threshold_cb    ( void * ctx );
 static void ttl_scan_cb          ( void * ctx );
+static void binlog_scan_cb       ( void * ctx );
 
 class hustdb_t
 {
@@ -354,6 +356,8 @@ public:
                         );
 
     int hustdb_ttl_scan ( );
+    
+    int hustdb_binlog_scan ( );
 
 public:
 

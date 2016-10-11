@@ -18,6 +18,8 @@
 
 #define HUSTDB_CONFIG                   "./hustdb.conf"
 
+#define HUSTDB_EXPORT_DIR               "./EXPORT"
+
 #define HUSTMQ_INDEX                    "./DATA/HUSTMQ"
 #define HUSTTABLE_INDEX                 "./DATA/HUSTTABLE"
 #define HUSTSTORE_INVARIANT             "./DATA/HUSTSTORE_INVARIANT"

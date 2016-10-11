@@ -1,6 +1,7 @@
 #include "hustdb.h"
 #include "tasks/task_export.h"
 #include "tasks/task_ttl_scan.h"
+#include "tasks/task_binlog_scan.h"
 #include "kv/kv_array/key_hash.h"
 #include "perf_target.h"
 #include "kv/md5db/bucket.h"
@@ -178,8 +179,8 @@ bool hustdb_t::open ( )
         return false;
     }
 
-    m_apptool->make_dir ( "./EXPORT" );
-    if ( ! m_apptool->is_dir ( "./EXPORT" ) )
+    m_apptool->make_dir ( HUSTDB_EXPORT_DIR );
+    if ( ! m_apptool->is_dir ( HUSTDB_EXPORT_DIR ) )
     {
         LOG_ERROR ( "[hustdb][open]./EXPORT create failed" );
         return false;
@@ -194,6 +195,7 @@ bool hustdb_t::open ( )
     if ( ! ( m_timer.register_task ( hustdb::timer_task_t ( 1, timestamp_cb, this ) ) &&
              m_timer.register_task ( hustdb::timer_task_t ( 10, over_threshold_cb, this ) ) &&
              m_timer.register_task ( hustdb::timer_task_t ( m_store_conf.db_ttl_scan_interval, ttl_scan_cb, this ) ) &&
+             m_timer.register_task ( hustdb::timer_task_t ( m_store_conf.db_binlog_scan_interval, binlog_scan_cb, this ) ) &&
              m_timer.open ( )
              )
          )
@@ -354,6 +356,13 @@ bool hustdb_t::init_server_config ( )
         LOG_ERROR ( "[hustdb][init_server_config]store db.ttl.scan_interval invalid, ttl.scan_interval: %d", m_store_conf.db_ttl_scan_interval );
         return false;
     }
+    
+    m_store_conf.db_binlog_scan_interval = m_appini->ini_get_int ( m_ini, "store", "db.binlog.scan_interval", 120 );
+    if ( m_store_conf.db_binlog_scan_interval <= 0 )
+    {
+        LOG_ERROR ( "[hustdb][init_server_config]store db.binlog.scan_interval invalid, binlog.scan_interval: %d", m_store_conf.db_binlog_scan_interval );
+        return false;
+    }
 
     m_store_conf.mq_queue_maximum = m_appini->ini_get_int ( m_ini, "store", "mq.queue.maximum", 8192 );
     if ( m_store_conf.mq_queue_maximum <= 0 )
@@ -450,7 +459,7 @@ bool hustdb_t::check_invariant_config ( )
              )
         {
             r = EINVAL;
-            LOG_ERROR ( "[hustdb][check_invariant_config]invariant error: [%d,%d], [%d,%d], [%d,%d], [%d,%d]",
+            LOG_ERROR ( "[hustdb][check_invariant_config]invariant error, fastdb:[%d,%d], conflictdb:[%d,%d], contentdb:[%d,%d], fast_conflictdb:[%d,%d]",
                        invar->fastdb, fastdb_count,
                        invar->conflictdb, conflictdb_count,
                        invar->contentdb, contentdb_count,
@@ -1673,7 +1682,7 @@ int hustdb_t::hustdb_export (
     const char *    noval_flag      = NULL;
     uint8_t         type            = 0;
 
-    if ( unlikely ( ! m_apptool->is_dir ( "./EXPORT" ) ) )
+    if ( unlikely ( ! m_apptool->is_dir ( HUSTDB_EXPORT_DIR ) ) )
     {
         LOG_ERROR ( "[hustdb][db_export]./EXPORT not exists" );
         return ENOENT;
@@ -1776,6 +1785,32 @@ int hustdb_t::hustdb_ttl_scan ( )
         task->release ();
 
         LOG_ERROR ( "[hustdb][db_ttl_scan]push task_ttl_scan_t failed" );
+        return EPERM;
+    }
+
+    return 0;
+}
+
+int hustdb_t::hustdb_binlog_scan ( )
+{
+    if ( ! m_slow_tasks.empty () )
+    {
+        LOG_ERROR ( "[hustdb][db_binlog_scan]slow_tasks not empty" );
+        return EPERM;
+    }
+
+    task_binlog_scan_t * task = task_binlog_scan_t::create ( );
+    if ( NULL == task )
+    {
+        LOG_ERROR ( "[hustdb][db_binlog_scan]task_binlog_scan_t::create failed" );
+        return EPERM;
+    }
+
+    if ( ! m_slow_tasks.push ( task ) )
+    {
+        task->release ();
+
+        LOG_ERROR ( "[hustdb][db_binlog_scan]push task_binlog_scan_t failed" );
         return EPERM;
     }
 
@@ -2876,7 +2911,7 @@ int hustdb_t::hustdb_binlog (
     int                  r            = 0;
     bool                 is_rem       = false;
 
-    if ( unlikely ( ! tb_name_check ( table, table_len ) ||
+    if ( unlikely ( ( table && table_len > 0 && ! tb_name_check ( table, table_len ) ) ||
                    CHECK_STRING ( key ) ||
                    CHECK_STRING ( host ) ||
                    host_len > 32
@@ -3887,4 +3922,17 @@ static void ttl_scan_cb (
 
     hustdb_t * db = ( hustdb_t * ) ctx;
     db->hustdb_ttl_scan ( );
+}
+
+static void binlog_scan_cb (
+                             void * ctx
+                             )
+{
+    if ( unlikely ( ! ctx ) )
+    {
+        return ;
+    }
+
+    hustdb_t * db = ( hustdb_t * ) ctx;
+    db->hustdb_binlog_scan ( );
 }

@@ -67,7 +67,8 @@ MODULE_OBJECTS=  					        \
 	$(BIN)base_timer.o   			                \
 	$(BIN)tasks_slow_task_thread.o                          \
 	$(BIN)tasks_task_export.o                               \
-	$(BIN)tasks_task_ttl_scan.o
+	$(BIN)tasks_task_ttl_scan.o                         \
+	$(BIN)tasks_task_binlog_scan.o
 
 MDB_OBJECTS =                                                   \
         $(BIN)memcached.o                                             \

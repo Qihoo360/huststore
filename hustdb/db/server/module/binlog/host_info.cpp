@@ -40,7 +40,7 @@ static void * check_alive ( void * arg )
     redeliver_tv.it_value.tv_sec = 1;
 
     if ( timerfd_settime ( timerfd, 0, &tv, NULL ) == - 1
-         || timerfd_settime ( timerfd, 0, &redeliver_tv, NULL ) == - 1 )
+         || timerfd_settime ( redeliver_fd, 0, &redeliver_tv, NULL ) == - 1 )
     {
         return ( void * ) NULL;
     }

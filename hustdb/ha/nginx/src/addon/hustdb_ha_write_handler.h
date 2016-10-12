@@ -15,7 +15,8 @@
 typedef enum
 {
 	STATE_WRITE_MASTER1,
-	STATE_WRITE_MASTER2
+	STATE_WRITE_MASTER2,
+	STATE_WRITE_BINLOG
 } hustdb_write_state_t;
 
 typedef struct
@@ -25,6 +26,7 @@ typedef struct
     int error_count;
     int skip_error_count; // for del
     ngx_http_subrequest_peer_t * error_peer;
+    ngx_http_subrequest_peer_t * health_peer;
     uint32_t ttl;
 } ngx_http_hustdb_ha_write_ctx_t;
 

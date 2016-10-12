@@ -110,6 +110,7 @@ typedef struct
 {
     ngx_http_subrequest_peer_t * peer;
     ngx_http_subrequest_peer_t * error_peer;
+    ngx_http_subrequest_peer_t * health_peer;
     int error_count;
     hustdb_write_state_t state;
 } write_base_ctx_t;
@@ -162,6 +163,7 @@ static ngx_bool_t __init_write_base_ctx(const char * key, write_base_ctx_t * ctx
 
     ctx->error_count = 0;
     ctx->error_peer = NULL;
+    ctx->health_peer = NULL;
     ctx->state = STATE_WRITE_MASTER1;
 
     ngx_bool_t alive = ngx_http_peer_is_alive(ctx->peer->peer);
@@ -235,6 +237,7 @@ static void __copy_data(write_ctx_t * tmp, ngx_http_hustdb_ha_write_ctx_t * ctx)
     ctx->state = tmp->base.state;
     ctx->error_count = tmp->base.error_count;
     ctx->error_peer = tmp->base.error_peer;
+    ctx->health_peer = tmp->base.health_peer;
 }
 
 static ngx_bool_t __init_write_ctx_by_body(ngx_http_request_t *r, hustdb_ha_write_ctx_t * ctx)
@@ -367,6 +370,12 @@ ngx_int_t hustdb_ha_start_del(
             hustdb_ha_on_subrequest_complete);
 }
 
+static ngx_bool_t __add_sync_head(const ngx_str_t * server, ngx_http_request_t *r)
+{
+    static ngx_str_t SYNC_KEY = ngx_string("Sync");
+    return ngx_http_add_field_to_headers_out(&SYNC_KEY, server, r);
+}
+
 static ngx_int_t __write_sync_data(
     uint8_t method,
     ngx_bool_t has_tb,
@@ -405,8 +414,7 @@ static ngx_int_t __write_sync_data(
             break;
         }
 
-        static ngx_str_t SYNC_KEY = ngx_string("Sync");
-        if (!ngx_http_add_field_to_headers_out(&SYNC_KEY, server, r))
+        if (!__add_sync_head(server, r))
         {
             break;
         }
@@ -475,6 +483,7 @@ static void __update_error(uint8_t method, ngx_uint_t status, ngx_http_hustdb_ha
 {
     if (NGX_HTTP_OK == status)
     {
+        ctx->health_peer = ctx->base.peer;
         return;
     }
     if (__skip_error(method, status))
@@ -486,6 +495,110 @@ static void __update_error(uint8_t method, ngx_uint_t status, ngx_http_hustdb_ha
     ctx->error_peer = ctx->base.peer;
 }
 
+static ngx_bool_t __should_write_log(ngx_http_hustdb_ha_write_ctx_t * ctx)
+{
+    return 0 == ctx->skip_error_count && 1 == ctx->error_count;
+}
+
+static ngx_str_t __format_binlog_args(uint8_t method,
+    ngx_bool_t has_tb,
+    ngx_http_request_t *r,
+    ngx_http_hustdb_ha_write_ctx_t * ctx)
+{
+    static const ngx_str_t HOST = ngx_string("host=");
+    static const ngx_str_t METHOD = ngx_string("&method=");
+    static const ngx_str_t TB = ngx_string("&tb=");
+    static const ngx_str_t KEY = ngx_string("&key=");
+
+    char method_str[4];
+    sprintf(method_str, "%d", (uint32_t)method);
+
+    size_t method_len = strlen(method_str);
+
+    ngx_str_t * host = &ctx->error_peer->peer->server;
+
+    typedef struct
+    {
+        const void * data;
+        size_t len;
+    } arg_item_t;
+
+    arg_item_t items[] = {
+        { HOST.data,    HOST.len   },
+        { host->data,   host->len  },
+        { METHOD.data,  METHOD.len },
+        { method_str,   method_len }
+    };
+    size_t size = sizeof(items) / sizeof(arg_item_t);
+
+    size_t buf_size = 0;
+
+    size_t i = 0;
+    for (i = 0; i < size; ++i)
+    {
+        buf_size += items[i].len;
+    }
+
+    size_t tb_len = 0;
+    if (has_tb)
+    {
+        tb_len = strlen(ctx->base.tb);
+        buf_size += (TB.len + tb_len);
+    }
+    size_t key_len = 0;
+    if (!ctx->base.key_in_body)
+    {
+        key_len = strlen(ctx->base.key);
+        buf_size += (KEY.len + key_len);
+    }
+
+    ngx_str_t args = { 0, 0 };
+    args.data = ngx_palloc(r->pool, buf_size);
+
+    for (i = 0; i < size; ++i)
+    {
+        memcpy(args.data + args.len, items[i].data, items[i].len);
+        args.len += items[i].len;
+    }
+
+    if (has_tb)
+    {
+        memcpy(args.data + args.len, TB.data, TB.len);
+        args.len += TB.len;
+        memcpy(args.data + args.len, ctx->base.tb, tb_len);
+        args.len += tb_len;
+    }
+
+    if (!ctx->base.key_in_body)
+    {
+        memcpy(args.data + args.len, KEY.data, KEY.len);
+        args.len += KEY.len;
+        memcpy(args.data + args.len, ctx->base.key, key_len);
+        args.len += key_len;
+    }
+
+    return args;
+}
+
+static ngx_int_t __write_binlog(
+    uint8_t method,
+    ngx_bool_t has_tb,
+    ngx_http_request_t *r,
+    ngx_http_hustdb_ha_write_ctx_t * ctx)
+{
+    ngx_bool_t alive = ngx_http_peer_is_alive(ctx->health_peer->peer);
+    if (!alive)
+    {
+        return __write_sync_data(method, has_tb, r, ctx);
+    }
+    ngx_http_hustdb_ha_main_conf_t * mcf = hustdb_ha_get_module_main_conf(r);
+
+    ctx->state = STATE_WRITE_BINLOG;
+    ctx->base.base.uri = mcf->binlog_uri;
+    ctx->base.base.args = __format_binlog_args(method, has_tb, r, ctx);
+    return ngx_http_run_subrequest(r, &ctx->base.base, ctx->health_peer->peer);
+}
+
 // -------------------------------------------------------------
 // |skip   |  0   |  1   |  2   |  0       |  1   |  2  |  0   |
 // -------------------------------------------------------------
@@ -493,15 +606,15 @@ static void __update_error(uint8_t method, ngx_uint_t status, ngx_http_hustdb_ha
 // -------------------------------------------------------------
 // |action |  200 |  200 |  404 |  200&log |  404 | 404 | 404  |
 // -------------------------------------------------------------
-static ngx_int_t __send_write_response(
+static ngx_int_t __post_write_data(
     uint8_t method,
     ngx_bool_t has_tb,
     ngx_http_request_t *r,
     ngx_http_hustdb_ha_write_ctx_t * ctx)
 {
-    if (0 == ctx->skip_error_count && 1 == ctx->error_count)
+    if (__should_write_log(ctx))
     {
-        return __write_sync_data(method, has_tb, r, ctx);
+        return __write_binlog(method, has_tb, r, ctx);
     }
     if (0 == ctx->skip_error_count && 0 == ctx->error_count)
     {
@@ -534,7 +647,7 @@ static ngx_int_t __on_write_master1_complete(
 	++ctx->error_count;
 	ctx->error_peer = ctx->base.peer;
 
-	return __send_write_response(method, has_tb, r, ctx);
+	return __post_write_data(method, has_tb, r, ctx);
 }
 
 static ngx_int_t __on_write_master2_complete(
@@ -544,7 +657,45 @@ static ngx_int_t __on_write_master2_complete(
     ngx_http_hustdb_ha_write_ctx_t * ctx)
 {
     __update_error(method, r->headers_out.status, ctx);
-    return __send_write_response(method, has_tb, r, ctx);
+    return __post_write_data(method, has_tb, r, ctx);
+}
+
+static ngx_int_t __on_write_binlog_complete(
+    uint8_t method,
+    ngx_bool_t has_tb,
+    ngx_http_request_t *r,
+    ngx_http_hustdb_ha_write_ctx_t * ctx)
+{
+    if (NGX_HTTP_OK != r->headers_out.status)
+    {
+        return __write_sync_data(method, has_tb, r, ctx);
+    }
+    if (!__add_sync_head(&ctx->error_peer->peer->server, r))
+    {
+        return hustdb_ha_send_response(NGX_HTTP_NOT_FOUND, NULL, NULL, r);
+    }
+    return hustdb_ha_send_response(NGX_HTTP_OK, &ctx->base.version, NULL, r);
+}
+
+static ngx_int_t __switch_state(
+    uint8_t method,
+    ngx_bool_t has_tb,
+    ngx_http_request_t *r,
+    ngx_http_hustdb_ha_write_ctx_t * ctx)
+{
+    if (STATE_WRITE_MASTER1 == ctx->state)
+    {
+        return __on_write_master1_complete(method, has_tb, r, ctx);
+    }
+    else if (STATE_WRITE_MASTER2 == ctx->state)
+    {
+        return __on_write_master2_complete(method, has_tb, r, ctx);
+    }
+    else if (STATE_WRITE_BINLOG == ctx->state)
+    {
+        return __on_write_binlog_complete(method, has_tb, r, ctx);
+    }
+    return NGX_ERROR;
 }
 
 ngx_int_t hustdb_ha_write_handler(
@@ -561,15 +712,7 @@ ngx_int_t hustdb_ha_write_handler(
     {
         return start_write(support_post_only, key_in_body, has_tb, backend_uri, r);
     }
-    if (STATE_WRITE_MASTER1 == ctx->base.state)
-    {
-        return __on_write_master1_complete(method, has_tb, r, &ctx->base);
-    }
-    else if (STATE_WRITE_MASTER2 == ctx->base.state)
-    {
-        return __on_write_master2_complete(method, has_tb, r, &ctx->base);
-    }
-    return NGX_ERROR;
+    return __switch_state(method, has_tb, r, &ctx->base);
 }
 
 static ngx_http_hustdb_ha_write_ctx_t * __create_zwrite_ctx(ngx_http_request_t *r)
@@ -639,15 +782,7 @@ ngx_int_t hustdb_ha_zwrite_handler(
     {
         return __start_zwrite(backend_uri, r);
     }
-    if (STATE_WRITE_MASTER1 == ctx->state)
-    {
-        return __on_write_master1_complete(method, true, r, ctx);
-    }
-    else if (STATE_WRITE_MASTER2 == ctx->state)
-    {
-        return __on_write_master2_complete(method, true, r, ctx);
-    }
-    return NGX_ERROR;
+    return __switch_state(method, true, r, ctx);
 }
 
 static ngx_int_t __send_write_cache_response(ngx_http_request_t *r, hustdb_ha_write_cache_ctx_t * ctx)

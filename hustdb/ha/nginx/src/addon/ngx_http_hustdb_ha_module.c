@@ -32,6 +32,7 @@ static char * ngx_http_sync_port(ngx_conf_t * cf, ngx_command_t * cmd, void * co
 static char * ngx_http_sync_status_uri(ngx_conf_t * cf, ngx_command_t * cmd, void * conf);
 static char * ngx_http_sync_user(ngx_conf_t * cf, ngx_command_t * cmd, void * conf);
 static char * ngx_http_sync_passwd(ngx_conf_t * cf, ngx_command_t * cmd, void * conf);
+static char * ngx_http_binlog_uri(ngx_conf_t * cf, ngx_command_t * cmd, void * conf);
 static void * ngx_http_hustdb_ha_create_main_conf(ngx_conf_t *cf);
 char * ngx_http_hustdb_ha_init_main_conf(ngx_conf_t * cf, void * conf);
 
@@ -296,6 +297,7 @@ static ngx_command_t ngx_http_hustdb_ha_commands[] =
     APPEND_MCF_ITEM("sync_status_uri", ngx_http_sync_status_uri),
     APPEND_MCF_ITEM("sync_user", ngx_http_sync_user),
     APPEND_MCF_ITEM("sync_passwd", ngx_http_sync_passwd),
+    APPEND_MCF_ITEM("binlog_uri", ngx_http_binlog_uri),
     ngx_null_command
 };
 
@@ -636,6 +638,19 @@ static char * ngx_http_sync_passwd(ngx_conf_t * cf, ngx_command_t * cmd, void * 
     }
     ngx_str_t * arr = cf->args->elts;
     mcf->sync_passwd = ngx_http_make_str(&arr[1], cf->pool);
+    // TODO: you can modify the value here
+    return NGX_CONF_OK;
+}
+
+static char * ngx_http_binlog_uri(ngx_conf_t * cf, ngx_command_t * cmd, void * conf)
+{
+    ngx_http_hustdb_ha_main_conf_t * mcf = ngx_http_conf_get_module_main_conf(cf, ngx_http_hustdb_ha_module);
+    if (!mcf || 2 != cf->args->nelts)
+    {
+        return "ngx_http_binlog_uri error";
+    }
+    ngx_str_t * arr = cf->args->elts;
+    mcf->binlog_uri = ngx_http_make_str(&arr[1], cf->pool);
     // TODO: you can modify the value here
     return NGX_CONF_OK;
 }

@@ -74,6 +74,7 @@ typedef struct
     ngx_str_t sync_status_uri;
     ngx_str_t sync_user;
     ngx_str_t sync_passwd;
+    ngx_str_t binlog_uri;
 } ngx_http_hustdb_ha_main_conf_t;
 
 void * hustdb_ha_get_module_main_conf(ngx_http_request_t * r);

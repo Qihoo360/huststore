@@ -233,7 +233,7 @@
                 ["string", "tb"],
                 ["string", "key"],
                 ["string", "host"],
-                ["uint8_t", "method"]
+                ["uint32_t", "method"]
             ],
             "required": ["key", "host", "method"],
             "post": { "arg": "key" },

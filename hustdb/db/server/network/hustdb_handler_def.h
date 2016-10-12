@@ -253,7 +253,7 @@ struct hustdb_binlog_ctx_t
     evhtp::c_str_t tb;
     evhtp::c_str_t key;
     evhtp::c_str_t host;
-    uint8_t method;
+    uint32_t method;
 
     bool has_tb;
     bool has_key;

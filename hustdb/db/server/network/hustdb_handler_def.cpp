@@ -836,7 +836,7 @@ hustdb_binlog_ctx_t::hustdb_binlog_ctx_t(evhtp_query_t * htp_query)
     memset(&tb, 0, sizeof(evhtp::c_str_t));
     memset(&key, 0, sizeof(evhtp::c_str_t));
     memset(&host, 0, sizeof(evhtp::c_str_t));
-    memset(&method, 0, sizeof(uint8_t));
+    memset(&method, 0, sizeof(uint32_t));
 
     if (!htp_query)
     {
@@ -869,7 +869,7 @@ hustdb_binlog_ctx_t::hustdb_binlog_ctx_t(evhtp_query_t * htp_query)
         else if (kv->klen == __method.len && 0 == strncmp(__method.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
             has_method = true;
-            method = evhtp::cast <uint8_t> (std::string(kv->val, kv->vlen));
+            method = evhtp::cast <uint32_t> (std::string(kv->val, kv->vlen));
         }
         kv = kv->next.tqe_next;
     }

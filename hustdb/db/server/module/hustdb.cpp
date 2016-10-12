@@ -186,24 +186,6 @@ bool hustdb_t::open ( )
         return false;
     }
 
-    if ( ! m_slow_tasks.start () )
-    {
-        LOG_ERROR ( "[hustdb][open]m_slow_tasks.start() failed" );
-        return false;
-    }
-
-    if ( ! ( m_timer.register_task ( hustdb::timer_task_t ( 1, timestamp_cb, this ) ) &&
-             m_timer.register_task ( hustdb::timer_task_t ( 10, over_threshold_cb, this ) ) &&
-             m_timer.register_task ( hustdb::timer_task_t ( m_store_conf.db_ttl_scan_interval, ttl_scan_cb, this ) ) &&
-             m_timer.register_task ( hustdb::timer_task_t ( m_store_conf.db_binlog_scan_interval, binlog_scan_cb, this ) ) &&
-             m_timer.open ( )
-             )
-         )
-    {
-        LOG_ERROR ( "[hustdb][open]m_timer register task failed" );
-        return false;
-    }
-
     if ( ! init_data_engine () )
     {
         LOG_ERROR ( "[hustdb][open]init_data_engine() failed" );
@@ -219,6 +201,24 @@ bool hustdb_t::open ( )
     if ( ! init_table_index () )
     {
         LOG_ERROR ( "[hustdb][open]init_table_index() failed" );
+        return false;
+    }
+    
+    if ( ! m_slow_tasks.start () )
+    {
+        LOG_ERROR ( "[hustdb][open]slow_tasks start failed" );
+        return false;
+    }
+
+    if ( ! ( m_timer.register_task ( hustdb::timer_task_t ( 1, timestamp_cb, this ) ) &&
+             m_timer.register_task ( hustdb::timer_task_t ( 10, over_threshold_cb, this ) ) &&
+             m_timer.register_task ( hustdb::timer_task_t ( m_store_conf.db_ttl_scan_interval, ttl_scan_cb, this ) ) &&
+             m_timer.register_task ( hustdb::timer_task_t ( m_store_conf.db_binlog_scan_interval, binlog_scan_cb, this ) ) &&
+             m_timer.open ( )
+             )
+         )
+    {
+        LOG_ERROR ( "[hustdb][open]timer register task failed" );
         return false;
     }
 
@@ -357,7 +357,7 @@ bool hustdb_t::init_server_config ( )
         return false;
     }
     
-    m_store_conf.db_binlog_scan_interval = m_appini->ini_get_int ( m_ini, "store", "db.binlog.scan_interval", 120 );
+    m_store_conf.db_binlog_scan_interval = m_appini->ini_get_int ( m_ini, "store", "db.binlog.scan_interval", 60 );
     if ( m_store_conf.db_binlog_scan_interval <= 0 )
     {
         LOG_ERROR ( "[hustdb][init_server_config]store db.binlog.scan_interval invalid, binlog.scan_interval: %d", m_store_conf.db_binlog_scan_interval );
@@ -1793,7 +1793,7 @@ int hustdb_t::hustdb_ttl_scan ( )
 
 int hustdb_t::hustdb_binlog_scan ( )
 {
-    if ( ! m_slow_tasks.empty () )
+    if ( ! m_slow_tasks.le_one () )
     {
         LOG_ERROR ( "[hustdb][db_binlog_scan]slow_tasks not empty" );
         return EPERM;

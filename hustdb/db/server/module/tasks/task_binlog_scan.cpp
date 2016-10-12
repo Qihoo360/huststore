@@ -41,12 +41,13 @@ void task_binlog_scan_t::process_binlog_scan ( )
     {
         i_server_kv_t * db = ( ( hustdb_t * ) G_APPTOOL->get_hustdb () )->get_storage ();
         
-        struct export_cb_param_t cb_pm;
-        cb_pm.start        = 0;
-        cb_pm.end          = MAX_BUCKET_NUM;
-        cb_pm.noval        = false;
+        struct check_alive_cb_param_t alive_cb_pm; 
+        struct export_cb_param_t      export_cb_pm;
+        export_cb_pm.start            = 0;
+        export_cb_pm.end              = MAX_BUCKET_NUM;
+        export_cb_pm.noval            = false;
 
-        int r = db->binlog_scan ( NULL, NULL, NULL, NULL, & cb_pm );
+        int r = db->binlog_scan ( NULL, NULL, & alive_cb_pm, NULL, & export_cb_pm );
         if ( 0 != r )
         {
             LOG_ERROR ( "[slow_task][binlog_scan]task failed: %d", r );

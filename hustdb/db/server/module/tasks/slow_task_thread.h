@@ -215,6 +215,8 @@ public:
                 );
 
     bool empty ( );
+    
+    bool le_one ( );
 
     void run ( );
 

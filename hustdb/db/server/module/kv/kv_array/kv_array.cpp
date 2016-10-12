@@ -96,7 +96,7 @@ bool kv_array_t::open ( config_t & config )
         return false;
     }
 
-    for ( int i = 0; i <= m_file_count; ++ i )
+    for ( int i = 0; i < m_file_count + 2; ++ i )
     {
         const char * path = config.get_file_path ( i );
         if ( NULL == path )
@@ -1619,9 +1619,10 @@ int kv_array_t::binlog_scan (
             if ( alive_cb_pm->cursor_type != '+' )
             {
                 r = EFAULT;
-                continue;
+                //continue;
+                break;
             }
-            
+
             real_key     = key + host_u8;
             real_key_len = key_len - host_u8;
 

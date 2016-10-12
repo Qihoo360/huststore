@@ -84,6 +84,11 @@ bool slow_task_thread_t::empty ( )
     return m_tasks.empty ();
 }
 
+bool slow_task_thread_t::le_one ( )
+{
+    return m_tasks.size () <= 1;
+}
+
 void slow_task_thread_t::run ( )
 {
     while ( ! is_need_exit () )

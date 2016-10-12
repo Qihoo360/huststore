@@ -542,6 +542,47 @@ void hustdb_export_frame(evhtp_request_t * request, void * data)
     hustdb_export_handler(args, request, ctx);
 }
 
+void hustdb_binlog_frame(evhtp_request_t * request, void * data)
+{
+    hustdb_network_ctx_t * ctx = reinterpret_cast<hustdb_network_ctx_t *>(data);
+    if (!request || !ctx || !ctx->db->ok())
+    {
+        evhtp::send_reply(EVHTP_RES_500, request);
+        return;
+    }
+    if (!evhtp::check_auth(request, &ctx->base))
+    {
+        return;
+    }
+    htp_method method = evhtp_request_get_method(request);
+    if (htp_method_GET != method && htp_method_POST != method)
+    {
+        evhtp::invalid_method(request);
+        return;
+    }
+    hustdb_binlog_ctx_t args(request->uri->query);
+    evhtp::c_str_t body = ctx->base.get_body(request);
+    if (htp_method_POST == method)
+    {
+        if (!body.data || body.len < 1)
+        {
+            evhtp::send_reply(EVHTP_RES_NOTFOUND, request);
+            return;
+        }
+    }
+    if (body.data && body.len > 0)
+    {
+        args.has_key = true;
+        args.key = body;
+    }
+    if (!args.has_key || !args.has_host || !args.has_method)
+    {
+        evhtp::send_reply(EVHTP_RES_NOTFOUND, request);
+        return;
+    }
+    hustdb_binlog_handler(args, request, ctx);
+}
+
 void hustmq_put_frame(evhtp_request_t * request, void * data)
 {
     hustdb_network_ctx_t * ctx = reinterpret_cast<hustdb_network_ctx_t *>(data);
@@ -1615,6 +1656,7 @@ bool hustdb_init_handlers(hustdb_network_ctx_t * ctx, evhtp_t * htp)
     if (!evhtp_set_cb(htp, "/hustdb/smembers", hustdb_smembers_frame, ctx)) return false;
     if (!evhtp_set_cb(htp, "/hustdb/file_count", hustdb_file_count_frame, ctx)) return false;
     if (!evhtp_set_cb(htp, "/hustdb/export", hustdb_export_frame, ctx)) return false;
+    if (!evhtp_set_cb(htp, "/hustdb/binlog", hustdb_binlog_frame, ctx)) return false;
     if (!evhtp_set_cb(htp, "/hustmq/put", hustmq_put_frame, ctx)) return false;
     if (!evhtp_set_cb(htp, "/hustmq/get", hustmq_get_frame, ctx)) return false;
     if (!evhtp_set_cb(htp, "/hustmq/ack", hustmq_ack_frame, ctx)) return false;

@@ -256,6 +256,14 @@ void hustdb_export_handler(hustdb_export_ctx_t& args, evhtp_request_t * request,
     hustdb_network::post_handler(r, &rsp, rsp.size(), request, ctx);
 }
 
+void hustdb_binlog_handler(hustdb_binlog_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx)
+{
+    conn_ctxt_t conn;
+    conn.worker_id = ctx->base.get_id(request);
+    int r = ctx->db->hustdb_binlog(args.has_tb ? args.tb.data : NULL, args.has_tb ? args.tb.len : 0, args.key.data, args.key.len, args.host.data, args.host.len, args.method, conn);
+    evhtp::send_nobody_reply(ctx->db->errno_int_status(r), request);
+}
+
 void hustmq_put_handler(hustmq_put_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx)
 {
     conn_ctxt_t conn;

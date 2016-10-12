@@ -825,6 +825,56 @@ hustdb_export_ctx_t::hustdb_export_ctx_t(evhtp_query_t * htp_query)
     }
 }
 
+hustdb_binlog_ctx_t::hustdb_binlog_ctx_t(evhtp_query_t * htp_query)
+{
+    // reset
+    has_tb = false;
+    has_key = false;
+    has_host = false;
+    has_method = false;
+
+    memset(&tb, 0, sizeof(evhtp::c_str_t));
+    memset(&key, 0, sizeof(evhtp::c_str_t));
+    memset(&host, 0, sizeof(evhtp::c_str_t));
+    memset(&method, 0, sizeof(uint8_t));
+
+    if (!htp_query)
+    {
+        return;
+    }
+    // parse from htp_query
+    evhtp_kv_s * kv = htp_query->tqh_first;
+    while (kv)
+    {
+        static evhtp::c_str_t __tb = evhtp_make_str("tb");
+        static evhtp::c_str_t __key = evhtp_make_str("key");
+        static evhtp::c_str_t __host = evhtp_make_str("host");
+        static evhtp::c_str_t __method = evhtp_make_str("method");
+
+        if (kv->klen == __tb.len && 0 == strncmp(__tb.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
+        {
+            has_tb = true;
+            tb.assign(kv->val, kv->vlen);
+        }
+        else if (kv->klen == __key.len && 0 == strncmp(__key.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
+        {
+            has_key = true;
+            key.assign(kv->val, kv->vlen);
+        }
+        else if (kv->klen == __host.len && 0 == strncmp(__host.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
+        {
+            has_host = true;
+            host.assign(kv->val, kv->vlen);
+        }
+        else if (kv->klen == __method.len && 0 == strncmp(__method.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
+        {
+            has_method = true;
+            method = evhtp::cast <uint8_t> (std::string(kv->val, kv->vlen));
+        }
+        kv = kv->next.tqe_next;
+    }
+}
+
 hustmq_put_ctx_t::hustmq_put_ctx_t(evhtp_query_t * htp_query)
 {
     // reset

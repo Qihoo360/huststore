@@ -248,6 +248,21 @@ struct hustdb_export_ctx_t
     hustdb_export_ctx_t(evhtp_query_t * htp_query);
 };
 
+struct hustdb_binlog_ctx_t
+{
+    evhtp::c_str_t tb;
+    evhtp::c_str_t key;
+    evhtp::c_str_t host;
+    uint8_t method;
+
+    bool has_tb;
+    bool has_key;
+    bool has_host;
+    bool has_method;
+
+    hustdb_binlog_ctx_t(evhtp_query_t * htp_query);
+};
+
 struct hustmq_put_ctx_t
 {
     evhtp::c_str_t queue;

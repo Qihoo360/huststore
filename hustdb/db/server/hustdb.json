@@ -226,6 +226,20 @@
             "check": "!request || !ctx || !ctx->db->ok()"
         },
         {
+            "uri": "/hustdb/binlog",
+            "methods": ["GET", "POST"],
+            "args":
+            [
+                ["string", "tb"],
+                ["string", "key"],
+                ["string", "host"],
+                ["uint8_t", "method"]
+            ],
+            "required": ["key", "host", "method"],
+            "post": { "arg": "key" },
+            "check": "!request || !ctx || !ctx->db->ok()"
+        },
+        {
             "uri": "/hustmq/put", 
             "methods": ["GET", "POST"],
             "args":

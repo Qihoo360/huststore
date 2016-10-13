@@ -107,4 +107,12 @@ typedef struct
 ngx_bool_t hustdb_ha_get_readable_peer(size_t buckets, size_t bucket, hustdb_ha_bucket_buf_t * result);
 ngx_bool_t hustdb_ha_init_identifier_cache(ngx_http_hustdb_ha_main_conf_t * mcf);
 
+ngx_int_t hustdb_ha_fetch_sync_data(
+    const ngx_str_t * http_uri,
+    const ngx_str_t * http_args,
+    const ngx_str_t * user,
+    const ngx_str_t * passwd,
+    ngx_http_upstream_rr_peer_t * sync_peer,
+    ngx_http_request_t * r);
+
 #endif // __hustdb_ha_handler_base_20150605184922_h__

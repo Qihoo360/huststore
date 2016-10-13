@@ -1,4 +1,4 @@
-#include "hustdb_ha_sync_handler.h"
+#include "hustdb_ha_handler_base.h"
 
 typedef struct
 {

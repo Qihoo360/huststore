@@ -11,22 +11,8 @@
 #include "zlog.h"
 #include "hustdb_ha_def.h"
 
-#define HUSTDB_HA_TB_QUERY   1
-
 #undef HUSTDB_TABLE_SIZE
 #define HUSTDB_TABLE_SIZE    1024
-
-#undef MAX_EXPORT_OFFSET
-#define MAX_EXPORT_OFFSET    100000000
-
-#undef SYNC_EXPORT_OFFSET
-#define SYNC_EXPORT_OFFSET   1000000
-
-#undef MAX_EXPORT_SIZE
-#define MAX_EXPORT_SIZE      1000
-
-#undef HUSTDB_HA_KEY_SIZE
-#define HUSTDB_HA_KEY_SIZE   64
 
 #undef PEER_KEY
 #define PEER_KEY             "peer"
@@ -92,10 +78,8 @@ typedef struct
 
 ngx_bool_t hustdb_ha_init_peer_array(ngx_pool_t * pool);
 ngx_http_upstream_rr_peer_t * hustdb_ha_get_peer(ngx_http_request_t *r);
-hustdb_ha_peers_t * hustdb_ha_get_peers();
 
 ngx_bool_t hustdb_ha_init_log_dirs(const ngx_str_t * prefix, ngx_pool_t * pool);
-ngx_str_t hustdb_ha_init_dir(const ngx_str_t * prefix, const ngx_str_t * file, ngx_pool_t * pool);
 ngx_bool_t hustdb_ha_init_table_str(const ngx_str_t * path, ngx_pool_t * pool);
 
 ngx_bool_t hustdb_ha_write_log(
@@ -113,8 +97,6 @@ ngx_bool_t hustdb_ha_check_keys(ngx_str_t * backend_uri, ngx_http_request_t *r);
 
 char * hustdb_ha_get_key_from_body(ngx_http_request_t * r);
 char * hustdb_ha_get_key(ngx_http_request_t * r);
-
-void hustdb_ha_dispose_status(char * status);
 
 char * hustdb_ha_read_file(const char * path, ngx_pool_t * pool);
 

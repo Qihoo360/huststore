@@ -15,6 +15,7 @@ NGX_ADDON_SRCS="$NGX_ADDON_SRCS \
     $ngx_addon_dir/hustdb_ha_write_binlog.c\
     $ngx_addon_dir/hustdb_ha_write_cache.c\
     $ngx_addon_dir/hustdb_ha_write_handler.c\
+    $ngx_addon_dir/hustdb_ha_read2_handler.c\
     $ngx_addon_dir/hustdb_ha_read_handler.c\
     $ngx_addon_dir/hustdb_ha_sync_handler.c\
     $ngx_addon_dir/hustdb_ha_set_table_handler.c\

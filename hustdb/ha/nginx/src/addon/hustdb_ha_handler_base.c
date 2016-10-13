@@ -1,4 +1,4 @@
-#include "hustdb_ha_handler_base.h"
+#include "hustdb_ha_handler_inner.h"
 #include "ngx_http_upstream_check_module.h"
 
 static const ngx_str_t VERSION_KEY = ngx_string("Version");
@@ -138,72 +138,4 @@ ngx_int_t hustdb_ha_post_peer(
     return (NGX_HTTP_OK == r->headers_out.status) ? ngx_http_send_response_imp(
         r->headers_out.status, &ctx->base.response, r) : ngx_http_send_response_imp(
             NGX_HTTP_NOT_FOUND, NULL, r);
-}
-
-
-static ngx_int_t __first_loop(hustdb_ha_check_parameter_t check_parameter, ngx_str_t * backend_uri, ngx_http_request_t *r)
-{
-    if (!check_parameter(backend_uri, r))
-    {
-        return NGX_ERROR;
-    }
-
-    ngx_http_upstream_rr_peers_t * peers = ngx_http_get_backends();
-    if (!peers || !peers->peer)
-    {
-        return NGX_ERROR;
-    }
-
-    hustdb_ha_loop_ctx_t * ctx = ngx_palloc(r->pool, sizeof(hustdb_ha_loop_ctx_t));
-    if (!ctx)
-    {
-        return NGX_ERROR;
-    }
-    memset(ctx, 0, sizeof(hustdb_ha_loop_ctx_t));
-    ngx_http_set_addon_module_ctx(r, ctx);
-
-    ctx->peer = ngx_http_first_peer(peers->peer);
-
-    return ngx_http_gen_subrequest(backend_uri, r, ctx->peer,
-        &ctx->base, ngx_http_post_subrequest_handler);
-}
-
-ngx_int_t hustdb_ha_loop_handler(
-    hustdb_ha_check_parameter_t check_parameter,
-    ngx_str_t * backend_uri,
-    ngx_http_request_t *r)
-{
-    hustdb_ha_loop_ctx_t * ctx = ngx_http_get_addon_module_ctx(r);
-    if (!ctx)
-    {
-        return __first_loop(check_parameter, backend_uri, r);
-    }
-    if (NGX_HTTP_OK != r->headers_out.status)
-    {
-        return ngx_http_send_response_imp(NGX_HTTP_NOT_FOUND, NULL, r);
-    }
-    ctx->peer = ngx_http_next_peer(ctx->peer);
-    if (ctx->peer)
-    {
-        return ngx_http_run_subrequest(r, &ctx->base, ctx->peer);
-    }
-    return ngx_http_send_response_imp(NGX_HTTP_OK, &ctx->base.response, r);
-}
-
-ngx_bool_t hustdb_ha_get_readable_peer(size_t buckets, size_t bucket, hustdb_ha_bucket_buf_t * result)
-{
-    for (result->bucket = bucket; result->bucket < buckets; ++result->bucket)
-    {
-        hustdb_ha_bucket_t * bk = hustdb_ha_get_bucket(result->bucket);
-        if (bk)
-        {
-            result->peer = ngx_http_get_first_peer(bk->readlist);
-            if (result->peer)
-            {
-                return true;
-            }
-        }
-        ++result->bad_buckets;
-    }
-    return false;
 }

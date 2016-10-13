@@ -52,6 +52,8 @@ public:
 
     void kill_me ( );
 
+    std::string queue_info ( );
+
 private:
 
     host_info_t ( const host_info_t & );

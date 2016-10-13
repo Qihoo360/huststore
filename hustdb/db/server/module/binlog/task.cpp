@@ -145,11 +145,20 @@ bool task_t::run ( husthttp_t * client )
             _callback_func ( _cb_param );
         }
 
+#if defined(_BINLOG_DEBUG)
+        printf ( "success|task|host:%s|path:%s|query_string:%s|http_code:%d\n", _host.c_str(), _path.c_str(), _query_string.c_str(), _http_code );
+#endif
+
         host_info.finish_task ( _host );
         return true;
     }
     else
     {
+
+#if defined(_BINLOG_DEBUG)
+        printf ( "fail|task|host:%s|path:%s|query_string:%s|http_code:%d\n", _host.c_str(), _path.c_str(), _query_string.c_str(), _http_code );
+#endif
+
         if ( ! host_info.has_host ( _host ) )
         {
             return true;

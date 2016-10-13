@@ -3,6 +3,7 @@
 #include <time.h>
 #include <stdint.h>
 #include <cstring>
+#include <cstdio>
 
 #include "host_info.h"
 #include "queue.h"
@@ -380,4 +381,18 @@ void host_info_t::kill_me ( )
         delete _client;
         _client = NULL;
     }
+}
+
+std::string host_info_t::queue_info ( )
+{
+    rw_lock_guard_t lock ( _rwlock, RLOCK );
+    std::string res;
+
+    for ( std::map<std::string, binlog_status_t>::iterator it = _status.begin ( ); it != _status.end ( ); ++it ) {
+        char info[128];
+        sprintf ( info, "queue_size|%s:%d\n", it->first.c_str ( ), it->second.remain.get ( ) );
+        res.append ( info );
+    }
+
+    return res;
 }

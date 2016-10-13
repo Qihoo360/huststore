@@ -2,6 +2,7 @@
 #include <pthread.h>
 
 #include <iostream>
+#include <cstdio>
 
 #include "binlog.h"
 #include "singleton.h"
@@ -140,4 +141,21 @@ bool binlog_t::remove_host (
 {
     host_info_t & host_info = singleton_t<host_info_t>::instance ();
     return host_info.remove_host ( host );
+}
+
+std::string binlog_t::get_status()
+{
+    char pool_info[128];
+
+    if ( _pool != NULL ) 
+    {
+        sprintf( pool_info, "main_queue_size:%zu\n", _pool->queue_size( ) );
+    }
+
+    std::string res ( pool_info );
+
+    host_info_t & host_info = singleton_t<host_info_t>::instance ( );
+    res.append ( host_info.queue_info( ) );
+    
+    return res;
 }

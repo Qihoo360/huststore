@@ -22,7 +22,7 @@ typedef struct
     hustdb_read_response_t master2_resp;
 } hustdb_ha_read_ctx_t;
 
-static ngx_int_t __on_subrequest_complete2(ngx_http_request_t * r, void * data, ngx_int_t rc)
+static ngx_int_t __on_subrequest_complete(ngx_http_request_t * r, void * data, ngx_int_t rc)
 {
     hustdb_ha_read_ctx_t * ctx = data;
     do
@@ -45,7 +45,7 @@ static ngx_int_t __on_subrequest_complete2(ngx_http_request_t * r, void * data, 
     return ngx_http_finish_subrequest(r);
 }
 
-static void __post_body_handler2(ngx_http_request_t *r)
+static void __post_body_handler(ngx_http_request_t *r)
 {
     --r->main->count;
     hustdb_ha_read_ctx_t * ctx = ngx_http_get_addon_module_ctx(r);
@@ -54,10 +54,10 @@ static void __post_body_handler2(ngx_http_request_t *r)
         r,
         ctx->peer->peer,
         &ctx->base,
-        __on_subrequest_complete2);
+        __on_subrequest_complete);
 }
 
-static ngx_int_t __start_read2(const char * arg, ngx_str_t * backend_uri, ngx_http_request_t *r)
+static ngx_int_t __start_read(const char * arg, ngx_str_t * backend_uri, ngx_http_request_t *r)
 {
     ngx_http_subrequest_peer_t * peer = hustdb_ha_hash_peer(arg, r);
     if (!peer)
@@ -87,7 +87,7 @@ static ngx_int_t __start_read2(const char * arg, ngx_str_t * backend_uri, ngx_ht
         return hustdb_ha_send_response(NGX_HTTP_NOT_FOUND, NULL, NULL, r);
     }
 
-    ngx_int_t rc = ngx_http_read_client_request_body(r, __post_body_handler2);
+    ngx_int_t rc = ngx_http_read_client_request_body(r, __post_body_handler);
     if ( rc >= NGX_HTTP_SPECIAL_RESPONSE )
     {
         return rc;
@@ -217,7 +217,7 @@ ngx_int_t hustdb_ha_read2_handler(const char * arg, ngx_str_t * backend_uri, ngx
     hustdb_ha_read_ctx_t * ctx = ngx_http_get_addon_module_ctx(r);
     if (!ctx)
     {
-        return __start_read2(arg, backend_uri, r);
+        return __start_read(arg, backend_uri, r);
     }
     if (STATE_READ_MASTER1 == ctx->state)
     {

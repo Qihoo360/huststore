@@ -3,6 +3,9 @@ HTTP_MODULES="$HTTP_MODULES ngx_http_hustdb_ha_module"
 NGX_ADDON_SRCS="$NGX_ADDON_SRCS \
     $ngx_addon_dir/hustdb_ha_def.c\
     $ngx_addon_dir/hustdb_ha_utils.c\
+    $ngx_addon_dir/hustdb_ha_table_vars.c\
+    $ngx_addon_dir/hustdb_ha_table_checker.c\
+    $ngx_addon_dir/hustdb_ha_table_setter.c\
     $ngx_addon_dir/hustdb_ha_table_def.c\
     $ngx_addon_dir/hustdb_ha_handler_base.c\
     $ngx_addon_dir/hustdb_ha_write_args.c\

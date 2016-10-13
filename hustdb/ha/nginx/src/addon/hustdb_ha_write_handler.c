@@ -224,7 +224,7 @@ static ngx_bool_t __parse_args(
     return __init_write_base_ctx(hash_by_tb ? ctx->tb : ctx->key, &ctx->base);
 }
 
-static void __copy_data(write_ctx_t * tmp, ngx_http_hustdb_ha_write_ctx_t * ctx)
+static void __copy_data(write_ctx_t * tmp, hustdb_ha_write_ctx_t * ctx)
 {
 
     ctx->base.key = tmp->key;
@@ -251,12 +251,12 @@ static ngx_bool_t __init_write_ctx_by_body(ngx_http_request_t *r, hustdb_ha_writ
         }
 
         write_ctx_t tmp;
-        if (!__set_write_context(key, ctx->has_tb, r, &tmp))
+        if (!__set_write_context(key, ctx->base.has_tb, r, &tmp))
         {
             break;
         }
 
-        __copy_data(&tmp, &ctx->base);
+        __copy_data(&tmp, ctx);
 
         return true;
     } while (0);
@@ -272,7 +272,7 @@ static void __post_handler(ngx_http_request_t *r)
     hustdb_ha_write_ctx_t * ctx = ngx_http_get_addon_module_ctx(r);
 
     ngx_bool_t rc = true;
-    if (ctx->key_in_body)
+    if (ctx->base.key_in_body)
     {
         if (!__init_write_ctx_by_body(r, ctx))
         {
@@ -287,10 +287,10 @@ static void __post_handler(ngx_http_request_t *r)
     }
 
     ngx_http_gen_subrequest(
-        ctx->base.base.base.backend_uri,
+        ctx->base.base.backend_uri,
         r,
-        ctx->base.base.peer->peer,
-        &ctx->base.base.base,
+        ctx->base.peer->peer,
+        &ctx->base.base,
         hustdb_ha_on_subrequest_complete);
 }
 
@@ -306,7 +306,7 @@ ngx_int_t hustdb_ha_start_post(
     {
         return hustdb_ha_send_response(NGX_HTTP_NOT_FOUND, NULL, NULL, r);
     }
-    ctx->base.base.base.backend_uri = backend_uri;
+    ctx->base.base.backend_uri = backend_uri;
 
     if (support_post_only && !(r->method & NGX_HTTP_POST))
     {
@@ -315,8 +315,8 @@ ngx_int_t hustdb_ha_start_post(
 
     if (key_in_body)
     {
-        ctx->key_in_body = true;
-        ctx->has_tb = has_tb;
+        ctx->base.key_in_body = true;
+        ctx->base.has_tb = has_tb;
     }
     else
     {
@@ -325,7 +325,7 @@ ngx_int_t hustdb_ha_start_post(
         {
             return hustdb_ha_send_response(NGX_HTTP_NOT_FOUND, NULL, NULL, r);
         }
-        __copy_data(&tmp, &ctx->base);
+        __copy_data(&tmp, ctx);
     }
 
     ngx_int_t rc = ngx_http_read_client_request_body(r, __post_handler);
@@ -348,12 +348,11 @@ ngx_int_t hustdb_ha_start_del(
         return hustdb_ha_start_post(support_post_only, key_in_body, has_tb, backend_uri, r);
     }
 
-    hustdb_ha_write_ctx_t * args = __create_write_ctx(r);
-    if (!args)
+    hustdb_ha_write_ctx_t * ctx = __create_write_ctx(r);
+    if (!ctx)
     {
         return NGX_ERROR;
     }
-    ngx_http_hustdb_ha_write_ctx_t * ctx = &args->base;
     ctx->base.base.backend_uri = backend_uri;
     write_ctx_t tmp;
     if (!__set_write_context(NULL, has_tb, r, &tmp))
@@ -380,7 +379,7 @@ static ngx_int_t __write_sync_data(
     uint8_t method,
     ngx_bool_t has_tb,
     ngx_http_request_t *r,
-    ngx_http_hustdb_ha_write_ctx_t * ctx)
+    hustdb_ha_write_ctx_t * ctx)
 {
     do
     {
@@ -479,7 +478,7 @@ static ngx_bool_t __skip_error(uint8_t method, ngx_uint_t status)
         || __skip_not_found_error(method, status);
 }
 
-static void __update_error(uint8_t method, ngx_uint_t status, ngx_http_hustdb_ha_write_ctx_t * ctx)
+static void __update_error(uint8_t method, ngx_uint_t status, hustdb_ha_write_ctx_t * ctx)
 {
     if (NGX_HTTP_OK == status)
     {
@@ -495,15 +494,10 @@ static void __update_error(uint8_t method, ngx_uint_t status, ngx_http_hustdb_ha
     ctx->error_peer = ctx->base.peer;
 }
 
-static ngx_bool_t __should_write_log(ngx_http_hustdb_ha_write_ctx_t * ctx)
-{
-    return 0 == ctx->skip_error_count && 1 == ctx->error_count;
-}
-
 static ngx_str_t __format_binlog_args(uint8_t method,
     ngx_bool_t has_tb,
     ngx_http_request_t *r,
-    ngx_http_hustdb_ha_write_ctx_t * ctx)
+    hustdb_ha_write_ctx_t * ctx)
 {
     static const ngx_str_t HOST = ngx_string("host=");
     static const ngx_str_t METHOD = ngx_string("&method=");
@@ -584,7 +578,7 @@ static ngx_int_t __write_binlog(
     uint8_t method,
     ngx_bool_t has_tb,
     ngx_http_request_t *r,
-    ngx_http_hustdb_ha_write_ctx_t * ctx)
+    hustdb_ha_write_ctx_t * ctx)
 {
     ngx_bool_t alive = ngx_http_peer_is_alive(ctx->health_peer->peer);
     if (!alive)
@@ -610,9 +604,9 @@ static ngx_int_t __post_write_data(
     uint8_t method,
     ngx_bool_t has_tb,
     ngx_http_request_t *r,
-    ngx_http_hustdb_ha_write_ctx_t * ctx)
+    hustdb_ha_write_ctx_t * ctx)
 {
-    if (__should_write_log(ctx))
+    if (0 == ctx->skip_error_count && 1 == ctx->error_count)
     {
         return __write_binlog(method, has_tb, r, ctx);
     }
@@ -627,7 +621,7 @@ static ngx_int_t __on_write_master1_complete(
     uint8_t method,
     ngx_bool_t has_tb,
     ngx_http_request_t *r,
-    ngx_http_hustdb_ha_write_ctx_t * ctx)
+    hustdb_ha_write_ctx_t * ctx)
 {
 	__update_error(method, r->headers_out.status, ctx);
 	ctx->base.peer = ctx->base.peer->next;
@@ -654,7 +648,7 @@ static ngx_int_t __on_write_master2_complete(
     uint8_t method,
     ngx_bool_t has_tb,
     ngx_http_request_t *r,
-    ngx_http_hustdb_ha_write_ctx_t * ctx)
+    hustdb_ha_write_ctx_t * ctx)
 {
     __update_error(method, r->headers_out.status, ctx);
     return __post_write_data(method, has_tb, r, ctx);
@@ -664,7 +658,7 @@ static ngx_int_t __on_write_binlog_complete(
     uint8_t method,
     ngx_bool_t has_tb,
     ngx_http_request_t *r,
-    ngx_http_hustdb_ha_write_ctx_t * ctx)
+    hustdb_ha_write_ctx_t * ctx)
 {
     if (NGX_HTTP_OK != r->headers_out.status)
     {
@@ -681,7 +675,7 @@ static ngx_int_t __switch_state(
     uint8_t method,
     ngx_bool_t has_tb,
     ngx_http_request_t *r,
-    ngx_http_hustdb_ha_write_ctx_t * ctx)
+    hustdb_ha_write_ctx_t * ctx)
 {
     if (STATE_WRITE_MASTER1 == ctx->state)
     {
@@ -712,18 +706,18 @@ ngx_int_t hustdb_ha_write_handler(
     {
         return start_write(support_post_only, key_in_body, has_tb, backend_uri, r);
     }
-    return __switch_state(method, has_tb, r, &ctx->base);
+    return __switch_state(method, has_tb, r, ctx);
 }
 
-static ngx_http_hustdb_ha_write_ctx_t * __create_zwrite_ctx(ngx_http_request_t *r)
+static hustdb_ha_write_ctx_t * __create_zwrite_ctx(ngx_http_request_t *r)
 {
-    ngx_http_hustdb_ha_write_ctx_t * ctx = ngx_palloc(r->pool, sizeof(ngx_http_hustdb_ha_write_ctx_t));
+    hustdb_ha_write_ctx_t * ctx = ngx_palloc(r->pool, sizeof(hustdb_ha_write_ctx_t));
     if (!ctx)
     {
         return NULL;
     }
     ngx_http_set_addon_module_ctx(r, ctx);
-    memset(ctx, 0, sizeof(ngx_http_hustdb_ha_write_ctx_t));
+    memset(ctx, 0, sizeof(hustdb_ha_write_ctx_t));
     return ctx;
 }
 
@@ -731,7 +725,7 @@ static void __post_body_handler(ngx_http_request_t *r)
 {
     --r->main->count;
 
-    ngx_http_hustdb_ha_write_ctx_t * ctx = ngx_http_get_addon_module_ctx(r);
+    hustdb_ha_write_ctx_t * ctx = ngx_http_get_addon_module_ctx(r);
 
     ctx->base.key = hustdb_ha_get_key(r);
     if (!ctx->base.key)
@@ -750,7 +744,7 @@ static void __post_body_handler(ngx_http_request_t *r)
 
 static ngx_int_t __start_zwrite(ngx_str_t * backend_uri, ngx_http_request_t *r)
 {
-    ngx_http_hustdb_ha_write_ctx_t * ctx = __create_zwrite_ctx(r);
+    hustdb_ha_write_ctx_t * ctx = __create_zwrite_ctx(r);
     if (!ctx)
     {
         return hustdb_ha_send_response(NGX_HTTP_NOT_FOUND, NULL, NULL, r);
@@ -777,7 +771,7 @@ ngx_int_t hustdb_ha_zwrite_handler(
     ngx_str_t * backend_uri,
     ngx_http_request_t *r)
 {
-    ngx_http_hustdb_ha_write_ctx_t * ctx = ngx_http_get_addon_module_ctx(r);
+    hustdb_ha_write_ctx_t * ctx = ngx_http_get_addon_module_ctx(r);
     if (!ctx)
     {
         return __start_zwrite(backend_uri, r);

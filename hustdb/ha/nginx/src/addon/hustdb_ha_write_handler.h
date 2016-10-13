@@ -28,14 +28,6 @@ typedef struct
     ngx_http_subrequest_peer_t * error_peer;
     ngx_http_subrequest_peer_t * health_peer;
     uint32_t ttl;
-} ngx_http_hustdb_ha_write_ctx_t;
-
-typedef struct
-{
-    ngx_http_hustdb_ha_write_ctx_t base;
-	// param
-	ngx_bool_t key_in_body;
-	ngx_bool_t has_tb;
 } hustdb_ha_write_ctx_t;
 
 typedef struct

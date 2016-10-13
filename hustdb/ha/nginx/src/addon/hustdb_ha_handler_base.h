@@ -11,8 +11,10 @@ typedef struct
     const char * tb;
     uint64_t score;
     int8_t opt;
-    ngx_bool_t key_in_body;
     ngx_str_t version;
+
+    ngx_bool_t key_in_body;
+    ngx_bool_t has_tb;
 } hustdb_ha_ctx_t;
 
 typedef struct

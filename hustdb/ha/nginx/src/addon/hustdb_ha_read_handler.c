@@ -140,13 +140,23 @@ ngx_int_t hustdb_ha_read_handler(
 	return hustdb_ha_send_response(NGX_HTTP_OK, &ctx->version, &ctx->base.response, r);
 }
 
+static char * __parse_key(ngx_http_request_t * r)
+{
+    char * key = hustdb_ha_get_key_from_body(r);
+    if (key)
+    {
+        return key;
+    }
+    return ngx_http_get_param_val(&r->args, "key", r->pool);
+}
+
 static void __post_body_handler(ngx_http_request_t *r)
 {
     --r->main->count;
     hustdb_ha_ctx_t * ctx = ngx_http_get_addon_module_ctx(r);
 
     ctx->tb = ngx_http_get_param_val(&r->args, "tb", r->pool);
-    ctx->key = hustdb_ha_get_key(r);
+    ctx->key = __parse_key(r);
     if (!ctx->key || !ctx->tb)
     {
         hustdb_ha_send_response(NGX_HTTP_NOT_FOUND, NULL, NULL, r);

@@ -171,16 +171,6 @@ char * hustdb_ha_get_key_from_body(ngx_http_request_t * r)
     return key;
 }
 
-char * hustdb_ha_get_key(ngx_http_request_t * r)
-{
-    char * key = hustdb_ha_get_key_from_body(r);
-    if (key)
-    {
-        return key;
-    }
-    return ngx_http_get_param_val(&r->args, "key", r->pool);
-}
-
 char * hustdb_ha_read_file(const char * path, ngx_pool_t * pool)
 {
     if (!path)

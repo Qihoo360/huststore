@@ -330,7 +330,17 @@ static void __post_body_handler(ngx_http_request_t *r)
 
     hustdb_ha_write_ctx_t * ctx = ngx_http_get_addon_module_ctx(r);
 
-    ctx->base.key = hustdb_ha_get_key(r);
+    char * key = hustdb_ha_get_key_from_body(r);
+    if (key)
+    {
+        ctx->base.key_in_body = true;
+    }
+    else
+    {
+        key = ngx_http_get_param_val(&r->args, "key", r->pool);
+    }
+
+    ctx->base.key = key;
     if (!ctx->base.key)
     {
         hustdb_ha_send_response(NGX_HTTP_NOT_FOUND, NULL, NULL, r);

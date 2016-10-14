@@ -319,9 +319,13 @@ bool kv_md5db_t::open ( )
     LOG_INFO ( "[md5db][db]conflicts opened OK" );
 
     // binlog
-    const char * username = hustdb->get_server_conf ().http_security_user.c_str ();
-    const char * password = hustdb->get_server_conf ().http_security_passwd.c_str ();
-    if ( ! m_inner->m_binlog.init ( 2, 1000, 1000, username, password ) )
+    if ( ! m_inner->m_binlog.init ( hustdb->get_store_conf ().db_binlog_thread_count,
+                                    hustdb->get_store_conf ().db_binlog_queue_capacity,
+                                    hustdb->get_store_conf ().db_binlog_queue_capacity,
+                                    hustdb->get_server_conf ().http_security_user.c_str (),
+                                    hustdb->get_server_conf ().http_security_passwd.c_str ()
+                                   )
+         )
     {
         LOG_ERROR ( "[md5db][db]binlog open failed" );
         return false;
@@ -3261,7 +3265,9 @@ int kv_md5db_t::binlog (
         return r;
     }
 
+    item_ctxt->key.append ( ( const char * ) & host_u8, sizeof ( uint8_t ) );
     item_ctxt->key.append ( host, host_len );
+    
     if ( tmp_ctxt->table_len > 0 )
     {
         item_ctxt->key.append ( tmp_ctxt->tbkey.c_str (), tmp_ctxt->table_len );
@@ -3269,7 +3275,6 @@ int kv_md5db_t::binlog (
 
     tmp_ctxt->value.resize ( 0 );
     tmp_ctxt->value.append ( 1, ( char ) cmd_type );
-    tmp_ctxt->value.append ( ( const char * ) & host_u8, sizeof ( uint8_t ) );
 
     if ( ! is_rem )
     {

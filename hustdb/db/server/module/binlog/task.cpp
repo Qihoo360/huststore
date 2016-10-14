@@ -61,14 +61,25 @@ bool task_t::make_task (
     _url.append ( host, host_len );
 
     size_t key_safe_len = 3 * key_len + 1;
-    char key_safe[key_safe_len];
+    char key_safe [ key_safe_len ];
 
-    if ( ! url_encode_all ( key, int ( key_len ), key_safe, ( int * ) &key_safe_len ) )
+    if ( cmd_type == HUSTDB_METHOD_PUT ||
+         cmd_type == HUSTDB_METHOD_HSET ||
+         cmd_type == HUSTDB_METHOD_DEL ||
+         cmd_type == HUSTDB_METHOD_HDEL
+         )
     {
-        return false;
+        if ( ! url_encode_all ( key, int ( key_len ), key_safe, ( int * ) &key_safe_len ) )
+        {
+            return false;
+        }
     }
-
-    char query_string[key_safe_len + 128];
+    else
+    {
+        key_safe_len = key_len;
+    }
+    
+    char query_string [ key_safe_len + 128 ];
 
     switch ( cmd_type )
     {
@@ -179,7 +190,7 @@ bool task_t::inner_handle ( husthttp_t * client )
 
     client->set_host ( _url.c_str (), _url.size () );
 
-    if ( ! client->open2 ( _method, _path, _query_string, _value, 5, 5 ) )
+    if ( ! client->open2 ( _method, _path, _query_string, _value, 3, 30 ) )
     {
         return false;
     }
@@ -201,7 +212,7 @@ bool task_t::inner_handle ( husthttp_t * client )
 
 bool task_t::is_success ( int * http_code )
 {
-    return ( *http_code == 200 || * http_code == 400 || * http_code == 412 );
+    return ( * http_code == 200 || * http_code == 400 || * http_code == 401 || * http_code == 404 || * http_code == 412 );
 }
 
 bool task_t::url_encode_all ( const char * src, int src_len, char * dst, int * dst_len )

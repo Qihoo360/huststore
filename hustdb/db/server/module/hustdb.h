@@ -159,6 +159,8 @@ typedef struct store_conf_s
     int32_t db_ttl_maximum;
     int32_t db_ttl_scan_interval;
     int32_t db_binlog_scan_interval;
+    int32_t db_binlog_thread_count;
+    int32_t db_binlog_queue_capacity;
     int32_t mq_queue_maximum;
     int32_t db_table_maximum;
     int32_t db_ttl_scan_count;
@@ -168,6 +170,9 @@ typedef struct store_conf_s
     , mq_ttl_maximum ( 0 )
     , db_ttl_maximum ( 0 )
     , db_ttl_scan_interval ( 0 )
+    , db_binlog_scan_interval ( 0 )
+    , db_binlog_thread_count ( 0 )
+    , db_binlog_queue_capacity ( 0 )
     , mq_queue_maximum ( 0 )
     , db_table_maximum ( 0 )
     , db_ttl_scan_count ( 0 )
@@ -219,9 +224,14 @@ public:
         return m_server_conf.tcp_worker_count;
     }
 
-    server_conf_t get_server_conf ( )
+    server_conf_t & get_server_conf ( )
     {
         return m_server_conf;
+    }
+    
+    store_conf_t & get_store_conf ( )
+    {
+        return m_store_conf;
     }
     
     uint32_t get_current_timestamp ( )

@@ -363,6 +363,20 @@ bool hustdb_t::init_server_config ( )
         LOG_ERROR ( "[hustdb][init_server_config]store db.binlog.scan_interval invalid, binlog.scan_interval: %d", m_store_conf.db_binlog_scan_interval );
         return false;
     }
+    
+    m_store_conf.db_binlog_thread_count = m_appini->ini_get_int ( m_ini, "store", "db.binlog.thread_count", 2 );
+    if ( m_store_conf.db_binlog_thread_count <= 0 )
+    {
+        LOG_ERROR ( "[hustdb][init_server_config]store db.binlog.thread_count invalid, binlog.thread_count: %d", m_store_conf.db_binlog_thread_count );
+        return false;
+    }
+    
+    m_store_conf.db_binlog_queue_capacity = m_appini->ini_get_int ( m_ini, "store", "db.binlog.queue_capacity", 1000 );
+    if ( m_store_conf.db_binlog_queue_capacity <= 0 )
+    {
+        LOG_ERROR ( "[hustdb][init_server_config]store db.binlog.queue_capacity invalid, binlog.queue_capacity: %d", m_store_conf.db_binlog_queue_capacity );
+        return false;
+    }
 
     m_store_conf.mq_queue_maximum = m_appini->ini_get_int ( m_ini, "store", "mq.queue.maximum", 8192 );
     if ( m_store_conf.mq_queue_maximum <= 0 )
@@ -807,6 +821,9 @@ const char * hustdb_t::errno_string_status ( int r )
         case EINVAL:
             return "401 Access denied.";
 
+        case ENOMEM:
+            return "403 Forbidden.";
+
         case ENOENT:
             return "404 Object not found.";
 
@@ -831,6 +848,9 @@ int hustdb_t::errno_int_status ( int r )
         case EINVAL:
             return 401;
 
+        case ENOMEM:
+            return 403;
+            
         case ENOENT:
             return 404;
 
@@ -1424,7 +1444,7 @@ int hustdb_t::hustdb_put (
     if ( unlikely ( m_over_threshold ) )
     {
         LOG_DEBUG ( "[hustdb][db_put]memory over threshold" );
-        return EINVAL;
+        return ENOMEM;
     }
 
     m_storage->set_inner_table ( NULL, 0, KV_ALL, conn );
@@ -2007,7 +2027,7 @@ int hustdb_t::hustdb_hset (
     if ( unlikely ( m_over_threshold ) )
     {
         LOG_DEBUG ( "[hustdb][db_hset]memory over threshold" );
-        return EINVAL;
+        return ENOMEM;
     }
 
     std::string inner_table ( table, table_len );
@@ -2286,7 +2306,7 @@ int hustdb_t::hustdb_sadd (
     if ( unlikely ( m_over_threshold ) )
     {
         LOG_DEBUG ( "[hustdb][db_sadd]memory over threshold" );
-        return EINVAL;
+        return ENOMEM;
     }
 
     std::string inner_table ( table, table_len );
@@ -2551,7 +2571,7 @@ int hustdb_t::hustdb_zadd (
     if ( unlikely ( m_over_threshold ) )
     {
         LOG_DEBUG ( "[hustdb][db_zadd]memory over threshold" );
-        return EINVAL;
+        return ENOMEM;
     }
 
     std::string inner_table ( table, table_len );
@@ -2998,7 +3018,7 @@ int hustdb_t::hustmq_put (
     if ( unlikely ( m_over_threshold ) )
     {
         LOG_DEBUG ( "[hustdb][mq_put]memory over threshold" );
-        return EINVAL;
+        return ENOMEM;
     }
 
     qhash = m_apptool->locker_hash ( queue, queue_len );
@@ -3688,7 +3708,7 @@ int hustdb_t::hustmq_pub (
     if ( unlikely ( m_over_threshold ) )
     {
         LOG_DEBUG ( "[hustdb][mq_pub]memory over threshold" );
-        return EINVAL;
+        return ENOMEM;
     }
 
     qhash = m_apptool->locker_hash ( queue, queue_len );

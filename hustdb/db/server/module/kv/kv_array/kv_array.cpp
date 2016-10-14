@@ -1543,14 +1543,13 @@ int kv_array_t::binlog_scan (
     const char *        val                   = NULL;
     size_t              table_len             = 0;
     const char *        table                 = NULL;
-    size_t              type_len              = 0;
-    char                type[ 2 ]             = { };
     i_iterator_t *      it                    = NULL;
     hustdb_t *          g_hustdb              = NULL;
     bool                ignore_this_record    = false;
     bool                break_the_loop        = false;
     i_kv_t *            kv_binlog             = NULL;
     i_kv_t *            kv_data               = NULL;
+    size_t              inner_key_len         = 16;
     std::string         ttl_key;
     std::string         host;
     std::string         content;
@@ -1600,16 +1599,15 @@ int kv_array_t::binlog_scan (
             
             r          = 0;
             version    = 0;
+            
             key        = it->key ( & key_len );
-            val        = it->value ( & val_len );
+            
+            fast_memcpy ( & host_u8, key, sizeof ( uint8_t ) );
 
-            fast_memcpy ( & cmd_type, val, sizeof ( uint8_t ) );
-            fast_memcpy ( & host_u8, val + sizeof ( uint8_t ), sizeof ( uint8_t ) );
-
-            if ( host.size () != host_u8 || strncmp ( host.c_str (), key, host_u8 ) != 0 )
+            if ( host.size () != host_u8 || strncmp ( host.c_str (), key + 1, host_u8 ) != 0 )
             {
                 host.resize ( 0 );
-                host.assign ( key, host_u8 );
+                host.assign ( key + 1, host_u8 );
                 
                 alive_cb_pm->host = & host;
                 
@@ -1619,27 +1617,29 @@ int kv_array_t::binlog_scan (
             if ( alive_cb_pm->cursor_type != '+' )
             {
                 r = EFAULT;
-                //continue;
-                break;
+                continue;
             }
+            
+            val        = it->value ( & val_len );
+            fast_memcpy ( & cmd_type, val, sizeof ( uint8_t ) );
 
-            real_key     = key + host_u8;
-            real_key_len = key_len - host_u8;
+            real_key     = key + host_u8 + 1;
+            real_key_len = key_len - host_u8 - 1;
 
-            if ( real_key_len > sizeof ( md5db::block_id_t ) )
+            if ( real_key_len > inner_key_len )
+            {
+                table_len = real_key_len - inner_key_len - 1;
+                table     = real_key;
+            }
+            else if ( real_key_len > sizeof ( md5db::block_id_t ) )
             {
                 table_len = real_key_len - sizeof ( md5db::block_id_t ) - 1;
                 table     = real_key;
-
-                type[ 0 ] = real_key [ table_len ];
-                type_len  = 1;
             }
             else
             {
                 table_len = 0;
                 table     = NULL;
-                type[ 0 ] = KV_ALL;
-                type_len  = 0;
             }
 
             binlog_done_cb_param_t * done_cb_pm = ( binlog_done_cb_param_t * ) malloc ( sizeof ( binlog_done_cb_param_t ) );
@@ -1659,8 +1659,8 @@ int kv_array_t::binlog_scan (
                     task_cb_pm.host_len   = host.size ();
                     task_cb_pm.table      = table;
                     task_cb_pm.table_len  = table_len;
-                    task_cb_pm.key        = val + 2;
-                    task_cb_pm.key_len    = val_len - 2;
+                    task_cb_pm.key        = val + 1;
+                    task_cb_pm.key_len    = val_len - 1;
                     task_cb_pm.value      = NULL;
                     task_cb_pm.value_len  = 0;
                     task_cb_pm.ver        = 0;
@@ -1677,7 +1677,7 @@ int kv_array_t::binlog_scan (
                 case HUSTDB_METHOD_HSET:
                 case HUSTDB_METHOD_SADD:
                 case HUSTDB_METHOD_ZADD:
-                    fast_memcpy ( & file_id, val + 2, sizeof ( uint32_t ) );
+                    fast_memcpy ( & file_id, val + 1, sizeof ( uint32_t ) );
 
                     if ( file_id >= m_file_count )
                     {

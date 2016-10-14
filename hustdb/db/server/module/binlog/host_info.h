@@ -52,7 +52,7 @@ public:
 
     void kill_me ( );
 
-    std::string queue_info ( );
+    void queue_info ( std::string & res );
 
 private:
 

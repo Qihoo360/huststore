@@ -143,19 +143,20 @@ bool binlog_t::remove_host (
     return host_info.remove_host ( host );
 }
 
-std::string binlog_t::get_status()
+void binlog_t::get_status (
+                            std::string & res
+                            )
 {
-    char pool_info[128];
+    char pool_info [ 128 ] = {};
 
-    if ( _pool != NULL ) 
+    if ( _pool != NULL )
     {
-        sprintf( pool_info, "main_queue_size:%zu\n", _pool->queue_size( ) );
+        sprintf ( pool_info, "[task_count:%zu]", _pool->queue_size ( ) );
     }
 
-    std::string res ( pool_info );
+    res.append ( pool_info );
 
     host_info_t & host_info = singleton_t<host_info_t>::instance ( );
-    res.append ( host_info.queue_info( ) );
     
-    return res;
+    host_info.queue_info ( res );
 }

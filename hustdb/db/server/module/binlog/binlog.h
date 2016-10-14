@@ -55,7 +55,9 @@ public:
                     void * param
                     );
 
-    std::string get_status ( );
+    void get_status (
+                      std::string & res
+                      );
 
 private:
     binlog_t ( const binlog_t & );

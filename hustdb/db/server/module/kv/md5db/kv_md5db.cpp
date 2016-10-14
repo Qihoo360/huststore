@@ -3193,8 +3193,12 @@ int kv_md5db_t::binlog_scan (
         return EFAULT;
     }
 
+    std::string binlog_status;
+    m_inner->m_binlog.get_status ( binlog_status );
+    
+    LOG_INFO ( "[md5db][binlog_scan]%s", binlog_status.c_str () );
+    
     std::map<std::string, char> alives;
-
     m_inner->m_binlog.get_alives ( alives );
 
     struct check_alive_cb_param_t * alive_cb_pm = ( struct check_alive_cb_param_t * ) alive_cb_param;

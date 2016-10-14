@@ -570,7 +570,7 @@ void hustdb_binlog_frame(evhtp_request_t * request, void * data)
             return;
         }
     }
-    if (body.data && body.len > 0)
+    if (!args.has_key && body.data && body.len > 0)
     {
         args.has_key = true;
         args.key = body;

@@ -236,7 +236,7 @@
                 ["uint32_t", "method"]
             ],
             "required": ["key", "host", "method"],
-            "post": { "arg": "key" },
+            "post": { "arg": "key", "optional": true },
             "check": "!request || !ctx || !ctx->db->ok()"
         },
         {

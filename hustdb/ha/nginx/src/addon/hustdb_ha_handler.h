@@ -18,6 +18,7 @@ ngx_int_t hustdb_ha_hkeys_handler(ngx_str_t * backend_uri, ngx_http_request_t *r
 ngx_int_t hustdb_ha_sadd_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
 ngx_int_t hustdb_ha_srem_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
 ngx_int_t hustdb_ha_sismember_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
+ngx_int_t hustdb_ha_sismember2_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
 ngx_int_t hustdb_ha_smembers_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
 ngx_int_t hustdb_ha_file_count_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
 ngx_int_t hustdb_ha_stat_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);

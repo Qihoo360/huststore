@@ -93,7 +93,7 @@ ngx_int_t hustdb_ha_get_handler(ngx_str_t * backend_uri, ngx_http_request_t *r)
 
 ngx_int_t hustdb_ha_get2_handler(ngx_str_t * backend_uri, ngx_http_request_t *r)
 {
-    return hustdb_ha_read2_handler("key", backend_uri, r);
+    return hustdb_ha_read2_handler(false, "key", backend_uri, r);
 }
 
 ngx_int_t hustdb_ha_hdel_handler(ngx_str_t * backend_uri, ngx_http_request_t *r)
@@ -113,7 +113,7 @@ ngx_int_t hustdb_ha_hget_handler(ngx_str_t * backend_uri, ngx_http_request_t *r)
 
 ngx_int_t hustdb_ha_hget2_handler(ngx_str_t * backend_uri, ngx_http_request_t *r)
 {
-    return hustdb_ha_read2_handler("key", backend_uri, r);
+    return hustdb_ha_read2_handler(false, "key", backend_uri, r);
 }
 
 ngx_int_t hustdb_ha_hkeys_handler(ngx_str_t * backend_uri, ngx_http_request_t *r)
@@ -139,6 +139,11 @@ ngx_int_t hustdb_ha_sadd_handler(ngx_str_t * backend_uri, ngx_http_request_t *r)
 ngx_int_t hustdb_ha_sismember_handler(ngx_str_t * backend_uri, ngx_http_request_t *r)
 {
     return hustdb_ha_read_handler(true, true, hustdb_ha_check_tb, backend_uri, r);
+}
+
+ngx_int_t hustdb_ha_sismember2_handler(ngx_str_t * backend_uri, ngx_http_request_t *r)
+{
+    return hustdb_ha_read2_handler(true, "key", backend_uri, r);
 }
 
 ngx_int_t hustdb_ha_smembers_handler(ngx_str_t * backend_uri, ngx_http_request_t *r)
@@ -183,5 +188,5 @@ ngx_int_t hustdb_ha_zscore_handler(ngx_str_t * backend_uri, ngx_http_request_t *
 
 ngx_int_t hustdb_ha_zscore2_handler(ngx_str_t * backend_uri, ngx_http_request_t *r)
 {
-    return hustdb_ha_read2_handler("tb", backend_uri, r);
+    return hustdb_ha_read2_handler(false, "tb", backend_uri, r);
 }

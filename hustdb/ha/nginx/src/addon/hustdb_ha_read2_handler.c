@@ -17,6 +17,7 @@ typedef struct
     ngx_http_subrequest_ctx_t base;
     ngx_http_subrequest_peer_t * peer;
     hustdb_read_state_t state;
+    ngx_bool_t discard_body;
     ngx_str_t version;
     hustdb_read_response_t master1_resp;
     hustdb_read_response_t master2_resp;
@@ -57,7 +58,7 @@ static void __post_body_handler(ngx_http_request_t *r)
         __on_subrequest_complete);
 }
 
-static ngx_int_t __start_read(const char * arg, ngx_str_t * backend_uri, ngx_http_request_t *r)
+static ngx_int_t __start_read(ngx_bool_t discard_body, const char * arg, ngx_str_t * backend_uri, ngx_http_request_t *r)
 {
     ngx_http_subrequest_peer_t * peer = hustdb_ha_hash_peer(arg, r);
     if (!peer)
@@ -77,6 +78,7 @@ static ngx_int_t __start_read(const char * arg, ngx_str_t * backend_uri, ngx_htt
         return NGX_ERROR;
     }
 
+    ctx->discard_body = discard_body;
     ctx->base.backend_uri = backend_uri;
     ctx->peer = peer;
     ctx->state = STATE_READ_MASTER1;
@@ -105,7 +107,10 @@ static ngx_int_t __on_read_master1_complete(ngx_http_request_t *r, hustdb_ha_rea
         {
             // save response of master1
             ctx->master1_resp.version = ctx->version;
-            ctx->master1_resp.data = hustdb_ha_make_str(&ctx->base.response, r);
+            if (!ctx->discard_body)
+            {
+                ctx->master1_resp.data = hustdb_ha_make_str(&ctx->base.response, r);
+            }
 
             ctx->state = STATE_READ_MASTER2;
             return ngx_http_run_subrequest(r, &ctx->base, ctx->peer->peer);
@@ -186,7 +191,11 @@ static ngx_int_t __on_read_master2_complete(ngx_http_request_t *r, hustdb_ha_rea
         }
         // save response of master2
         ctx->master2_resp.version = ctx->version;
-        ctx->master2_resp.data = ctx->base.response;
+
+        if (!ctx->discard_body)
+        {
+            ctx->master2_resp.data = ctx->base.response;
+        }
 
         ngx_bool_t ver_eq = __string_eq(&ctx->master1_resp.version, &ctx->master2_resp.version);
         if (!ver_eq && !__add_conflict_ver(&ctx->master1_resp.version, &ctx->master2_resp.version, r))
@@ -197,13 +206,19 @@ static ngx_int_t __on_read_master2_complete(ngx_http_request_t *r, hustdb_ha_rea
         {
             break;
         }
+
+        if (ctx->discard_body)
+        {
+            return ver_eq ? ngx_http_send_response_imp(
+                NGX_HTTP_OK, &ctx->base.response, r) : ngx_http_send_response_imp(NGX_HTTP_CONFLICT, NULL, r);
+        }
+
         ngx_bool_t val_eq = __string_eq(&ctx->master1_resp.data, &ctx->master2_resp.data);
         ngx_str_t response = { 0, 0 };
         if (!val_eq && !__add_conflict_val(&ctx->master1_resp.data, &ctx->master2_resp.data, r, &response))
         {
             break;
         }
-
         return val_eq ? ngx_http_send_response_imp(
             NGX_HTTP_OK, &ctx->base.response, r) : ngx_http_send_response_imp(NGX_HTTP_CONFLICT, &response, r);
 
@@ -212,12 +227,12 @@ static ngx_int_t __on_read_master2_complete(ngx_http_request_t *r, hustdb_ha_rea
     return hustdb_ha_send_response(NGX_HTTP_NOT_FOUND, NULL, NULL, r);
 }
 
-ngx_int_t hustdb_ha_read2_handler(const char * arg, ngx_str_t * backend_uri, ngx_http_request_t *r)
+ngx_int_t hustdb_ha_read2_handler(ngx_bool_t discard_body, const char * arg, ngx_str_t * backend_uri, ngx_http_request_t *r)
 {
     hustdb_ha_read_ctx_t * ctx = ngx_http_get_addon_module_ctx(r);
     if (!ctx)
     {
-        return __start_read(arg, backend_uri, r);
+        return __start_read(discard_body, arg, backend_uri, r);
     }
     if (STATE_READ_MASTER1 == ctx->state)
     {

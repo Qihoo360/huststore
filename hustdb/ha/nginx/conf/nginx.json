@@ -48,6 +48,7 @@
         "sadd",
         "srem",
         "sismember",
+        "sismember2",
         "smembers",
         "zadd",
         "zrem",

@@ -30,7 +30,7 @@ def manual():
             [action]
                 put | get | get2 | del | exist |
                 hset | hget | hget2 |hdel | hexist |
-                sadd | srem | sismember |
+                sadd | srem | sismember | sismember2 |
                 zadd | zrem | zismember | zscore | zscore2 |
                 cache_exist | cache_get | cache_ttl | 
                 cache_put | cache_append | cache_del | cache_expire |
@@ -89,6 +89,7 @@ class HATester:
             'sadd': self.__sadd,
             'srem': self.__srem,
             'sismember': self.__sismember,
+            'sismember2': self.__sismember2,
             
             'zadd': self.__zadd,
             'zrem': self.__zrem,
@@ -148,6 +149,18 @@ class HATester:
         cmd = self.__gencmd('get')(self.__dbkey)
         r = self.__sess.get(cmd, auth=(USER, PASSWD))
         print r.content if 200 == r.status_code else '%s: %d' % (cmd, r.status_code)
+    def __exist2_complete(self, cmd, r):
+        if 'version' in r.headers:
+            print 'Version: %s' % r.headers['version']
+        elif 'version1' in r.headers:
+            print 'Version1: %s' % r.headers['version1']
+            print 'Version2: %s' % r.headers['version2']
+        if 200 == r.status_code:
+            print 'ok'
+        elif 409 == r.status_code:
+            print 'conflict version'
+        else:
+            print '%s: %d' % (cmd, r.status_code)
     def __get2_complete(self, cmd, r):
         if 'version' in r.headers:
             print 'Version: %s' % r.headers['version']
@@ -219,6 +232,10 @@ class HATester:
         cmd = self.__genscmd('sismember')(self.__dbtb)
         r = self.__sess.post(cmd, self.__dbkey, headers = {'content-type':'text/plain'}, auth=(USER, PASSWD))
         print 'pass' if 200 == r.status_code else '%s: %d' % (cmd, r.status_code)
+    def __sismember2(self):
+        cmd = self.__genscmd('sismember2')(self.__dbtb)
+        r = self.__sess.post(cmd, self.__dbkey, headers = {'content-type':'text/plain'}, auth=(USER, PASSWD))
+        self.__exist2_complete(cmd, r)
 
     def __zadd(self):
         self.__post_base('%s/zadd?tb=hustdbhaztb&score=60' % self.__host, self.__dbkey)

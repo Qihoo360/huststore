@@ -48,7 +48,7 @@ ngx_int_t hustdb_ha_zread_keys_handler(
     ngx_str_t * backend_uri,
     ngx_http_request_t *r);
 
-ngx_int_t hustdb_ha_read2_handler(const char * arg, ngx_str_t * backend_uri, ngx_http_request_t *r);
+ngx_int_t hustdb_ha_read2_handler(ngx_bool_t discard_body, const char * arg, ngx_str_t * backend_uri, ngx_http_request_t *r);
 
 ngx_bool_t hustdb_ha_init_identifier_cache(ngx_http_hustdb_ha_main_conf_t * mcf);
 

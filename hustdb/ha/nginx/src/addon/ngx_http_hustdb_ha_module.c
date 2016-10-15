@@ -114,6 +114,11 @@ static ngx_http_request_item_t hustdb_ha_handler_dict[] =
         hustdb_ha_sismember_handler
     },
     {
+        ngx_string("/sismember2"),
+        ngx_string("/hustdb/sismember"),
+        hustdb_ha_sismember2_handler
+    },
+    {
         ngx_string("/smembers"),
         ngx_string("/hustdb/smembers"),
         hustdb_ha_smembers_handler

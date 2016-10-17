@@ -417,6 +417,11 @@ private:
                            uint32_t & version
                            );
 
+    bool binlog_version_valid (
+                                uint32_t user_version,
+                                uint32_t cur_version
+                                );
+
 private:
 
     struct inner;

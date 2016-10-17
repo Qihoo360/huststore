@@ -873,6 +873,9 @@ char hustdb_t::real_table_type (
 
         case SET_TB:
             return 'S';
+            
+        case ZSET_IN:
+            return 'Y';
 
         case ZSET_TB:
             return 'Z';
@@ -2626,7 +2629,7 @@ int hustdb_t::hustdb_zadd (
     }
 
     r = m_storage->put ( key, key_len, val, val_len, ver, is_dup, conn, ctxt );
-    is_version_error = ctxt->is_version_error;
+    is_version_error = ctxt ? ctxt->is_version_error : true;
     if ( 0 != r )
     {
         if ( ctxt && ctxt->is_version_error )

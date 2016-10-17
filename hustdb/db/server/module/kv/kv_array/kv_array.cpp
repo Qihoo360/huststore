@@ -1626,7 +1626,9 @@ int kv_array_t::binlog_scan (
             real_key     = key + host_u8 + 1;
             real_key_len = key_len - host_u8 - 1;
 
-            if ( real_key_len > inner_key_len )
+            if ( real_key_len > inner_key_len &&
+                 hustdb_t::real_table_type ( real_key [ real_key_len - inner_key_len - 1 ] ) != 'N'
+                 )
             {
                 table_len = real_key_len - inner_key_len - 1;
                 table     = real_key;

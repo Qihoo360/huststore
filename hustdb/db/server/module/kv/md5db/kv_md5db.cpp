@@ -208,6 +208,27 @@ uint32_t kv_md5db_t::add_version ( uint32_t & version )
     return version;
 }
 
+bool kv_md5db_t::binlog_version_valid (
+                                        uint32_t user_version,
+                                        uint32_t cur_version
+                                        )
+{
+    uint32_t ver_threshold = 10000000;
+
+    if ( user_version >= cur_version )
+    {
+        return true;
+    }
+    else if ( BUCKET_DATA_MAX_VERSION - cur_version <= ver_threshold &&
+              user_version <= ver_threshold
+              )
+    {
+        return true;
+    }
+    
+    return false;
+}
+
 void kv_md5db_t::user_key_to_inner (
                                      void *          inner_key,
                                      const void *    user_key,
@@ -1199,7 +1220,7 @@ int kv_md5db_t::set_conflict_data (
         else
         {
             // binlog
-            if ( user_version <= version )
+            if ( ! binlog_version_valid ( user_version, version ) )
             {
                 LOG_DEBUG ( "[md5db][db][put][binlog]version too low user=%u,%u",
                            user_version, version );
@@ -1981,7 +2002,7 @@ int kv_md5db_t::del_conflict_block_id (
         else
         {
             // binlog, del user_version always = deleted_version
-            if ( user_version < deleted_version )
+            if ( ! binlog_version_valid ( user_version, deleted_version ) )
             {
                 LOG_DEBUG ( "[md5db][db][del][binlog]version too low user=%u,%u",
                            user_version, deleted_version );
@@ -2028,7 +2049,7 @@ int kv_md5db_t::del_conflict_block_id (
     }
     else
     {
-        LOG_ERROR ( "fullkey is NULL!!!!!!!!!!!!!!!!!!!" );
+        LOG_ERROR ( "fullkey is NULL!" );
         r = EFAULT;
     }
 
@@ -2386,7 +2407,7 @@ int kv_md5db_t::del_inner (
                 else
                 {
                     // binlog, del user_version always = item->version
-                    if ( user_version < item->version )
+                    if ( ! binlog_version_valid ( user_version, item->version ) )
                     {
                         LOG_DEBUG ( "[md5db][db][del][binlog]version too low user=%u,%u",
                                    user_version, item->version );
@@ -2666,7 +2687,7 @@ int kv_md5db_t::put_inner (
                     else
                     {
                         // binlog
-                        if ( user_version <= item->version )
+                        if ( ! binlog_version_valid ( user_version, item->version ) )
                         {
                             LOG_DEBUG ( "[md5db][db][put][binlog]version too low user=%u,%u",
                                        user_version, item->version );

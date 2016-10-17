@@ -390,7 +390,7 @@ void host_info_t::queue_info ( std::string & res )
     for ( std::map<std::string, binlog_status_t>::iterator it = _status.begin ( ); it != _status.end ( ); ++ it )
     {
         char info [ 128 ] = {};
-        sprintf ( info, "[ip:%s;count:%d]", it->first.c_str ( ), it->second.remain.get ( ) );
+        sprintf ( info, "[%s->%d]", it->first.c_str ( ), it->second.remain.get ( ) );
         res.append ( info );
     }
 }

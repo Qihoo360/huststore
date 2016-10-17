@@ -26,6 +26,5 @@ ngx_str_t * hustdb_ha_get_keys_from_header(ngx_http_request_t * r);
 ngx_bool_t hustdb_ha_add_keys_to_header(const ngx_str_t * keys, ngx_http_request_t * r);
 ngx_str_t * hustdb_ha_get_version(ngx_http_request_t * r);
 ngx_bool_t hustdb_ha_add_version(const ngx_str_t * version, ngx_http_request_t * r);
-ngx_http_subrequest_peer_t * hustdb_ha_hash_peer(const char * arg, ngx_http_request_t *r);
 
 #endif // __hustdb_ha_handler_inner_20161013212422_h__

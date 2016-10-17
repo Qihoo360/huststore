@@ -48,7 +48,13 @@ ngx_int_t hustdb_ha_zread_keys_handler(
     ngx_str_t * backend_uri,
     ngx_http_request_t *r);
 
-ngx_int_t hustdb_ha_read2_handler(ngx_bool_t discard_body, const char * arg, ngx_str_t * backend_uri, ngx_http_request_t *r);
+typedef ngx_http_subrequest_peer_t * (*hustdb_ha_hash_peer_t)(ngx_http_request_t *r);
+
+ngx_http_subrequest_peer_t * hustdb_ha_hash_peer_by_key(ngx_http_request_t *r);
+ngx_http_subrequest_peer_t * hustdb_ha_hash_peer_by_tb(ngx_http_request_t *r);
+ngx_http_subrequest_peer_t * hustdb_ha_hash_peer_by_body_key(ngx_http_request_t *r);
+
+ngx_int_t hustdb_ha_read2_handler(ngx_bool_t discard_body, hustdb_ha_hash_peer_t hashfunc, ngx_str_t * backend_uri, ngx_http_request_t *r);
 
 ngx_bool_t hustdb_ha_init_identifier_cache(ngx_http_hustdb_ha_main_conf_t * mcf);
 

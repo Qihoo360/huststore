@@ -12,9 +12,29 @@ static hustdb_ha_ctx_t * __create_ctx(ngx_http_request_t *r)
     return ctx;
 }
 
-ngx_http_subrequest_peer_t * hustdb_ha_hash_peer(const char * arg, ngx_http_request_t *r)
+static ngx_http_subrequest_peer_t * __hash_peer(const char * arg, ngx_http_request_t *r)
 {
     char * key = ngx_http_get_param_val(&r->args, arg, r->pool);
+    if (!key)
+    {
+        return NULL;
+    }
+    return hustdb_ha_get_readlist(key);
+}
+
+ngx_http_subrequest_peer_t * hustdb_ha_hash_peer_by_key(ngx_http_request_t *r)
+{
+    return __hash_peer("key", r);
+}
+
+ngx_http_subrequest_peer_t * hustdb_ha_hash_peer_by_tb(ngx_http_request_t *r)
+{
+    return __hash_peer("tb", r);
+}
+
+ngx_http_subrequest_peer_t * hustdb_ha_hash_peer_by_body_key(ngx_http_request_t *r)
+{
+    char * key = hustdb_ha_get_key_from_body(r);
     if (!key)
     {
         return NULL;

@@ -157,6 +157,24 @@
 #endif
 #endif
 
+#if !defined(IS_LITTLE_ENDIAN)
+#if defined(__GNUC__) || defined(__clang__)
+#ifdef __BIG_ENDIAN__
+#define IS_LITTLE_ENDIAN 0
+#else
+#define IS_LITTLE_ENDIAN 1
+#endif // __BIG_ENDIAN__
+#elif defined(_MSC_VER)
+#if defined(_M_PPC)
+#define IS_LITTLE_ENDIAN 0
+#else
+#define IS_LITTLE_ENDIAN 1
+#endif
+#else
+#error Unable to determine endianness, define IS_LITTLE_ENDIAN.
+#endif
+#endif
+
 #if defined( WIN64 ) || defined( WIN32 ) || defined(__i386) || defined(_M_IX86) || defined (__x86_64)
 #define S_LITTLE_ENDIAN     1
 #define S_BIG_ENDIAN        0

@@ -31,7 +31,7 @@ void send_write_reply(evhtp_res code, uint32_t ver, bool is_version_error, evhtp
     evhtp::send_nobody_reply(code, request);
 }
 
-void add_uniq_sort (unsigned long start, unsigned long end, ip_allow_t * ip_allow_map)
+void add_uniq_sort (unsigned int start, unsigned int end, ip_allow_t * ip_allow_map)
 {
     int i = 0;
     int pos = - 1;
@@ -78,8 +78,8 @@ bool get_ip_allow_map(const char * ip_allow_string, unsigned int ip_allow_string
     int i = 0;
     int pos = 0;
     char flag = ',';
-    unsigned long prev_ip = 0;
-    unsigned long cur_ip = 0;
+    unsigned int prev_ip = 0;
+    unsigned int cur_ip = 0;
     char ip_string [16] = { };
 
     if ( ! ip_allow_string || ip_allow_string_length <= 0 || ip_allow_string_length > 8192 )
@@ -102,7 +102,11 @@ bool get_ip_allow_map(const char * ip_allow_string, unsigned int ip_allow_string
             memset (ip_string, 0, sizeof ( ip_string ));
             memcpy (ip_string, ip_allow_string + pos, i - pos);
 
-            cur_ip = ntohl (inet_addr (ip_string));
+#if IS_LITTLE_ENDIAN
+                cur_ip = ntohl (inet_addr (ip_string));
+#else
+                cur_ip = inet_addr (ip_string);
+#endif
 
             if ( flag == ',' && ip_allow_string[ i ] == ',' )
             {
@@ -122,7 +126,11 @@ bool get_ip_allow_map(const char * ip_allow_string, unsigned int ip_allow_string
     memset (ip_string, 0, sizeof ( ip_string ));
     memcpy (ip_string, ip_allow_string + pos, i - pos);
 
-    cur_ip = ntohl (inet_addr (ip_string));
+#if IS_LITTLE_ENDIAN
+        cur_ip = ntohl (inet_addr (ip_string));
+#else
+        cur_ip = inet_addr (ip_string);
+#endif
 
     if ( flag == ',' )
     {

@@ -7,8 +7,8 @@ namespace sync_network {
 
 typedef struct
 {
-    unsigned long start;
-    unsigned long end;
+    unsigned int start;
+    unsigned int end;
 } ip_t;
 
 typedef struct

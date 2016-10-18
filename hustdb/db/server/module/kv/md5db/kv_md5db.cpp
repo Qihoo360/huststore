@@ -3249,9 +3249,10 @@ int kv_md5db_t::binlog (
                          conn_ctxt_t conn
                          )
 {
-    char                inner_key[ 16 ];
+    uint32_t            ip               = 0;
+    uint32_t            port             = 0;
+    char                inner_key[ 16 ]  = {};
     size_t              inner_key_len    = 16;
-    uint8_t             host_u8          = ( uint8_t ) host_len;
     item_ctxt_t *       item_ctxt        = NULL;
     block_id_t          block_id;
 
@@ -3284,14 +3285,38 @@ int kv_md5db_t::binlog (
         r = m_inner->m_data.hash_with_md5db ( tmp_ctxt->tbkey.c_str (), tmp_ctxt->table_len, conn, item_ctxt );
     }
 
-    if ( 0 != r )
+    if ( unlikely ( 0 != r ) )
     {
         LOG_ERROR ( "[md5db][binlog]hash failed" );
         return r;
     }
+    
+    for ( int i = 0; i < host_len; i ++ )
+    {
+        if ( host[ i ] == ':' )
+        {
+            char str [ 24 ];
+            
+            memset ( str, 0, sizeof ( str ) );
+            memcpy ( str, host, i );
+            ip = inet_addr (str);
+            
+            memset ( str, 0, sizeof ( str ) );
+            memcpy ( str, host + i + 1, host_len - i - 1 );
+            port = atoi ( str );
+            
+            break;
+        }
+    }
+    
+    if ( unlikely ( ip <= 0 && port <= 0 ) )
+    {
+        LOG_ERROR ( "[md5db][binlog]invalid host" );
+        return EINVAL;
+    }
 
-    item_ctxt->key.append ( ( const char * ) & host_u8, sizeof ( uint8_t ) );
-    item_ctxt->key.append ( host, host_len );
+    item_ctxt->key.append ( ( const char * ) & ip, sizeof ( uint32_t ) );
+    item_ctxt->key.append ( ( const char * ) & port, sizeof ( uint32_t ) );
     
     if ( tmp_ctxt->table_len > 0 )
     {

@@ -9,8 +9,6 @@
 #define QUERY_MAX   100
 #define FORM_MAX    100
 
-#define gr_url_decode   url_decode
-#define gr_memrchr      memrchr
 #define mem5cmp         fast_mem5cmp
 #define mem2cmp         fast_mem2cmp
 #define mem6cmp         fast_mem6cmp

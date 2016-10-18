@@ -3,6 +3,9 @@
 
 #include <pthread.h>
 
+#define RLOCK 0
+#define WLOCK 1
+
 class mutex_lock_t
 {
 public:

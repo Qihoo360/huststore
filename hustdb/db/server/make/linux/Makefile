@@ -116,7 +116,8 @@ BINLOG_OBJECTS =               \
 	$(BIN)queue.o 		\
 	$(BIN)task.o 		\
 	$(BIN)binlog_thread.o 		\
-	$(BIN)thread_pool.o 
+	$(BIN)thread_pool.o \
+	$(BIN)binlog_time.o
 
 TARGET = ./hustdb
 INCS = $(INCLUDE) -I $(SERVER)module -I /usr/local/include -I /usr/local/include/evhtp -I /usr/local/include/event2
@@ -269,7 +270,7 @@ $(BIN)binlog.o: $(BINLOG_SRC)binlog.cpp $(BINLOG_SRC)binlog.h $(BINLOG_SRC)singl
 $(BIN)condition.o: $(BINLOG_SRC)condition.cpp $(BINLOG_SRC)condition.h
 	$(CPPC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
 
-$(BIN)host_info.o: $(BINLOG_SRC)host_info.cpp $(BINLOG_SRC)host_info.h $(BINLOG_SRC)queue.h $(BINLOG_SRC)task.h $(BINLOG_SRC)thread_pool.h $(BINLOG_SRC)husthttp.h $(BINLOG_SRC)thread.h $(BINLOG_SRC)singleton.h $(BINLOG_SRC)atomic2.h
+$(BIN)host_info.o: $(BINLOG_SRC)host_info.cpp $(BINLOG_SRC)host_info.h $(BINLOG_SRC)queue.h $(BINLOG_SRC)task.h $(BINLOG_SRC)thread_pool.h $(BINLOG_SRC)husthttp.h $(BINLOG_SRC)thread.h $(BINLOG_SRC)singleton.h $(BINLOG_SRC)atomic2.h $(BINLOG_SRC)binlog_time.h
 	$(CPPC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
 
 $(BIN)http.o: $(BINLOG_SRC)http.cpp $(BINLOG_SRC)http.h
@@ -284,13 +285,16 @@ $(BIN)mutex.o: $(BINLOG_SRC)mutex.cpp $(BINLOG_SRC)mutex.h
 $(BIN)queue.o: $(BINLOG_SRC)queue.cpp $(BINLOG_SRC)queue.h $(BINLOG_SRC)task.h
 	$(CPPC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
 
-$(BIN)task.o: $(BINLOG_SRC)task.cpp $(BINLOG_SRC)task.h $(BINLOG_SRC)husthttp.h $(BINLOG_SRC)singleton.h $(BINLOG_SRC)host_info.h
+$(BIN)task.o: $(BINLOG_SRC)task.cpp $(BINLOG_SRC)task.h $(BINLOG_SRC)husthttp.h $(BINLOG_SRC)singleton.h $(BINLOG_SRC)host_info.h $(BINLOG_SRC)binlog_time.h
 	$(CPPC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
 
 $(BIN)binlog_thread.o: $(BINLOG_SRC)thread.cpp $(BINLOG_SRC)thread.h 
 	$(CPPC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
 
 $(BIN)thread_pool.o: $(BINLOG_SRC)thread_pool.cpp $(BINLOG_SRC)thread_pool.h $(BINLOG_SRC)husthttp.h $(BINLOG_SRC)task.h
+	$(CPPC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
+
+$(BIN)binlog_time.o: $(BINLOG_SRC)binlog_time.cpp $(BINLOG_SRC)binlog_time.h $(BINLOG_SRC)mutex.h
 	$(CPPC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
 	
 clean:

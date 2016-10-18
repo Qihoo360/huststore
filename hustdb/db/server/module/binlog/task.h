@@ -19,7 +19,8 @@ public:
                       size_t host_len,
                       callback_func_t callback_func,
                       void * param,
-                      const std::string & auth
+                      const std::string & auth,
+                      size_t alive_time
                       );
     ~task_t ( );
 
@@ -49,6 +50,8 @@ private:
 
     bool inner_handle ( husthttp_t * );
 
+    bool is_overtime ( );
+
     std::string _host;
     std::string _url;
     std::string _method;
@@ -63,6 +66,9 @@ private:
     void * _cb_param;
 
     int _http_code;
+
+    int64_t _alive_time;
+    int64_t _timestamp;
 };
 
 #endif

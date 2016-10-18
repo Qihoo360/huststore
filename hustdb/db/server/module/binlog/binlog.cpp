@@ -28,6 +28,7 @@ bool binlog_t::init (
                       int num_threads,
                       size_t max_queue_size,
                       size_t max_backup_queue_size,
+                      size_t alive_time,
                       const char * username,
                       const char * password
                       )
@@ -58,6 +59,8 @@ bool binlog_t::init (
         return false;
     }
 
+    _alive_time = alive_time;
+
     return true;
 }
 
@@ -83,7 +86,7 @@ bool binlog_t::add_task (
                           void * param
                           )
 {
-    task_t * task = new task_t ( host, host_len, _callback_func, param, _auth );
+    task_t * task = new task_t ( host, host_len, _callback_func, param, _auth, _alive_time );
     
     task->make_task (
                      host,

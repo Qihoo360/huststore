@@ -12,6 +12,7 @@
 #include "husthttp.h"
 #include "thread.h"
 #include "singleton.h"
+#include "binlog_time.h"
 
 static void * check_alive ( void * arg )
 {
@@ -81,6 +82,7 @@ static void * check_alive ( void * arg )
 
         if ( pfd[1].revents & POLLIN )
         {
+            binlog_time_t::set_current_time ( );
             read ( redeliver_fd, &val, sizeof ( val ) );
             host_info.redeliver ();
         }

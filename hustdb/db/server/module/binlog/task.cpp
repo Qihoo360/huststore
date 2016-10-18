@@ -7,6 +7,7 @@
 #include "husthttp.h"
 #include "singleton.h"
 #include "host_info.h"
+#include "binlog_time.h"
 
 #define HUSTDB_METHOD_PUT  1
 #define HUSTDB_METHOD_DEL  2
@@ -22,13 +23,16 @@ task_t::task_t (
                  size_t host_len,
                  callback_func_t callback_func,
                  void * param,
-                 const std::string & auth )
+                 const std::string & auth,
+                 size_t alive_time )
 : _url ( auth )
 , _callback_func ( callback_func )
 , _cb_param ( param )
 , _http_code ( 0 )
+, _alive_time ( alive_time )
 {
     _host.assign ( host, host_len );
+    _timestamp = binlog_time_t::get_current_time ( );
 }
 
 task_t::~ task_t ( )
@@ -170,6 +174,11 @@ bool task_t::run ( husthttp_t * client )
         printf ( "fail|task|host:%s|path:%s|query_string:%s|http_code:%d\n", _host.c_str(), _path.c_str(), _query_string.c_str(), _http_code );
 #endif
 
+        if ( is_overtime( ) ) {
+            host_info.finish_task ( _host );
+            return true;
+        }
+
         if ( ! host_info.has_host ( _host ) )
         {
             return true;
@@ -213,6 +222,11 @@ bool task_t::inner_handle ( husthttp_t * client )
 bool task_t::is_success ( int * http_code )
 {
     return ( * http_code == 200 || * http_code == 400 || * http_code == 401 || * http_code == 404 || * http_code == 412 );
+}
+
+bool task_t::is_overtime ( ) 
+{
+    return binlog_time_t::get_current_time ( ) - _timestamp >= _alive_time;    
 }
 
 bool task_t::url_encode_all ( const char * src, int src_len, char * dst, int * dst_len )

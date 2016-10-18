@@ -8,9 +8,6 @@
 #include "atomic2.h"
 #include "mutex.h"
 
-#define RLOCK 0
-#define WLOCK 1
-
 class queue_t;
 class task_t;
 class thread_pool_t;

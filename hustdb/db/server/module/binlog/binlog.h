@@ -20,6 +20,7 @@ public:
                 int num_threads,
                 size_t max_queue_size,
                 size_t max_backup_queue_size,
+                size_t alive_time,
                 const char * username = NULL,
                 const char * password = NULL
                 );
@@ -68,6 +69,8 @@ private:
     binlog_callback_func_t _callback_func;
 
     std::string _auth;
+
+    size_t _alive_time;
 };
 
 #endif

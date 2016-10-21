@@ -3,10 +3,14 @@ hustdb ha
 
 首先安装 `hustdb ha` 所依赖的公共组件：  
 
-* [curl](https://github.com/curl/curl/releases)
 * [zlog-1.2.12](https://github.com/HardySimpson/zlog/releases)
 * [libevent-2.0.22-stable](https://github.com/libevent/libevent/releases/download/release-2.0.22-stable/libevent-2.0.22-stable.tar.gz)
 * [libevhtp-1.2.10](https://github.com/ellzey/libevhtp/releases)
+
+编译 `libcurl`：
+
+    $ cd third_party
+    $ build_libcurl.sh
 
 安装 `ha` 以及 `sync server`：
 
@@ -47,7 +51,8 @@ hustdb ha
             ["sync_port", "8089"],
             ["sync_status_uri", "/sync_status"],
             ["sync_user", "sync"],
-            ["sync_passwd", "sync"]
+            ["sync_passwd", "sync"],
+            ["binlog_uri", "/hustdb/binlog"]
         ],
         "local_cmds": 
         [
@@ -66,6 +71,7 @@ hustdb ha
             "sadd",
             "srem",
             "sismember",
+            "sismember2",
             "smembers",
             "zadd",
             "zrem",
@@ -81,7 +87,21 @@ hustdb ha
             "sync_status",
             "sync_alive",
             "get_table",
-            "set_table"
+            "set_table",
+            "cache/exist",
+            "cache/get",
+            "cache/ttl",
+            "cache/put",
+            "cache/append",
+            "cache/del",
+            "cache/expire",
+            "cache/persist",
+            "cache/hexist",
+            "cache/hget",
+            "cache/hset",
+            "cache/hdel", 
+            "cache/hincrby",
+            "cache/hincrbyfloat"
         ],
         "proxy":
         {
@@ -125,7 +145,22 @@ hustdb ha
                 "/hustdb/zrangebyscore",
                 "/hustdb/stat",
                 "/hustdb/stat_all",
-                "/hustdb/file_count"
+                "/hustdb/file_count",
+                "/hustdb/binlog",
+                "/hustcache/exist",
+                "/hustcache/get",
+                "/hustcache/ttl",
+                "/hustcache/put",
+                "/hustcache/append",
+                "/hustcache/del",
+                "/hustcache/expire",
+                "/hustcache/persist",
+                "/hustcache/hexist",
+                "/hustcache/hget",
+                "/hustcache/hset",
+                "/hustcache/hdel", 
+                "/hustcache/hincrby",
+                "/hustcache/hincrbyfloat"
             ]
         }
     }

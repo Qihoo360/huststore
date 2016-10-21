@@ -22,10 +22,14 @@
 
 	Downloads: https://curl.haxx.se/download.html
 
-	$ tar -zxvf curl-7.45.0.tar.gz
-	$ cd curl-7.45.0
-	$ make
-	$ sudo make install
+    $ sudo yum install -y libidn-devel
+
+    $ cd third_party
+    $ tar -zxvf curl-curl-7_50_2.tar.gz
+    $ cd curl-curl-7_50_2 
+    $ ./buildconf
+    $ ./configure --disable-ldap --disable-ldaps
+    $ make
 
 ### libevent ###
 

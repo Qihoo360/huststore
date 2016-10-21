@@ -36,7 +36,8 @@ A complete example of configuration file:
             ["sync_port", "8089"],
             ["sync_status_uri", "/sync_status"],
             ["sync_user", "sync"],
-            ["sync_passwd", "sync"]
+            ["sync_passwd", "sync"],
+            ["binlog_uri", "/hustdb/binlog"]
         ],
         "auth_filter": [],
         "local_cmds": 
@@ -56,6 +57,7 @@ A complete example of configuration file:
             "sadd",
             "srem",
             "sismember",
+            "sismember2",
             "smembers",
             "zadd",
             "zrem",
@@ -71,7 +73,21 @@ A complete example of configuration file:
             "sync_status",
             "sync_alive",
             "get_table",
-            "set_table"
+            "set_table",
+            "cache/exist",
+            "cache/get",
+            "cache/ttl",
+            "cache/put",
+            "cache/append",
+            "cache/del",
+            "cache/expire",
+            "cache/persist",
+            "cache/hexist",
+            "cache/hget",
+            "cache/hset",
+            "cache/hdel", 
+            "cache/hincrby",
+            "cache/hincrbyfloat"
         ],
         "proxy":
         {
@@ -119,7 +135,22 @@ A complete example of configuration file:
                 "/hustdb/zrangebyscore",
                 "/hustdb/stat",
                 "/hustdb/stat_all",
-                "/hustdb/file_count"
+                "/hustdb/file_count",
+                "/hustdb/binlog",
+                "/hustcache/exist",
+                "/hustcache/get",
+                "/hustcache/ttl",
+                "/hustcache/put",
+                "/hustcache/append",
+                "/hustcache/del",
+                "/hustcache/expire",
+                "/hustcache/persist",
+                "/hustcache/hexist",
+                "/hustcache/hget",
+                "/hustcache/hset",
+                "/hustcache/hdel", 
+                "/hustcache/hincrby",
+                "/hustcache/hincrbyfloat"
             ]
         }
     }
@@ -254,11 +285,12 @@ Content of the generated `nginx.conf`:
             sync_status_uri           /sync_status;
             sync_user                 sync;
             sync_passwd               sync;
-    
+            binlog_uri                /hustdb/binlog;
+
             location /status.html {
                 root /data/hustdbha/html;
             }
-    
+
             location /put {
                 hustdb_ha;
                 http_basic_auth_file /data/hustdbha/conf/htpasswd;
@@ -316,6 +348,10 @@ Content of the generated `nginx.conf`:
                 http_basic_auth_file /data/hustdbha/conf/htpasswd;
             }
             location /sismember {
+                hustdb_ha;
+                http_basic_auth_file /data/hustdbha/conf/htpasswd;
+            }
+            location /sismember2 {
                 hustdb_ha;
                 http_basic_auth_file /data/hustdbha/conf/htpasswd;
             }
@@ -383,7 +419,63 @@ Content of the generated `nginx.conf`:
                 hustdb_ha;
                 http_basic_auth_file /data/hustdbha/conf/htpasswd;
             }
-    
+            location /cache/exist {
+                hustdb_ha;
+                http_basic_auth_file /data/hustdbha/conf/htpasswd;
+            }
+            location /cache/get {
+                hustdb_ha;
+                http_basic_auth_file /data/hustdbha/conf/htpasswd;
+            }
+            location /cache/ttl {
+                hustdb_ha;
+                http_basic_auth_file /data/hustdbha/conf/htpasswd;
+            }
+            location /cache/put {
+                hustdb_ha;
+                http_basic_auth_file /data/hustdbha/conf/htpasswd;
+            }
+            location /cache/append {
+                hustdb_ha;
+                http_basic_auth_file /data/hustdbha/conf/htpasswd;
+            }
+            location /cache/del {
+                hustdb_ha;
+                http_basic_auth_file /data/hustdbha/conf/htpasswd;
+            }
+            location /cache/expire {
+                hustdb_ha;
+                http_basic_auth_file /data/hustdbha/conf/htpasswd;
+            }
+            location /cache/persist {
+                hustdb_ha;
+                http_basic_auth_file /data/hustdbha/conf/htpasswd;
+            }
+            location /cache/hexist {
+                hustdb_ha;
+                http_basic_auth_file /data/hustdbha/conf/htpasswd;
+            }
+            location /cache/hget {
+                hustdb_ha;
+                http_basic_auth_file /data/hustdbha/conf/htpasswd;
+            }
+            location /cache/hset {
+                hustdb_ha;
+                http_basic_auth_file /data/hustdbha/conf/htpasswd;
+            }
+            location /cache/hdel {
+                hustdb_ha;
+                http_basic_auth_file /data/hustdbha/conf/htpasswd;
+            }
+            location /cache/hincrby {
+                hustdb_ha;
+                http_basic_auth_file /data/hustdbha/conf/htpasswd;
+            }
+            location /cache/hincrbyfloat {
+                hustdb_ha;
+                http_basic_auth_file /data/hustdbha/conf/htpasswd;
+            }
+
             location /hustdb/put {
                 proxy_pass http://backend;
                 proxy_http_version 1.1;
@@ -649,6 +741,186 @@ Content of the generated `nginx.conf`:
                 proxy_busy_buffers_size 64m;
             }
             location /hustdb/file_count {
+                proxy_pass http://backend;
+                proxy_http_version 1.1;
+                proxy_set_header Connection "Keep-Alive";
+                proxy_set_header Authorization "Basic aHVzdHN0b3JlOmh1c3RzdG9yZQ==";
+                proxy_connect_timeout 2s;
+                proxy_send_timeout 60s;
+                proxy_read_timeout 60s;
+                proxy_buffer_size 64m;
+                proxy_buffers 2 64m;
+                proxy_busy_buffers_size 64m;
+            }
+            location /hustdb/binlog {
+                proxy_pass http://backend;
+                proxy_http_version 1.1;
+                proxy_set_header Connection "Keep-Alive";
+                proxy_set_header Authorization "Basic aHVzdHN0b3JlOmh1c3RzdG9yZQ==";
+                proxy_connect_timeout 2s;
+                proxy_send_timeout 60s;
+                proxy_read_timeout 60s;
+                proxy_buffer_size 64m;
+                proxy_buffers 2 64m;
+                proxy_busy_buffers_size 64m;
+            }
+            location /hustcache/exist {
+                proxy_pass http://backend;
+                proxy_http_version 1.1;
+                proxy_set_header Connection "Keep-Alive";
+                proxy_set_header Authorization "Basic aHVzdHN0b3JlOmh1c3RzdG9yZQ==";
+                proxy_connect_timeout 2s;
+                proxy_send_timeout 60s;
+                proxy_read_timeout 60s;
+                proxy_buffer_size 64m;
+                proxy_buffers 2 64m;
+                proxy_busy_buffers_size 64m;
+            }
+            location /hustcache/get {
+                proxy_pass http://backend;
+                proxy_http_version 1.1;
+                proxy_set_header Connection "Keep-Alive";
+                proxy_set_header Authorization "Basic aHVzdHN0b3JlOmh1c3RzdG9yZQ==";
+                proxy_connect_timeout 2s;
+                proxy_send_timeout 60s;
+                proxy_read_timeout 60s;
+                proxy_buffer_size 64m;
+                proxy_buffers 2 64m;
+                proxy_busy_buffers_size 64m;
+            }
+            location /hustcache/ttl {
+                proxy_pass http://backend;
+                proxy_http_version 1.1;
+                proxy_set_header Connection "Keep-Alive";
+                proxy_set_header Authorization "Basic aHVzdHN0b3JlOmh1c3RzdG9yZQ==";
+                proxy_connect_timeout 2s;
+                proxy_send_timeout 60s;
+                proxy_read_timeout 60s;
+                proxy_buffer_size 64m;
+                proxy_buffers 2 64m;
+                proxy_busy_buffers_size 64m;
+            }
+            location /hustcache/put {
+                proxy_pass http://backend;
+                proxy_http_version 1.1;
+                proxy_set_header Connection "Keep-Alive";
+                proxy_set_header Authorization "Basic aHVzdHN0b3JlOmh1c3RzdG9yZQ==";
+                proxy_connect_timeout 2s;
+                proxy_send_timeout 60s;
+                proxy_read_timeout 60s;
+                proxy_buffer_size 64m;
+                proxy_buffers 2 64m;
+                proxy_busy_buffers_size 64m;
+            }
+            location /hustcache/append {
+                proxy_pass http://backend;
+                proxy_http_version 1.1;
+                proxy_set_header Connection "Keep-Alive";
+                proxy_set_header Authorization "Basic aHVzdHN0b3JlOmh1c3RzdG9yZQ==";
+                proxy_connect_timeout 2s;
+                proxy_send_timeout 60s;
+                proxy_read_timeout 60s;
+                proxy_buffer_size 64m;
+                proxy_buffers 2 64m;
+                proxy_busy_buffers_size 64m;
+            }
+            location /hustcache/del {
+                proxy_pass http://backend;
+                proxy_http_version 1.1;
+                proxy_set_header Connection "Keep-Alive";
+                proxy_set_header Authorization "Basic aHVzdHN0b3JlOmh1c3RzdG9yZQ==";
+                proxy_connect_timeout 2s;
+                proxy_send_timeout 60s;
+                proxy_read_timeout 60s;
+                proxy_buffer_size 64m;
+                proxy_buffers 2 64m;
+                proxy_busy_buffers_size 64m;
+            }
+            location /hustcache/expire {
+                proxy_pass http://backend;
+                proxy_http_version 1.1;
+                proxy_set_header Connection "Keep-Alive";
+                proxy_set_header Authorization "Basic aHVzdHN0b3JlOmh1c3RzdG9yZQ==";
+                proxy_connect_timeout 2s;
+                proxy_send_timeout 60s;
+                proxy_read_timeout 60s;
+                proxy_buffer_size 64m;
+                proxy_buffers 2 64m;
+                proxy_busy_buffers_size 64m;
+            }
+            location /hustcache/persist {
+                proxy_pass http://backend;
+                proxy_http_version 1.1;
+                proxy_set_header Connection "Keep-Alive";
+                proxy_set_header Authorization "Basic aHVzdHN0b3JlOmh1c3RzdG9yZQ==";
+                proxy_connect_timeout 2s;
+                proxy_send_timeout 60s;
+                proxy_read_timeout 60s;
+                proxy_buffer_size 64m;
+                proxy_buffers 2 64m;
+                proxy_busy_buffers_size 64m;
+            }
+            location /hustcache/hexist {
+                proxy_pass http://backend;
+                proxy_http_version 1.1;
+                proxy_set_header Connection "Keep-Alive";
+                proxy_set_header Authorization "Basic aHVzdHN0b3JlOmh1c3RzdG9yZQ==";
+                proxy_connect_timeout 2s;
+                proxy_send_timeout 60s;
+                proxy_read_timeout 60s;
+                proxy_buffer_size 64m;
+                proxy_buffers 2 64m;
+                proxy_busy_buffers_size 64m;
+            }
+            location /hustcache/hget {
+                proxy_pass http://backend;
+                proxy_http_version 1.1;
+                proxy_set_header Connection "Keep-Alive";
+                proxy_set_header Authorization "Basic aHVzdHN0b3JlOmh1c3RzdG9yZQ==";
+                proxy_connect_timeout 2s;
+                proxy_send_timeout 60s;
+                proxy_read_timeout 60s;
+                proxy_buffer_size 64m;
+                proxy_buffers 2 64m;
+                proxy_busy_buffers_size 64m;
+            }
+            location /hustcache/hset {
+                proxy_pass http://backend;
+                proxy_http_version 1.1;
+                proxy_set_header Connection "Keep-Alive";
+                proxy_set_header Authorization "Basic aHVzdHN0b3JlOmh1c3RzdG9yZQ==";
+                proxy_connect_timeout 2s;
+                proxy_send_timeout 60s;
+                proxy_read_timeout 60s;
+                proxy_buffer_size 64m;
+                proxy_buffers 2 64m;
+                proxy_busy_buffers_size 64m;
+            }
+            location /hustcache/hdel {
+                proxy_pass http://backend;
+                proxy_http_version 1.1;
+                proxy_set_header Connection "Keep-Alive";
+                proxy_set_header Authorization "Basic aHVzdHN0b3JlOmh1c3RzdG9yZQ==";
+                proxy_connect_timeout 2s;
+                proxy_send_timeout 60s;
+                proxy_read_timeout 60s;
+                proxy_buffer_size 64m;
+                proxy_buffers 2 64m;
+                proxy_busy_buffers_size 64m;
+            }
+            location /hustcache/hincrby {
+                proxy_pass http://backend;
+                proxy_http_version 1.1;
+                proxy_set_header Connection "Keep-Alive";
+                proxy_set_header Authorization "Basic aHVzdHN0b3JlOmh1c3RzdG9yZQ==";
+                proxy_connect_timeout 2s;
+                proxy_send_timeout 60s;
+                proxy_read_timeout 60s;
+                proxy_buffer_size 64m;
+                proxy_buffers 2 64m;
+                proxy_busy_buffers_size 64m;
+            }
+            location /hustcache/hincrbyfloat {
                 proxy_pass http://backend;
                 proxy_http_version 1.1;
                 proxy_set_header Connection "Keep-Alive";

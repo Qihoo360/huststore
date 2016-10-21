@@ -20,12 +20,16 @@ Deployment
 
 `sync server` needs to `POST` data to the backend machines synchronizing. An open source library [libcurl](https://curl.haxx.se) is used for transproting data.
 
-	Downloads: https://curl.haxx.se/download.html
+    Downloads: https://curl.haxx.se/download.html
 
-	$ tar -zxvf curl-7.45.0.tar.gz
-	$ cd curl-7.45.0
-	$ make
-	$ sudo make install
+    $ sudo yum install -y libidn-devel
+
+    $ cd third_party
+    $ tar -zxvf curl-curl-7_50_2.tar.gz
+    $ cd curl-curl-7_50_2 
+    $ ./buildconf
+    $ ./configure --disable-ldap --disable-ldaps
+    $ make
 
 ### libevent ###
 
@@ -67,41 +71,31 @@ Below is a complete **one-key script for remote deployment**, it also includes d
         '
     sudo -u jobs \
         scp -oStrictHostKeyChecking=no \
-        nginx.tar.gz \
-        jobs@192.168.1.101:/data/tmp/
-    sudo -u jobs \
-        scp -oStrictHostKeyChecking=no \
-        sync.tar.gz \
-        jobs@192.168.1.101:/data/tmp/
-    sudo -u jobs \
-        scp -oStrictHostKeyChecking=no \
-        upgrade.sh \
+        huststore.tar.gz \
         jobs@192.168.1.101:/data/tmp/
     sudo -u jobs \
         ssh -oStrictHostKeyChecking=no \
         jobs@192.168.1.101 \
         ' \
         cd /data/tmp/; \
-        rm -rf nginx; \
-        tar -zxf nginx.tar.gz -C .; \
-        cd /data/tmp/nginx/; \
+        rm -rf huststore; \
+        tar -zxf huststore.tar.gz -C .; \
+        cd /data/tmp/huststore/hustdb/ha/nginx; \
         ./configure --prefix=/data/hustdbha --add-module=src/addon; \
         make -j; \
         make install; \
         cd /data/hustdbha/html/; \
         rm -f status.html; \
         echo "ok" > status.html; \
-        cd /data/tmp/; \
-        cp upgrade.sh /data/hustdbha/sbin/; \
-        rm -rf nginx; \
-        rm -f nginx.tar.gz; \
-        cd /data/tmp/; \
-        tar -zxf sync.tar.gz -C .; \
-        cd /data/tmp/sync/; \
+        cp /data/tmp/huststore/hustdb/ha/upgrade.sh /data/hustdbha/sbin/; \
+        cd /data/tmp/huststore/third_party; \
+        ./build_libcurl.sh; \
+        cp /data/tmp/huststore/hustdb/sync; \
         make -j; \
         make install; \
-        rm -rf sync; \
-        rm -f sync.tar.gz; \
+        cp /data/tmp; \
+        rm -rf huststore; \
+        rm -f huststore.tar.gz; \
         '
     
     echo 'finish!'
@@ -109,29 +103,13 @@ Below is a complete **one-key script for remote deployment**, it also includes d
 
 ### Restrictions ###
 
-* `nginx.tar.gz` is the compressed package for `hustdb ha`, the source code path is `hustdb/ha/nginx`.
+* `huststore.tar.gz` is the compressed package for the source code of `huststore`.
 
-* `upgrade.sh` is the smooth upgrade script for `hustdb ha`, check [here](upgrade.md) for more details. 
-
-* `sync.tar.gz` is the compressed package for `sync server`, the source code path is: `hustdb/sync`.  
-
-* `nginx.tar.gz`, `upgrade.sh` and `sync.tar.gz` need to be in the same directory.  
+* `huststore.tar.gz` need to be in the same directory.  
 
 * In the above example, `192.168.1.101` represents the online machine in production environment, replace it to your real ip in production environment.
 
 * Suppose this script runs on `192.168.1.100`, then `192.168.1.100` needs to build SSH trust relationship (login passwordless) with `192.168.1.101`, operation account is `jobs`, replace it with your account in your real production environment.
-
-Below is a sample script for packaging the above contents:
-
-    #!/bin/sh
-    cd hustdb/
-    mkdir deploy
-    cd ha/
-    tar -zcf nginx.tar.gz nginx
-    cp upgrade.sh nginx.tar.gz ../deploy/
-    cd ../
-    tar -zcf sync.tar.gz sync
-    cp sync.tar.gz deploy/
 
 ### Script example for remote deployment of HA ###
 
@@ -149,30 +127,26 @@ If only `HA` needs to be re-deployed, you can refer to the below scripts:
         '
     sudo -u jobs \
         scp -oStrictHostKeyChecking=no \
-        nginx.tar.gz \
-        jobs@192.168.1.101:/data/tmp/
-    sudo -u jobs \
-        scp -oStrictHostKeyChecking=no \
-        upgrade.sh \
+        huststore.tar.gz \
         jobs@192.168.1.101:/data/tmp/
     sudo -u jobs \
         ssh -oStrictHostKeyChecking=no \
         jobs@192.168.1.101 \
         ' \
         cd /data/tmp/; \
-        rm -rf nginx; \
-        tar -zxf nginx.tar.gz -C .; \
-        cd /data/tmp/nginx/; \
+        rm -rf huststore; \
+        tar -zxf huststore.tar.gz -C .; \
+        cd /data/tmp/huststore/hustdb/ha/nginx; \
         ./configure --prefix=/data/hustdbha --add-module=src/addon; \
         make -j; \
         make install; \
         cd /data/hustdbha/html/; \
         rm -f status.html; \
         echo "ok" > status.html; \
+        cp /data/tmp/huststore/hustdb/ha/upgrade.sh /data/hustdbha/sbin/; \
         cd /data/tmp/; \
-        cp upgrade.sh /data/hustdbha/sbin/; \
-        rm -rf nginx; \
-        rm -f nginx.tar.gz; \
+        rm -rf huststore; \
+        rm -f huststore.tar.gz; \
         '
     
     echo 'finish!'
@@ -192,19 +166,20 @@ If only `sync server` needs to be re-deployed, you can refer to the below script
         '
     sudo -u jobs \
         scp -oStrictHostKeyChecking=no \
-        sync.tar.gz \
+        huststore.tar.gz \
         jobs@192.168.1.101:/data/tmp/
     sudo -u jobs \
         ssh -oStrictHostKeyChecking=no \
         jobs@192.168.1.101 \
         ' \
-        cd /data/tmp/; \
-        tar -zxf sync.tar.gz -C .; \
-        cd /data/tmp/sync/; \
+        cd /data/tmp/huststore/third_party; \
+        ./build_libcurl.sh; \
+        cp /data/tmp/huststore/hustdb/sync; \
         make -j; \
         make install; \
-        rm -rf sync; \
-        rm -f sync.tar.gz; \
+        cp /data/tmp; \
+        rm -rf huststore; \
+        rm -f huststore.tar.gz; \
         '
     
     echo 'finish!'

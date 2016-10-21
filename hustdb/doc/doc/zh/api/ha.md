@@ -25,6 +25,7 @@ ha
 * [sadd](ha/sadd.md)
 * [srem](ha/srem.md)
 * [sismember](ha/sismember.md)
+* [sismember2](ha/sismember2.md)
 * [smembers](ha/smembers.md)
 * [zadd](ha/zadd.md)
 * [zscore](ha/zscore.md)

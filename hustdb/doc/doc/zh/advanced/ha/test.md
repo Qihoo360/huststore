@@ -14,7 +14,7 @@
             [action]
                 put | get | get2 | del | exist |
                 hset | hget | hget2 |hdel | hexist |
-                sadd | srem | sismember |
+                sadd | srem | sismember | sismember2 |
                 zadd | zrem | zismember | zscore | zscore2 |
                 cache_exist | cache_get | cache_ttl | 
                 cache_put | cache_append | cache_del | cache_expire |

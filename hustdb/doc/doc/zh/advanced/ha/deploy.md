@@ -20,12 +20,16 @@
 
 `sync server` 同步时需要将数据 `POST` 到后端机。这里使用了开源的 `url` 传输库 [libcurl](https://curl.haxx.se)。
 
-	Downloads: https://curl.haxx.se/download.html
+    Downloads: https://curl.haxx.se/download.html
 
-	$ tar -zxvf curl-7.45.0.tar.gz
-	$ cd curl-7.45.0
-	$ make
-	$ sudo make install
+    $ sudo yum install -y libidn-devel
+
+    $ cd third_party
+    $ tar -zxvf curl-curl-7_50_2.tar.gz
+    $ cd curl-curl-7_50_2 
+    $ ./buildconf
+    $ ./configure --disable-ldap --disable-ldaps
+    $ make
 
 ### libevent ###
 
@@ -66,41 +70,31 @@
         '
     sudo -u jobs \
         scp -oStrictHostKeyChecking=no \
-        nginx.tar.gz \
-        jobs@192.168.1.101:/data/tmp/
-    sudo -u jobs \
-        scp -oStrictHostKeyChecking=no \
-        sync.tar.gz \
-        jobs@192.168.1.101:/data/tmp/
-    sudo -u jobs \
-        scp -oStrictHostKeyChecking=no \
-        upgrade.sh \
+        huststore.tar.gz \
         jobs@192.168.1.101:/data/tmp/
     sudo -u jobs \
         ssh -oStrictHostKeyChecking=no \
         jobs@192.168.1.101 \
         ' \
         cd /data/tmp/; \
-        rm -rf nginx; \
-        tar -zxf nginx.tar.gz -C .; \
-        cd /data/tmp/nginx/; \
+        rm -rf huststore; \
+        tar -zxf huststore.tar.gz -C .; \
+        cd /data/tmp/huststore/hustdb/ha/nginx; \
         ./configure --prefix=/data/hustdbha --add-module=src/addon; \
         make -j; \
         make install; \
         cd /data/hustdbha/html/; \
         rm -f status.html; \
         echo "ok" > status.html; \
-        cd /data/tmp/; \
-        cp upgrade.sh /data/hustdbha/sbin/; \
-        rm -rf nginx; \
-        rm -f nginx.tar.gz; \
-        cd /data/tmp/; \
-        tar -zxf sync.tar.gz -C .; \
-        cd /data/tmp/sync/; \
+        cp /data/tmp/huststore/hustdb/ha/upgrade.sh /data/hustdbha/sbin/; \
+        cd /data/tmp/huststore/third_party; \
+        ./build_libcurl.sh; \
+        cp /data/tmp/huststore/hustdb/sync; \
         make -j; \
         make install; \
-        rm -rf sync; \
-        rm -f sync.tar.gz; \
+        cp /data/tmp; \
+        rm -rf huststore; \
+        rm -f huststore.tar.gz; \
         '
     
     echo 'finish!'
@@ -108,29 +102,13 @@
 
 ### 限制 ###
 
-* `nginx.tar.gz` 为打包后的 `hustdb ha` 模块，其源代码路径为：`hustdb/ha/nginx` 。
+* `huststore.tar.gz` 为打包后的 `huststore` 源代码。
 
-* `upgrade.sh` 为 `hustdb ha` 平滑升级脚本，具体内容参考[这里](upgrade.md) 。
-
-* `sync.tar.gz` 是打包后的 `sync server`，源代码路径为： `hustdb/sync` 。
-
-* `nginx.tar.gz`、`upgrade.sh`、`sync.tar.gz` 需要和部署脚本在同一目录下。
+* `huststore.tar.gz` 需要和部署脚本在同一目录下。
 
 * 样例中 `192.168.1.101` 代表生产环境所属的线上机，实际部署的时候替换为真实的机器即可。
 
 * 假设该脚本运行的机器位于 `192.168.1.100` ，则 `192.168.1.100` 需要与 `192.168.1.101` 建立 ssh 信任关系，操作账户为 `jobs`，实际部署时，将 `jobs` 替换为真实的账户即可。
-
-可参考如下脚本来打包以上内容：
-
-    #!/bin/sh
-    cd hustdb/
-    mkdir deploy
-    cd ha/
-    tar -zcf nginx.tar.gz nginx
-    cp upgrade.sh nginx.tar.gz ../deploy/
-    cd ../
-    tar -zcf sync.tar.gz sync
-    cp sync.tar.gz deploy/
 
 ### 远程部署 HA 脚本范例 ###
 
@@ -148,30 +126,26 @@
         '
     sudo -u jobs \
         scp -oStrictHostKeyChecking=no \
-        nginx.tar.gz \
-        jobs@192.168.1.101:/data/tmp/
-    sudo -u jobs \
-        scp -oStrictHostKeyChecking=no \
-        upgrade.sh \
+        huststore.tar.gz \
         jobs@192.168.1.101:/data/tmp/
     sudo -u jobs \
         ssh -oStrictHostKeyChecking=no \
         jobs@192.168.1.101 \
         ' \
         cd /data/tmp/; \
-        rm -rf nginx; \
-        tar -zxf nginx.tar.gz -C .; \
-        cd /data/tmp/nginx/; \
+        rm -rf huststore; \
+        tar -zxf huststore.tar.gz -C .; \
+        cd /data/tmp/huststore/hustdb/ha/nginx; \
         ./configure --prefix=/data/hustdbha --add-module=src/addon; \
         make -j; \
         make install; \
         cd /data/hustdbha/html/; \
         rm -f status.html; \
         echo "ok" > status.html; \
+        cp /data/tmp/huststore/hustdb/ha/upgrade.sh /data/hustdbha/sbin/; \
         cd /data/tmp/; \
-        cp upgrade.sh /data/hustdbha/sbin/; \
-        rm -rf nginx; \
-        rm -f nginx.tar.gz; \
+        rm -rf huststore; \
+        rm -f huststore.tar.gz; \
         '
     
     echo 'finish!'
@@ -191,19 +165,20 @@
         '
     sudo -u jobs \
         scp -oStrictHostKeyChecking=no \
-        sync.tar.gz \
+        huststore.tar.gz \
         jobs@192.168.1.101:/data/tmp/
     sudo -u jobs \
         ssh -oStrictHostKeyChecking=no \
         jobs@192.168.1.101 \
         ' \
-        cd /data/tmp/; \
-        tar -zxf sync.tar.gz -C .; \
-        cd /data/tmp/sync/; \
+        cd /data/tmp/huststore/third_party; \
+        ./build_libcurl.sh; \
+        cp /data/tmp/huststore/hustdb/sync; \
         make -j; \
         make install; \
-        rm -rf sync; \
-        rm -f sync.tar.gz; \
+        cp /data/tmp; \
+        rm -rf huststore; \
+        rm -f huststore.tar.gz; \
         '
     
     echo 'finish!'

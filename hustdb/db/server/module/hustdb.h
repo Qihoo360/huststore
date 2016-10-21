@@ -161,6 +161,7 @@ typedef struct store_conf_s
     int32_t db_binlog_scan_interval;
     int32_t db_binlog_thread_count;
     int32_t db_binlog_queue_capacity;
+    int32_t db_binlog_task_timeout;
     int32_t mq_queue_maximum;
     int32_t db_table_maximum;
     int32_t db_ttl_scan_count;
@@ -173,6 +174,7 @@ typedef struct store_conf_s
     , db_binlog_scan_interval ( 0 )
     , db_binlog_thread_count ( 0 )
     , db_binlog_queue_capacity ( 0 )
+    , db_binlog_task_timeout ( 0 )
     , mq_queue_maximum ( 0 )
     , db_table_maximum ( 0 )
     , db_ttl_scan_count ( 0 )

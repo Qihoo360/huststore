@@ -377,6 +377,13 @@ bool hustdb_t::init_server_config ( )
         LOG_ERROR ( "[hustdb][init_server_config]store db.binlog.queue_capacity invalid, binlog.queue_capacity: %d", m_store_conf.db_binlog_queue_capacity );
         return false;
     }
+    
+    m_store_conf.db_binlog_task_timeout = m_appini->ini_get_int ( m_ini, "store", "db.binlog.task_timeout", 950400 );
+    if ( m_store_conf.db_binlog_task_timeout <= 0 )
+    {
+        LOG_ERROR ( "[hustdb][init_server_config]store db.binlog.task_timeout invalid, binlog.task_timeout: %d", m_store_conf.db_binlog_task_timeout );
+        return false;
+    }
 
     m_store_conf.mq_queue_maximum = m_appini->ini_get_int ( m_ini, "store", "mq.queue.maximum", 8192 );
     if ( m_store_conf.mq_queue_maximum <= 0 )
@@ -2976,7 +2983,7 @@ int hustdb_t::hustdb_binlog (
             return EKEYREJECTED;
     }
 
-    r = m_storage->binlog ( key, key_len, host, host_len, cmd_type, is_rem, conn );
+    r = m_storage->binlog ( key, key_len, host, host_len, m_current_timestamp, cmd_type, is_rem, conn );
     if ( 0 != r )
     {
         LOG_ERROR ( "[hustdb][db_binlog]binlog return %d", r );

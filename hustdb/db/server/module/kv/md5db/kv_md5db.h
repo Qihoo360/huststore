@@ -138,6 +138,7 @@ public:
                          size_t user_key_len,
                          const char * host,
                          size_t host_len,
+                         uint32_t timestamp,
                          uint8_t cmd_type,
                          bool is_rem,
                          conn_ctxt_t conn

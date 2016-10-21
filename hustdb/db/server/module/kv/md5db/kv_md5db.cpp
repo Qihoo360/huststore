@@ -343,6 +343,7 @@ bool kv_md5db_t::open ( )
     if ( ! m_inner->m_binlog.init ( hustdb->get_store_conf ().db_binlog_thread_count,
                                     hustdb->get_store_conf ().db_binlog_queue_capacity,
                                     hustdb->get_store_conf ().db_binlog_queue_capacity,
+                                    hustdb->get_store_conf ().db_binlog_task_timeout,
                                     hustdb->get_server_conf ().http_security_user.c_str (),
                                     hustdb->get_server_conf ().http_security_passwd.c_str ()
                                    )
@@ -3244,14 +3245,16 @@ int kv_md5db_t::binlog (
                          size_t user_key_len,
                          const char * host,
                          size_t host_len,
+                         uint32_t timestamp,
                          uint8_t cmd_type,
                          bool is_rem,
                          conn_ctxt_t conn
                          )
 {
     uint32_t            ip               = 0;
-    uint32_t            port             = 0;
-    char                inner_key[ 16 ]  = {};
+    uint32_t            port_i           = 0;
+    char                port_s[ 8 ]      = { };
+    char                inner_key[ 16 ]  = { };
     size_t              inner_key_len    = 16;
     item_ctxt_t *       item_ctxt        = NULL;
     block_id_t          block_id;
@@ -3303,20 +3306,23 @@ int kv_md5db_t::binlog (
             
             memset ( str, 0, sizeof ( str ) );
             memcpy ( str, host + i + 1, host_len - i - 1 );
-            port = atoi ( str );
+            port_i = atoi ( str );
             
             break;
         }
     }
     
-    if ( unlikely ( ip <= 0 && port <= 0 ) )
+    if ( unlikely ( ip <= 0 || port_i <= 0 || port_i >= 65535  ) )
     {
         LOG_ERROR ( "[md5db][binlog]invalid host" );
         return EINVAL;
     }
+    
+    sprintf ( port_s, "%05d", port_i );
 
     item_ctxt->key.append ( ( const char * ) & ip, sizeof ( uint32_t ) );
-    item_ctxt->key.append ( ( const char * ) & port, sizeof ( uint32_t ) );
+    item_ctxt->key.append ( ( const char * ) port_s, 5 );
+    item_ctxt->key.append ( ( const char * ) & timestamp, sizeof ( uint32_t ) );
     
     if ( tmp_ctxt->table_len > 0 )
     {

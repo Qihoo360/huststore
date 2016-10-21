@@ -1327,9 +1327,9 @@ int kv_array_t::ttl_scan (
         return EFAULT;
     }
 
-    g_hustdb       = ( hustdb_t * ) G_APPTOOL->get_hustdb ();
-    timestamp      = g_hustdb->get_current_timestamp ();
-    conn.worker_id = g_hustdb->get_worker_count ();
+    g_hustdb                         = ( hustdb_t * ) G_APPTOOL->get_hustdb ();
+    timestamp                        = g_hustdb->get_current_timestamp ();
+    conn.worker_id                   = g_hustdb->get_worker_count ();
 
     struct export_cb_param_t * cb_pm = ( struct export_cb_param_t * ) callback_param;
     size                             = cb_pm->size;
@@ -1529,10 +1529,14 @@ int kv_array_t::binlog_scan (
     uint8_t             cmd_type              = 0;
     uint32_t            version               = 0;
     uint32_t            timestamp             = 0;
+    uint32_t            bl_timestamp          = 0;
+    uint32_t            bl_task_timeout       = 0;
     uint32_t            ttl                   = 0;
     uint32_t            file_id               = 0;
     uint32_t            binlog_success        = 0;
     uint32_t            binlog_fail           = 0;
+    uint32_t            binlog_timeout        = 0;
+    uint32_t            binlog_round          = 0;
     uint32_t            bl_file_id            = m_file_count + 1;
     size_t              key_len               = 0;
     const char *        key                   = NULL;
@@ -1549,12 +1553,15 @@ int kv_array_t::binlog_scan (
     i_kv_t *            kv_binlog             = NULL;
     i_kv_t *            kv_data               = NULL;
     size_t              inner_key_len         = 16;
-    char                host_i[ 8 ]           = {};
     size_t              host_len              = 0;
+    char                host_i[ 9 ]           = {};
     char                host_s[ 32 ]          = {};
-    struct in_addr      addr;
+    size_t              real_key_offset       = sizeof ( host_i ) + sizeof ( uint32_t );
+    char                port_s[ 8 ]           = {};
+    struct in_addr      ip_addr;
     std::string         ttl_key;
     std::string         content;
+    std::string         binlog_seek;
     binlog_task_cb_param_t task_cb_pm;
 
     ttl_key.reserve ( RESERVE_BYTES_FOR_RSP_BUFER );
@@ -1567,260 +1574,302 @@ int kv_array_t::binlog_scan (
         return EFAULT;
     }
 
-    g_hustdb       = ( hustdb_t * ) G_APPTOOL->get_hustdb ();
-    timestamp      = g_hustdb->get_current_timestamp ();
-
+    g_hustdb                                    = ( hustdb_t * ) G_APPTOOL->get_hustdb ();
+    timestamp                                   = g_hustdb->get_current_timestamp ();
+    bl_task_timeout                             = g_hustdb->get_store_conf ().db_binlog_task_timeout;
+    
     struct check_alive_cb_param_t * alive_cb_pm = ( struct check_alive_cb_param_t * ) alive_cb_param;
     task_cb_pm.db                               = alive_cb_pm->db;
     
-    do
+    while ( true )
     {
-
-        it = kv_binlog->iterator ();
-        if ( NULL == it )
+        if ( binlog_round > 0 && binlog_seek.empty () )
         {
-            LOG_ERROR ( "[kv_array][binlog_scan]iterator() failed" );
-            r = EFAULT;
             break;
         }
 
-        it->seek_first ();
+        binlog_round ++;
         
-        ttl_key.resize ( 0 );
-
-        for ( i = 0; it->valid (); it->next (), i ++ )
+        do
         {
+
+            it = kv_binlog->iterator ();
+            if ( NULL == it )
+            {
+                LOG_ERROR ( "[kv_array][binlog_scan]iterator() failed" );
+                r = EFAULT;
+                break;
+            }
+
+            if ( binlog_seek.empty () )
+            {
+                it->seek_first ();
+            }
+            else
+            {
+                it->seek ( binlog_seek.c_str (), binlog_seek.size () );
+            }
+
+            binlog_seek.resize ( 0 );
+            ttl_key.resize ( 0 );
+
+            for ( i = 0; it->valid (); it->next (), i ++ )
+            {
+                if ( ! ttl_key.empty () )
+                {
+                    r = kv_binlog->del ( ttl_key.c_str (), ttl_key.size () );
+                    if ( unlikely ( 0 != r ) )
+                    {
+                        LOG_ERROR ( "[kv_array][binlog_scan]del return %d", r );
+                    }
+                }
+
+                r          = 0;
+                version    = 0;
+                ttl_key.resize ( 0 );
+
+                key        = it->key ( & key_len );
+
+                if ( unlikely ( key_len <= real_key_offset ) )
+                {
+                    ttl_key.append ( key, key_len );
+                    LOG_ERROR ( "[kv_array][binlog_scan]invalid key: %d", key_len );
+                    r = EFAULT;
+                    continue;
+                }
+
+                fast_memcpy ( & bl_timestamp, key + sizeof ( host_i ), sizeof ( uint32_t ) );
+                if ( unlikely ( timestamp - bl_timestamp > bl_task_timeout ) )
+                {
+                    binlog_timeout ++;
+                    ttl_key.append ( key, key_len );
+                    LOG_ERROR ( "[kv_array][binlog_scan][timestamp=%u]binlog timeout", bl_timestamp );
+                    r = EFAULT;
+                    continue;
+                }
+
+                if ( strncmp ( host_i, key, sizeof ( host_i ) ) != 0 )
+                {
+                    fast_memcpy ( host_i, key, sizeof ( host_i ) );
+
+                    memset ( host_s, 0, sizeof ( host_s ) );
+                    fast_memcpy ( & ip_addr, host_i, sizeof ( uint32_t ) );
+                    fast_memcpy ( port_s, host_i + sizeof ( uint32_t ), 5 );
+                    sprintf ( host_s, "%s:%d", inet_ntoa ( ip_addr ), atoi ( port_s ) );
+                    host_len = strlen ( host_s );
+
+                    std::string host_t = host_s;
+                    alive_cb_pm->host = & host_t;
+
+                    alive_cb ( alive_cb_pm );
+                }
+
+                if ( alive_cb_pm->cursor_type != '+' )
+                {
+                    memset ( host_s, 0, sizeof ( host_s ) );
+                    fast_memcpy ( host_s, host_i, sizeof ( uint32_t ) );
+                    sprintf ( host_s + sizeof ( uint32_t ), "%05d", atoi ( port_s ) + 1 );
+                    binlog_seek = host_s;
+
+                    r = EFAULT;
+                    break;
+                }
+
+                val        = it->value ( & val_len );
+                fast_memcpy ( & cmd_type, val, sizeof ( uint8_t ) );
+
+                real_key     = key + real_key_offset;
+                real_key_len = key_len - real_key_offset;
+
+                switch ( cmd_type )
+                {
+                    case HUSTDB_METHOD_PUT:
+                    case HUSTDB_METHOD_DEL:
+                        table_len = 0;
+                        table     = NULL;
+                        break;
+
+                    case HUSTDB_METHOD_HDEL:
+                    case HUSTDB_METHOD_SREM:
+                    case HUSTDB_METHOD_ZREM:
+                        table_len = real_key_len - inner_key_len - 1;
+                        table     = real_key;
+                        break;
+
+                    case HUSTDB_METHOD_HSET:
+                    case HUSTDB_METHOD_SADD:
+                    case HUSTDB_METHOD_ZADD:
+                        table_len = real_key_len - sizeof ( md5db::block_id_t ) - 1;
+                        table     = real_key;
+                        break;
+
+                    default:
+                        r = EFAULT;
+                        break;
+                }
+
+                if ( unlikely (
+                               r != 0 ||
+                               (
+                                 table &&
+                                 (
+                                   table_len <= 0 ||
+                                   hustdb_t::real_table_type ( table [ table_len ] ) == 'N'
+                                   )
+                                 )
+                               )
+                     )
+                {
+                    ttl_key.append ( key, key_len );
+                    LOG_ERROR ( "[kv_array][binlog_scan]invalid table: %d", table_len );
+                    r = EFAULT;
+                    continue;
+                }
+
+                binlog_done_cb_param_t * done_cb_pm = ( binlog_done_cb_param_t * ) malloc ( sizeof ( binlog_done_cb_param_t ) );
+                done_cb_pm->db                      = alive_cb_pm->db;
+                done_cb_pm->key_len                 = key_len;
+                fast_memcpy ( done_cb_pm->key, key, key_len );
+
+                switch ( cmd_type )
+                {
+                    case HUSTDB_METHOD_DEL:
+                    case HUSTDB_METHOD_HDEL:
+                    case HUSTDB_METHOD_SREM:
+                    case HUSTDB_METHOD_ZREM:
+                        task_cb_pm.host       = host_s;
+                        task_cb_pm.host_len   = host_len;
+                        task_cb_pm.table      = table;
+                        task_cb_pm.table_len  = table_len;
+                        task_cb_pm.key        = val + 1;
+                        task_cb_pm.key_len    = val_len - 1;
+                        task_cb_pm.value      = NULL;
+                        task_cb_pm.value_len  = 0;
+                        task_cb_pm.ver        = 0;
+                        task_cb_pm.ttl        = 0;
+                        task_cb_pm.cmd_type   = cmd_type;
+                        task_cb_pm.param      = done_cb_pm;
+
+                        task_cb ( & task_cb_pm );
+                        alive_cb_pm->cursor_type = task_cb_pm.cursor_type;
+
+                        break;
+
+                    case HUSTDB_METHOD_PUT:
+                    case HUSTDB_METHOD_HSET:
+                    case HUSTDB_METHOD_SADD:
+                    case HUSTDB_METHOD_ZADD:
+                        fast_memcpy ( & file_id, val + 1, sizeof ( uint32_t ) );
+
+                        if ( file_id >= m_file_count )
+                        {
+                            free ( done_cb_pm );
+                            ttl_key.append ( key, key_len );
+                            LOG_ERROR ( "[kv_array][binlog_scan][local=%d][files=%d]invalid local_id", file_id, m_file_count );
+                            r = EFAULT;
+                            break;
+                        }
+
+                        kv_data = m_files[ file_id ];
+                        if ( unlikely ( NULL == kv_data ) )
+                        {
+                            free ( done_cb_pm );
+                            LOG_ERROR ( "[kv_array][binlog_scan][local=%u]file is NULL", file_id );
+                            r = EFAULT;
+                            break;
+                        }
+
+                        r = kv_data->get ( real_key, real_key_len, content );
+                        if ( unlikely ( 0 != r ) )
+                        {
+                            free ( done_cb_pm );
+                            ttl_key.append ( key, key_len );
+                            LOG_ERROR ( "[kv_array][binlog_scan][file_id=%u]get return %d", file_id, r );
+                            r = EFAULT;
+                            break;
+                        }
+
+                        val     = content.c_str ();
+                        val_len = content.size ();
+
+                        export_cb ( export_cb_param,
+                                   key,
+                                   key_len,
+                                   val,
+                                   val_len,
+                                   table,
+                                   table_len,
+                                   version,
+                                   ttl,
+                                   content,
+                                   & ignore_this_record,
+                                   & break_the_loop );
+
+                        if ( ttl > 0 && ttl <= timestamp )
+                        {
+                            free ( done_cb_pm );
+                            ttl_key.append ( key, key_len );
+                            LOG_ERROR ( "[kv_array][binlog_scan][ttl=%u]data timeout", ttl );
+                            r = EFAULT;
+                            break;
+                        }
+
+                        task_cb_pm.host       = host_s;
+                        task_cb_pm.host_len   = host_len;
+                        task_cb_pm.table      = table;
+                        task_cb_pm.table_len  = table_len;
+                        task_cb_pm.key        = key;
+                        task_cb_pm.key_len    = key_len;
+                        task_cb_pm.value      = val;
+                        task_cb_pm.value_len  = val_len;
+                        task_cb_pm.ver        = version;
+                        task_cb_pm.ttl        = ( ttl > 0 ) ? ttl - timestamp : 0;
+                        task_cb_pm.cmd_type   = cmd_type;
+                        task_cb_pm.param      = done_cb_pm;
+
+                        task_cb ( & task_cb_pm );
+                        alive_cb_pm->cursor_type = task_cb_pm.cursor_type;
+
+                        break;
+
+                    default:
+                        ttl_key.append ( key, key_len );
+                        r = EFAULT;
+                        break;
+                }
+
+                if ( likely ( 0 == r ) )
+                {
+                    binlog_success ++;
+                }
+                else
+                {
+                    binlog_fail ++;
+                }
+            }
+
             if ( ! ttl_key.empty () )
             {
                 r = kv_binlog->del ( ttl_key.c_str (), ttl_key.size () );
                 if ( unlikely ( 0 != r ) )
                 {
-                    LOG_ERROR ( "[kv_array][binlog_scan][file_id=%u]del return %d", file_id, r );
+                    LOG_ERROR ( "[kv_array][binlog_scan]del return %d", r );
                 }
             }
-            
-            r          = 0;
-            version    = 0;
-            ttl_key.resize ( 0 );
-            
-            key        = it->key ( & key_len );
-            
-            if ( unlikely ( key_len <= sizeof ( host_i ) ) )
-            {
-                ttl_key.append ( key, key_len );
-                LOG_ERROR ( "[kv_array][binlog_scan]invalid key: %d", key_len );
-                r = EFAULT;
-                continue;
-            }
 
-            if ( strncmp ( host_i, key, sizeof ( host_i ) ) != 0 )
-            {
-                fast_memcpy ( host_i, key, sizeof ( host_i ) );
-                
-                memset ( host_s, 0, sizeof ( host_s ) );
-                fast_memcpy ( & addr, & host_i, sizeof ( uint32_t ) );
-                sprintf ( host_s, "%s:%d", inet_ntoa ( addr ), * ( ( uint32_t * ) ( host_i + sizeof ( uint32_t ) ) ) );
-                host_len = strlen ( host_s );
-                
-                std::string host_t = host_s;
-                alive_cb_pm->host = & host_t;
-                
-                alive_cb ( alive_cb_pm );
-            }
-            
-            if ( alive_cb_pm->cursor_type != '+' )
-            {
-                r = EFAULT;
-                continue;
-            }
-            
-            val        = it->value ( & val_len );
-            fast_memcpy ( & cmd_type, val, sizeof ( uint8_t ) );
-
-            real_key     = key + sizeof ( host_i );
-            real_key_len = key_len - sizeof ( host_i );
-
-            switch ( cmd_type )
-            {
-                case HUSTDB_METHOD_PUT:
-                case HUSTDB_METHOD_DEL:
-                    table_len = 0;
-                    table     = NULL;
-                    break;
-                    
-                case HUSTDB_METHOD_HDEL:
-                case HUSTDB_METHOD_SREM:
-                case HUSTDB_METHOD_ZREM:
-                    table_len = real_key_len - inner_key_len - 1;
-                    table     = real_key;
-                    break;
-                    
-                case HUSTDB_METHOD_HSET:
-                case HUSTDB_METHOD_SADD:
-                case HUSTDB_METHOD_ZADD:
-                    table_len = real_key_len - sizeof ( md5db::block_id_t ) - 1;
-                    table     = real_key;
-                    break;
-                    
-                default:
-                    r = EFAULT;
-                    break;
-            }
-
-            if ( unlikely (
-                           r != 0 ||
-                           (
-                             table &&
-                             (
-                               table_len <= 0 ||
-                               hustdb_t::real_table_type ( table [ table_len ] ) == 'N'
-                               )
-                             )
-                           )
-                 )
-            {
-                ttl_key.append ( key, key_len );
-                LOG_ERROR ( "[kv_array][binlog_scan]invalid table: %d", table_len );
-                r = EFAULT;
-                continue;
-            }
-            
-            binlog_done_cb_param_t * done_cb_pm = ( binlog_done_cb_param_t * ) malloc ( sizeof ( binlog_done_cb_param_t ) );
-            done_cb_pm->db                      = alive_cb_pm->db;
-            done_cb_pm->key_len                 = key_len;
-            fast_memcpy ( done_cb_pm->key, key, key_len );
-            
-            switch ( cmd_type )
-            {
-                case HUSTDB_METHOD_DEL:
-                case HUSTDB_METHOD_HDEL:
-                case HUSTDB_METHOD_SREM:
-                case HUSTDB_METHOD_ZREM:
-                    task_cb_pm.host       = host_s;
-                    task_cb_pm.host_len   = host_len;
-                    task_cb_pm.table      = table;
-                    task_cb_pm.table_len  = table_len;
-                    task_cb_pm.key        = val + 1;
-                    task_cb_pm.key_len    = val_len - 1;
-                    task_cb_pm.value      = NULL;
-                    task_cb_pm.value_len  = 0;
-                    task_cb_pm.ver        = 0;
-                    task_cb_pm.ttl        = 0;
-                    task_cb_pm.cmd_type   = cmd_type;
-                    task_cb_pm.param      = done_cb_pm;
-
-                    task_cb ( & task_cb_pm );
-                    alive_cb_pm->cursor_type = task_cb_pm.cursor_type;
-
-                    break;
-                    
-                case HUSTDB_METHOD_PUT:
-                case HUSTDB_METHOD_HSET:
-                case HUSTDB_METHOD_SADD:
-                case HUSTDB_METHOD_ZADD:
-                    fast_memcpy ( & file_id, val + 1, sizeof ( uint32_t ) );
-
-                    if ( file_id >= m_file_count )
-                    {
-                        free ( done_cb_pm );
-                        ttl_key.append ( key, key_len );
-                        LOG_ERROR ( "[kv_array][binlog_scan][local=%d][files=%d]invalid local_id", file_id, m_file_count );
-                        r = EFAULT;
-                        break;
-                    }
-
-                    kv_data = m_files[ file_id ];
-                    if ( unlikely ( NULL == kv_data ) )
-                    {
-                        free ( done_cb_pm );
-                        LOG_ERROR ( "[kv_array][binlog_scan][local=%u]file is NULL", file_id );
-                        r = EFAULT;
-                        break;
-                    }
-
-                    r = kv_data->get ( real_key, real_key_len, content );
-                    if ( unlikely ( 0 != r ) )
-                    {
-                        free ( done_cb_pm );
-                        ttl_key.append ( key, key_len );
-                        LOG_ERROR ( "[kv_array][binlog_scan][file_id=%u]get return %d", file_id, r );
-                        r = EFAULT;
-                        break;
-                    }
-
-                    val     = content.c_str ();
-                    val_len = content.size ();
-
-                    export_cb ( export_cb_param,
-                               key,
-                               key_len,
-                               val,
-                               val_len,
-                               table,
-                               table_len,
-                               version,
-                               ttl,
-                               content,
-                               & ignore_this_record,
-                               & break_the_loop );
-                    
-                    if ( ttl > 0 && ttl <= timestamp )
-                    {
-                        free ( done_cb_pm );
-                        ttl_key.append ( key, key_len );
-                        LOG_ERROR ( "[kv_array][binlog_scan][ttl=%u][timestamp=%u]timeout", ttl, timestamp );
-                        r = EFAULT;
-                        break;
-                    }
-                    
-                    task_cb_pm.host       = host_s;
-                    task_cb_pm.host_len   = host_len;
-                    task_cb_pm.table      = table;
-                    task_cb_pm.table_len  = table_len;
-                    task_cb_pm.key        = key;
-                    task_cb_pm.key_len    = key_len;
-                    task_cb_pm.value      = val;
-                    task_cb_pm.value_len  = val_len;
-                    task_cb_pm.ver        = version;
-                    task_cb_pm.ttl        = ( ttl > 0 ) ? ttl - timestamp : 0;
-                    task_cb_pm.cmd_type   = cmd_type;
-                    task_cb_pm.param      = done_cb_pm;
-                    
-                    task_cb ( & task_cb_pm );
-                    alive_cb_pm->cursor_type = task_cb_pm.cursor_type;
-                    
-                    break;
-
-                default:
-                    ttl_key.append ( key, key_len );
-                    r = EFAULT;
-                    break;
-            }
-
-            if ( likely ( 0 == r ) )
-            {
-                binlog_success ++;
-            }
-            else
-            {
-                binlog_fail ++;
-            }
         }
+        while ( 0 );
 
-        LOG_INFO ( "[kv_array][binlog_scan][count=%d][success=%d][fail=%d][consume=%d]", i, binlog_success, binlog_fail, g_hustdb->get_current_timestamp () - timestamp );
-
-        r = 0;
-
-    }
-    while ( 0 );
-
-    if ( it )
-    {
-        it->kill_me ();
-        it = NULL;
+        if ( it )
+        {
+            it->kill_me ();
+            it = NULL;
+        }
     }
 
-    return r;
+    LOG_INFO ( "[kv_array][binlog_scan][round=%d][success=%d][fail=%d][timeout=%d][consume=%d]", binlog_round, binlog_success, binlog_fail, binlog_timeout, g_hustdb->get_current_timestamp () - timestamp );
+
+    return 0;
 }
 
 int kv_array_t::hash_info (

@@ -5,7 +5,7 @@
 
 namespace sync_network {
 
-void add_uniq_sort (unsigned long int, unsigned int end, ip_allow_t * ip_allow_map)
+void add_uniq_sort (unsigned long int start, unsigned int end, ip_allow_t * ip_allow_map)
 {
     int i = 0;
     int pos = - 1;

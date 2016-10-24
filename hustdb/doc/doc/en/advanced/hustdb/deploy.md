@@ -53,11 +53,18 @@ Deployment
 	db.ttl.maximum                  = 2592000       //DB, max number of time to live for item
     db.ttl.scan_interval            = 30            //DB, scan interval for ttl, timeout item will be recycled periodically
 
-	mq.queue.maximum                = 8192          //MQ, max capacity of queue; If it's value is reduced, the tail index will become invalid, change it to the original value to restore.
-	db.table.maximum                = 8192          //DB, max capacity of table; If it's value is reduced, the tail index will become invalid, change it to the original value to restore.
-
     # 1 ~ 10000, default 1000
     db.ttl.scan_count               = 1000          //DB, number of item each time ttl scan is executed.
+
+	db.binlog.thread_count          = 2             //DB，number of worker threads for binlog
+	db.binlog.queue_capacity        = 1000          //DB，binlog task queue capacity
+
+	# UNIT Second
+	db.binlog.scan_interval         = 60            //DB，scan interval for binlog, time synchronization binlog item
+	db.binlog.task_timeout          = 950400        //DB，task timeout time for binlog
+
+	mq.queue.maximum                = 8192          //MQ, max capacity of queue; If it's value is reduced, the tail index will become invalid, change it to the original value to restore.
+	db.table.maximum                = 8192          //DB, max capacity of table; If it's value is reduced, the tail index will become invalid, change it to the original value to restore.
 
     [cachedb]
     # UNIT MB, default 512

@@ -53,11 +53,18 @@
 	db.ttl.maximum                  = 2592000       //DB，item最大存活时间
     db.ttl.scan_interval            = 30            //DB，ttl扫描间隔，定期回收ttl超时的item
 
+	# 1 ~ 10000, default 1000
+    db.ttl.scan_count               = 1000          //DB，每次ttl扫描的item数量
+
+	db.binlog.thread_count          = 2             //DB，binlog的worker线程数
+	db.binlog.queue_capacity        = 1000          //DB，binlog任务队列容量
+
+	# UNIT Second
+	db.binlog.scan_interval         = 60            //DB，binlog扫描间隔，定期同步binlog的item
+	db.binlog.task_timeout          = 950400        //DB，binlog任务超时时间
+
 	mq.queue.maximum                = 8192          //MQ，queue最大数量；当且仅当，数值修改：大→小，会造成尾部索引失效，改回原数值即可恢复
 	db.table.maximum                = 8192          //DB，table最大数量；当且仅当，数值修改：大→小，会造成尾部索引失效，改回原数值即可恢复
-
-    # 1 ~ 10000, default 1000
-    db.ttl.scan_count               = 1000          //DB，每次ttl扫描的item数量
 
     [cachedb]
     # UNIT MB, default 512

@@ -1,25 +1,20 @@
 #/usr/bin/python
 import sys
 import os
-import time
 import datetime
-import json
-import string
 import requests
 import random
-import struct
 from time import sleep
 
 LOOPS = 10000
 USER = 'huststore'
 PASSWD = 'huststore'
 gentm = lambda: datetime.datetime.now().strftime('[%Y-%m-%d %H:%M:%S] ')
-test_cases = map(lambda i: { 'tb': 'hustdbhatb%d' % i, 'key': 'hustdbhakey%d' % i, 'val': 'hustdbhaval%d' % i }, xrange(1, 31))
-gen_char = lambda i: str('\n' if 0 != i and 0 == i % 80 else random.randint(0, 9))
-gen_body = lambda n: map(gen_char, xrange(n))
 TIMEOUT = 60
 
-SIZE_LEN = 4
+kv_fmt = '%s/%s?key=%s'
+hash_fmt = '%s/%s?tb=%s&key=%s'
+set_fmt = '%s/%s?tb=%s'
 
 def manual(): 
     print """
@@ -43,125 +38,132 @@ def manual():
         python autotest.py localhost:8082 sync_status
         """
 
-def log_err(path, str):
-    print str
-    with open(path, 'a+') as f:
-        f.writelines('%s%s\n' % (gentm(), str))
+def test_loop(log_dir, host, sess):
+    def log_err(path, msg):
+        print msg
+        with open(path, 'a+') as f:
+            f.writelines('%s%s\n' % (gentm(), msg))
+    def write_complete_base(loop, r, cmd, key):
+        if 200 != r.status_code:
+            log_err(log_dir, 'loop %s { %s: %d }' % (loop, cmd, r.status_code))
+        else:
+            if key in r.headers:
+                log_err(log_dir, 'loop %s { %s: { %s: %s } }' % (loop, cmd, key, r.headers[key]))
+    def write_complete(loop, r, cmd):
+        write_complete_base(loop, r, cmd, 'sync')
+    def write_cache_complete(loop, r, cmd):
+        write_complete_base(loop, r, cmd, 'fail')
+    def exist_complete(loop, r, cmd):
+        if 200 == r.status_code:
+            log_err(log_dir, 'loop %s { %s: still exist }' % (loop, cmd))
+    def get_complete(loop, r, cmd, val):
+        if r.content != val:
+            log_err(log_dir, 'loop %s { %s }, not equal' % (loop, cmd))
+    def zscore_complete(loop, r, cmd, score):
+        if 200 != r.status_code or int(r.content) != score:
+            log_err(log_dir, 'loop %s { %s: score error }' % (loop, cmd))
+    def fetch(func, cmd, body):
+        return func(cmd, body, headers = {'content-type':'text/plain'}, timeout=TIMEOUT, auth=(USER, PASSWD))
+    def fetch_nobody(func, cmd):
+        return func(cmd, timeout=TIMEOUT, auth=(USER, PASSWD))
+    
+    def safe_request(loop, func, cmd, count):
+        try:
+            func(cmd)
+        except requests.exceptions.RequestException as e:
+            log_err(log_dir, 'loop %s {%s: %s}' % (loop, cmd, str(e)))
+            sleep(1)
+        return count + 1
+    def run_each_case(loop, sess, hash_tb, set_tb, zset_tb, key, val, score, count):
+        kv_cmd = lambda cmd: kv_fmt % (host, cmd, key)
+        hash_cmd = (lambda host, tb, key: lambda cmd: hash_fmt % (host, cmd, tb, key))(host, hash_tb, key)
+        set_cmd = (lambda host, tb: lambda cmd: set_fmt % (host, cmd, tb))(host, set_tb)
+        zset_cmd = (lambda host, tb: lambda cmd: set_fmt % (host, cmd, tb))(host, zset_tb)
+        
+        put_base = lambda loop, func, val: lambda cmd: write_complete(loop, fetch(func, cmd, val), cmd)
+        get_base = lambda loop, func, val: lambda cmd: get_complete(loop, fetch_nobody(func, cmd), cmd, val)
+        del_base = lambda loop, func: lambda cmd: write_complete(loop, fetch_nobody(func, cmd), cmd)
+        exist_base = lambda loop, func: lambda cmd: exist_complete(loop, fetch_nobody(func, cmd), cmd)
+        
+        put_key = lambda loop, func, key: lambda cmd: write_complete(loop, fetch(func, cmd, key), cmd)
+        rem_key = lambda loop, func, key: lambda cmd: write_complete(loop, fetch(func, cmd, key), cmd)
+        key_exist = lambda loop, func, key: lambda cmd: exist_complete(loop, fetch(func, cmd, key), cmd)
+        zscore = lambda loop, func, key, score: lambda cmd: zscore_complete(loop, fetch(func, cmd, key), cmd, score)
+        
+        cases = [
+            [kv_cmd('put'), put_base(loop, sess.post, val)],
+            [kv_cmd('get'), get_base(loop, sess.get, val)],
+            [kv_cmd('del'), del_base(loop, sess.get)],
+            [kv_cmd('exist'), exist_base(loop, sess.get)],
+            [hash_cmd('hset'), put_base(loop, sess.post, val)],
+            [hash_cmd('hget'), get_base(loop, sess.get, val)],
+            [hash_cmd('hdel'), del_base(loop, sess.get)],
+            [hash_cmd('hexist'), exist_base(loop, sess.get)],
+            [set_cmd('sadd'), put_key(loop, sess.post, key)],
+            [set_cmd('srem'), rem_key(loop, sess.post, key)],
+            [set_cmd('sismember'), key_exist(loop, sess.post, key)],
+            ['%s&score=%d' % (zset_cmd('zadd'), score), put_key(loop, sess.post, key)],
+            [zset_cmd('zscore'), zscore(loop, sess.post, key, score)],
+            [zset_cmd('zrem'), rem_key(loop, sess.post, key)],
+            [zset_cmd('zismember'), key_exist(loop, sess.post, key)],
+            [kv_cmd('cache/put'), put_base(loop, sess.post, val)],
+            [kv_cmd('cache/get'), get_base(loop, sess.get, val)],
+            [kv_cmd('cache/del'), del_base(loop, sess.get)],
+            [kv_cmd('cache/exist'), exist_base(loop, sess.get)],
+            [hash_cmd('cache/hset'), put_base(loop, sess.post, val)],
+            [hash_cmd('cache/hget'), get_base(loop, sess.get, val)],
+            [hash_cmd('cache/hdel'), del_base(loop, sess.get)],
+            [hash_cmd('cache/hexist'), exist_base(loop, sess.get)]
+            ]
+        for case in cases:
+            safe_request(loop, case[1], case[0], count)
+        return count
+    def run_cases(loop):
+        count = 0
+        for i in xrange(1, 31):
+            count = run_each_case(loop, sess, 
+                'hustdbhahashtbloop', 
+                'hustdbhasettbloop', 
+                'hustdbhazsettbloop', 
+                'hustdbhakey%d' % i, 
+                'hustdbhaval%d' % i, 
+                i, count)
+        #print count
+    for i in xrange(LOOPS):
+        loopstr = str(i)
+        print 'loop %s' % loopstr
+        with open('%s.count' % log_dir, 'w') as f:
+            f.writelines('%s%s\n' % (gentm(), loopstr))
+        run_cases(loopstr)
 
-def get_count(func, host, key):
-    cmd = '%s/%s' % (host, key)
-    r = func(cmd, auth=(USER, PASSWD))
-    return int(r.content) if 200 == r.status_code else 0
-    
-def stat_all(func, host, peer):
-    cmd = '%s/stat_all?peer=%d' % (host, peer)
-    r = func(cmd, auth=(USER, PASSWD))
-    return r.content if 200 == r.status_code else 0
-    
-class HATester:
-    def __init__(self, log_dir, host):
-        self.__log_dir = log_dir
-        self.__host = host
-        self.__dbtb = 'hustdbhatb'
-        self.__dbkey = 'hustdbhakey'
-        self.__dbval = 'hustdbhavalue'
-        self.__host = host
-        self.__gencmd = lambda cmd: lambda key: '%s/%s?key=%s' % (host, cmd, key)
-        self.__gentbcmd = lambda cmd: lambda tb, key: '%s/%s?tb=%s&key=%s' % (host, cmd, tb, key)
-        self.__genscmd = lambda cmd: lambda tb: '%s/%s?tb=%s' % (host, cmd, tb)
-        self.dict = {
-            'stat_all': self.__stat_all,
-            'sync_status': self.__sync_status,
-            'sync_alive': self.__sync_alive,
-            'get_table': self.__get_table,
-            'put': self.__put,
-            'get': self.__get,
-            'get2': self.__get2,
-            'del': self.__del,
-            'exist': self.__exist,
-            
-            'hset': self.__hset,
-            'hget': self.__hget,
-            'hget2': self.__hget2,
-            'hdel': self.__hdel,
-            'hexist': self.__hexist,
-            
-            'sadd': self.__sadd,
-            'srem': self.__srem,
-            'sismember': self.__sismember,
-            'sismember2': self.__sismember2,
-            
-            'zadd': self.__zadd,
-            'zrem': self.__zrem,
-            'zismember': self.__zismember,
-            'zscore': self.__zscore,
-            'zscore2': self.__zscore2,
-            
-            'cache_exist': self.__cache_exist,
-            'cache_get': self.__cache_get,
-            'cache_ttl': self.__cache_ttl,
-            'cache_put': self.__cache_put,
-            'cache_append': self.__cache_append,
-            'cache_del': self.__cache_del,
-            'cache_expire': self.__cache_expire,
-            
-            'cache_hexist': self.__cache_hexist,
-            'cache_hget': self.__cache_hget,
-            'cache_hset': self.__cache_hset,
-            'cache_hdel': self.__cache_hdel,
-            'cache_hincrby': self.__cache_hincrby,
-            'cache_hincrbyfloat': self.__cache_hincrbyfloat,
-            
-            'loop': self.__loop
-            }
-        self.__func_dict = self.__functors()
-        self.__count = 0
-        self.__sess = requests.Session()
-    def __stat_all(self):
-        peers = get_count(self.__sess.get, self.__host, 'peer_count')
+def test_ha(log_dir, host, cmd):
+    # test utils
+    def stat_all(sess, host):
+        def __get_count(sess, host, key):
+            cmd = '%s/%s' % (host, key)
+            r = sess.get(cmd, auth=(USER, PASSWD))
+            return int(r.content) if 200 == r.status_code else 0
+        def __stat_all(sess, host, peer):
+            cmd = '%s/stat_all?peer=%d' % (host, peer)
+            r = sess.get(cmd, auth=(USER, PASSWD))
+            return r.content if 200 == r.status_code else 0
+        peers = __get_count(sess, host, 'peer_count')
         for peer in xrange(peers):
             print '[peer-%d]' % peer
-            print stat_all(self.__sess.get, self.__host, peer)
-        
-    def __sync_status(self):
-        cmd = '%s/sync_status' % (self.__host)
-        r = self.__sess.get(cmd, auth=(USER, PASSWD))
-        print r.content if 200 == r.status_code else '%s: %d' % (cmd, r.status_code)
-    def __sync_alive(self):
-        cmd = '%s/sync_alive' % (self.__host)
-        r = self.__sess.get(cmd, auth=(USER, PASSWD))
-        print r.content if 200 == r.status_code else '%s: %d' % (cmd, r.status_code)
-    def __get_table(self):
-        cmd = '%s/get_table' % (self.__host)
-        r = self.__sess.get(cmd, auth=(USER, PASSWD))
-        print r.content if 200 == r.status_code else '%s: %d' % (cmd, r.status_code)
-    def __put(self):
-        cmd = self.__gencmd('put')(self.__dbkey)
-        r = self.__sess.post(cmd, self.__dbval, headers = {'content-type':'text/plain'}, auth=(USER, PASSWD))
+            print __stat_all(sess, host, peer)
+    def write_complete_base(r, cmd, key):
         if 200 == r.status_code:
-            if 'sync' in r.headers:
-                print 'sync: %s' % r.headers['sync']
+            if key in r.headers:
+                print '%s: %s' % (key, r.headers[key])
             else:
                 print 'pass'
         else:
             print '%s: %d' % (cmd, r.status_code)
-    def __get(self):
-        cmd = self.__gencmd('get')(self.__dbkey)
-        r = self.__sess.get(cmd, auth=(USER, PASSWD))
-        print r.content if 200 == r.status_code else '%s: %d' % (cmd, r.status_code)
-    def __exist2_complete(self, cmd, r):
-        if 'version' in r.headers:
-            print 'Version: %s' % r.headers['version']
-        elif 'version1' in r.headers:
-            print 'Version1: %s' % r.headers['version1']
-            print 'Version2: %s' % r.headers['version2']
-        if 200 == r.status_code:
-            print 'ok'
-        elif 409 == r.status_code:
-            print 'conflict version'
-        else:
-            print '%s: %d' % (cmd, r.status_code)
-    def __get2_complete(self, cmd, r):
+    def write_complete(r, cmd):
+        write_complete_base(r, cmd, 'sync')
+    def write_cache_complete(r, cmd):
+        write_complete_base(r, cmd, 'fail')
+    def get2_complete(r, cmd):
         if 'version' in r.headers:
             print 'Version: %s' % r.headers['version']
         elif 'version1' in r.headers:
@@ -177,305 +179,120 @@ class HATester:
                 print 'Value2: %s' % r.content[off:]
         else:
             print '%s: %d' % (cmd, r.status_code)
-    def __get2(self):
-        cmd = self.__gencmd('get2')(self.__dbkey)
-        r = self.__sess.get(cmd, auth=(USER, PASSWD))
-        self.__get2_complete(cmd, r)
-    def __write_base(self, cmd):
-        r = self.__sess.get(cmd, auth=(USER, PASSWD))
+    def exist2_complete(r, cmd):
+        if 'version' in r.headers:
+            print 'Version: %s' % r.headers['version']
+        elif 'version1' in r.headers:
+            print 'Version1: %s' % r.headers['version1']
+            print 'Version2: %s' % r.headers['version2']
         if 200 == r.status_code:
-            if 'sync' in r.headers:
-                print 'sync: %s' % r.headers['sync']
-            else:
-                print 'pass'
+            print 'ok'
+        elif 409 == r.status_code:
+            print 'conflict version'
         else:
             print '%s: %d' % (cmd, r.status_code)
-    def __del(self):
-        self.__write_base(self.__gencmd('del')(self.__dbkey))
-    def __exist(self):
-        cmd = self.__gencmd('exist')(self.__dbkey)
-        r = self.__sess.get(cmd, auth=(USER, PASSWD))
-        print 'exist' if 200 == r.status_code else '%s: %d' % (cmd, r.status_code)
+    def print_result(r, cmd, result):
+        print result if 200 == r.status_code else '%s: %d' % (cmd, r.status_code)
+    def http_post(sess, cmd, body):
+        return sess.post(cmd, body, headers = {'content-type':'text/plain'}, auth=(USER, PASSWD))
+    def post_nobody_base(sess, cmd, body):
+        print_result(http_post(sess, cmd, body), cmd, 'pass')
+    def post_base(sess, cmd, body):
+        r = http_post(sess, cmd, body)
+        print_result(r, cmd, r.content)
+    def post2_base(sess, cmd, body):
+        r = http_post(sess, cmd, body)
+        get2_complete(r, cmd)
+    def post_cache_base(sess, cmd, body):
+        write_cache_complete(http_post(sess, cmd, body), cmd)
+    def set_cache_base(sess, cmd):
+        write_cache_complete(sess.get(cmd, auth=(USER, PASSWD)), cmd)
+    def write_body_base(sess, cmd, body):
+        write_complete(http_post(sess, cmd, body), cmd)
+    def write_base(sess, cmd):
+        write_complete(sess.get(cmd, auth=(USER, PASSWD)), cmd)
+    def get2_base(sess, cmd):
+        get2_complete(sess.get(cmd, auth=(USER, PASSWD)), cmd)
+    def get_base(sess, cmd):
+        r = sess.get(cmd, auth=(USER, PASSWD))
+        print_result(r, cmd, r.content)
+    def get_nobody_base(sess, cmd, result):
+        print_result(sess.get(cmd, auth=(USER, PASSWD)), cmd, result)
+    def hincrby_base(cmd, val):
+        set_cache_base(sess, '%s&val=%s' % (hash_cmd('cache/hset'), val))
+        set_cache_base(sess, '%s&val=%s' % (hash_cmd('cache/%s' % cmd), val))
+        get_base(sess, hash_cmd('cache/hget'))
 
-    def __hset(self):
-        self.__post_base(self.__gentbcmd('hset')(self.__dbtb, self.__dbkey), self.__dbval)
-    def __hget(self):
-        cmd = self.__gentbcmd('hget')(self.__dbtb, self.__dbkey)
-        r = self.__sess.get(cmd, auth=(USER, PASSWD))
-        print r.content if 200 == r.status_code else '%s: %d' % (cmd, r.status_code)
-    def __hget2(self):
-        cmd = self.__gentbcmd('hget2')(self.__dbtb, self.__dbkey)
-        r = self.__sess.get(cmd, auth=(USER, PASSWD))
-        self.__get2_complete(cmd, r)
-    def __hdel(self):
-        self.__write_base(self.__gentbcmd('hdel')(self.__dbtb, self.__dbkey))
-    def __hexist(self):
-        cmd = self.__gentbcmd('hexist')(self.__dbtb, self.__dbkey)
-        r = self.__sess.get(cmd, auth=(USER, PASSWD))
-        print 'exist' if 200 == r.status_code else '%s: %d' % (cmd, r.status_code)
-        
-    def __post_base(self, cmd, body):
-        r = self.__sess.post(cmd, body, headers = {'content-type':'text/plain'}, auth=(USER, PASSWD))
-        if 200 == r.status_code:
-            if 'sync' in r.headers:
-                print 'sync: %s' % r.headers['sync']
-            else:
-                print 'pass'
-        else:
-            print '%s: %d' % (cmd, r.status_code)
-        
-    def __sadd(self):
-        self.__post_base(self.__genscmd('sadd')(self.__dbtb), self.__dbkey)
-    def __srem(self):
-        self.__post_base(self.__genscmd('srem')(self.__dbtb), self.__dbkey)
-    def __sismember(self):
-        cmd = self.__genscmd('sismember')(self.__dbtb)
-        r = self.__sess.post(cmd, self.__dbkey, headers = {'content-type':'text/plain'}, auth=(USER, PASSWD))
-        print 'pass' if 200 == r.status_code else '%s: %d' % (cmd, r.status_code)
-    def __sismember2(self):
-        cmd = self.__genscmd('sismember2')(self.__dbtb)
-        r = self.__sess.post(cmd, self.__dbkey, headers = {'content-type':'text/plain'}, auth=(USER, PASSWD))
-        self.__exist2_complete(cmd, r)
+    # vars
+    sess = requests.Session()
+    
+    kv_cmd = (lambda host, key: lambda cmd: kv_fmt % (host, cmd, key))(host, 'hustdbhakey')
+    hash_cmd = (lambda host, tb, key: lambda cmd: hash_fmt % (host, cmd, tb, key))(host, 'hustdbhahashtb', 'hustdbhahashkey')
+    set_cmd = (lambda host, tb: lambda cmd: set_fmt % (host, cmd, tb))(host, 'hustdbhasettb')
+    zset_cmd = (lambda host, tb: lambda cmd: set_fmt % (host, cmd, tb))(host, 'hustdbhazsettb')
+    
+    kv_val = 'hustdbhavalue'
+    hash_val = 'hustdbhahashvalue'
+    
+    set_key = 'hustdbhasetkey'
+    zset_key = 'hustdbhazsetkey'
 
-    def __zadd(self):
-        self.__post_base('%s/zadd?tb=hustdbhaztb&score=60' % self.__host, self.__dbkey)
-    def __zrem(self):
-        self.__post_base('%s/zrem?tb=hustdbhaztb' % self.__host, self.__dbkey)
-    def __zismember(self):
-        cmd = '%s/zismember?tb=hustdbhaztb' % self.__host
-        r = self.__sess.post(cmd, self.__dbkey, headers = {'content-type':'text/plain'}, auth=(USER, PASSWD))
-        print 'pass' if 200 == r.status_code else '%s: %d' % (cmd, r.status_code)
-    def __zscore(self):
-        cmd = '%s/zscore?tb=hustdbhaztb' % self.__host
-        r = self.__sess.post(cmd, self.__dbkey, headers = {'content-type':'text/plain'}, auth=(USER, PASSWD))
-        print r.content if 200 == r.status_code else '%s: %d' % (cmd, r.status_code)
-    def __zscore2(self):
-        cmd = '%s/zscore2?tb=hustdbhaztb' % self.__host
-        r = self.__sess.post(cmd, self.__dbkey, headers = {'content-type':'text/plain'}, auth=(USER, PASSWD))
-        self.__get2_complete(cmd, r)
-    def __cache_exist(self):
-        cmd = self.__gencmd('cache/exist')(self.__dbkey)
-        r = self.__sess.get(cmd, auth=(USER, PASSWD))
-        print 'exist' if 200 == r.status_code else '%s: %d' % (cmd, r.status_code)
-    def __cache_get(self):
-        cmd = self.__gencmd('cache/get')(self.__dbkey)
-        r = self.__sess.get(cmd, auth=(USER, PASSWD))
-        print r.content if 200 == r.status_code else '%s: %d' % (cmd, r.status_code)
-    def __cache_ttl(self):
-        cmd = self.__gencmd('cache/ttl')(self.__dbkey)
-        r = self.__sess.get(cmd, auth=(USER, PASSWD))
-        print r.content if 200 == r.status_code else '%s: %d' % (cmd, r.status_code)
-    def __post_cache_base(self, cmd, body):
-        r = self.__sess.post(cmd, body, headers = {'content-type':'text/plain'}, auth=(USER, PASSWD))
-        if 200 == r.status_code:
-            if 'fail' in r.headers:
-                print 'fail: %s' % r.headers['fail']
-            else:
-                print 'pass'
-        else:
-            print '%s: %d' % (cmd, r.status_code)
-    def __cache_put(self):
-        self.__post_cache_base(self.__gencmd('cache/put')(self.__dbkey), self.__dbval)
-    def __cache_append(self):
-        self.__post_cache_base(self.__gencmd('cache/append')(self.__dbkey), self.__dbval)
-    def __cache_del(self):
-        self.__post_cache_base(self.__gencmd('cache/del')(self.__dbkey), '')
-    def __cache_expire(self):
-        self.__post_cache_base('%s/cache/expire?key=%s&ttl=5' % (self.__host, self.__dbkey), '')
-    def __cache_hexist(self):
-        cmd = self.__gentbcmd('cache/hexist')(self.__dbtb, self.__dbkey)
-        r = self.__sess.get(cmd, auth=(USER, PASSWD))
-        print 'exist' if 200 == r.status_code else '%s: %d' % (cmd, r.status_code)
-    def __cache_hget(self):
-        cmd = self.__gentbcmd('cache/hget')(self.__dbtb, self.__dbkey)
-        r = self.__sess.get(cmd, auth=(USER, PASSWD))
-        print r.content if 200 == r.status_code else '%s: %d' % (cmd, r.status_code)
-    def __cache_hset(self):
-        self.__post_cache_base(self.__gentbcmd('cache/hset')(self.__dbtb, self.__dbkey), self.__dbval)
-    def __cache_hdel(self):
-        self.__post_cache_base(self.__gentbcmd('cache/hdel')(self.__dbtb, self.__dbkey), '')
-    def __cache_hincrby(self):
-        cmd = '%s/cache/hset?tb=%s&key=%s&val=5' % (self.__host, self.__dbtb, self.__dbkey)
-        r = self.__sess.get(cmd, auth=(USER, PASSWD))
-        if 200 == r.status_code:
-            self.__post_cache_base('%s/cache/hincrby?tb=%s&key=%s&val=5' % (self.__host, self.__dbtb, self.__dbkey), '')
-    def __cache_hincrbyfloat(self):
-        cmd = '%s/cache/hset?tb=%s&key=%s&val=5.125' % (self.__host, self.__dbtb, self.__dbkey)
-        r = self.__sess.get(cmd, auth=(USER, PASSWD))
-        if 200 == r.status_code:
-            self.__post_cache_base('%s/cache/hincrbyfloat?tb=%s&key=%s&val=5.125' % (self.__host, self.__dbtb, self.__dbkey), '')
+    func_dict = {
+        'loop': lambda: test_loop(log_dir, host, sess),
+        'stat_all': (lambda sess, host: lambda: stat_all(sess, host))(sess, host),
+        'sync_status': lambda: get_base(sess, '%s/sync_status' % (host)),
+        'sync_alive': lambda: get_base(sess, '%s/sync_alive' % (host)),
+        'get_table': lambda: get_base(sess, '%s/get_table' % (host)),
+        # kv
+        'put': lambda: write_body_base(sess, kv_cmd('put'), kv_val),
+        'get': lambda: get_base(sess, kv_cmd('get')),
+        'get2': lambda: get2_base(sess, cmd = kv_cmd('get2')),
+        'del': lambda: write_base(sess, kv_cmd('del')),
+        'exist': lambda: get_nobody_base(sess, kv_cmd('exist'), 'exist'),
+        # hash
+        'hset': lambda: write_body_base(sess, hash_cmd('hset'), hash_val),
+        'hget': lambda: get_base(sess, hash_cmd('hget')),
+        'hget2': lambda: get2_base(sess, hash_cmd('hget2')),
+        'hdel': lambda: write_base(sess, hash_cmd('hdel')),
+        'hexist': lambda: get_nobody_base(sess, hash_cmd('hexist'), 'exist'),
+        # set
+        'sadd': lambda: write_body_base(sess, set_cmd('sadd'), set_key),
+        'srem': lambda: write_body_base(sess, set_cmd('srem'), set_key),
+        'sismember': lambda: post_nobody_base(sess, set_cmd('sismember'), set_key),
+        'sismember2': (lambda cmd: lambda: exist2_complete(http_post(sess, cmd, set_key), cmd))(set_cmd('sismember2')),
+        # zset
+        'zadd': lambda: write_body_base(sess, '%s&score=60' % zset_cmd('zadd'), zset_key),
+        'zrem': lambda: write_body_base(sess, zset_cmd('zrem'), zset_key),
+        'zismember': lambda: post_nobody_base(sess, zset_cmd('zismember'), zset_key),
+        'zscore': lambda: post_base(sess, zset_cmd('zscore'), zset_key),
+        'zscore2': lambda: post2_base(sess, zset_cmd('zscore2'), zset_key),
+        # cache
+        'cache_exist': lambda: get_nobody_base(sess, kv_cmd('cache/exist'), 'exist'),
+        'cache_get': lambda: get_base(sess, kv_cmd('cache/get')),
+        'cache_ttl': lambda: get_base(sess, kv_cmd('cache/ttl')),
+        'cache_put': lambda: post_cache_base(sess, kv_cmd('cache/put'), kv_val),
+        'cache_append': lambda: post_cache_base(sess, kv_cmd('cache/append'), kv_val),
+        'cache_del': lambda: post_cache_base(sess, kv_cmd('cache/del'), ''),
+        'cache_expire': lambda: post_cache_base(sess, '%s&ttl=5' % kv_cmd('cache/expire'), ''),
+        'cache_hexist': lambda: get_nobody_base(sess, hash_cmd('cache/hexist'), 'exist'),
+        'cache_hget': lambda: get_base(sess, hash_cmd('cache/hget')),
+        'cache_hset': lambda: post_cache_base(sess, hash_cmd('cache/hset'), hash_val),
+        'cache_hdel': lambda: post_cache_base(sess, hash_cmd('cache/hdel'), ''),
+        'cache_hincrby': lambda: hincrby_base('hincrby', '5'),
+        'cache_hincrbyfloat': lambda: hincrby_base('hincrbyfloat', '5.125')
+        }
+    if cmd in func_dict:
+        func_dict[cmd]()
+        return True
+    return False
 
-    def __run_template(self, loop, cmd, func):
-        try:
-            self.__count = self.__count + 1
-            func(loop, cmd)
-        except requests.exceptions.RequestException as e:
-            log_err(self.__log_dir, 'loop %s {%s: %s}' % (loop, cmd, str(e)))
-            sleep(1)
-    def __functors(self):
-        def __put(val, func):
-            def __put_imp(loop, cmd):
-                r = func(cmd, val, headers = {'content-type':'text/plain'}, timeout=TIMEOUT, auth=(USER, PASSWD))
-                if 200 != r.status_code:
-                    log_err(self.__log_dir, 'loop %s { %s: %d }' % (loop, cmd, r.status_code))
-                else:
-                    if 'sync' in r.headers:
-                        log_err(self.__log_dir, 'loop %s { %s: { sync: %s } }' % (loop, cmd, r.headers['sync']))
-            return __put_imp
-        def __get(val, func):
-            def __get_imp(loop, cmd):
-                r = func(cmd, timeout=TIMEOUT, auth=(USER, PASSWD))
-                if r.content != val:
-                    log_err(self.__log_dir, 'loop %s { %s }, not equal' % (loop, cmd))
-            return __get_imp
-        def __del(func):
-            def __del_imp(loop, cmd):
-                r = func(cmd, timeout=TIMEOUT, auth=(USER, PASSWD))
-                if 200 != r.status_code:
-                    log_err(self.__log_dir, 'loop %s { %s: %d }' % (loop, cmd, r.status_code))
-                else:
-                    if 'sync' in r.headers:
-                        log_err(self.__log_dir, 'loop %s { %s: { sync: %s } }' % (loop, cmd, r.headers['sync']))
-            return __del_imp
-        def __del_cache(func):
-            def __del_imp(loop, cmd):
-                r = func(cmd, timeout=TIMEOUT, auth=(USER, PASSWD))
-                if 200 != r.status_code:
-                    log_err(self.__log_dir, 'loop %s { %s: %d }' % (loop, cmd, r.status_code))
-                else:
-                    if 'fail' in r.headers:
-                        log_err(self.__log_dir, 'loop %s { %s: { fail: %s } }' % (loop, cmd, r.headers['fail']))
-            return __del_imp
-        def __exist(func): 
-            def __exist_imp(loop, cmd):
-                r = func(cmd, timeout=TIMEOUT, auth=(USER, PASSWD))
-                if 200 == r.status_code:
-                    log_err(self.__log_dir, 'loop %s { %s: still exist }' % (loop, cmd))
-            return __exist_imp
-        def __post(key, func):
-            def __post_imp(loop, cmd):
-                r = func(cmd, key, headers = {'content-type':'text/plain'}, timeout=TIMEOUT, auth=(USER, PASSWD))
-                if 200 != r.status_code:
-                    log_err(self.__log_dir, 'loop %s { %s: %d }' % (loop, cmd, r.status_code))
-                else:
-                    if 'sync' in r.headers:
-                        log_err(self.__log_dir, 'loop %s { %s: { sync: %s } }' % (loop, cmd, r.headers['sync']))
-            return __post_imp
-        def __post_exist(key, func):
-            def __post_exist_imp(loop, cmd):
-                r = func(cmd, key, headers = {'content-type':'text/plain'}, timeout=TIMEOUT, auth=(USER, PASSWD))
-                if 200 == r.status_code:
-                    log_err(self.__log_dir, 'loop %s { %s: still exist }' % (loop, cmd))
-            return __post_exist_imp
-        def __sadd(key, func):
-            return __post(key, func)
-        def __srem(key, func):
-            return __post(key, func)
-        def __sismember(key, func):
-            return __post_exist(key, func)
-        def __zadd(key, func):
-            return __post(key, func)
-        def __zscore(key, score, func):
-            def __zscore_imp(loop, cmd):
-                r = func(cmd, key, headers = {'content-type':'text/plain'}, timeout=TIMEOUT, auth=(USER, PASSWD))
-                if 200 != r.status_code or int(r.content) != score:
-                    log_err(self.__log_dir, 'loop %s { %s: score error }' % (loop, cmd))
-            return __zscore_imp
-        def __zrem(key, func):
-            return __post(key, func)
-        def __zismember(key, func):
-            return __post_exist(key, func)
-        return {
-            'put': __put,
-            'get': __get,
-            'del': __del,
-            'exist': __exist,
-            'sadd': __sadd,
-            'srem': __srem,
-            'sismember': __sismember,
-            'zadd': __zadd,
-            'zscore': __zscore,
-            'zrem': __zrem,
-            'zismember': __zismember,
-            'cache_put': __put,
-            'cache_get': __get,
-            'cache_del': __del_cache,
-            'cache_exist': __exist
-            }
-    def __run_each_case(self, loop, tb, key, val):
-        cases = [
-            ['put', self.__func_dict['put'](val, self.__sess.put)],
-            ['get', self.__func_dict['get'](val, self.__sess.get)],
-            ['del', self.__func_dict['del'](self.__sess.get)],
-            ['exist', self.__func_dict['exist'](self.__sess.get)]
-            ]
-        hcases = [
-            ['hset', self.__func_dict['put'](val, self.__sess.put)],
-            ['hget', self.__func_dict['get'](val, self.__sess.get)],
-            ['hdel', self.__func_dict['del'](self.__sess.get)],
-            ['hexist', self.__func_dict['exist'](self.__sess.get)]
-            ]
-        scases = [
-            ['sadd', self.__func_dict['sadd'](key, self.__sess.post)],
-            ['srem', self.__func_dict['srem'](key, self.__sess.post)],
-            ['sismember', self.__func_dict['sismember'](key, self.__sess.post)]
-            ]
-        zcases = [
-            ['zadd',      '%s/zadd?tb=hustdbhaztb&score=60' % self.__host, self.__func_dict['zadd'](key, self.__sess.post)],
-            ['zscore',    '%s/zscore?tb=hustdbhaztb' % self.__host,        self.__func_dict['zscore'](key, 60, self.__sess.post)],
-            ['zrem',      '%s/zrem?tb=hustdbhaztb' % self.__host,          self.__func_dict['zrem'](key, self.__sess.post)],
-            ['zismember', '%s/zismember?tb=hustdbhaztb' % self.__host,     self.__func_dict['zismember'](key, self.__sess.post)]
-            ]
-        cache_cases = [
-            ['cache/put', self.__func_dict['cache_put'](val, self.__sess.post)],
-            ['cache/get', self.__func_dict['cache_get'](val, self.__sess.get)],
-            ['cache/del', self.__func_dict['cache_del'](self.__sess.get)],
-            ['cache/exist', self.__func_dict['cache_exist'](self.__sess.get)]
-            ]
-        cache_hcases = [
-            ['cache/hset', self.__func_dict['cache_put'](val, self.__sess.post)],
-            ['cache/hget', self.__func_dict['cache_get'](val, self.__sess.get)],
-            ['cache/hdel', self.__func_dict['cache_del'](self.__sess.get)],
-            ['cache/hexist', self.__func_dict['cache_exist'](self.__sess.get)]
-            ]
-        for case in cases:
-            self.__run_template(loop, self.__gencmd(case[0])(key),       case[1])
-        for case in hcases:
-            self.__run_template(loop, self.__gentbcmd(case[0])(tb, key), case[1])
-        for case in scases:
-            self.__run_template(loop, self.__genscmd(case[0])(tb),       case[1])
-        for case in zcases:
-            self.__run_template(loop, case[1], case[2])
-        for case in cache_cases:
-            self.__run_template(loop, self.__gencmd(case[0])(key),       case[1])
-        for case in cache_hcases:
-            self.__run_template(loop, self.__gentbcmd(case[0])(tb, key), case[1])
-    def __run_cases(self, loop):
-        self.__count = 0
-        for case in test_cases:
-            self.__run_each_case(loop, case['tb'], case['key'], case['val'])
-        #print self.__count
-    def __loop(self):
-        for i in xrange(LOOPS):
-            loopstr = str(i)
-            print 'loop %s' % loopstr
-            with open('%s.count' % self.__log_dir, 'w') as f:
-                f.writelines('%s%s\n' % (gentm(), loopstr))
-            self.__run_cases(loopstr)
-
-def test(argv):
+def test_main(argv):
     log_dir = os.path.join(os.path.abspath('.'), 'hustdb_ha.log')
     size = len(argv)
     if 3 != size:
         return False
-    host = 'http://%s' % argv[1]
-    cmd = argv[2]
-    obj = HATester(log_dir, host)
-    if cmd in obj.dict:
-        obj.dict[cmd]()
-        return True
-    return False
+    return test_ha(log_dir, host = 'http://%s' % argv[1], cmd = argv[2])
 
 if __name__ == "__main__":
-    if not test(sys.argv):
+    if not test_main(sys.argv):
         manual()

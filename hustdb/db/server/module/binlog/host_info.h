@@ -68,7 +68,6 @@ private:
     std::map<std::string, queue_t *> _queue;
 
     rw_lock_t _rwlock;
-    mutex_lock_t _mutex;
 
     size_t _redeliver_size;
     size_t _max_queue_size;

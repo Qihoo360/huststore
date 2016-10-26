@@ -100,7 +100,6 @@ static void * check_alive ( void * arg )
 
 host_info_t::host_info_t ( )
 : _rwlock ( )
-, _mutex ( )
 , _redeliver_size ( 500 )
 , _max_queue_size ( 0 )
 , _tp ( NULL )
@@ -288,13 +287,11 @@ bool host_info_t::redeliver_with_host ( const std::string & host )
 
 void host_info_t::set_status ( const std::string & host, int status )
 {
-    mutex_lock_guard_t lock ( _mutex );
     _status[host].status = status;
 }
 
 int host_info_t::get_status ( const std::string & host )
 {
-    mutex_lock_guard_t lock ( _mutex );
     return _status[host].status;
 }
 

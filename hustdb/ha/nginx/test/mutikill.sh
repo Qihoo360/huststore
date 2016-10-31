@@ -1,1 +1,1 @@
-ps aux | grep mutitest.py | awk 'BEGIN {FS=" "} NF>12 {print $2}' | xargs kill -9
+ps gaux | grep mutitest.py | grep -v grep | awk '{print $2}' | xargs kill -9

@@ -1556,7 +1556,8 @@ int kv_array_t::binlog_scan (
     size_t              host_len              = 0;
     char                host_i[ 9 ]           = {};
     char                host_s[ 32 ]          = {};
-    size_t              real_key_offset       = sizeof ( host_i ) + sizeof ( uint32_t );
+    size_t              real_key_offset       = sizeof ( host_i );
+    size_t              real_val_offset       = 1 + sizeof ( uint32_t );
     char                port_s[ 8 ]           = {};
     struct in_addr      ip_addr;
     std::string         ttl_key;
@@ -1629,16 +1630,23 @@ int kv_array_t::binlog_scan (
                 ttl_key.resize ( 0 );
 
                 key        = it->key ( & key_len );
+                val        = it->value ( & val_len );
 
-                if ( unlikely ( key_len <= real_key_offset ) )
+                if ( unlikely (
+                               key_len <= real_key_offset ||
+                               val_len <= real_val_offset
+                               )
+                     )
                 {
                     ttl_key.append ( key, key_len );
                     LOG_ERROR ( "[kv_array][binlog_scan]invalid key: %d", key_len );
                     r = EFAULT;
                     continue;
                 }
-
-                fast_memcpy ( & bl_timestamp, key + sizeof ( host_i ), sizeof ( uint32_t ) );
+                
+                fast_memcpy ( & cmd_type, val, sizeof ( uint8_t ) );
+                fast_memcpy ( & bl_timestamp, val + sizeof ( uint8_t ), sizeof ( uint32_t ) );
+                
                 if ( unlikely ( timestamp - bl_timestamp > bl_task_timeout ) )
                 {
                     binlog_timeout ++;
@@ -1648,7 +1656,7 @@ int kv_array_t::binlog_scan (
                     continue;
                 }
 
-                if ( strncmp ( host_i, key, sizeof ( host_i ) ) != 0 )
+                if ( ! mem_equal ( host_i, key, sizeof ( host_i ) ) )
                 {
                     fast_memcpy ( host_i, key, sizeof ( host_i ) );
 
@@ -1674,9 +1682,6 @@ int kv_array_t::binlog_scan (
                     r = EFAULT;
                     break;
                 }
-
-                val        = it->value ( & val_len );
-                fast_memcpy ( & cmd_type, val, sizeof ( uint8_t ) );
 
                 real_key     = key + real_key_offset;
                 real_key_len = key_len - real_key_offset;
@@ -1741,8 +1746,8 @@ int kv_array_t::binlog_scan (
                         task_cb_pm.host_len   = host_len;
                         task_cb_pm.table      = table;
                         task_cb_pm.table_len  = table_len;
-                        task_cb_pm.key        = val + 1;
-                        task_cb_pm.key_len    = val_len - 1;
+                        task_cb_pm.key        = val + real_val_offset;
+                        task_cb_pm.key_len    = val_len - real_val_offset;
                         task_cb_pm.value      = NULL;
                         task_cb_pm.value_len  = 0;
                         task_cb_pm.ver        = 0;
@@ -1759,7 +1764,7 @@ int kv_array_t::binlog_scan (
                     case HUSTDB_METHOD_HSET:
                     case HUSTDB_METHOD_SADD:
                     case HUSTDB_METHOD_ZADD:
-                        fast_memcpy ( & file_id, val + 1, sizeof ( uint32_t ) );
+                        fast_memcpy ( & file_id, val + real_val_offset, sizeof ( uint32_t ) );
 
                         if ( file_id >= m_file_count )
                         {

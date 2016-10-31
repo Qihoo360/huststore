@@ -23,7 +23,7 @@ enum slow_task_type_t
         volatile bool   is_need_exit;                               \
         void *          ( * user_routine )( void * p );             \
         void *          user_routine_param;                         \
-        event2_t         start_event;                               \
+        event2_t        start_event;                                \
         int             thread_id;                                  \
         bool            start_event_inited;                         \
     } db_tasks_t;

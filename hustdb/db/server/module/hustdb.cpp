@@ -211,7 +211,7 @@ bool hustdb_t::open ( )
     }
 
     if ( ! ( m_timer.register_task ( hustdb::timer_task_t ( 1, timestamp_cb, this ) ) &&
-             m_timer.register_task ( hustdb::timer_task_t ( 10, over_threshold_cb, this ) ) &&
+             m_timer.register_task ( hustdb::timer_task_t ( 15, over_threshold_cb, this ) ) &&
              m_timer.register_task ( hustdb::timer_task_t ( m_store_conf.db_ttl_scan_interval, ttl_scan_cb, this ) ) &&
              m_timer.register_task ( hustdb::timer_task_t ( m_store_conf.db_binlog_scan_interval, binlog_scan_cb, this ) ) &&
              m_timer.open ( )
@@ -357,21 +357,21 @@ bool hustdb_t::init_server_config ( )
         return false;
     }
     
-    m_store_conf.db_binlog_scan_interval = m_appini->ini_get_int ( m_ini, "store", "db.binlog.scan_interval", 60 );
+    m_store_conf.db_binlog_scan_interval = m_appini->ini_get_int ( m_ini, "store", "db.binlog.scan_interval", 20 );
     if ( m_store_conf.db_binlog_scan_interval <= 0 )
     {
         LOG_ERROR ( "[hustdb][init_server_config]store db.binlog.scan_interval invalid, binlog.scan_interval: %d", m_store_conf.db_binlog_scan_interval );
         return false;
     }
     
-    m_store_conf.db_binlog_thread_count = m_appini->ini_get_int ( m_ini, "store", "db.binlog.thread_count", 2 );
+    m_store_conf.db_binlog_thread_count = m_appini->ini_get_int ( m_ini, "store", "db.binlog.thread_count", 4 );
     if ( m_store_conf.db_binlog_thread_count <= 0 )
     {
         LOG_ERROR ( "[hustdb][init_server_config]store db.binlog.thread_count invalid, binlog.thread_count: %d", m_store_conf.db_binlog_thread_count );
         return false;
     }
     
-    m_store_conf.db_binlog_queue_capacity = m_appini->ini_get_int ( m_ini, "store", "db.binlog.queue_capacity", 1000 );
+    m_store_conf.db_binlog_queue_capacity = m_appini->ini_get_int ( m_ini, "store", "db.binlog.queue_capacity", 2000 );
     if ( m_store_conf.db_binlog_queue_capacity <= 0 )
     {
         LOG_ERROR ( "[hustdb][init_server_config]store db.binlog.queue_capacity invalid, binlog.queue_capacity: %d", m_store_conf.db_binlog_queue_capacity );

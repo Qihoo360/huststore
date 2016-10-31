@@ -3322,7 +3322,6 @@ int kv_md5db_t::binlog (
 
     item_ctxt->key.append ( ( const char * ) & ip, sizeof ( uint32_t ) );
     item_ctxt->key.append ( ( const char * ) port_s, 5 );
-    item_ctxt->key.append ( ( const char * ) & timestamp, sizeof ( uint32_t ) );
     
     if ( tmp_ctxt->table_len > 0 )
     {
@@ -3331,6 +3330,7 @@ int kv_md5db_t::binlog (
 
     tmp_ctxt->value.resize ( 0 );
     tmp_ctxt->value.append ( 1, ( char ) cmd_type );
+    tmp_ctxt->value.append ( ( const char * ) & timestamp, sizeof ( uint32_t ) );
 
     if ( ! is_rem )
     {

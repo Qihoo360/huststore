@@ -239,9 +239,6 @@ bool run_server(const std::string& srv_conf, const std::string& pid_file, const 
         return false;
     }
 
-    std::string json_val;
-    jos_lib::Serialize <jos_lib::SyncServerConf, false> (cf, json_val);
-
     if (!init(cf.sync.logs_path.c_str(), cf.sync.ngx_path.c_str(), cf.sync.auth_path.c_str(),
         cf.sync.threads, cf.sync.release_interval, cf.sync.checkdb_interval, cf.sync.checklog_interval))
     {

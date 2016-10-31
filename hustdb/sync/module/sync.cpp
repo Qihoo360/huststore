@@ -271,6 +271,9 @@ static int construct_file_queue ( int status_dir_index, int log_dir_index )
             continue;
         }
         fstat (fd, &sb);
+        if ( sb.st_size != 10000000 ) {
+            continue;
+        }
         char *status = ( char * ) mmap (NULL, sb.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
         close (fd);
 

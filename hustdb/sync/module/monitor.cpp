@@ -143,7 +143,10 @@ static void handle_monitor_event ( struct inotify_event *event, int *wds, int si
     if ( event->mask & IN_CREATE )
     {
         int fd = open (status_path.c_str (), O_RDWR | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
-        write (fd, ( void * ) status_buf, FILE_BIT_MAX);
+        if ( write (fd, ( void * ) status_buf, FILE_BIT_MAX) != FILE_BIT_MAX) 
+        {
+            return;
+        }
         char *addr = ( char * ) mmap (0, FILE_BIT_MAX, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
         close (fd);
         *( uint32_t * ) addr = 0;

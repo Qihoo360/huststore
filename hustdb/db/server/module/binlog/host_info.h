@@ -17,12 +17,13 @@ class thread_t;
 struct binlog_status_t
 {
 
-    binlog_status_t ( ) : status ( 0 ), remain ( )
+    binlog_status_t ( ) : status ( 0 ), remain ( ), silence ( )
     {
     }
 
     int32_t status;
     atomic_int32_t remain;
+    atomic_int32_t silence;
 };
 
 class host_info_t
@@ -51,6 +52,8 @@ public:
 
     void queue_info ( std::string & res );
 
+    void check_silence_and_remove_host ( );
+
 private:
 
     host_info_t ( const host_info_t & );
@@ -63,6 +66,9 @@ private:
     void decrement ( const std::string & host );
 
     bool redeliver_with_host ( const std::string & host );
+    bool inner_remove_host ( const std::string & host ); 
+
+    void inner_check_db ( std::string & host, const char * method, const char * path, std::string & head, std::string & body, int & http_code );
 
     std::map<std::string, binlog_status_t> _status;
     std::map<std::string, queue_t *> _queue;
@@ -74,6 +80,12 @@ private:
     thread_pool_t * _tp;
     husthttp_t * _client;
     thread_t * _thread;
+
+    std::vector<std::string> _gc_pool; 
+    int32_t _silence_limit;
+
+    int _cursor;
+    int _gc_cursor;
 };
 
 #endif

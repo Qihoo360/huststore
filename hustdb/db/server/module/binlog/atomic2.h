@@ -15,6 +15,11 @@ public:
         return __sync_val_compare_and_swap ( &_value, 0, 0 );
     }
 
+    T get_and_set ( T newValue )
+    {
+        return __sync_lock_test_and_set ( &_value, newValue );
+    }
+
     T fetch_and_add ( T x )
     {
         return __sync_fetch_and_add ( &_value, x );

@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <cstring>
 #include <cstdio>
+#include <vector>
+#include <algorithm>
 
 #include "host_info.h"
 #include "queue.h"
@@ -21,17 +23,20 @@ static void * check_alive ( void * arg )
     int stop_pfd = * ( int * ) arg;
     int timerfd = timerfd_create ( CLOCK_REALTIME, 0 );
     int redeliver_fd = timerfd_create ( CLOCK_REALTIME, 0 );
+    int gc_fd = timerfd_create ( CLOCK_REALTIME, 0 );
 
-    if ( timerfd == - 1 || redeliver_fd == - 1 )
+    if ( timerfd == - 1 || redeliver_fd == - 1 || gc_fd == -1 )
     {
         return ( void * ) NULL;
     }
 
-    struct itimerspec tv, redeliver_tv;
+    struct itimerspec tv, redeliver_tv, gc_tv;
 
     memset ( &tv, 0, sizeof ( tv ) );
 
     memset ( &redeliver_tv, 0, sizeof ( redeliver_tv ) );
+
+    memset ( &gc_tv, 0, sizeof ( gc_tv ) );
 
     tv.it_value.tv_sec = 1;
 
@@ -41,13 +46,20 @@ static void * check_alive ( void * arg )
 
     redeliver_tv.it_interval.tv_sec = 1;
 
+    gc_tv.it_value.tv_sec = 1;
+
+    gc_tv.it_interval.tv_sec = 300;
+
+
+
     if ( timerfd_settime ( timerfd, 0, &tv, NULL ) == - 1
-         || timerfd_settime ( redeliver_fd, 0, &redeliver_tv, NULL ) == - 1 )
+         || timerfd_settime ( redeliver_fd, 0, &redeliver_tv, NULL ) == - 1 
+         || timerfd_settime ( gc_fd, 0, &gc_tv, NULL ) == -1 )
     {
         return ( void * ) NULL;
     }
 
-    struct pollfd pfd[3];
+    struct pollfd pfd[4];
 
     pfd[0].fd = timerfd;
 
@@ -57,9 +69,13 @@ static void * check_alive ( void * arg )
 
     pfd[1].events = POLLIN;
 
-    pfd[2].fd = stop_pfd;
+    pfd[2].fd = gc_fd;
 
     pfd[2].events = POLLIN;
+
+    pfd[3].fd = stop_pfd;
+
+    pfd[3].events = POLLIN;
 
     int ret = - 1;
 
@@ -67,7 +83,7 @@ static void * check_alive ( void * arg )
 
     while ( 1 )
     {
-        ret = poll ( pfd, 3, - 1 );
+        ret = poll ( pfd, 4, - 1 );
 
         if ( ret == - 1 )
         {
@@ -87,7 +103,13 @@ static void * check_alive ( void * arg )
             host_info.redeliver ();
         }
 
-        if ( pfd[2].revents & POLLIN )
+        if ( pfd[2].revents & POLLIN ) 
+        {
+            read ( gc_fd, &val, sizeof ( val ) );
+            host_info.check_silence_and_remove_host ( );
+        }
+
+        if ( pfd[3].revents & POLLIN )
         {
             char buf;
             read ( stop_pfd, &buf, 1 );
@@ -105,6 +127,10 @@ host_info_t::host_info_t ( )
 , _tp ( NULL )
 , _client ( NULL )
 , _thread ( NULL )
+, _gc_pool ( )
+, _silence_limit ( 3600 )
+, _cursor ( 0 )
+, _gc_cursor ( 0 )
 {
 }
 
@@ -190,23 +216,28 @@ void host_info_t::finish_task ( const std::string & host )
 
 bool host_info_t::add_host ( const std::string & host )
 {
-    rw_lock_guard_t lock ( _rwlock, WLOCK );
+    do {
+        rw_lock_guard_t lock ( _rwlock, RLOCK );
+        if ( _queue.find ( host ) != _queue.end () )
+        {
+            return true;
+        }
+    }while(0);
 
-    if ( _queue.find ( host ) != _queue.end () )
-    {
-        return true;
-    }
+    do {
+        rw_lock_guard_t lock ( _rwlock, WLOCK );
+        queue_t * queue = new queue_t ( _max_queue_size );
 
-    queue_t * queue = new queue_t ( _max_queue_size );
+        if ( queue == NULL )
+        {
+            return false;
+        }
 
-    if ( queue == NULL )
-    {
-        return false;
-    }
+        _queue[host] = queue;
 
-    _queue[host] = queue;
+        _status[host] = binlog_status_t ();
+    }while(0);
 
-    _status[host] = binlog_status_t ();
     return true;
 }
 
@@ -219,6 +250,10 @@ bool host_info_t::has_host ( const std::string & host )
 bool host_info_t::remove_host ( const std::string & host )
 {
     rw_lock_guard_t lock ( _rwlock, WLOCK );
+    return inner_remove_host ( host );
+}
+
+bool host_info_t::inner_remove_host ( const std::string & host ) {
     std::map<std::string, queue_t *>::iterator it;
 
     if ( ( it = _queue.find ( host ) ) == _queue.end () )
@@ -239,6 +274,46 @@ bool host_info_t::remove_host ( const std::string & host )
     _status.erase ( status_it );
 
     return true;
+}
+
+void host_info_t::check_silence_and_remove_host( )
+{
+    _gc_pool.clear ( );
+    rw_lock_guard_t lock ( _rwlock, WLOCK );
+
+    std::map<std::string, queue_t *>::iterator it = _queue.begin ( );
+    std::advance ( it, _gc_cursor);
+    int count = std::max ( 10, int ( _queue.size ( ) ) / 10);
+    int dist = std::distance ( it, _queue.end ( ) );
+    int size = std::min ( dist, count );
+    int remain = count - size;
+
+    for ( int i = 0; i < size && it != _queue.end ( ); ++i, ++it ) 
+    {
+        if ( _status[it->first].silence.get ( ) >= _silence_limit ) 
+        {
+            _gc_pool.push_back ( it->first );
+        }
+    }
+
+    if ( remain != 0 ) {
+        it = _queue.begin ( );
+        for ( int i = 0; i < remain && it != _queue.end ( ); ++i, ++it ) 
+        {
+            if ( _status[it->first].silence.get ( ) >= _silence_limit ) 
+            {
+                _gc_pool.push_back ( it->first );
+            }
+        }
+    }
+
+    _gc_cursor = std::distance ( _queue.begin( ), it );
+
+    size_t gc_size = _gc_pool.size ( );
+    for ( size_t i = 0; i < gc_size; i++ ) 
+    {
+        inner_remove_host ( _gc_pool[i] );
+    }
 }
 
 void host_info_t::get_alives ( std::map<std::string, char> & alives )
@@ -297,51 +372,77 @@ int host_info_t::get_status ( const std::string & host )
 
 void host_info_t::increment ( const std::string & host )
 {
-    _status[host].remain.increment ();
+    _status[host].remain.increment ( );
+    _status[host].silence.get_and_set ( 0 );
 }
 
 void host_info_t::decrement ( const std::string & host )
 {
-    _status[host].remain.decrement ();
+    _status[host].remain.decrement ( );
 }
 
 void host_info_t::check_db ( )
 {
     const char * method = "GET";
     const char * path = "/status.html";
-    std::string head, body;
+    std::string head, body, host;
     int http_code = 0;
 
     rw_lock_guard_t lock ( _rwlock, RLOCK );
 
-    for ( std::map<std::string, queue_t *>::iterator it = _queue.begin (); it != _queue.end (); ++ it )
+    std::map<std::string, queue_t *>::iterator it = _queue.begin ( );
+    std::advance ( it, _cursor );
+    int dist = std::distance ( it, _queue.end ( ) );
+    int size = std::min ( dist, 5 );
+    int remain = 5 - size;
+
+    for ( int i = 0; i < size && it != _queue.end ( ); ++i, ++it ) 
     {
-        _client->set_host ( it->first.c_str (), it->first.size () );
+        host.assign ( it->first );
+        inner_check_db( host, method, path, head, body, http_code );
+    }
 
-        if ( ! _client->open ( method, path, NULL, NULL, 0, 1, 3 ) )
+    if ( remain != 0 ) 
+    {
+        it = _queue.begin ( );
+        for ( int i = 0; i < remain && it != _queue.end ( ); ++i, ++it ) 
         {
-            set_status ( it->first, 0 );
-            continue;
+            host.assign ( it->first );
+            inner_check_db( host, method, path, head, body, http_code );
         }
+    }
 
-        int tmp;
+    _cursor = std::distance ( _queue.begin ( ), it );
 
-        if ( ! _client->process ( &tmp ) )
-        {
-            set_status ( it->first, 0 );
-            continue;
-        }
+}
 
-        _client->get_response ( body, head, http_code );
+void host_info_t::inner_check_db ( std::string & host, const char * method, const char * path, std::string & head, std::string & body, int & http_code ) 
+{
+    _client->set_host ( host.c_str (), host.size () );
 
-        if ( http_code == 200 && strncmp ( body.c_str (), "ok\n", 3 ) == 0 )
-        {
-            set_status ( it->first, 1 );
-        }
-        else
-        {
-            set_status ( it->first, 0 );
-        }
+    if ( ! _client->open ( method, path, NULL, NULL, 0, 1, 3 ) )
+    {
+        set_status ( host, 0 );
+        return;
+    }
+
+    int tmp;
+
+    if ( ! _client->process ( &tmp ) )
+    {
+        set_status ( host, 0 );
+        return;
+    }
+
+    _client->get_response ( body, head, http_code );
+
+    if ( http_code == 200 && strncmp ( body.c_str (), "ok\n", 3 ) == 0 )
+    {
+        set_status ( host, 1 );
+    }
+    else
+    {
+        set_status ( host, 0 );
     }
 }
 
@@ -351,6 +452,10 @@ void host_info_t::redeliver ( )
 
     for ( std::map<std::string, queue_t *>::iterator it = _queue.begin (); it != _queue.end (); ++ it )
     {
+        if ( _status[it->first].remain.get ( ) == 0 ) {
+            _status[it->first].silence.increment ( );
+            continue;
+        }
         redeliver_with_host ( it->first );
     }
 }

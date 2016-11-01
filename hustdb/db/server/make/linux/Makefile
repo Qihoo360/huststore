@@ -298,6 +298,6 @@ $(BIN)binlog_time.o: $(BINLOG_SRC)binlog_time.cpp $(BINLOG_SRC)binlog_time.h $(B
 	$(CPPC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
 	
 clean:
-	rm -fr $(TDB_OBJECTS) $(MDB_OBJECTS) $(RDB_OBJECTS) $(MODULE_OBJECTS) $(SVR_OBJECTS)
+	rm -fr $(TDB_OBJECTS) $(MDB_OBJECTS) $(RDB_OBJECTS) $(MODULE_OBJECTS) $(SVR_OBJECTS) $(BINLOG_OBJECTS)
 	rm -fr $(TARGET)
 	rm -fr ./hustdb.conf

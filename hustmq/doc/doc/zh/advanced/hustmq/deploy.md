@@ -41,8 +41,8 @@
     http.access.allow               = 127.0.0.1     //IP限制；例如：(1)X.Y.Z.1-X.Y.Z.10；(2)X.Y.Z.1-X.Y.Z.10,X.Y.Z.22；(3)X.Y.Z.1-X.Y.Z.10,X.Y.Z.17,A.B.C.1-A.B.C.10
 
 	# UNIT Percentage
-    memory.process.threshold        = 70            //hustdb进程内存限制（%），超出阈值，禁止除del外所有写操作
-    memory.system.threshold         = 90            //系统内存限制（%），超出阈值，禁止除del外所有写操作
+    memory.process.threshold        = 0             //hustdb进程内存限制（%），超出阈值，禁止除del外所有写操作
+    memory.system.threshold         = 0             //系统内存限制（%），超出阈值，禁止除del外所有写操作
 
 	[store]
 	# UNIT Minute, 1 ~ 255
@@ -56,11 +56,11 @@
 	# 1 ~ 10000, default 1000
     db.ttl.scan_count               = 1000          //DB，每次ttl扫描的item数量
 
-	db.binlog.thread_count          = 2             //DB，binlog的worker线程数
-	db.binlog.queue_capacity        = 1000          //DB，binlog任务队列容量
+	db.binlog.thread_count          = 4             //DB，binlog的worker线程数
+	db.binlog.queue_capacity        = 2000          //DB，binlog任务队列容量
 
 	# UNIT Second
-	db.binlog.scan_interval         = 60            //DB，binlog扫描间隔，定期同步binlog的item
+	db.binlog.scan_interval         = 20            //DB，binlog扫描间隔，定期同步binlog的item
 	db.binlog.task_timeout          = 950400        //DB，binlog任务超时时间
 
 	mq.queue.maximum                = 8192          //MQ，queue最大数量；当且仅当，数值修改：大→小，会造成尾部索引失效，改回原数值即可恢复

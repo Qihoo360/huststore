@@ -41,8 +41,8 @@ Deployment
     http.access.allow               = 127.0.0.1     //IP restrictions. e.g. (1) X.Y.Z.1-X.Y.Z.10;(2) X.Y.Z.1-X.Y.Z.10,X.Y.Z.22;(3) X.Y.Z.1-X.Y.Z.10,X.Y.Z.17,A.B.C.1-A.B.C.10
 
 	# UNIT Percentage
-    memory.process.threshold        = 70            //Process memory limit (%) for hustdb , if exceeded, all write operations, except del, will be disabled.
-    memory.system.threshold         = 90            //System memory limit, if exceed, all write operations, except del, will be disabled.
+    memory.process.threshold        = 0             //Process memory limit (%) for hustdb , if exceeded, all write operations, except del, will be disabled.
+    memory.system.threshold         = 0             //System memory limit, if exceed, all write operations, except del, will be disabled.
 
 	[store]
 	# UNIT Minute, 1 ~ 255
@@ -56,11 +56,11 @@ Deployment
     # 1 ~ 10000, default 1000
     db.ttl.scan_count               = 1000          //DB, number of item each time ttl scan is executed.
 
-	db.binlog.thread_count          = 2             //DB，number of worker threads for binlog
-	db.binlog.queue_capacity        = 1000          //DB，binlog task queue capacity
+	db.binlog.thread_count          = 4             //DB，number of worker threads for binlog
+	db.binlog.queue_capacity        = 2000          //DB，binlog task queue capacity
 
 	# UNIT Second
-	db.binlog.scan_interval         = 60            //DB，scan interval for binlog, time synchronization binlog item
+	db.binlog.scan_interval         = 20            //DB，scan interval for binlog, time synchronization binlog item
 	db.binlog.task_timeout          = 950400        //DB，task timeout time for binlog
 
 	mq.queue.maximum                = 8192          //MQ, max capacity of queue; If it's value is reduced, the tail index will become invalid, change it to the original value to restore.

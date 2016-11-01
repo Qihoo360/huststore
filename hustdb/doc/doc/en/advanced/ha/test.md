@@ -28,14 +28,14 @@ Path: `hustdb/ha/nginx/test/autotest.py`
 
 ### Script for stress test ###
 
-Path: `hustdb/ha/nginx/mutitest.py`
+Path: `hustdb/ha/nginx/multi_test.py`
 
     usage:
-        python mutitest [number] [uri]
+        python multi_test [number] [uri]
             number : number of process
             uri    : ip:port
     sample:
-        python mutitest.py 2 localhost:8082
+        python multi_test.py 2 localhost:8082
 
 [Previous](../ha.md)
 

@@ -1,0 +1,1 @@
+ps gaux | grep multi_test.py | grep -v grep | awk '{print $2}' | xargs kill -9

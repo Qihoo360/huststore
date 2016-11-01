@@ -16,16 +16,15 @@ PASSWD = 'huststore'
 gentm = lambda: datetime.datetime.now().strftime('[%Y-%m-%d %H:%M:%S] ')
 test_cases = map(lambda i: { 'tb': 'hustdbhatb%d' % i, 'key': 'hustdbhakey%d' % i, 'val': 'hustdbhaval%d' % i }, xrange(1, 31))
 gen_char = lambda i: str('\n' if 0 != i and 0 == i % 80 else random.randint(0, 9))
-gen_body = lambda n: map(gen_char, xrange(n))
 
 def manual(): 
     print """
     usage:
-        python mutitest [number] [uri]
+        python multi_test [number] [uri]
             number : number of process
             uri    : ip:port
     sample:
-        python mutitest.py 2 localhost:8082
+        python multi_test.py 2 localhost:8082
         """
     
 def log_err(str):

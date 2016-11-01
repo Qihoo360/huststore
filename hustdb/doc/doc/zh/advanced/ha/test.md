@@ -28,14 +28,14 @@
 
 ### 压力测试脚本 ###
 
-路径：`hustdb/ha/nginx/mutitest.py`
+路径：`hustdb/ha/nginx/multi_test.py`
 
     usage:
-        python mutitest [number] [uri]
+        python multi_test [number] [uri]
             number : number of process
             uri    : ip:port
     sample:
-        python mutitest.py 2 localhost:8082
+        python multi_test.py 2 localhost:8082
 
 [上一级](../ha.md)
 

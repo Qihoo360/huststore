@@ -1677,7 +1677,7 @@ int kv_array_t::binlog_scan (
                     memset ( host_s, 0, sizeof ( host_s ) );
                     fast_memcpy ( host_s, host_i, sizeof ( uint32_t ) );
                     sprintf ( host_s + sizeof ( uint32_t ), "%05d", atoi ( port_s ) + 1 );
-                    binlog_seek = host_s;
+                    binlog_seek.assign ( host_s, sizeof ( host_s ) );
 
                     r = EFAULT;
                     break;

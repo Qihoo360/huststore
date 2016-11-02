@@ -82,7 +82,7 @@ bool task_t::make_task (
     {
         key_safe_len = key_len;
     }
-    
+
     char query_string [ key_safe_len + 128 ];
 
     switch ( cmd_type )
@@ -161,7 +161,7 @@ bool task_t::run ( husthttp_t * client )
         }
 
 #if defined(_BINLOG_DEBUG)
-        printf ( "success|task|host:%s|path:%s|query_string:%s|http_code:%d\n", _host.c_str(), _path.c_str(), _query_string.c_str(), _http_code );
+        printf ( "success|task|host:%s|path:%s|query_string:%s|http_code:%d\n", _host.c_str (), _path.c_str (), _query_string.c_str (), _http_code );
 #endif
 
         host_info.finish_task ( _host );
@@ -171,10 +171,11 @@ bool task_t::run ( husthttp_t * client )
     {
 
 #if defined(_BINLOG_DEBUG)
-        printf ( "fail|task|host:%s|path:%s|query_string:%s|http_code:%d\n", _host.c_str(), _path.c_str(), _query_string.c_str(), _http_code );
+        printf ( "fail|task|host:%s|path:%s|query_string:%s|http_code:%d\n", _host.c_str (), _path.c_str (), _query_string.c_str (), _http_code );
 #endif
 
-        if ( is_overtime( ) ) {
+        if ( is_overtime ( ) )
+        {
             host_info.finish_task ( _host );
             return true;
         }
@@ -224,9 +225,9 @@ bool task_t::is_success ( int * http_code )
     return ( * http_code == 200 || * http_code == 400 || * http_code == 401 || * http_code == 404 || * http_code == 412 );
 }
 
-bool task_t::is_overtime ( ) 
+bool task_t::is_overtime ( )
 {
-    return binlog_time_t::get_current_time ( ) - _timestamp >= _alive_time;    
+    return binlog_time_t::get_current_time ( ) - _timestamp >= _alive_time;
 }
 
 bool task_t::url_encode_all ( const char * src, int src_len, char * dst, int * dst_len )

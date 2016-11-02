@@ -7,12 +7,10 @@ queue_t::queue_t ( size_t max_queue_size )
 , _cond ( _mutex )
 , _queue ( )
 {
-
 }
 
 queue_t::~ queue_t ( )
 {
-
 }
 
 bool queue_t::put_with_check ( task_t * task )

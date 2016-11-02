@@ -25,22 +25,22 @@ static void * check_alive ( void * arg )
     int redeliver_fd = timerfd_create ( CLOCK_REALTIME, 0 );
     int gc_fd = timerfd_create ( CLOCK_REALTIME, 0 );
 
-    if ( timerfd == - 1 || redeliver_fd == - 1 || gc_fd == -1 )
+    if ( timerfd == - 1 || redeliver_fd == - 1 || gc_fd == - 1 )
     {
         return ( void * ) NULL;
     }
 
-    struct itimerspec tv, redeliver_tv, gc_tv;
+    struct itimerspec check_tv, redeliver_tv, gc_tv;
 
-    memset ( &tv, 0, sizeof ( tv ) );
+    memset ( &check_tv, 0, sizeof ( check_tv ) );
 
     memset ( &redeliver_tv, 0, sizeof ( redeliver_tv ) );
 
     memset ( &gc_tv, 0, sizeof ( gc_tv ) );
 
-    tv.it_value.tv_sec = 1;
+    check_tv.it_value.tv_sec = 1;
 
-    tv.it_interval.tv_sec = 5;
+    check_tv.it_interval.tv_sec = 6;
 
     redeliver_tv.it_value.tv_sec = 1;
 
@@ -52,9 +52,9 @@ static void * check_alive ( void * arg )
 
 
 
-    if ( timerfd_settime ( timerfd, 0, &tv, NULL ) == - 1
-         || timerfd_settime ( redeliver_fd, 0, &redeliver_tv, NULL ) == - 1 
-         || timerfd_settime ( gc_fd, 0, &gc_tv, NULL ) == -1 )
+    if ( timerfd_settime ( timerfd, 0, &check_tv, NULL ) == - 1
+         || timerfd_settime ( redeliver_fd, 0, &redeliver_tv, NULL ) == - 1
+         || timerfd_settime ( gc_fd, 0, &gc_tv, NULL ) == - 1 )
     {
         return ( void * ) NULL;
     }
@@ -103,7 +103,7 @@ static void * check_alive ( void * arg )
             host_info.redeliver ();
         }
 
-        if ( pfd[2].revents & POLLIN ) 
+        if ( pfd[2].revents & POLLIN )
         {
             read ( gc_fd, &val, sizeof ( val ) );
             host_info.check_silence_and_remove_host ( );
@@ -216,15 +216,18 @@ void host_info_t::finish_task ( const std::string & host )
 
 bool host_info_t::add_host ( const std::string & host )
 {
-    do {
+    do
+    {
         rw_lock_guard_t lock ( _rwlock, RLOCK );
         if ( _queue.find ( host ) != _queue.end () )
         {
             return true;
         }
-    }while(0);
+    }
+    while ( 0 );
 
-    do {
+    do
+    {
         rw_lock_guard_t lock ( _rwlock, WLOCK );
         queue_t * queue = new queue_t ( _max_queue_size );
 
@@ -236,7 +239,8 @@ bool host_info_t::add_host ( const std::string & host )
         _queue[host] = queue;
 
         _status[host] = binlog_status_t ();
-    }while(0);
+    }
+    while ( 0 );
 
     return true;
 }
@@ -253,7 +257,8 @@ bool host_info_t::remove_host ( const std::string & host )
     return inner_remove_host ( host );
 }
 
-bool host_info_t::inner_remove_host ( const std::string & host ) {
+bool host_info_t::inner_remove_host ( const std::string & host )
+{
     std::map<std::string, queue_t *>::iterator it;
 
     if ( ( it = _queue.find ( host ) ) == _queue.end () )
@@ -276,7 +281,7 @@ bool host_info_t::inner_remove_host ( const std::string & host ) {
     return true;
 }
 
-void host_info_t::check_silence_and_remove_host( )
+void host_info_t::check_silence_and_remove_host ( )
 {
     _gc_pool.clear ( );
     rw_lock_guard_t lock ( _rwlock, WLOCK );
@@ -288,29 +293,30 @@ void host_info_t::check_silence_and_remove_host( )
     int size = std::min ( dist, count );
     int remain = count - size;
 
-    for ( int i = 0; i < size && it != _queue.end ( ); ++i, ++it ) 
+    for ( int i = 0; i < size && it != _queue.end ( ); ++ i, ++ it )
     {
-        if ( _status[it->first].silence.get ( ) >= _silence_limit ) 
+        if ( _status[it->first].silence.get ( ) >= _silence_limit )
         {
             _gc_pool.push_back ( it->first );
         }
     }
 
-    if ( remain != 0 ) {
+    if ( remain != 0 )
+    {
         it = _queue.begin ( );
-        for ( int i = 0; i < remain && it != _queue.end ( ); ++i, ++it ) 
+        for ( int i = 0; i < remain && it != _queue.end ( ); ++ i, ++ it )
         {
-            if ( _status[it->first].silence.get ( ) >= _silence_limit ) 
+            if ( _status[it->first].silence.get ( ) >= _silence_limit )
             {
                 _gc_pool.push_back ( it->first );
             }
         }
     }
 
-    _gc_cursor = std::distance ( _queue.begin( ), it );
+    _gc_cursor = std::distance ( _queue.begin ( ), it );
 
     size_t gc_size = _gc_pool.size ( );
-    for ( size_t i = 0; i < gc_size; i++ ) 
+    for ( size_t i = 0; i < gc_size; i ++ )
     {
         inner_remove_host ( _gc_pool[i] );
     }
@@ -383,10 +389,12 @@ void host_info_t::decrement ( const std::string & host )
 
 void host_info_t::check_db ( )
 {
-    const char * method = "GET";
-    const char * path = "/status.html";
-    std::string head, body, host;
-    int http_code = 0;
+    int          http_code    = 0;
+    const char * method       = "GET";
+    const char * path         = "/status.html";
+    std::string  head;
+    std::string  body;
+    std::string  host;
 
     rw_lock_guard_t lock ( _rwlock, RLOCK );
 
@@ -396,19 +404,19 @@ void host_info_t::check_db ( )
     int size = std::min ( dist, 5 );
     int remain = 5 - size;
 
-    for ( int i = 0; i < size && it != _queue.end ( ); ++i, ++it ) 
+    for ( int i = 0; i < size && it != _queue.end ( ); ++ i, ++ it )
     {
         host.assign ( it->first );
-        inner_check_db( host, method, path, head, body, http_code );
+        inner_check_db ( host, method, path, head, body, http_code );
     }
 
-    if ( remain != 0 ) 
+    if ( remain != 0 )
     {
         it = _queue.begin ( );
-        for ( int i = 0; i < remain && it != _queue.end ( ); ++i, ++it ) 
+        for ( int i = 0; i < remain && it != _queue.end ( ); ++ i, ++ it )
         {
             host.assign ( it->first );
-            inner_check_db( host, method, path, head, body, http_code );
+            inner_check_db ( host, method, path, head, body, http_code );
         }
     }
 
@@ -416,19 +424,19 @@ void host_info_t::check_db ( )
 
 }
 
-void host_info_t::inner_check_db ( std::string & host, const char * method, const char * path, std::string & head, std::string & body, int & http_code ) 
+void host_info_t::inner_check_db ( std::string & host, const char * method, const char * path, std::string & head, std::string & body, int & http_code )
 {
+    int proc_ret;
+
     _client->set_host ( host.c_str (), host.size () );
 
-    if ( ! _client->open ( method, path, NULL, NULL, 0, 1, 3 ) )
+    if ( ! _client->open ( method, path, NULL, NULL, 0, 1, 1 ) )
     {
         set_status ( host, 0 );
         return;
     }
 
-    int tmp;
-
-    if ( ! _client->process ( &tmp ) )
+    if ( ! _client->process ( & proc_ret ) )
     {
         set_status ( host, 0 );
         return;
@@ -452,7 +460,8 @@ void host_info_t::redeliver ( )
 
     for ( std::map<std::string, queue_t *>::iterator it = _queue.begin (); it != _queue.end (); ++ it )
     {
-        if ( _status[it->first].remain.get ( ) == 0 ) {
+        if ( _status[it->first].remain.get ( ) == 0 )
+        {
             _status[it->first].silence.increment ( );
             continue;
         }
@@ -493,7 +502,7 @@ void host_info_t::queue_info ( std::string & res )
 
     for ( std::map<std::string, binlog_status_t>::iterator it = _status.begin ( ); it != _status.end ( ); ++ it )
     {
-        char info [ 128 ] = {};
+        char info [ 128 ] = { };
         sprintf ( info, "[%s->%d]", it->first.c_str ( ), it->second.remain.get ( ) );
         res.append ( info );
     }

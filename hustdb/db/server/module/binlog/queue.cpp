@@ -11,6 +11,12 @@ queue_t::queue_t ( size_t max_queue_size )
 
 queue_t::~ queue_t ( )
 {
+    while ( !_queue.empty ( ) ) 
+    {
+        task_t * task = _queue.front ( );
+        _queue.pop_front ( );
+        delete task;
+    }
 }
 
 bool queue_t::put_with_check ( task_t * task )

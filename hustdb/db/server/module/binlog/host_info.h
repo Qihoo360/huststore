@@ -85,7 +85,6 @@ private:
     int32_t _silence_limit;
 
     int _cursor;
-    int _gc_cursor;
 };
 
 #endif

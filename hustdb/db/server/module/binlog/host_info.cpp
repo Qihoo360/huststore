@@ -33,24 +33,17 @@ static void * check_alive ( void * arg )
     struct itimerspec check_tv, redeliver_tv, gc_tv;
 
     memset ( &check_tv, 0, sizeof ( check_tv ) );
-
     memset ( &redeliver_tv, 0, sizeof ( redeliver_tv ) );
-
     memset ( &gc_tv, 0, sizeof ( gc_tv ) );
 
-    check_tv.it_value.tv_sec = 1;
+    check_tv.it_value.tv_sec           = 1;
+    check_tv.it_interval.tv_sec        = 6;
 
-    check_tv.it_interval.tv_sec = 6;
+    redeliver_tv.it_value.tv_sec       = 1;
+    redeliver_tv.it_interval.tv_sec    = 1;
 
-    redeliver_tv.it_value.tv_sec = 1;
-
-    redeliver_tv.it_interval.tv_sec = 1;
-
-    gc_tv.it_value.tv_sec = 1;
-
-    gc_tv.it_interval.tv_sec = 300;
-
-
+    gc_tv.it_value.tv_sec              = 1;
+    gc_tv.it_interval.tv_sec           = 300;
 
     if ( timerfd_settime ( timerfd, 0, &check_tv, NULL ) == - 1
          || timerfd_settime ( redeliver_fd, 0, &redeliver_tv, NULL ) == - 1
@@ -61,21 +54,17 @@ static void * check_alive ( void * arg )
 
     struct pollfd pfd[4];
 
-    pfd[0].fd = timerfd;
+    pfd[0].fd        = timerfd;
+    pfd[0].events    = POLLIN;
 
-    pfd[0].events = POLLIN;
+    pfd[1].fd        = redeliver_fd;
+    pfd[1].events    = POLLIN;
 
-    pfd[1].fd = redeliver_fd;
+    pfd[2].fd        = gc_fd;
+    pfd[2].events    = POLLIN;
 
-    pfd[1].events = POLLIN;
-
-    pfd[2].fd = gc_fd;
-
-    pfd[2].events = POLLIN;
-
-    pfd[3].fd = stop_pfd;
-
-    pfd[3].events = POLLIN;
+    pfd[3].fd        = stop_pfd;
+    pfd[3].events    = POLLIN;
 
     int ret = - 1;
 
@@ -130,7 +119,6 @@ host_info_t::host_info_t ( )
 , _gc_pool ( )
 , _silence_limit ( 3600 )
 , _cursor ( 0 )
-, _gc_cursor ( 0 )
 {
 }
 
@@ -219,6 +207,11 @@ bool host_info_t::add_host ( const std::string & host )
     do
     {
         rw_lock_guard_t lock ( _rwlock, RLOCK );
+        if ( _queue.size () >= 1024 )
+        {
+            return false;
+        }
+        
         if ( _queue.find ( host ) != _queue.end () )
         {
             return true;
@@ -285,35 +278,14 @@ void host_info_t::check_silence_and_remove_host ( )
 {
     _gc_pool.clear ( );
     rw_lock_guard_t lock ( _rwlock, WLOCK );
-
-    std::map<std::string, queue_t *>::iterator it = _queue.begin ( );
-    std::advance ( it, _gc_cursor);
-    int count = std::max ( 10, int ( _queue.size ( ) ) / 10);
-    int dist = std::distance ( it, _queue.end ( ) );
-    int size = std::min ( dist, count );
-    int remain = count - size;
-
-    for ( int i = 0; i < size && it != _queue.end ( ); ++ i, ++ it )
+    
+    for ( std::map<std::string, queue_t *>::iterator it = _queue.begin (); it != _queue.end ( ); ++ it )
     {
         if ( _status[it->first].silence.get ( ) >= _silence_limit )
         {
             _gc_pool.push_back ( it->first );
         }
     }
-
-    if ( remain != 0 )
-    {
-        it = _queue.begin ( );
-        for ( int i = 0; i < remain && it != _queue.end ( ); ++ i, ++ it )
-        {
-            if ( _status[it->first].silence.get ( ) >= _silence_limit )
-            {
-                _gc_pool.push_back ( it->first );
-            }
-        }
-    }
-
-    _gc_cursor = std::distance ( _queue.begin ( ), it );
 
     size_t gc_size = _gc_pool.size ( );
     for ( size_t i = 0; i < gc_size; i ++ )
@@ -397,6 +369,12 @@ void host_info_t::check_db ( )
     std::string  host;
 
     rw_lock_guard_t lock ( _rwlock, RLOCK );
+    
+    if ( _queue.empty () )
+    {
+        _cursor = 0;
+        return;
+    }
 
     std::map<std::string, queue_t *>::iterator it = _queue.begin ( );
     std::advance ( it, _cursor );
@@ -421,7 +399,6 @@ void host_info_t::check_db ( )
     }
 
     _cursor = std::distance ( _queue.begin ( ), it );
-
 }
 
 void host_info_t::inner_check_db ( std::string & host, const char * method, const char * path, std::string & head, std::string & body, int & http_code )
@@ -465,6 +442,7 @@ void host_info_t::redeliver ( )
             _status[it->first].silence.increment ( );
             continue;
         }
+        
         redeliver_with_host ( it->first );
     }
 }

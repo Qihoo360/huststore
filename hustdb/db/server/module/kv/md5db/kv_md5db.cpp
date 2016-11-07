@@ -3222,6 +3222,12 @@ int kv_md5db_t::binlog_scan (
     
     std::map<std::string, char> alives;
     m_inner->m_binlog.get_alives ( alives );
+    
+    if ( unlikely ( alives.size () >= 1024 ) )
+    {
+        LOG_ERROR ( "[md5db][binlog_scan]count of host out of range: %d", alives.size () );
+        return EINVAL;
+    }
 
     struct check_alive_cb_param_t * alive_cb_pm = ( struct check_alive_cb_param_t * ) alive_cb_param;
     alive_cb_pm->db                             = this;

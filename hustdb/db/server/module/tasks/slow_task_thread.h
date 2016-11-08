@@ -235,7 +235,7 @@ private:
     tasks_t m_tasks;
     tasks_t m_doing_tasks;
     tasks_t m_done_tasks;
-    lockable_t m_lock;
+    rwlockable_t m_lock;
     event2_t m_event;
 
 private:

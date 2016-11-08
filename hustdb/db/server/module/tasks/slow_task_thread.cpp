@@ -21,7 +21,7 @@ void slow_task_thread_t::stop ( )
 
     TASK_THREAD::stop ();
 
-    scope_lock_t lock ( m_lock );
+    scope_wlock_t lock ( m_lock );
 
     if ( ! m_tasks.empty () )
     {
@@ -64,7 +64,8 @@ bool slow_task_thread_t::push (
         return false;
     }
 
-    scope_lock_t lock ( m_lock );
+    scope_wlock_t lock ( m_lock );
+    
     try
     {
         m_tasks.push_back ( task );
@@ -81,11 +82,15 @@ bool slow_task_thread_t::push (
 
 bool slow_task_thread_t::empty ( )
 {
+    scope_rlock_t lock ( m_lock );
+        
     return m_tasks.empty ();
 }
 
 bool slow_task_thread_t::le_one ( )
 {
+    scope_rlock_t lock ( m_lock );
+    
     return m_tasks.size () <= 1;
 }
 
@@ -106,7 +111,8 @@ void slow_task_thread_t::run ( )
             task2_t * p = NULL;
 
             {
-                scope_lock_t lock ( m_lock );
+                scope_wlock_t lock ( m_lock );
+                
                 if ( m_tasks.empty () )
                 {
                     break;
@@ -140,6 +146,8 @@ void slow_task_thread_t::info (
                                 std::string & info
                                 )
 {
+    scope_rlock_t lock ( m_lock );
+    
     char s[ 128 ] = { };
 
     sprintf ( s,
@@ -156,7 +164,7 @@ slow_task_type_t slow_task_thread_t::status (
                                               task2_t * task
                                               )
 {
-    scope_lock_t lock ( m_lock );
+    scope_rlock_t lock ( m_lock );
 
     tasks_t::iterator it;
 

@@ -26,6 +26,8 @@ hustdb_t::hustdb_t ( )
 , m_rdb_ok ( false )
 , m_timer ( )
 , m_slow_tasks ( )
+, m_mq_locker ( )
+, m_tb_locker ( )
 , m_server_conf ( )
 , m_store_conf ( )
 {

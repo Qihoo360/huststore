@@ -107,7 +107,7 @@ typedef struct table_stat_s
     char table [ MAX_QUEUE_NAME_LEN + 2 ];
 } table_stat_t;
 
-typedef std::map < std::string, uint32_t > table_map_t;
+typedef std::map< std::string, uint32_t > table_map_t;
 
 typedef std::vector< lockable_t * > locker_vec_t;
 

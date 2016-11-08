@@ -144,7 +144,7 @@ namespace md5db
         uint32_t m_cache_file_bitmap_length;
         uint32_t m_cache_file_bitmap_bit_length;
 
-        lockable_t m_lock;
+        rwlockable_t m_lock;
 
     private:
         // disable

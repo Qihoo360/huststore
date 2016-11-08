@@ -528,7 +528,7 @@ namespace md5db
             block ++;
         }
 
-        scope_lock_t lock ( m_lock );
+        scope_wlock_t lock ( m_lock );
 
         return write_inner ( data, data_len, offset, block, tail );
     }
@@ -680,6 +680,8 @@ namespace md5db
             tail = PAGE - tail;
             block ++;
         }
+        
+        scope_wlock_t lock ( m_lock );
 
         if ( old_block == block )
         {
@@ -706,8 +708,6 @@ namespace md5db
             LOG_ERROR ( "[md5db][content_db]offset for update error" );
             return false;
         }
-
-        scope_lock_t lock ( m_lock );
 
         if ( ! index.id )
         {
@@ -737,6 +737,8 @@ namespace md5db
     {
         data_index_t index;
         fast_memcpy ( & index, & offset, 4 );
+        
+        scope_rlock_t lock ( m_lock );
 
         if ( ! index.id )
         {
@@ -776,7 +778,7 @@ namespace md5db
             return false;
         }
 
-        scope_lock_t lock ( m_lock );
+        scope_wlock_t lock ( m_lock );
 
         if ( ! index.id )
         {

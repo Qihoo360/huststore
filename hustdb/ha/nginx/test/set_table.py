@@ -11,16 +11,16 @@ AUTH = ('huststore', 'huststore')
 def manual(): 
     print """
     usage:
-        python set_table.py [option] [host] [private pem] [table]
+        python set_table.py [option] [uri] [private pem] [table]
             [option]
                 -t: simple test
                 -m: mutiprocess test
     sample:
-        python set_table.py -t localhost conf/private.pem conf/hustdbtable.json
+        python set_table.py -t localhost:8082 conf/private.pem conf/hustdbtable.json
         """
 
 def get_identifier(sess, host):
-    cmd = 'http://%s:8082/set_table' % host
+    cmd = 'http://%s/set_table' % host
     r = sess.post(cmd, auth=AUTH)
     return None if 200 != r.status_code else r.content
 def overwrite_table(sess, host, cipher_id, private_pem, table):
@@ -30,7 +30,7 @@ def overwrite_table(sess, host, cipher_id, private_pem, table):
         p = f.read()
         privkey = rsa.PrivateKey.load_pkcs1(p)
         id = rsa.decrypt(cipher_id, privkey)
-    cmd = 'http://%s:8082/set_table?id=%s' % (host, id)
+    cmd = 'http://%s/set_table?id=%s' % (host, id)
     r = sess.post(cmd, body, auth=AUTH)
     if 200 != r.status_code:
         print r.headers['errorcode']

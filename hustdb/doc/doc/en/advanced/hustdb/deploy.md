@@ -57,7 +57,7 @@ Deployment
     db.ttl.scan_count               = 1000          //DB, number of item each time ttl scan is executed.
 
 	db.binlog.thread_count          = 4             //DB，number of worker threads for binlog
-	db.binlog.queue_capacity        = 2000          //DB，binlog task queue capacity
+	db.binlog.queue_capacity        = 4000          //DB，binlog task queue capacity
 
 	# UNIT Second
 	db.binlog.scan_interval         = 20            //DB，scan interval for binlog, time synchronization binlog item

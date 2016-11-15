@@ -57,7 +57,7 @@
     db.ttl.scan_count               = 1000          //DB，每次ttl扫描的item数量
 
 	db.binlog.thread_count          = 4             //DB，binlog的worker线程数
-	db.binlog.queue_capacity        = 2000          //DB，binlog任务队列容量
+	db.binlog.queue_capacity        = 4000          //DB，binlog任务队列容量
 
 	# UNIT Second
 	db.binlog.scan_interval         = 20            //DB，binlog扫描间隔，定期同步binlog的item

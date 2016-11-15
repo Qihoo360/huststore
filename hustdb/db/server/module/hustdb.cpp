@@ -373,7 +373,7 @@ bool hustdb_t::init_server_config ( )
         return false;
     }
     
-    m_store_conf.db_binlog_queue_capacity = m_appini->ini_get_int ( m_ini, "store", "db.binlog.queue_capacity", 2000 );
+    m_store_conf.db_binlog_queue_capacity = m_appini->ini_get_int ( m_ini, "store", "db.binlog.queue_capacity", 4000 );
     if ( m_store_conf.db_binlog_queue_capacity <= 0 )
     {
         LOG_ERROR ( "[hustdb][init_server_config]store db.binlog.queue_capacity invalid, binlog.queue_capacity: %d", m_store_conf.db_binlog_queue_capacity );

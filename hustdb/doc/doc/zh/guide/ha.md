@@ -15,7 +15,7 @@ hustdb ha
 安装 `ha` 以及 `sync server`：
 
     $ cd hustdb/ha/nginx
-    $ ./configure --prefix=/data/hustdbha --add-module=src/addon
+    $ sh Config.sh
     $ make -j
     $ make install
     $ cd ../../sync

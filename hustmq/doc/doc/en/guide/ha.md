@@ -1,10 +1,10 @@
 hustmq ha
 --
 
-Install `hustmq ha` and `libsync`:
+Install `hustmq ha`:
 
     $ cd hustmq/ha/nginx
-    $ ./configure --prefix=/data/hustmqha --add-module=src/addon
+    $ sh Config.sh
     $ make -j
     $ make install
 

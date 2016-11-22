@@ -79,8 +79,8 @@ typedef struct {
 #if (NGX_HTTP_SSL)
     unsigned                   ssl:1;
 #endif
-#if (NGX_HTTP_SPDY)
-    unsigned                   spdy:1;
+#if (NGX_HTTP_V2)
+    unsigned                   http2:1;
 #endif
 #if (NGX_HAVE_INET6 && defined IPV6_V6ONLY)
     unsigned                   ipv6only:1;
@@ -232,10 +232,10 @@ typedef struct {
 
 
 typedef struct {
-     ngx_hash_combined_t       names;
+    ngx_hash_combined_t        names;
 
-     ngx_uint_t                nregex;
-     ngx_http_server_name_t   *regex;
+    ngx_uint_t                 nregex;
+    ngx_http_server_name_t    *regex;
 } ngx_http_virtual_names_t;
 
 
@@ -248,8 +248,8 @@ struct ngx_http_addr_conf_s {
 #if (NGX_HTTP_SSL)
     unsigned                   ssl:1;
 #endif
-#if (NGX_HTTP_SPDY)
-    unsigned                   spdy:1;
+#if (NGX_HTTP_V2)
+    unsigned                   http2:1;
 #endif
     unsigned                   proxy_protocol:1;
 };
@@ -404,6 +404,7 @@ struct ngx_http_core_loc_conf_s {
     ngx_flag_t    internal;                /* internal */
     ngx_flag_t    sendfile;                /* sendfile */
     ngx_flag_t    aio;                     /* aio */
+    ngx_flag_t    aio_write;               /* aio_write */
     ngx_flag_t    tcp_nopush;              /* tcp_nopush */
     ngx_flag_t    tcp_nodelay;             /* tcp_nodelay */
     ngx_flag_t    reset_timedout_connection; /* reset_timedout_connection */
@@ -543,7 +544,7 @@ typedef ngx_int_t (*ngx_http_request_body_filter_pt)
 ngx_int_t ngx_http_output_filter(ngx_http_request_t *r, ngx_chain_t *chain);
 ngx_int_t ngx_http_write_filter(ngx_http_request_t *r, ngx_chain_t *chain);
 ngx_int_t ngx_http_request_body_save_filter(ngx_http_request_t *r,
-   ngx_chain_t *chain);
+    ngx_chain_t *chain);
 
 
 ngx_int_t ngx_http_set_disable_symlinks(ngx_http_request_t *r,

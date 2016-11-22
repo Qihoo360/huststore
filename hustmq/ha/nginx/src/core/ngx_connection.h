@@ -64,6 +64,7 @@ struct ngx_listening_s {
     unsigned            nonblocking:1;
     unsigned            shared:1;    /* shared between threads or processes */
     unsigned            addr_ntop:1;
+    unsigned            wildcard:1;
 
 #if (NGX_HAVE_INET6 && defined IPV6_V6ONLY)
     unsigned            ipv6only:1;
@@ -94,31 +95,31 @@ struct ngx_listening_s {
 
 
 typedef enum {
-     NGX_ERROR_ALERT = 0,
-     NGX_ERROR_ERR,
-     NGX_ERROR_INFO,
-     NGX_ERROR_IGNORE_ECONNRESET,
-     NGX_ERROR_IGNORE_EINVAL
+    NGX_ERROR_ALERT = 0,
+    NGX_ERROR_ERR,
+    NGX_ERROR_INFO,
+    NGX_ERROR_IGNORE_ECONNRESET,
+    NGX_ERROR_IGNORE_EINVAL
 } ngx_connection_log_error_e;
 
 
 typedef enum {
-     NGX_TCP_NODELAY_UNSET = 0,
-     NGX_TCP_NODELAY_SET,
-     NGX_TCP_NODELAY_DISABLED
+    NGX_TCP_NODELAY_UNSET = 0,
+    NGX_TCP_NODELAY_SET,
+    NGX_TCP_NODELAY_DISABLED
 } ngx_connection_tcp_nodelay_e;
 
 
 typedef enum {
-     NGX_TCP_NOPUSH_UNSET = 0,
-     NGX_TCP_NOPUSH_SET,
-     NGX_TCP_NOPUSH_DISABLED
+    NGX_TCP_NOPUSH_UNSET = 0,
+    NGX_TCP_NOPUSH_SET,
+    NGX_TCP_NOPUSH_DISABLED
 } ngx_connection_tcp_nopush_e;
 
 
 #define NGX_LOWLEVEL_BUFFERED  0x0f
 #define NGX_SSL_BUFFERED       0x01
-#define NGX_SPDY_BUFFERED      0x02
+#define NGX_HTTP_V2_BUFFERED   0x02
 
 
 struct ngx_connection_s {
@@ -140,6 +141,8 @@ struct ngx_connection_s {
     ngx_log_t          *log;
 
     ngx_pool_t         *pool;
+
+    int                 type;
 
     struct sockaddr    *sockaddr;
     socklen_t           socklen;
@@ -174,6 +177,7 @@ struct ngx_connection_s {
     unsigned            idle:1;
     unsigned            reusable:1;
     unsigned            close:1;
+    unsigned            shared:1;
 
     unsigned            sendfile:1;
     unsigned            sndlowat:1;

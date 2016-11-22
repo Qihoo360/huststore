@@ -116,6 +116,10 @@ static void __free_peer(ngx_peer_connection_t *pc, void *data, ngx_uint_t state)
         {
             break;
         }
+        if (!u->request_body_sent)
+        {
+            break;
+        }
         if (ngx_terminate || ngx_exiting)
         {
             break;

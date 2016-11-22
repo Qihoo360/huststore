@@ -8,7 +8,7 @@ function upgrade()
         echo "`basename $0` [user]"
         return 0
     fi
-    oldpid=`ps aux | grep nginx | grep $user | awk 'BEGIN {FS=" "} $11 == "nginx:" && $12 == "master" {print $2}'`
+    oldpid=`ps aux | grep nginx | grep $user | grep -v grep | grep master | awk '{print $2}'`
     if [ "$oldpid"x = ""x ]; then
         echo "no nginx running"
         return 0

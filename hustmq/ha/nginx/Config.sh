@@ -1,1 +1,1 @@
-./configure --with-debug --prefix=/data/hustmqha --add-module=src/addon
+./configure --with-cc-opt="-g3 -O0" --with-ld-opt="-lm" --prefix=/data/hustmqha --add-module=src/addon

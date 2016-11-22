@@ -188,7 +188,7 @@ typedef struct {
     ngx_int_t  (*notify)(ngx_event_handler_pt handler);
 
     ngx_int_t  (*process_events)(ngx_cycle_t *cycle, ngx_msec_t timer,
-                   ngx_uint_t flags);
+                                 ngx_uint_t flags);
 
     ngx_int_t  (*init)(ngx_cycle_t *cycle, ngx_msec_t timer);
     void       (*done)(ngx_cycle_t *cycle);
@@ -343,7 +343,8 @@ extern ngx_event_actions_t   ngx_event_actions;
 #define NGX_DISABLE_EVENT  EV_DISABLE
 
 
-#elif (NGX_HAVE_DEVPOLL || NGX_HAVE_EVENTPORT)
+#elif (NGX_HAVE_DEVPOLL && !(NGX_TEST_BUILD_DEVPOLL)) \
+      || (NGX_HAVE_EVENTPORT && !(NGX_TEST_BUILD_EVENTPORT))
 
 #define NGX_READ_EVENT     POLLIN
 #define NGX_WRITE_EVENT    POLLOUT
@@ -352,7 +353,7 @@ extern ngx_event_actions_t   ngx_event_actions;
 #define NGX_ONESHOT_EVENT  1
 
 
-#elif (NGX_HAVE_EPOLL)
+#elif (NGX_HAVE_EPOLL) && !(NGX_TEST_BUILD_EPOLL)
 
 #define NGX_READ_EVENT     (EPOLLIN|EPOLLRDHUP)
 #define NGX_WRITE_EVENT    EPOLLOUT
@@ -418,6 +419,7 @@ extern ngx_os_io_t  ngx_io;
 #define ngx_udp_recv         ngx_io.udp_recv
 #define ngx_send             ngx_io.send
 #define ngx_send_chain       ngx_io.send_chain
+#define ngx_udp_send         ngx_io.udp_send
 
 
 #define NGX_EVENT_MODULE      0x544E5645  /* "EVNT" */
@@ -491,6 +493,9 @@ extern ngx_module_t           ngx_event_core_module;
 
 
 void ngx_event_accept(ngx_event_t *ev);
+#if !(NGX_WIN32)
+void ngx_event_recvmsg(ngx_event_t *ev);
+#endif
 ngx_int_t ngx_trylock_accept_mutex(ngx_cycle_t *cycle);
 u_char *ngx_accept_log_error(ngx_log_t *log, u_char *buf, size_t len);
 

@@ -86,19 +86,20 @@ class HATester:
             }
         self.__blen = 1024 * 1024
         self.__count = 0
+        self.__sess = requests.Session()
 
     def __do_get_status(self):
         cmd = '%s/do_get_status' % self.__host
-        r = requests.get(cmd, auth=(USER, PASSWD))
+        r = self.__sess.get(cmd, auth=(USER, PASSWD))
         print r.content if 200 == r.status_code else '%s: %d' % (cmd, r.status_code)
     def __do_post_status(self):
         cmd = '%s/do_post_status' % self.__host
-        r = requests.get(cmd, auth=(USER, PASSWD))
+        r = self.__sess.get(cmd, auth=(USER, PASSWD))
         print r.content if 200 == r.status_code else '%s: %d' % (cmd, r.status_code)
     def __purge_item(self, item, index):
         try:
             cmd = self.__gen_purge_item(index, item['queue'])
-            r = requests.get(cmd, auth=(USER, PASSWD))
+            r = self.__sess.get(cmd, auth=(USER, PASSWD))
             if 200 != r.status_code:
                 print '%s: %d' % (cmd, r.status_code)
         except requests.exceptions.RequestException as e:
@@ -111,7 +112,7 @@ class HATester:
     def __stat_all(self):
         self.__autost()
         cmd = '%s/stat_all' % self.__host
-        r = requests.get(cmd, auth=(USER, PASSWD))
+        r = self.__sess.get(cmd, auth=(USER, PASSWD))
         if 200 != r.status_code:
             print '%s: %d' % (cmd, r.status_code)
         else:
@@ -119,7 +120,7 @@ class HATester:
     def __autost(self):
         self.__count = self.__count + 1
         cmd = '%s/autost' % self.__host
-        r = requests.get(cmd, auth=(USER, PASSWD))
+        r = self.__sess.get(cmd, auth=(USER, PASSWD))
         if 200 == r.status_code:
             return True
         print '%s: %d' % (cmd, r.status_code)
@@ -129,33 +130,33 @@ class HATester:
             if i % 100 == 0:
                 print 'loop %d' % i
             cmd = '%s/autost' % self.__host
-            r = requests.get(cmd, auth=(USER, PASSWD))
+            r = self.__sess.get(cmd, auth=(USER, PASSWD))
             if 200 != r.status_code:
                 print '%s: %d' % (cmd, r.status_code)
     def __put(self):
         cmd = '%s/put?queue=hustmqhaqueue' % self.__host
-        r = requests.put(cmd, 'test_body', headers={'content-type':'text/plain'}, auth=(USER, PASSWD))
+        r = self.__sess.put(cmd, 'test_body', headers={'content-type':'text/plain'}, auth=(USER, PASSWD))
         if 200 != r.status_code:
             print '%s: %d' % (cmd, r.status_code)
         else:
             print 'pass'
     def __get(self):
         cmd = '%s/get?queue=hustmqhaqueue&worker=testworker' % self.__host
-        r = requests.get(cmd, auth=(USER, PASSWD))
+        r = self.__sess.get(cmd, auth=(USER, PASSWD))
         if 200 != r.status_code:
             print '%s: %d' % (cmd, r.status_code)
         else:
             print r.content
     def __ack(self):
         cmd = '%s/get?queue=hustmqhaqueue&worker=testworker&ack=false' % self.__host
-        r = requests.get(cmd, auth=(USER, PASSWD))
+        r = self.__sess.get(cmd, auth=(USER, PASSWD))
         if 200 != r.status_code:
             print '%s: %d' % (cmd, r.status_code)
             return
         print r.content
         cmd = '%s/ack?queue=hustmqhaqueue&peer=%s&token=%s' % (
             self.__host, r.headers['ack-peer'], r.headers['ack-token'])
-        r = requests.get(cmd, auth=(USER, PASSWD))
+        r = self.__sess.get(cmd, auth=(USER, PASSWD))
         if 200 != r.status_code:
             print '%s: %d' % (cmd, r.status_code)
             return
@@ -165,13 +166,13 @@ class HATester:
         val = 'ha_timeout_val'
         
         cmd = '%s/put?queue=%s' % (self.__host, qname)
-        r = requests.put(cmd, val, headers={'content-type':'text/plain'}, auth=(USER, PASSWD))
+        r = self.__sess.put(cmd, val, headers={'content-type':'text/plain'}, auth=(USER, PASSWD))
         if 200 != r.status_code:
             print '%s: %d' % (cmd, r.status_code)
             return
         
         cmd = '%s/timeout?queue=%s&minute=1' % (self.__host, qname)
-        r = requests.get(cmd, auth=(USER, PASSWD))
+        r = self.__sess.get(cmd, auth=(USER, PASSWD))
         if 200 != r.status_code:
             print '%s: %d' % (cmd, r.status_code)
             return
@@ -179,7 +180,7 @@ class HATester:
         self.__autost()
         
         cmd = '%s/get?queue=%s&worker=testworker&ack=false' % (self.__host, qname)
-        r = requests.get(cmd, auth=(USER, PASSWD))
+        r = self.__sess.get(cmd, auth=(USER, PASSWD))
         if 200 != r.status_code:
             print '%s: %d' % (cmd, r.status_code)
             return
@@ -189,7 +190,7 @@ class HATester:
         time.sleep(60)
         
         cmd = '%s/get?queue=%s&worker=testworker' % (self.__host, qname)
-        r = requests.get(cmd, auth=(USER, PASSWD))
+        r = self.__sess.get(cmd, auth=(USER, PASSWD))
         if 200 != r.status_code:
             print '%s: %d' % (cmd, r.status_code)
             return
@@ -200,14 +201,14 @@ class HATester:
         print 'put...'
         for i in xrange(100):
             cmd = '%s/put?queue=hustmqhaqueue' % self.__host
-            r = requests.put(cmd, get_body(i), headers={'content-type':'text/plain'}, auth=(USER, PASSWD))
+            r = self.__sess.put(cmd, get_body(i), headers={'content-type':'text/plain'}, auth=(USER, PASSWD))
             if 200 != r.status_code:
                 print '%s: %d' % (cmd, r.status_code)
                 return
         print 'get...'
         for i in xrange(100):
             cmd = '%s/get?queue=hustmqhaqueue&worker=testworker' % self.__host
-            r = requests.get(cmd, auth=(USER, PASSWD))
+            r = self.__sess.get(cmd, auth=(USER, PASSWD))
             if 200 != r.status_code:
                 print '%s: %d' % (cmd, r.status_code)
                 return
@@ -221,11 +222,11 @@ class HATester:
             if i % 100 == 0:
                 print 'loop %d' % i
             cmd = '%s/put?queue=hustmqhaqueue&item=hustmqteststr' % self.__host
-            r = requests.put(cmd, auth=(USER, PASSWD))
+            r = self.__sess.put(cmd, auth=(USER, PASSWD))
             if 200 != r.status_code:
                 print '%s: %d' % (cmd, r.status_code)
             cmd = '%s/autost' % self.__host
-            r = requests.get(cmd, auth=(USER, PASSWD))
+            r = self.__sess.get(cmd, auth=(USER, PASSWD))
             if 200 != r.status_code:
                 print '%s: %d' % (cmd, r.status_code)
     def __evget(self):
@@ -233,16 +234,16 @@ class HATester:
             if i % 100 == 0:
                 print 'loop %d' % i
             cmd = '%s/evget?queue=hustmqhaqueue&worker=testworker' % self.__host
-            r = requests.get(cmd, auth=(USER, PASSWD))
+            r = self.__sess.get(cmd, auth=(USER, PASSWD))
             if 200 != r.status_code:
                 print '%s: %d' % (cmd, r.status_code)
     def __pub_imp(self):
         cmd = '%s/pub?queue=hustpushqueue&item=jobstest' % self.__host
-        r = requests.get(cmd, auth=(USER, PASSWD))
+        r = self.__sess.get(cmd, auth=(USER, PASSWD))
         if 200 != r.status_code:
             print '%s: %d' % (cmd, r.status_code)
         cmd = '%s/autost' % self.__host
-        r = requests.get(cmd, auth=(USER, PASSWD))
+        r = self.__sess.get(cmd, auth=(USER, PASSWD))
         if 200 != r.status_code:
             print '%s: %d' % (cmd, r.status_code)
     def __evpub(self):
@@ -251,10 +252,10 @@ class HATester:
                 print 'loop %d' % i
             self.__pub_imp()
         cmd = '%s/autost' % self.__host
-        requests.get(cmd, auth=(USER, PASSWD))
+        self.__sess.get(cmd, auth=(USER, PASSWD))
     def __pub(self):
         cmd = '%s/pub?queue=hustpushqueue&item=jobstest' % self.__host
-        r = requests.get(cmd, auth=(USER, PASSWD))
+        r = self.__sess.get(cmd, auth=(USER, PASSWD))
         if 200 != r.status_code:
             log_pub('[publish] %s: %d' % (cmd, r.status_code))
         else: 
@@ -262,7 +263,7 @@ class HATester:
     def __looppub(self):
         def __get_idx():
             cmd = '%s/stat?queue=hustpushqueue' % self.__host
-            r = requests.get(cmd, auth=(USER, PASSWD))
+            r = self.__sess.get(cmd, auth=(USER, PASSWD))
             if len(r.content) < 1:
                 return None
             si = r.json()['si']
@@ -273,7 +274,7 @@ class HATester:
             if not idx:
                 return
             cmd = '%s/pub?queue=hustpushqueue&item=jobstest&idx=%d' % (self.__host, int(idx['ci']) + 2)
-            r = requests.get(cmd, auth=(USER, PASSWD))
+            r = self.__sess.get(cmd, auth=(USER, PASSWD))
             if 200 != r.status_code:
                 log_pub('[reset idx fail] %s: %d' % (cmd, r.status_code))
             else:
@@ -301,7 +302,7 @@ class HATester:
                     idx = new_idx
             cmd = '%s/pub?queue=hustpushqueue&item=jobstest' % self.__host
             try:
-                r = requests.get(cmd, auth=(USER, PASSWD))
+                r = self.__sess.get(cmd, auth=(USER, PASSWD))
                 if 200 != r.status_code:
                     log_pub('[publish] %s: %d' % (cmd, r.status_code))
                 else:
@@ -316,7 +317,7 @@ class HATester:
     def __sub_imp(self, idx):
         while True:
             cmd = '%s/evsub?queue=hustpushqueue&idx=%d' % (self.__host, idx)
-            r = requests.get(cmd, auth=(USER, PASSWD))
+            r = self.__sess.get(cmd, auth=(USER, PASSWD))
             if 403 == r.status_code:
                 idx = int(r.headers['index'].split('-')[0]) + 1
                 print '[sync] %s { si: %d }' % (cmd, idx)
@@ -336,7 +337,7 @@ class HATester:
         print 'put...'
         for i in xrange(64):
             cmd = '%s/put?queue=hustmqhaqueue&item=hustmqteststr%d' % (self.__host, i)
-            r = requests.get(cmd, auth=(USER, PASSWD))
+            r = self.__sess.get(cmd, auth=(USER, PASSWD))
             if 200 != r.status_code:
                 print '%s: %d' % (cmd, r.status_code)
                 return
@@ -344,13 +345,13 @@ class HATester:
         print 'get...'
         for i in xrange(63):
             cmd = '%s/get?queue=hustmqhaqueue&worker=testworker%d' % (self.__host, i)
-            r = requests.get(cmd, auth=(USER, PASSWD))
+            r = self.__sess.get(cmd, auth=(USER, PASSWD))
             if 200 != r.status_code:
                 print '%s: %d' % (cmd, r.status_code)
                 return
         self.__autost()
         cmd = '%s/worker?queue=hustmqhaqueue' % self.__host
-        r = requests.get(cmd, auth=(USER, PASSWD))
+        r = self.__sess.get(cmd, auth=(USER, PASSWD))
         if 200 != r.status_code:
             print '%s: %d' % (cmd, r.status_code)
             return
@@ -358,7 +359,7 @@ class HATester:
         self.__autost()
         print 'purge...'
         cmd = '%s/stat?queue=hustmqhaqueue' % self.__host
-        r = requests.get(cmd, auth=(USER, PASSWD))
+        r = self.__sess.get(cmd, auth=(USER, PASSWD))
         if 200 != r.status_code:
             print '%s: %d' % (cmd, r.status_code)
             return
@@ -368,7 +369,7 @@ class HATester:
     
     def __get_stat_all(self):
         self.__autost()
-        r = requests.get('%s/stat_all' % self.__host, auth=(USER, PASSWD))
+        r = self.__sess.get('%s/stat_all' % self.__host, auth=(USER, PASSWD))
         return r.json() if 200 == r.status_code else []
     def __run_put_cases(self, number, loop):
         test_cases = map(self.__gen_put_item, xrange(0, number)) + map(self.__gen_put_body_item, xrange(0, number))
@@ -377,9 +378,9 @@ class HATester:
                 cmd = case['cmd'](queue)
                 try:
                     self.__count = self.__count + 1
-                    r = requests.put(
+                    r = self.__sess.put(
                         cmd, data=case['body'], headers={'content-type':'text/plain'}, timeout=5, auth=(USER, PASSWD)
-                        ) if 'body' in case else requests.get(cmd, timeout=5, auth=(USER, PASSWD))
+                        ) if 'body' in case else self.__sess.get(cmd, timeout=5, auth=(USER, PASSWD))
                     if 200 != r.status_code:
                         log_err('loop %s HATester::__run_put_cases(%d)->error: %s: %d' % (loop, number, cmd, r.status_code))
                 except requests.exceptions.RequestException as e:
@@ -399,7 +400,7 @@ class HATester:
                 cmd = case(item['queue'])
                 try:
                     self.__count = self.__count + 1
-                    r = requests.get(cmd, timeout=5, auth=(USER, PASSWD))
+                    r = self.__sess.get(cmd, timeout=5, auth=(USER, PASSWD))
                     if 200 != r.status_code:
                         log_err('loop %s HATester::__run_common_cases->error: %s: %d' % (loop, cmd, r.status_code))
                 except requests.exceptions.RequestException as e:
@@ -418,7 +419,7 @@ class HATester:
                 cmd = case(item['queue'], loop)
                 try:
                     self.__count = self.__count + 1
-                    r = requests.get(cmd, timeout=5, auth=(USER, PASSWD))
+                    r = self.__sess.get(cmd, timeout=5, auth=(USER, PASSWD))
                     if 200 != r.status_code:
                         log_err('loop %s HATester::__run_worker_cases->error: %s: %d' % (loop, cmd, r.status_code))
                 except requests.exceptions.RequestException as e:
@@ -430,7 +431,7 @@ class HATester:
         try:
             self.__count = self.__count + 1
             cmd = self.__gen_purge_item(index, item['queue'])
-            r = requests.get(cmd, auth=(USER, PASSWD))
+            r = self.__sess.get(cmd, auth=(USER, PASSWD))
             if 200 != r.status_code:
                 log_err('loop %s HATester::__run_purge_case->error: %s: %d' % (loop, cmd, r.status_code))
         except requests.exceptions.RequestException as e:

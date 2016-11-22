@@ -10,7 +10,7 @@
 
 
 #define NGX_HTTP_MAX_URI_CHANGES           10
-#define NGX_HTTP_MAX_SUBREQUESTS           200
+#define NGX_HTTP_MAX_SUBREQUESTS           50
 
 /* must be 2^n */
 #define NGX_HTTP_LC_HEADER_LEN             32
@@ -23,6 +23,7 @@
 #define NGX_HTTP_VERSION_9                 9
 #define NGX_HTTP_VERSION_10                1000
 #define NGX_HTTP_VERSION_11                1001
+#define NGX_HTTP_VERSION_20                2000
 
 #define NGX_HTTP_UNKNOWN                   0x0001
 #define NGX_HTTP_GET                       0x0002
@@ -270,6 +271,7 @@ typedef struct {
     ngx_array_t                       cache_control;
 
     off_t                             content_length_n;
+    off_t                             content_offset;
     time_t                            date_time;
     time_t                            last_modified_time;
 } ngx_http_headers_out_t;
@@ -282,6 +284,9 @@ typedef struct {
     ngx_chain_t                      *bufs;
     ngx_buf_t                        *buf;
     off_t                             rest;
+#if (NGX_HTTP_V2)
+    off_t                             received;
+#endif
     ngx_chain_t                      *free;
     ngx_chain_t                      *busy;
     ngx_http_chunked_t               *chunked;
@@ -431,16 +436,16 @@ struct ngx_http_request_s {
     ngx_uint_t                        err_status;
 
     ngx_http_connection_t            *http_connection;
-#if (NGX_HTTP_SPDY)
-    ngx_http_spdy_stream_t           *spdy_stream;
+#if (NGX_HTTP_V2)
+    ngx_http_v2_stream_t             *stream;
 #endif
 
     ngx_http_log_handler_pt           log_handler;
 
     ngx_http_cleanup_t               *cleanup;
 
+    unsigned                          count:16;
     unsigned                          subrequests:8;
-    unsigned                          count:8;
     unsigned                          blocked:8;
 
     unsigned                          aio:1;
@@ -529,6 +534,7 @@ struct ngx_http_request_s {
     unsigned                          filter_need_in_memory:1;
     unsigned                          filter_need_temporary:1;
     unsigned                          allow_ranges:1;
+    unsigned                          subrequest_ranges:1;
     unsigned                          single_range:1;
     unsigned                          disable_not_modified:1;
 

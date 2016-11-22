@@ -13,18 +13,18 @@ ngx_int_t ngx_http_fetch_upstream_init(size_t cache_size, ngx_conf_t *cf)
 
 static ngx_http_log_ctx_t * __create_log_ctx(ngx_connection_t * c, ngx_http_request_t * r)
 {
-    ngx_http_log_ctx_t * log_ctx = ngx_pcalloc(c->pool, sizeof(ngx_http_log_ctx_t));
-    if (!log_ctx)
+    ngx_http_log_ctx_t * ctx = ngx_pcalloc(c->pool, sizeof(ngx_http_log_ctx_t));
+    if (!ctx)
     {
         return NULL;
     }
-    log_ctx->connection = c;
-    log_ctx->request = r;
-    log_ctx->current_request = r;
-    return log_ctx;
+    ctx->connection = c;
+    ctx->request = r;
+    ctx->current_request = r;
+    return ctx;
 }
 
-static ngx_log_t * __create_log(const ngx_connection_t * c, ngx_cycle_t * cycle, ngx_http_log_ctx_t * log_ctx)
+static ngx_log_t * __create_log(const ngx_connection_t * c, ngx_cycle_t * cycle, ngx_http_log_ctx_t * ctx)
 {
     ngx_log_t * log = ngx_pcalloc(c->pool, sizeof(ngx_log_t));
     if (!log)
@@ -32,7 +32,7 @@ static ngx_log_t * __create_log(const ngx_connection_t * c, ngx_cycle_t * cycle,
         return NULL;
     }
     log->action = "ngx_http_fetch";
-    log->data = log_ctx;
+    log->data = ctx;
     log->file = cycle->new_log.file;
     log->log_level = NGX_LOG_NOTICE;
     return log;
@@ -249,7 +249,6 @@ ngx_int_t ngx_http_fetch_init_upstream(const ngx_http_fetch_upstream_data_t * da
     {
         return NGX_ERROR;
     }
-    memset(ctx, 0, sizeof(ngx_http_fetch_ctx_t));
     ngx_http_fetch_set_module_ctx(r, ctx);
 
     memcpy(&ctx->addr, &data->args->addr, sizeof(ngx_addr_t));

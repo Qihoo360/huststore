@@ -33,6 +33,23 @@
 #define NGX_SSL_NAME     "OpenSSL"
 
 
+#if (defined LIBRESSL_VERSION_NUMBER && OPENSSL_VERSION_NUMBER == 0x20000000L)
+#undef OPENSSL_VERSION_NUMBER
+#define OPENSSL_VERSION_NUMBER  0x1000107fL
+#endif
+
+
+#if (OPENSSL_VERSION_NUMBER >= 0x10100001L)
+
+#define ngx_ssl_version()       OpenSSL_version(OPENSSL_VERSION)
+
+#else
+
+#define ngx_ssl_version()       SSLeay_version(SSLEAY_VERSION)
+
+#endif
+
+
 #define ngx_ssl_session_t       SSL_SESSION
 #define ngx_ssl_conn_t          SSL
 
@@ -46,6 +63,7 @@ typedef struct {
 
 typedef struct {
     ngx_ssl_conn_t             *connection;
+    SSL_CTX                    *session_ctx;
 
     ngx_int_t                   last;
     ngx_buf_t                  *buf;

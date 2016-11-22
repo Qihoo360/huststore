@@ -840,6 +840,9 @@ ngx_epoll_process_events(ngx_cycle_t *cycle, ngx_msec_t timer, ngx_uint_t flags)
             }
 
             wev->ready = 1;
+#if (NGX_THREADS)
+            wev->complete = 1;
+#endif
 
             if (flags & NGX_POST_EVENTS) {
                 ngx_post_event(wev, &ngx_posted_events);
@@ -899,7 +902,7 @@ ngx_epoll_eventfd_handler(ngx_event_t *ev)
         events = io_getevents(ngx_aio_ctx, 1, 64, event, &ts);
 
         ngx_log_debug1(NGX_LOG_DEBUG_EVENT, ev->log, 0,
-                       "io_getevents: %l", events);
+                       "io_getevents: %d", events);
 
         if (events > 0) {
             ready -= events;
@@ -907,7 +910,7 @@ ngx_epoll_eventfd_handler(ngx_event_t *ev)
             for (i = 0; i < events; i++) {
 
                 ngx_log_debug4(NGX_LOG_DEBUG_EVENT, ev->log, 0,
-                               "io_event: %uXL %uXL %L %L",
+                               "io_event: %XL %XL %L %L",
                                 event[i].data, event[i].obj,
                                 event[i].res, event[i].res2);
 

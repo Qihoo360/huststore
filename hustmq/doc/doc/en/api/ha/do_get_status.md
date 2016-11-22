@@ -17,7 +17,7 @@ This interface is used to fetch the status of task [`do_get`](do_get.md) in real
 **Return value:**
 
     HTTP/1.1 200 OK
-    Server: nginx/1.9.4
+    Server: nginx/1.10.0
     Date: Thu, 31 Mar 2016 03:14:49 GMT
     Content-Type: text/plain
     Content-Length: 72

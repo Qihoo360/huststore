@@ -21,7 +21,7 @@ According to the consistency status of version, this interface will return the f
 **Return value 1(version is matched):**
 
     HTTP/1.1 200 OK
-    Server: nginx/1.9.4
+    Server: nginx/1.10.0
     Date: Thu, 19 May 2016 10:31:13 GMT
     Content-Type: text/plain
     Content-Length: 2
@@ -35,7 +35,7 @@ Related fields:
 **Return value 2(version is not matched):**
 
     HTTP/1.1 409 Conflict
-    Server: nginx/1.9.4
+    Server: nginx/1.10.0
     Date: Thu, 19 May 2016 10:33:09 GMT
     Content-Type: text/plain
     Content-Length: 5

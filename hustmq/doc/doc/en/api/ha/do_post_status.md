@@ -17,7 +17,7 @@ This interface is used to fetch [`do_post`](do_post.md) task status in real time
 **Return value:**
 
     HTTP/1.1 200 OK
-    Server: nginx/1.9.4
+    Server: nginx/1.10.0
     Date: Thu, 31 Mar 2016 03:40:06 GMT
     Content-Type: text/plain
     Content-Length: 52

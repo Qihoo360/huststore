@@ -18,7 +18,7 @@
 **返回样例:**
 
     HTTP/1.1 200 OK
-    Server: nginx/1.9.4
+    Server: nginx/1.10.0
     Date: Tue, 29 Mar 2016 08:53:48 GMT
     Content-Type: text/plain
     Content-Length: 2

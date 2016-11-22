@@ -20,7 +20,7 @@
 **返回范例1（值一致，版本一致）:**
 
     HTTP/1.1 200 OK
-    Server: nginx/1.9.4
+    Server: nginx/1.10.0
     Date: Thu, 19 May 2016 10:24:23 GMT
     Content-Type: text/plain
     Content-Length: 13
@@ -36,7 +36,7 @@
 **返回范例2（值一致，版本不一致）:**
 
     HTTP/1.1 200 OK
-    Server: nginx/1.9.4
+    Server: nginx/1.10.0
     Date: Thu, 19 May 2016 10:25:11 GMT
     Content-Type: text/plain
     Content-Length: 13
@@ -54,7 +54,7 @@
 **返回范例3（值不一致，版本一致）:**
 
     HTTP/1.1 409 Conflict
-    Server: nginx/1.9.4
+    Server: nginx/1.10.0
     Date: Thu, 19 May 2016 10:25:47 GMT
     Content-Type: text/plain
     Content-Length: 26
@@ -72,7 +72,7 @@
 **返回范例4（值不一致，版本不一致）:**
 
     HTTP/1.1 409 Conflict
-    Server: nginx/1.9.4
+    Server: nginx/1.10.0
     Date: Thu, 19 May 2016 10:26:32 GMT
     Content-Type: text/plain
     Content-Length: 26

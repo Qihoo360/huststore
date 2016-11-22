@@ -19,7 +19,7 @@ According to the version of data and consistency status of the value, this inter
 **Return value 1 (Both value and version are matched):**
 
     HTTP/1.1 200 OK
-    Server: nginx/1.9.4
+    Server: nginx/1.10.0
     Date: Thu, 19 May 2016 10:05:31 GMT
     Content-Type: text/plain
     Content-Length: 13
@@ -35,7 +35,7 @@ Related fields:
 **eturn value 1 (Value is matched, version is not matched):**
 
     HTTP/1.1 200 OK
-    Server: nginx/1.9.4
+    Server: nginx/1.10.0
     Date: Thu, 19 May 2016 10:06:06 GMT
     Content-Type: text/plain
     Content-Length: 13
@@ -53,7 +53,7 @@ Related fields:
 **Return value 3 (Value is not matched, version is matched):**
 
     HTTP/1.1 409 Conflict
-    Server: nginx/1.9.4
+    Server: nginx/1.10.0
     Date: Thu, 19 May 2016 10:07:01 GMT
     Content-Type: text/plain
     Content-Length: 26
@@ -71,7 +71,7 @@ Related fields:
 **Return value 4 (Both value and version are not matched):**
 
     HTTP/1.1 409 Conflict
-    Server: nginx/1.9.4
+    Server: nginx/1.10.0
     Date: Thu, 19 May 2016 10:19:04 GMT
     Content-Type: text/plain
     Content-Length: 26

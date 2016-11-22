@@ -194,7 +194,7 @@ Type in commands:
 We should be able to see the below infomation:
 
     HTTP/1.1 200 OK
-    Server: nginx/1.9.4
+    Server: nginx/1.10.0
     Date: Tue, 07 Jun 2016 03:25:18 GMT
     Content-Type: text/plain
     Content-Length: 3

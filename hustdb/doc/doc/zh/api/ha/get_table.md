@@ -15,7 +15,7 @@
 **返回值范例:**
 
 	HTTP/1.1 200 OK
-	Server: nginx/1.9.4
+	Server: nginx/1.10.0
 	Date: Mon, 29 Feb 2016 07:22:25 GMT
 	Content-Type: text/plain
 	Content-Length: 624

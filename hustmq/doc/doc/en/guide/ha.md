@@ -100,7 +100,7 @@ Input the following test command:
 Then server will output the following information:
 
     HTTP/1.1 200 OK
-    Server: nginx/1.9.4
+    Server: nginx/1.10.0
     Date: Tue, 01 Mar 2016 08:13:42 GMT
     Content-Type: text/plain
     Content-Length: 0

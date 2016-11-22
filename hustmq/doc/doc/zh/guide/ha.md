@@ -100,7 +100,7 @@ hustmq ha
 可以看到服务器返回如下内容：
 
     HTTP/1.1 200 OK
-    Server: nginx/1.9.4
+    Server: nginx/1.10.0
     Date: Tue, 01 Mar 2016 08:13:42 GMT
     Content-Type: text/plain
     Content-Length: 0

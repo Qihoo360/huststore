@@ -194,7 +194,7 @@ hustdb ha
 可以看到服务器返回如下内容：
 
     HTTP/1.1 200 OK
-    Server: nginx/1.9.4
+    Server: nginx/1.10.0
     Date: Tue, 07 Jun 2016 03:25:18 GMT
     Content-Type: text/plain
     Content-Length: 3

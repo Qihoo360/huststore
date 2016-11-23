@@ -1,4 +1,4 @@
-cd ../../../third_party
+cd ../../../../../third_party
 sh ./build.sh
 cd -
 make clean

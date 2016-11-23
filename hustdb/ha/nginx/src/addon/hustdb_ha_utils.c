@@ -25,7 +25,7 @@ ngx_str_t hustdb_ha_make_str(ngx_str_t * val, ngx_http_request_t * r)
 
 ngx_str_t hustdb_ha_strcat(const ngx_str_t * str, int num, ngx_pool_t * pool)
 {
-    ngx_str_t out;
+    ngx_str_t out = { 0, 0 };
     size_t len = str->len + 11;
     out.data = ngx_palloc(pool, len);
     if (!out.data)

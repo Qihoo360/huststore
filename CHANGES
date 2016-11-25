@@ -1,0 +1,51 @@
+Changes with huststore release 1.5                                        25 Nov 2016
+
+    A summary of what is in this release since 1.4:
+    *) Upgrade nginx to stable version 1.10.0. Mainline version: 1.9.15. Previous mainline version: 1.9.4. You can get the details from official website: https://nginx.org/en/CHANGES-1.10
+    *) Update the project configuration for better configure & make.
+    *) Fix bug on "ngx_http_fetch".
+
+
+Changes with huststore release 1.4                                        16 Nov 2016
+
+    A summary of what is in this release since 1.3:
+    *) Add "binlog" feature for better reliability & performance. This is an important service patch for "sync".
+    *) Add "sismember2" for hustdb HA.
+    *) Extract "third-party" for better build.
+    *) Refactor the code of hustdb HA & Hustmq HA & test scripts for better readability & maintainability.
+    *) Many other fixes and improvements, 60 commits since 1.3.
+
+
+Changes with huststore release 1.3                                        9 Sep 2016
+
+    A summary of what is in this release since 1.2:
+    *) Translate documents, 40+ commits since 1.2.
+
+Changes with huststore release 1.2                                        23 Aug 2016
+
+    A summary of what is in this release since 1.1:
+    *) Add feature "rdb" (like redis, the data will be stored in memory for higher performance), see details.
+    *) Refactor ttl policy (from lazy ttl to active ttl)
+    *) Many other fixes and improvements, 80+ commits since 1.1.
+
+Changes with huststore release 1.1                                        16 Jun 2016
+
+    This is the first stable release, with important bug fixes and a few new features:
+    *) Refactor the architect of HustDB HA, which is important for the availability of HA.
+        *) libsync is extracted as a standlone sync server from master process of HA.
+        *) In this version, when sync server is down by accident, the HA will still be healthy. (In pre-release, when something is wrong with libsync.so, the master of HA will be crash.)
+        *) In this version, the HA could be smoothly upgraded in any condition. (In pre-release, if libsync.so is need to be upgraded, we need to stop master of HA first)
+    *) Add daemon mode and "-q" command option to gracefully quit server for HustDB
+    *) Fix bug on HustMQ HA & HustDB HA & sync server
+
+Changes with huststore release 1.0                                        28 May 2016
+
+    This is an interim release before 1.1, with important bug fixes and a few new features:
+    *) hustmq & hustmq ha: support redelivery in server side.
+    *) hustmq ha: support "queue_hash" (similar as "ip_hash")
+    *) hustdb ha: implement high-consistence API for db query ( get2, hget2, zscore2)
+    *) hustdb ha: fix bug on gen_table.py
+
+Changes with huststore release 0.9                                        17 May 2016
+
+    *) This is the initial release.

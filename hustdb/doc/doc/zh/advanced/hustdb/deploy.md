@@ -38,7 +38,7 @@
     http.security.user              = huststore     //权限验证，user
     http.security.passwd            = huststore     //权限验证，password
 
-    http.access.allow               = 127.0.0.1     //IP限制；例如：(1)X.Y.Z.1-X.Y.Z.10；(2)X.Y.Z.1-X.Y.Z.10,X.Y.Z.22；(3)X.Y.Z.1-X.Y.Z.10,X.Y.Z.17,A.B.C.1-A.B.C.10
+    http.access.allow               = W.X.Y.Z       //IP限制；例如：(1)X.Y.Z.1-X.Y.Z.10；(2)X.Y.Z.1-X.Y.Z.10,X.Y.Z.22；(3)X.Y.Z.1-X.Y.Z.10,X.Y.Z.17,A.B.C.1-A.B.C.10
 
 	# UNIT Percentage
     memory.process.threshold        = 0             //hustdb进程内存限制（%），超出阈值，禁止除del外所有写操作

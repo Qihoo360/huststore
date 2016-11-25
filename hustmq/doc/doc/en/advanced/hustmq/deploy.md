@@ -38,7 +38,7 @@ Deployment
     http.security.user              = huststore     //Authority verification: user
     http.security.passwd            = huststore     //Authority verrification: password
 
-    http.access.allow               = 127.0.0.1     //IP restrictions. e.g. (1) X.Y.Z.1-X.Y.Z.10;(2) X.Y.Z.1-X.Y.Z.10,X.Y.Z.22;(3) X.Y.Z.1-X.Y.Z.10,X.Y.Z.17,A.B.C.1-A.B.C.10
+    http.access.allow               = W.X.Y.Z       //IP restrictions. e.g. (1) X.Y.Z.1-X.Y.Z.10;(2) X.Y.Z.1-X.Y.Z.10,X.Y.Z.22;(3) X.Y.Z.1-X.Y.Z.10,X.Y.Z.17,A.B.C.1-A.B.C.10
 
 	# UNIT Percentage
     memory.process.threshold        = 0             //Process memory limit (%) for hustdb , if exceeded, all write operations, except del, will be disabled.

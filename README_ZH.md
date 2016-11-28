@@ -102,7 +102,7 @@
 
 	（2）GET
 	    <1>value：256B；     qps：100 thousand
-	    <2>value：1KB；      qps：10 thousand
+	    <2>value：1KB；      qps：95 thousand
 	    <3>value：4KB；      qps：25 thousand
 	    <4>value：16KB；     qps：7 thousand
 	    <5>value：64KB；     qps：2 thousand

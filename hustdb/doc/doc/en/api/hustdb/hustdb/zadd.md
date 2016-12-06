@@ -7,7 +7,7 @@
 **Parameter:** 
 
 *  **tb** (Required)  
-*  **score** (Required)
+*  **score** (Required, >0)
 *  **key** (Required, GET: key is argument or POST: key is body)   
 *  **opt** (Optional, 0,1,-1;default: 0)
 *  **ttl** (Optional, default: 0)

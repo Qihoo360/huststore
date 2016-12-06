@@ -83,7 +83,7 @@ offset from starting node, used by keys, hkeys, etc., to fetch streaming data
 size of records, work with offset. used by keys, hkeys, etc., to fetch streaming data
 
 #### `score` ####
-used by zadd only, to store sort set key score
+used by zadd only, to store sort set key score, must > 0
 
 #### `opt` ####
 used by zadd only, 0: score argument will cover key score, 1: argument plus key score and then overwrite score, -1: argument minus key score and then overwrite score

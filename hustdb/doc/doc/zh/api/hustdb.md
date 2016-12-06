@@ -83,7 +83,7 @@ fastdb编号，0~N-1（N为hustdb.conf中fastdb.count值）
 记录条数，与offset配合使用，用于keys，hkeys等接口，获取流式数据
 
 #### `score` ####
-仅用于zadd，存储sort set键值分数
+仅用于zadd，存储sort set键值分数，必须>0
 
 #### `opt` ####
 仅用于zadd，0：score参数覆盖键值分数，1：score参数与键值分数相加后覆盖，-1：score参数与键值分数相减后覆盖

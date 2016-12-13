@@ -33,7 +33,7 @@
     tcp.recv_timeout                = 300           //单链接最长存活时间
     tcp.send_timeout                = 300           //单链接发送数据超时
 
-    tcp.worker_count                = 10            //worker线程数
+    tcp.worker_count                = 16            //worker线程数
 
     http.security.user              = huststore     //权限验证，user
     http.security.passwd            = huststore     //权限验证，password

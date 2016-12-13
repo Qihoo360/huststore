@@ -14,7 +14,7 @@
 
     curl -i -X GET "http://localhost:8085/hustcache/hincrby?tb=test_table&key=test_key&val=7"
 
-**结果范例A2:**
+**结果范例A1:**
 
 	HTTP/1.1 200 OK
 	Content-Length: 2

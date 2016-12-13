@@ -28,7 +28,7 @@ bool mdb_t::open (
         for ( int i = 0; i < count; ++ i )
         {
             std::string * s = new std::string ();
-            s->reserve ( MDB_VAL_LEN + 16 );
+            s->resize ( MDB_VAL_LEN + 16 );
 
             m_buffers.push_back ( s );
         }

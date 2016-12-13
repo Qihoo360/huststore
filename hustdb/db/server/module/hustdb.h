@@ -13,7 +13,8 @@
 #include <set>
 #include <vector>
 
-#define SIZEOF_UNIT32                 4
+#define SIZEOF_UINT32                 4
+#define SIZEOF_UINT64                 8
 #define MAX_QUEUE_NAME_LEN            64
 #define MAX_QKEY_LEN                  80
 #define QUEUE_STAT_LEN                sizeof ( queue_stat_t )
@@ -40,6 +41,11 @@
 
 #define CHECK_STRING(key)             ( ! key || key##_len <= 0 )
 #define CHECK_VERSION                 ( ver < 0 || ver >= 0xFFFFFFFF )
+
+#define LOCKERS_RLOCK(key)            rwlockable_t * hrlk = m_lockers.at ( m_apptool->locker_hash ( key, key##_len ) ); \
+                                      scope_rlock_t r_locker ( * hrlk );
+#define LOCKERS_WLOCK(key)            rwlockable_t * hwlk = m_lockers.at ( m_apptool->locker_hash ( key, key##_len ) ); \
+                                      scope_wlock_t w_locker ( * hwlk );
 
 enum table_type_t
 {
@@ -109,7 +115,7 @@ typedef struct table_stat_s
 
 typedef std::map< std::string, uint32_t > table_map_t;
 
-typedef std::vector< lockable_t * > locker_vec_t;
+typedef std::vector< rwlockable_t * > wrlocker_vec_t;
 
 typedef struct server_conf_s
 {
@@ -408,6 +414,21 @@ public:
                       conn_ctxt_t conn,
                       item_ctxt_t * & ctxt
                       );
+
+    int hustdb_hincrby (
+                         const char * table,
+                         size_t table_len,
+                         const char * key,
+                         size_t key_len,
+                         uint64_t score,
+                         std::string * & rsp,
+                         int & rsp_len,
+                         uint32_t & ver,
+                         uint32_t ttl,
+                         bool is_dup,
+                         conn_ctxt_t conn,
+                         item_ctxt_t * & ctxt
+                         );
 
     int hustdb_hdel (
                       const char * table,
@@ -772,7 +793,7 @@ private:
     queue_map_t m_queue_map;
     rwlockable_t m_mq_locker;
     
-    locker_vec_t m_lockers;
+    wrlocker_vec_t m_lockers;
 
     fmap_t m_table_index;
     table_map_t m_table_map;

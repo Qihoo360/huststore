@@ -33,7 +33,7 @@ Deployment
     tcp.recv_timeout                = 300           //Max live time for for a single connection
     tcp.send_timeout                = 300           //Timeout for a single connection
 
-    tcp.worker_count                = 10            //Number of worker thread
+    tcp.worker_count                = 16            //Number of worker thread
 
     http.security.user              = huststore     //Authority verification: user
     http.security.passwd            = huststore     //Authority verrification: password

@@ -97,7 +97,7 @@ void hustdb_t::destroy ( )
         m_appini = NULL;
     }
 
-    for ( locker_vec_t::iterator it = m_lockers.begin (); it != m_lockers.end (); ++ it )
+    for ( wrlocker_vec_t::iterator it = m_lockers.begin (); it != m_lockers.end (); ++ it )
     {
         delete ( * it );
     }
@@ -228,7 +228,7 @@ bool hustdb_t::open ( )
     {
         for ( int i = 0; i < MAX_LOCKER_NUM; i ++ )
         {
-            lockable_t * l = new lockable_t ();
+            rwlockable_t * l = new rwlockable_t ();
             m_lockers.push_back ( l );
         }
     }
@@ -1358,6 +1358,8 @@ int hustdb_t::hustdb_get (
         return EKEYREJECTED;
     }
 
+    LOCKERS_RLOCK ( key )
+    
     m_storage->set_inner_table ( NULL, 0, KV_ALL, conn );
 
     if ( m_mdb_ok && key_len < MDB_KEY_LEN )
@@ -1365,8 +1367,8 @@ int hustdb_t::hustdb_get (
         r = m_mdb->get ( key, key_len, conn, rsp, & rsp_len );
         if ( r == 0 )
         {
-            fast_memcpy ( & ver, rsp->c_str () + rsp_len - SIZEOF_UNIT32, SIZEOF_UNIT32 );
-            rsp_len -= SIZEOF_UNIT32;
+            fast_memcpy ( & ver, rsp->c_str () + rsp_len - SIZEOF_UINT32, SIZEOF_UINT32 );
+            rsp_len -= SIZEOF_UINT32;
             get_ok = true;
         }
     }
@@ -1420,8 +1422,8 @@ int hustdb_t::hustdb_get (
 
         if ( m_mdb_ok && alive >= 0 && key_len < MDB_KEY_LEN && rsp_len < MDB_VAL_LEN )
         {
-            rsp->append ( ( const char * ) & ver, SIZEOF_UNIT32 );
-            m_mdb->put ( key, key_len, rsp->c_str (), rsp_len + SIZEOF_UNIT32, alive );
+            rsp->append ( ( const char * ) & ver, SIZEOF_UINT32 );
+            m_mdb->put ( key, key_len, rsp->c_str (), rsp_len + SIZEOF_UINT32, alive );
         }
     }
 
@@ -1458,6 +1460,8 @@ int hustdb_t::hustdb_put (
         LOG_DEBUG ( "[hustdb][db_put]memory over threshold" );
         return ENOMEM;
     }
+    
+    LOCKERS_WLOCK ( key )
 
     m_storage->set_inner_table ( NULL, 0, KV_ALL, conn );
 
@@ -1503,9 +1507,9 @@ int hustdb_t::hustdb_put (
         {
             std::string * buf = m_mdb->buffer ( conn );
             fast_memcpy ( ( char * ) & ( * buf ) [ 0 ], val, val_len );
-            fast_memcpy ( ( char * ) & ( * buf ) [ 0 ] + val_len, & ver, SIZEOF_UNIT32 );
+            fast_memcpy ( ( char * ) & ( * buf ) [ 0 ] + val_len, & ver, SIZEOF_UINT32 );
 
-            m_mdb->put ( key, key_len, buf->c_str (), val_len + SIZEOF_UNIT32, ttl );
+            m_mdb->put ( key, key_len, buf->c_str (), val_len + SIZEOF_UINT32, ttl );
         }
         else
         {
@@ -1535,6 +1539,8 @@ int hustdb_t::hustdb_del (
         LOG_DEBUG ( "[hustdb][db_del]params error" );
         return EKEYREJECTED;
     }
+    
+    LOCKERS_WLOCK ( key )
 
     m_storage->set_inner_table ( NULL, 0, KV_ALL, conn );
 
@@ -1931,6 +1937,8 @@ int hustdb_t::hustdb_hget (
         LOG_ERROR ( "[hustdb][db_hget]find table failed" );
         return EPERM;
     }
+    
+    LOCKERS_RLOCK ( key )
 
     m_storage->set_inner_table ( table, table_len, HASH_TB, conn );
 
@@ -1942,8 +1950,8 @@ int hustdb_t::hustdb_hget (
         r = m_mdb->get ( mkey, mkey_len, conn, rsp, & rsp_len );
         if ( r == 0 )
         {
-            fast_memcpy ( & ver, rsp->c_str () + rsp_len - SIZEOF_UNIT32, SIZEOF_UNIT32 );
-            rsp_len -= SIZEOF_UNIT32;
+            fast_memcpy ( & ver, rsp->c_str () + rsp_len - SIZEOF_UINT32, SIZEOF_UINT32 );
+            rsp_len -= SIZEOF_UINT32;
             get_ok = true;
         }
     }
@@ -1997,8 +2005,8 @@ int hustdb_t::hustdb_hget (
 
         if ( m_mdb_ok && alive >= 0 && table_len + key_len + 2 < MDB_KEY_LEN && rsp_len < MDB_VAL_LEN )
         {
-            rsp->append ( ( const char * ) & ver, SIZEOF_UNIT32 );
-            m_mdb->put ( mkey, mkey_len, rsp->c_str (), rsp_len + SIZEOF_UNIT32, alive );
+            rsp->append ( ( const char * ) & ver, SIZEOF_UINT32 );
+            m_mdb->put ( mkey, mkey_len, rsp->c_str (), rsp_len + SIZEOF_UINT32, alive );
         }
     }
 
@@ -2050,6 +2058,8 @@ int hustdb_t::hustdb_hset (
         LOG_ERROR ( "[hustdb][db_hset]find table failed" );
         return EPERM;
     }
+    
+    LOCKERS_WLOCK ( key )
 
     m_storage->set_inner_table ( table, table_len, HASH_TB, conn );
 
@@ -2098,14 +2108,157 @@ int hustdb_t::hustdb_hset (
         {
             std::string * buf = m_mdb->buffer ( conn );
             fast_memcpy ( ( char * ) & ( * buf ) [ 0 ], val, val_len );
-            fast_memcpy ( ( char * ) & ( * buf ) [ 0 ] + val_len, & ver, SIZEOF_UNIT32 );
-            m_mdb->put ( mkey, mkey_len, buf->c_str (), val_len + SIZEOF_UNIT32, ttl );
+            fast_memcpy ( ( char * ) & ( * buf ) [ 0 ] + val_len, & ver, SIZEOF_UINT32 );
+            m_mdb->put ( mkey, mkey_len, buf->c_str (), val_len + SIZEOF_UINT32, ttl );
         }
         else
         {
             m_mdb->del ( mkey, mkey_len );
         }
     }
+
+    return 0;
+}
+
+int hustdb_t::hustdb_hincrby (
+                               const char * table,
+                               size_t table_len,
+                               const char * key,
+                               size_t key_len,
+                               uint64_t score,
+                               std::string * & rsp,
+                               int & rsp_len,
+                               uint32_t & ver,
+                               uint32_t ttl,
+                               bool is_dup,
+                               conn_ctxt_t conn,
+                               item_ctxt_t * & ctxt
+                               )
+{
+    int             r            = 0;
+    uint32_t        user_ver     = ver;
+    size_t          mkey_len     = 0;
+    const char *    mkey         = NULL;
+    bool            get_ok       = false;
+    size_t          val_len      = 0;
+    char            val[ 32 ]    = { };
+    uint32_t        cur_ver      = 0;
+    uint64_t        cur_score    = 0;
+    int             offset       = - 1;
+
+    if ( unlikely ( ! tb_name_check ( table, table_len ) ||
+                   CHECK_VERSION ||
+                   CHECK_STRING ( key ) ||
+                   score <= 0
+                   )
+         )
+    {
+        LOG_DEBUG ( "[hustdb][db_hincrby]params error" );
+        return EKEYREJECTED;
+    }
+
+    if ( unlikely ( m_over_threshold ) )
+    {
+        LOG_DEBUG ( "[hustdb][db_hincrby]memory over threshold" );
+        return ENOMEM;
+    }
+
+    std::string inner_table ( table, table_len );
+
+    offset = find_table_offset ( inner_table, true, HASH_TB );
+    if ( unlikely ( offset < 0 ) )
+    {
+        LOG_ERROR ( "[hustdb][db_hincrby]find table failed" );
+        return EPERM;
+    }
+    
+    LOCKERS_WLOCK ( key )
+
+    m_storage->set_inner_table ( table, table_len, HASH_TB, conn );
+    
+    if ( m_mdb_ok && table_len + key_len + 2 < MDB_KEY_LEN )
+    {
+        mkey_len = key_len;
+        mkey = m_storage->get_inner_tbkey ( key, mkey_len, conn );
+        
+        r = m_mdb->get ( mkey, mkey_len, conn, rsp, & rsp_len );
+        if ( r == 0 )
+        {
+            rsp_len -= SIZEOF_UINT32;
+            ( * rsp ) [ rsp_len ] = '\0';
+            get_ok = true;
+        }
+    }
+
+    if ( ! get_ok )
+    {
+        r = m_storage->get ( key, key_len, cur_ver, conn, rsp, ctxt );
+    }
+    
+    if ( 0 == r )
+    {
+        cur_score = strtoul ( rsp->c_str (), NULL, 10 );
+    }
+    
+    score += cur_score;
+    
+    sprintf ( val, "%lu", score );
+    val_len = strlen ( val );
+
+    if ( ttl <= 0 || ttl > m_store_conf.db_ttl_maximum )
+    {
+        m_storage->set_inner_ttl ( 0, conn );
+    }
+    else
+    {
+        m_storage->set_inner_ttl ( m_current_timestamp + ttl, conn );
+    }
+
+    r = m_storage->put ( key, key_len, val, val_len, ver, is_dup, conn, ctxt );
+    if ( 0 != r )
+    {
+        if ( ctxt && ctxt->is_version_error )
+        {
+            if ( ! is_dup )
+            {
+                LOG_ERROR ( "[hustdb][db_hincrby][user_ver=%u][ver=%u]hset return EINVAL", user_ver, ver );
+            }
+            else
+            {
+                LOG_INFO ( "[hustdb][db_hincrby][user_ver=%u][ver=%u]hset return EINVAL", user_ver, ver );
+            }
+        }
+        else
+        {
+            LOG_ERROR ( "[hustdb][db_hincrby][key=%p][key_len=%d]hset return %d", key, ( int ) key_len, r );
+        }
+
+        return r;
+    }
+
+    if ( ctxt->kv_type == NEW_KV && ! ctxt->is_version_error )
+    {
+        set_table_size ( offset, 1 );
+    }
+
+    if ( ( ! is_dup && ver > 1 || is_dup && user_ver == ver && ! ctxt->is_version_error ) && m_mdb_ok && table_len + key_len + 2 < MDB_KEY_LEN )
+    {
+        if ( val_len < MDB_VAL_LEN )
+        {
+            std::string * buf = m_mdb->buffer ( conn );
+            fast_memcpy ( ( char * ) & ( * buf ) [ 0 ], val, val_len );
+            fast_memcpy ( ( char * ) & ( * buf ) [ 0 ] + val_len, & ver, SIZEOF_UINT32 );
+            m_mdb->put ( mkey, mkey_len, buf->c_str (), val_len + SIZEOF_UINT32, ttl );
+        }
+        else
+        {
+            m_mdb->del ( mkey, mkey_len );
+        }
+    }
+    
+    rsp = m_mdb->buffer ( conn );
+    fast_memcpy ( ( char * ) & ( * rsp ) [ 0 ], val, val_len );
+    rsp_len = val_len;
 
     return 0;
 }
@@ -2144,6 +2297,8 @@ int hustdb_t::hustdb_hdel (
         LOG_ERROR ( "[hustdb][db_hdel]find table failed" );
         return EPERM;
     }
+    
+    LOCKERS_WLOCK ( key )
 
     m_storage->set_inner_table ( table, table_len, HASH_TB, conn );
 
@@ -2555,6 +2710,9 @@ int hustdb_t::hustdb_zadd (
                             )
 {
     int             r            = 0;
+    size_t          mkey_len     = 0;
+    const char *    mkey         = NULL;
+    bool            get_ok       = false;
     uint32_t        user_ver     = ver;
     int             offset       = - 1;
     size_t          val_len      = 0;
@@ -2562,11 +2720,10 @@ int hustdb_t::hustdb_zadd (
     char            val21[ 32 ]  = { };
     uint32_t        cur_ver      = 0;
     uint64_t        cur_score    = 0;
+    int             rsp_len      = 0;
     bool            has_been     = false;
     item_ctxt_t *   ctxt         = NULL;
     std::string *   rsp          = NULL;
-    uint16_t        zhash        = 0;
-    lockable_t *    zlkt         = NULL;
     is_version_error             = false;
 
     if ( unlikely ( ! tb_name_check ( table, table_len ) ||
@@ -2595,14 +2752,31 @@ int hustdb_t::hustdb_zadd (
         return EPERM;
     }
 
-    zhash = m_apptool->locker_hash ( key, key_len );
-    zlkt = m_lockers.at ( zhash );
-    scope_lock_t zlocker ( * zlkt );
+    LOCKERS_WLOCK ( key )
 
     m_storage->set_inner_ttl ( 0, conn );
     m_storage->set_inner_table ( table, table_len, ZSET_IN, conn );
+    
+    if ( m_mdb_ok && table_len + key_len + 2 < MDB_KEY_LEN )
+    {
+        mkey_len = key_len;
+        mkey = m_storage->get_inner_tbkey ( key, mkey_len, conn );
+        
+        r = m_mdb->get ( mkey, mkey_len, conn, rsp, & rsp_len );
+        if ( r == 0 )
+        {
+            fast_memcpy ( & cur_ver, rsp->c_str () + rsp_len - SIZEOF_UINT32, SIZEOF_UINT32 );
+            rsp_len -= SIZEOF_UINT32;
+            ( * rsp ) [ rsp_len ] = '\0';
+            get_ok = true;
+        }
+    }
 
-    r = m_storage->get ( key, key_len, cur_ver, conn, rsp, ctxt );
+    if ( ! get_ok )
+    {
+        r = m_storage->get ( key, key_len, cur_ver, conn, rsp, ctxt );
+    }
+    
     if ( 0 == r )
     {
         has_been  = true;
@@ -2664,6 +2838,21 @@ int hustdb_t::hustdb_zadd (
     {
         set_table_size ( offset, 1 );
     }
+    
+    if ( ( ! is_dup && ver > 1 || is_dup && user_ver == ver && ! ctxt->is_version_error ) && m_mdb_ok && table_len + key_len + 2 < MDB_KEY_LEN )
+    {
+        if ( val_len < MDB_VAL_LEN )
+        {
+            std::string * buf = m_mdb->buffer ( conn );
+            fast_memcpy ( ( char * ) & ( * buf ) [ 0 ], val, val_len );
+            fast_memcpy ( ( char * ) & ( * buf ) [ 0 ] + val_len, & ver, SIZEOF_UINT32 );
+            m_mdb->put ( mkey, mkey_len, buf->c_str (), val_len + SIZEOF_UINT32, ttl );
+        }
+        else
+        {
+            m_mdb->del ( mkey, mkey_len );
+        }
+    }
 
     m_storage->set_inner_ttl ( 0, conn );
 
@@ -2714,6 +2903,11 @@ int hustdb_t::hustdb_zscore (
                               )
 {
     int             r            = 0;
+    size_t          mkey_len     = 0;
+    const char *    mkey         = NULL;
+    uint32_t        ttl          = 0;
+    int             alive        = 0;
+    bool            get_ok       = false;
     int             offset       = - 1;
 
     if ( unlikely ( ! tb_name_check ( table, table_len ) ||
@@ -2733,21 +2927,57 @@ int hustdb_t::hustdb_zscore (
         LOG_ERROR ( "[hustdb][db_zscore]find table failed" );
         return EPERM;
     }
+    
+    LOCKERS_RLOCK ( key )
 
     m_storage->set_inner_table ( table, table_len, ZSET_IN, conn );
-
-    r = m_storage->get ( key, key_len, ver, conn, rsp, ctxt );
-    if ( 0 != r )
+    
+    if ( m_mdb_ok && table_len + key_len + 2 < MDB_KEY_LEN )
     {
-        if ( ENOENT != r )
+        mkey_len = key_len;
+        mkey = m_storage->get_inner_tbkey ( key, mkey_len, conn );
+        
+        r = m_mdb->get ( mkey, mkey_len, conn, rsp, & rsp_len );
+        if ( r == 0 )
         {
-            LOG_ERROR ( "[hustdb][db_zscore]zscore return %d", r );
+            fast_memcpy ( & ver, rsp->c_str () + rsp_len - SIZEOF_UINT32, SIZEOF_UINT32 );
+            rsp_len -= SIZEOF_UINT32;
+            get_ok = true;
         }
-
-        return r;
     }
 
-    rsp_len = rsp->size ();
+    if ( ! get_ok )
+    {
+        r = m_storage->get ( key, key_len, ver, conn, rsp, ctxt );
+        if ( 0 != r )
+        {
+            if ( ENOENT != r )
+            {
+                LOG_ERROR ( "[hustdb][db_zscore]zscore return %d", r );
+            }
+
+            return r;
+        }
+        
+        ttl = m_storage->get_inner_ttl ( conn );
+        if ( ttl > 0 )
+        {
+            alive = ( ttl > m_current_timestamp ) ? ( ttl - m_current_timestamp ) : - 1;
+            
+            if ( alive < 0 )
+            {
+                return ENOENT;
+            }
+        }
+        
+        rsp_len = rsp->size ();
+        
+        if ( m_mdb_ok && alive >= 0 && table_len + key_len + 2 < MDB_KEY_LEN && rsp_len < MDB_VAL_LEN )
+        {
+            rsp->append ( ( const char * ) & ver, SIZEOF_UINT32 );
+            m_mdb->put ( mkey, mkey_len, rsp->c_str (), rsp_len + SIZEOF_UINT32, alive );
+        }
+    }
 
     return 0;
 }
@@ -2764,13 +2994,13 @@ int hustdb_t::hustdb_zrem (
                             )
 {
     int             r            = 0;
+    size_t          mkey_len     = 0;
+    const char *    mkey         = NULL;
     int             offset       = - 1;
     char            val21[ 32 ]  = { };
     uint32_t        cur_ver      = 0;
     uint64_t        cur_score    = 0;
     std::string *   rsp          = NULL;
-    uint16_t        zhash        = 0;
-    lockable_t *    zlkt         = NULL;
 
     if ( unlikely ( ! tb_name_check ( table, table_len ) ||
                    CHECK_VERSION ||
@@ -2791,9 +3021,7 @@ int hustdb_t::hustdb_zrem (
         return EPERM;
     }
 
-    zhash = m_apptool->locker_hash ( key, key_len );
-    zlkt = m_lockers.at ( zhash );
-    scope_lock_t zlocker ( * zlkt );
+    LOCKERS_WLOCK ( key )
 
     m_storage->set_inner_table ( table, table_len, ZSET_IN, conn );
 
@@ -2821,6 +3049,14 @@ int hustdb_t::hustdb_zrem (
     if ( ! ctxt->is_version_error )
     {
         set_table_size ( offset, - 1 );
+    }
+    
+    if ( ! ctxt->is_version_error && m_mdb_ok && table_len + key_len + 2 < MDB_KEY_LEN )
+    {
+        mkey_len = key_len;
+        mkey = m_storage->get_inner_tbkey ( key, mkey_len, conn );
+
+        m_mdb->del ( mkey, mkey_len );
     }
 
     sprintf ( val21, "%021lu", cur_score );
@@ -3008,10 +3244,8 @@ int hustdb_t::hustmq_put (
     char            qkey[ MAX_QKEY_LEN ]    = { };
     uint32_t        tag                     = 0;
     uint32_t        ver                     = 0;
-    uint16_t        qhash                   = 0;
     uint32_t        real                    = 0;
     int             offset                  = - 1;
-    lockable_t *    qlkt                    = NULL;
     queue_stat_t *  qstat                   = NULL;
     unsigned char * qstat_val               = NULL;
     queue_info_t *  queue_info              = NULL;
@@ -3033,9 +3267,7 @@ int hustdb_t::hustmq_put (
         return ENOMEM;
     }
 
-    qhash = m_apptool->locker_hash ( queue, queue_len );
-    qlkt = m_lockers.at ( qhash );
-    scope_lock_t qlocker ( * qlkt );
+    LOCKERS_WLOCK ( queue )
 
     std::string inner_queue ( queue, queue_len );
 
@@ -3049,7 +3281,7 @@ int hustdb_t::hustmq_put (
     qstat = ( queue_stat_t * ) ( m_queue_index.ptr + offset );
     qstat_val = ( unsigned char * ) ( m_queue_index.ptr + offset );
 
-    fast_memcpy ( & tag, qstat_val + SIZEOF_UNIT32 * ( priori * 2 + 1 ), SIZEOF_UNIT32 );
+    fast_memcpy ( & tag, qstat_val + SIZEOF_UINT32 * ( priori * 2 + 1 ), SIZEOF_UINT32 );
     tag = ( tag + 1 ) % CYCLE_QUEUE_ITEM_NUM;
 
     real = clac_real_item ( qstat->sp, qstat->ep ) + clac_real_item ( qstat->sp1, qstat->ep1 ) + clac_real_item ( qstat->sp2, qstat->ep2 );
@@ -3072,7 +3304,7 @@ int hustdb_t::hustmq_put (
         return r;
     }
 
-    fast_memcpy ( qstat_val + SIZEOF_UNIT32 * ( priori * 2 + 1 ), & tag, SIZEOF_UNIT32 );
+    fast_memcpy ( qstat_val + SIZEOF_UINT32 * ( priori * 2 + 1 ), & tag, SIZEOF_UINT32 );
 
     return 0;
 }
@@ -3095,9 +3327,7 @@ int hustdb_t::hustmq_get (
     uint32_t        priori                  = 0;
     uint32_t        tag                     = 0;
     uint32_t        ver                     = 0;
-    uint16_t        qhash                   = 0;
     int             offset                  = - 1;
-    lockable_t *    qlkt                    = NULL;
     queue_stat_t *  qstat                   = NULL;
     unsigned char * qstat_val               = NULL;
     queue_info_t *  queue_info              = NULL;
@@ -3113,9 +3343,7 @@ int hustdb_t::hustmq_get (
         return EKEYREJECTED;
     }
 
-    qhash = m_apptool->locker_hash ( queue, queue_len );
-    qlkt = m_lockers.at ( qhash );
-    scope_lock_t qlocker ( * qlkt );
+    LOCKERS_WLOCK ( queue )
 
     std::string inner_queue ( queue, queue_len );
 
@@ -3162,7 +3390,7 @@ int hustdb_t::hustmq_get (
             return ENOENT;
         }
 
-        fast_memcpy ( qstat_val + SIZEOF_UNIT32 * priori * 2, & tag, SIZEOF_UNIT32 );
+        fast_memcpy ( qstat_val + SIZEOF_UINT32 * priori * 2, & tag, SIZEOF_UINT32 );
 
         sprintf ( qkey, "%s|%u:%u", inner_queue.c_str (), priori, tag );
         qkey_len = strlen ( qkey );
@@ -3215,8 +3443,6 @@ int hustdb_t::hustmq_ack (
     size_t          qkey_len                = 0;
     char            qkey[ MAX_QKEY_LEN ]    = { };
     uint32_t        ver                     = 0;
-    uint16_t        qhash                   = 0;
-    lockable_t *    qlkt                    = NULL;
     queue_info_t *  queue_info              = NULL;
     item_ctxt_t *   ctxt                    = NULL;
 
@@ -3231,9 +3457,7 @@ int hustdb_t::hustmq_ack (
 
     do
     {
-        qhash = m_apptool->locker_hash ( queue, queue_len );
-        qlkt = m_lockers.at ( qhash );
-        scope_lock_t qlocker ( * qlkt );
+        LOCKERS_WLOCK ( queue )
 
         std::string inner_queue ( queue, queue_len );
 
@@ -3291,8 +3515,6 @@ int hustdb_t::hustmq_worker (
     int             offset                  = - 1;
     worker_t *      wmap                    = NULL;
     char            wt[ 64 ]                = { };
-    uint16_t        qhash                   = 0;
-    lockable_t *    qlkt                    = NULL;
     queue_info_t *  queue_info              = NULL;
 
     if ( unlikely ( ! tb_name_check ( queue, queue_len ) ) )
@@ -3301,9 +3523,7 @@ int hustdb_t::hustmq_worker (
         return EKEYREJECTED;
     }
 
-    qhash = m_apptool->locker_hash ( queue, queue_len );
-    qlkt = m_lockers.at ( qhash );
-    scope_lock_t qlocker ( * qlkt );
+    LOCKERS_WLOCK ( queue )
 
     std::string inner_queue ( queue, queue_len );
 
@@ -3360,8 +3580,6 @@ int hustdb_t::hustmq_stat (
     int             offset                  = - 1;
     queue_stat_t *  qstat                   = NULL;
     char            st[ 1024 ]              = { };
-    uint16_t        qhash                   = 0;
-    lockable_t *    qlkt                    = NULL;
     queue_info_t *  queue_info              = NULL;
 
     if ( unlikely ( ! tb_name_check ( queue, queue_len ) ) )
@@ -3370,9 +3588,7 @@ int hustdb_t::hustmq_stat (
         return EKEYREJECTED;
     }
 
-    qhash = m_apptool->locker_hash ( queue, queue_len );
-    qlkt = m_lockers.at ( qhash );
-    scope_lock_t qlocker ( * qlkt );
+    LOCKERS_WLOCK ( queue )
 
     std::string inner_queue ( queue, queue_len );
 
@@ -3458,8 +3674,6 @@ int hustdb_t::hustmq_max (
                            uint32_t max
                            )
 {
-    uint16_t        qhash                   = 0;
-    lockable_t *    qlkt                    = NULL;
     int             offset                  = - 1;
     queue_stat_t *  qstat                   = NULL;
     queue_info_t *  queue_info              = NULL;
@@ -3473,9 +3687,7 @@ int hustdb_t::hustmq_max (
         return EKEYREJECTED;
     }
 
-    qhash = m_apptool->locker_hash ( queue, queue_len );
-    qlkt = m_lockers.at ( qhash );
-    scope_lock_t qlocker ( * qlkt );
+    LOCKERS_WLOCK ( queue )
 
     std::string inner_queue ( queue, queue_len );
 
@@ -3499,8 +3711,6 @@ int hustdb_t::hustmq_lock (
                             uint8_t lock
                             )
 {
-    uint16_t        qhash                   = 0;
-    lockable_t *    qlkt                    = NULL;
     int             offset                  = - 1;
     queue_stat_t *  qstat                   = NULL;
     queue_info_t *  queue_info              = NULL;
@@ -3513,9 +3723,7 @@ int hustdb_t::hustmq_lock (
         return EKEYREJECTED;
     }
 
-    qhash = m_apptool->locker_hash ( queue, queue_len );
-    qlkt = m_lockers.at ( qhash );
-    scope_lock_t qlocker ( * qlkt );
+    LOCKERS_WLOCK ( queue )
 
     std::string inner_queue ( queue, queue_len );
 
@@ -3539,8 +3747,6 @@ int hustdb_t::hustmq_timeout (
                                uint8_t timeout
                                )
 {
-    uint16_t        qhash                   = 0;
-    lockable_t *    qlkt                    = NULL;
     int             offset                  = - 1;
     queue_stat_t *  qstat                   = NULL;
     queue_info_t *  queue_info              = NULL;
@@ -3554,9 +3760,7 @@ int hustdb_t::hustmq_timeout (
         return EKEYREJECTED;
     }
 
-    qhash = m_apptool->locker_hash ( queue, queue_len );
-    qlkt = m_lockers.at ( qhash );
-    scope_lock_t qlocker ( * qlkt );
+    LOCKERS_WLOCK ( queue )
 
     std::string inner_queue ( queue, queue_len );
 
@@ -3587,8 +3791,6 @@ int hustdb_t::hustmq_purge (
     size_t          qkey_len                = 0;
     char            qkey[ MAX_QKEY_LEN ]    = { };
     uint32_t        ver                     = 0;
-    uint16_t        qhash                   = 0;
-    lockable_t *    qlkt                    = NULL;
     uint32_t        real                    = 0;
     int             offset                  = - 1;
     queue_stat_t *  qstat                   = NULL;
@@ -3605,9 +3807,7 @@ int hustdb_t::hustmq_purge (
         return EKEYREJECTED;
     }
 
-    qhash = m_apptool->locker_hash ( queue, queue_len );
-    qlkt = m_lockers.at ( qhash );
-    scope_lock_t qlocker ( * qlkt );
+    LOCKERS_WLOCK ( queue )
 
     std::string inner_queue ( queue, queue_len );
 
@@ -3623,8 +3823,8 @@ int hustdb_t::hustmq_purge (
 
     m_storage->set_inner_table ( NULL, 0, QUEUE_TB, conn );
 
-    fast_memcpy ( & stag, qstat_val + SIZEOF_UNIT32 * priori * 2, SIZEOF_UNIT32 );
-    fast_memcpy ( & etag, qstat_val + SIZEOF_UNIT32 * ( priori * 2 + 1 ), SIZEOF_UNIT32 );
+    fast_memcpy ( & stag, qstat_val + SIZEOF_UINT32 * priori * 2, SIZEOF_UINT32 );
+    fast_memcpy ( & etag, qstat_val + SIZEOF_UINT32 * ( priori * 2 + 1 ), SIZEOF_UINT32 );
 
     if ( stag > etag && stag > MAX_QUEUE_ITEM_NUM )
     {
@@ -3672,8 +3872,8 @@ int hustdb_t::hustmq_purge (
     else
     {
         stag = etag = 0;
-        fast_memcpy ( qstat_val + SIZEOF_UNIT32 * priori * 2, & stag, SIZEOF_UNIT32 );
-        fast_memcpy ( qstat_val + SIZEOF_UNIT32 * ( priori * 2 + 1 ), & etag, SIZEOF_UNIT32 );
+        fast_memcpy ( qstat_val + SIZEOF_UINT32 * priori * 2, & stag, SIZEOF_UINT32 );
+        fast_memcpy ( qstat_val + SIZEOF_UINT32 * ( priori * 2 + 1 ), & etag, SIZEOF_UINT32 );
     }
 
     return 0;
@@ -3694,8 +3894,6 @@ int hustdb_t::hustmq_pub (
     char            qkey[ MAX_QKEY_LEN ]    = { };
     uint32_t        priori                  = 0;
     uint32_t        ver                     = 0;
-    uint16_t        qhash                   = 0;
-    lockable_t *    qlkt                    = NULL;
     uint32_t        rttl                    = 0;
     uint32_t        stag                    = 0;
     uint32_t        etag                    = 0;
@@ -3723,9 +3921,7 @@ int hustdb_t::hustmq_pub (
         return ENOMEM;
     }
 
-    qhash = m_apptool->locker_hash ( queue, queue_len );
-    qlkt = m_lockers.at ( qhash );
-    scope_lock_t qlocker ( * qlkt );
+    LOCKERS_WLOCK ( queue )
 
     std::string inner_queue ( queue, queue_len );
 
@@ -3739,8 +3935,8 @@ int hustdb_t::hustmq_pub (
     qstat = ( queue_stat_t * ) ( m_queue_index.ptr + offset );
     qstat_val = ( unsigned char * ) ( m_queue_index.ptr + offset );
 
-    fast_memcpy ( & stag, qstat_val + SIZEOF_UNIT32 * priori * 2, SIZEOF_UNIT32 );
-    fast_memcpy ( & etag, qstat_val + SIZEOF_UNIT32 * ( priori * 2 + 1 ), SIZEOF_UNIT32 );
+    fast_memcpy ( & stag, qstat_val + SIZEOF_UINT32 * priori * 2, SIZEOF_UINT32 );
+    fast_memcpy ( & etag, qstat_val + SIZEOF_UINT32 * ( priori * 2 + 1 ), SIZEOF_UINT32 );
 
     real = clac_real_item ( qstat->sp, qstat->ep );
 
@@ -3813,8 +4009,8 @@ int hustdb_t::hustmq_pub (
     }
 
     qstat->ctime = ( uint32_t ) m_current_timestamp;
-    fast_memcpy ( qstat_val + SIZEOF_UNIT32 * priori * 2, & stag, SIZEOF_UNIT32 );
-    fast_memcpy ( qstat_val + SIZEOF_UNIT32 * ( priori * 2 + 1 ), & etag, SIZEOF_UNIT32 );
+    fast_memcpy ( qstat_val + SIZEOF_UINT32 * priori * 2, & stag, SIZEOF_UINT32 );
+    fast_memcpy ( qstat_val + SIZEOF_UINT32 * ( priori * 2 + 1 ), & etag, SIZEOF_UINT32 );
 
     return 0;
 }
@@ -3834,8 +4030,6 @@ int hustdb_t::hustmq_sub (
     char            qkey[ MAX_QKEY_LEN ]    = { };
     uint32_t        priori                  = 0;
     uint32_t        ver                     = 0;
-    uint16_t        qhash                   = 0;
-    lockable_t *    qlkt                    = NULL;
     uint32_t        rttl                    = 0;
     int             offset                  = - 1;
     queue_stat_t *  qstat                   = NULL;
@@ -3851,9 +4045,7 @@ int hustdb_t::hustmq_sub (
         return EKEYREJECTED;
     }
 
-    qhash = m_apptool->locker_hash ( queue, queue_len );
-    qlkt = m_lockers.at ( qhash );
-    scope_lock_t qlocker ( * qlkt );
+    LOCKERS_WLOCK ( queue )
 
     std::string inner_queue ( queue, queue_len );
 

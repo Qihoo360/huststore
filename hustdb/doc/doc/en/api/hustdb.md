@@ -16,6 +16,7 @@ hustdb
 	* [hexist](hustdb/hustdb/hexist.md)
 	* [hget](hustdb/hustdb/hget.md)
 	* [hset](hustdb/hustdb/hset.md)
+    * [hincrby](hustdb/hustdb/hincrby.md)
 	* [hdel](hustdb/hustdb/hdel.md)
 	* [hkeys](hustdb/hustdb/hkeys.md)
 	* [sismember](hustdb/hustdb/sismember.md)

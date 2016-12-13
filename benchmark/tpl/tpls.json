@@ -1,0 +1,33 @@
+{
+    "tpls":
+    [
+        "uri_table.json",
+        "init.lua",
+        "request.lua",
+        "utils.lua",
+        "setup.lua",
+        "response.lua",
+        "load_requests.lua",
+        "load_body.lua",
+        "done/head.lua",
+        "done/mid.lua",
+        "done/tail.lua",
+        "init/set.lua",
+        "init/get.lua",
+        "init/post.lua",
+        "request/put.lua",
+        "request/hset.lua",
+        "request/sset.lua",
+        "request/zadd.lua",
+        "request/mqput.lua",
+        "request/mqworker.lua",
+        "request/mqlock.lua",
+        "request/mqmax.lua",
+        "request/mqget.lua",
+        "request/get.lua",
+        "request/hget.lua",
+        "request/sset.lua",
+        "request/zset.lua"
+    ],
+    "tpl_lines": ["done.lua"]
+}

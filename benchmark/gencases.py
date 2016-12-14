@@ -132,7 +132,8 @@ def gen(wrk, out):
             wrk['wrk']['timeout'], 
             item[OUT], 
             wrk['srv'][item[SRV]]))
-        shutil.copy('runcase.py', out)
+        for item in ['runcase.py', 'analyze.py']:
+            shutil.copy(item, out)
         lines.append('python runcase.py %s %d %s %s' % (script, wrk['wrk']['repeated'], wrk['filter'], log))
         lines.append('python analyze.py %s %s %s' % (log, wrk['filter'], output))
     write_file(os.path.join(out, 'benchmark.sh'), merge(lines))

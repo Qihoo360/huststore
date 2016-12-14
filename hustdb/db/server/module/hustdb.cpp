@@ -2126,6 +2126,8 @@ int hustdb_t::hustdb_hincrby (
                                const char * key,
                                size_t key_len,
                                uint64_t score,
+                               const char * host,
+                               size_t host_len,
                                std::string * & rsp,
                                int & rsp_len,
                                uint32_t & ver,
@@ -2259,6 +2261,19 @@ int hustdb_t::hustdb_hincrby (
     rsp = m_mdb->buffer ( conn );
     fast_memcpy ( ( char * ) & ( * rsp ) [ 0 ], val, val_len );
     rsp_len = val_len;
+
+    if ( ! CHECK_STRING ( host ) && host_len <= 32 )
+    {
+        hustdb_binlog ( table,
+                       table_len,
+                       key,
+                       key_len,
+                       host,
+                       host_len,
+                       HUSTDB_METHOD_HSET,
+                       conn
+                       );
+    }
 
     return 0;
 }

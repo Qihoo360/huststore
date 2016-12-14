@@ -421,6 +421,8 @@ public:
                          const char * key,
                          size_t key_len,
                          uint64_t score,
+                         const char * host,
+                         size_t host_len,
                          std::string * & rsp,
                          int & rsp_len,
                          uint32_t & ver,

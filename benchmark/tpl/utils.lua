@@ -20,6 +20,24 @@ function file_exists(file)
     return f ~= nil
 end
 
+function set_loop(path, loop)
+    local f = io.open(path, "w")
+    if f then
+        f:write(tostring(loop))
+        f:close()
+    end
+end
+
+function get_loop(path)
+    local f = io.open(path, "r")
+    if f then
+        local loop = f:read("*number")
+        f:close()
+        return loop
+    end
+    return 0
+end
+
 function get_hosts(path)
     hosts = {}
     if not file_exists(path) then
@@ -34,8 +52,8 @@ function get_hosts(path)
     return hosts
 end
 
-function get_key(id, requests)
-    return string.format("benchmark_key_%d_%d", id, requests)
+function get_key(loop, id, requests)
+    return string.format("benchmark_key_%d_%d_%d", loop, id, requests)
 end
 
 function get_hash_tb(id)

@@ -27,7 +27,6 @@ def manual():
 def write_file(url, data):
     with open(url, 'w') as f:
         f.writelines(data)
-
 def merge_array(arr):
     out = []
     for item in arr:
@@ -36,7 +35,6 @@ def merge_array(arr):
 
 substitute_tpls = lambda tpls, vars: join_lines([tpl.substitute(vars) for tpl in tpls], '')
 get_tpl_key = lambda s: os.path.splitext(s)[0].replace('/', '_')
-
 def load_templates():
     cwd = os.path.split(os.path.realpath(__file__))[0]
     tpl_path = os.path.join(cwd, 'tpl')
@@ -72,9 +70,9 @@ def gen_benchmark(method, load_tpl, init, request, done):
         tpls['response'].template,
         done
         ])
-
 def gen_set_done(loop_file, requests_file):
-    return gen_done(loop_file,
+    return gen_done(
+        loop_file,
         tpls['done_head'].substitute({'var_requests_file': requests_file}),
         tpls['done_mid'].template, 
         tpls['done_tail'].template
@@ -114,13 +112,14 @@ def gen(wrk, out):
     OUT = 4
     func_dict = { 'http_set': gen_http_set, 'http_get': gen_http_get, 'http_post': gen_http_post }
     lines = []
+    loop_file = wrk['loop_file']
     for item in items:
         if None == item:
             continue
         if 'outputs' in wrk:
             if not item[OUT] in wrk['outputs']:
                 continue
-        write_file(os.path.join(out, item[OUT]), func_dict[item[FUNC]](item[URI], get_tpl_key(item[TPL]), 'loop.txt', 'thread.requests'))
+        write_file(os.path.join(out, item[OUT]), func_dict[item[FUNC]](item[URI], get_tpl_key(item[TPL]), loop_file, 'thread.requests'))
         case = os.path.splitext(item[OUT])[0]
         script = '%s.sh' % case
         log = '%s.log' % case
@@ -136,6 +135,7 @@ def gen(wrk, out):
             shutil.copy(item, out)
         lines.append('python runcase.py %s %d %s %s' % (script, wrk['wrk']['repeated'], wrk['filter'], log))
         lines.append('python analyze.py %s %s %s' % (log, wrk['filter'], output))
+        lines.append('rm -f %s' % loop_file)
     write_file(os.path.join(out, 'benchmark.sh'), merge(lines))
     return True
 

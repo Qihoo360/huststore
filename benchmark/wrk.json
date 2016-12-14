@@ -15,6 +15,7 @@
         "hustmqha": "10.125.98.246:8080"
     },
     "filter": "@huststore_benchmark",
+    "loop_file": "loop.txt",
     "outputs":
     [
         "hustcache_put.lua",

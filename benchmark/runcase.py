@@ -7,7 +7,7 @@ import os.path
 def manual(): 
     print """
     usage:
-        python runcase.py [script] [loop] [filter] [output]
+        python runcase.py [script] [loop] [separator] [output]
     sample:
         python runcase.py hustdb_put.sh 5 @huststore_benchmark hustdb_put.log
         """

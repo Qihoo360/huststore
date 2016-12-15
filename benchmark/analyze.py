@@ -18,7 +18,7 @@ get_stats_pattern = lambda key: ''.join([])
 def manual(): 
     print """
     usage:
-        python analyze.py [log] [filter] [output]
+        python analyze.py [log] [separator] [output]
     sample:
         python analyze.py hustdb_put.log @huststore_benchmark hustdb_put.json
         """

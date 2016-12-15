@@ -157,8 +157,8 @@ def gen(wrk, out):
         for item in ['runcase.py', 'analyze.py']:
             shutil.copy(item, out)
         lines.append('rm -f %s' % loop_file)
-        lines.append('python runcase.py %s %d %s %s' % (script, wrk['wrk']['loop'], wrk['filter'], log))
-        lines.append('python analyze.py %s %s %s' % (log, wrk['filter'], output))
+        lines.append('python runcase.py %s %d %s %s' % (script, wrk['wrk']['loop'], wrk['separator'], log))
+        lines.append('python analyze.py %s %s %s' % (log, wrk['separator'], output))
     write_file(os.path.join(out, 'benchmark.sh'), merge(lines))
     return True
 

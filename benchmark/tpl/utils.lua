@@ -1,6 +1,18 @@
 local tid = 1
 local threads = {}
-local addrs   = {}
+local addrs = {}
+
+function get_loop(path)
+    local f = io.open(path, "r")
+    if f then
+        local loop = f:read("*number")
+        f:close()
+        return loop
+    end
+    return 0
+end
+
+local loop = get_loop("$var_loop")
 
 wrk.method = "$var_method"
 wrk.headers["Content-Type"] = "text/plain"
@@ -26,16 +38,6 @@ function set_loop(path, loop)
         f:write(tostring(loop))
         f:close()
     end
-end
-
-function get_loop(path)
-    local f = io.open(path, "r")
-    if f then
-        local loop = f:read("*number")
-        f:close()
-        return loop
-    end
-    return 0
 end
 
 function get_hosts(path)

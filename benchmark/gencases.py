@@ -54,15 +54,15 @@ def load_templates():
 
 tpls = load_templates()
 
-def gen_init(max_requests, loop_file, tail):
-    return tpls['init'].substitute({'var_max_requests': max_requests, 'var_loop': loop_file, 'var_tail': tail})
+def gen_init(max_requests, tail):
+    return tpls['init'].substitute({'var_max_requests': max_requests, 'var_tail': tail})
 def gen_request(make_request):
     return tpls['request'].substitute({'var_make_request': make_request})
 def gen_done(loop_file, head, mid, tail):
     return substitute_tpls(tpls['done'], {'var_loop': loop_file, 'var_head': head, 'var_mid': mid, 'var_tail': tail})
-def gen_benchmark(method, load_tpl, init, request, done):
+def gen_benchmark(loop_file, method, load_tpl, init, request, done):
     return merge([
-        tpls['utils'].substitute({'var_method': method, 'var_auth': AUTH}),
+        tpls['utils'].substitute({'var_loop': loop_file, 'var_method': method, 'var_auth': AUTH}),
         load_tpl,
         tpls['setup'].template,
         init,
@@ -80,25 +80,28 @@ def gen_set_done(loop_file, requests_file):
 
 def gen_http_set(uri, tpl_key, loop_file, requests_file):
     return gen_benchmark(
+        loop_file,
         'POST',
         tpls['load_body'].template,
-        gen_init(MAX_REQUESTS, loop_file, tpls['init_set'].template),
+        gen_init(MAX_REQUESTS, tpls['init_set'].template),
         gen_request(tpls[tpl_key].substitute({'var_uri': uri})),
         gen_set_done(loop_file, requests_file)
         )
 def gen_http_get(uri, tpl_key, loop_file, requests_file):
     return gen_benchmark(
+        loop_file,
         'GET',
         tpls['load_requests'].template,
-        gen_init('get_requests("%s", id)' % requests_file, loop_file, tpls['init_get'].template),
+        gen_init('get_requests("%s", id)' % requests_file, tpls['init_get'].template),
         gen_request(tpls[tpl_key].substitute({'var_uri': uri})),
         gen_done(loop_file, FILTER, FILTER, FILTER)
         )
 def gen_http_post(uri, tpl_key, loop_file, requests_file):
     return gen_benchmark(
+        loop_file,
         'POST',
         merge([tpls['load_body'].template, tpls['load_requests'].template]),
-        gen_init('get_requests("%s", id)' % requests_file, loop_file, tpls['init_post'].template),
+        gen_init('get_requests("%s", id)' % requests_file, tpls['init_post'].template),
         gen_request(tpls[tpl_key].substitute({'var_uri': uri})),
         gen_set_done(loop_file, requests_file)
         )
@@ -133,9 +136,9 @@ def gen(wrk, out):
             wrk['srv'][item[SRV]]))
         for item in ['runcase.py', 'analyze.py']:
             shutil.copy(item, out)
+        lines.append('rm -f %s' % loop_file)
         lines.append('python runcase.py %s %d %s %s' % (script, wrk['wrk']['repeated'], wrk['filter'], log))
         lines.append('python analyze.py %s %s %s' % (log, wrk['filter'], output))
-        lines.append('rm -f %s' % loop_file)
     write_file(os.path.join(out, 'benchmark.sh'), merge(lines))
     return True
 

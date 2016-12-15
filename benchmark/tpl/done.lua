@@ -12,8 +12,7 @@ $var_head
         print(msg:format(id, requests, fails))
 $var_mid
     end
-    print(string.format("[summary] requests: %d, fails: %d", total_requests, total_fails))
-    local loop = get_loop("$var_loop")
+    print(string.format("[summary] loop: %d, requests: %d, fails: %d", loop, total_requests, total_fails))
     set_loop("$var_loop", loop + 1)
 $var_tail
 end

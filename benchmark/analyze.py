@@ -30,7 +30,8 @@ def load_file(uri):
 def get_avg_success_rate(items):
     reqs = sum([item[0] for item in items])
     errs = sum([item[1] for item in items])
-    return float(reqs - errs) * float(100) / float(reqs)
+    rate = float(reqs - errs) * float(100) / float(reqs)
+    return '%.2f%% [%d/%d (errs/reqs)]' % (rate, errs, reqs)
 def get_avg_latency(items):
     avgdict = {}
     for item in items:
@@ -76,7 +77,7 @@ def init_patterns():
         ],
         [
             'Success rate', 
-            re.compile('^\[summary\]\s+requests:\s+(?P<reqs>[\d]+),\s+fails:\s+(?P<errs>[\d]+)$'), 
+            re.compile('^\[summary\]\s+loop:\s+[\d]+,\s+requests:\s+(?P<reqs>[\d]+),\s+fails:\s+(?P<errs>[\d]+)$'), 
             lambda d: [int(d['reqs']), int(d['errs'])],
             get_avg_success_rate,
             False

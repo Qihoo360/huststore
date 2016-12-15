@@ -5,7 +5,7 @@
         "connections": 2000,
         "duration": "10s",
         "timeout": "10s",
-        "repeated": 10
+        "loop": 10
     },
     "data":
     {

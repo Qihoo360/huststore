@@ -7,7 +7,7 @@ import os.path
 def manual(): 
     print """
     usage:
-        python runcase.py [script] [repeated] [filter] [output]
+        python runcase.py [script] [loop] [filter] [output]
     sample:
         python runcase.py hustdb_put.sh 5 @huststore_benchmark hustdb_put.log
         """
@@ -20,10 +20,10 @@ def load_file(uri):
     with open(uri) as f:
         return f.read()
 
-def runcase(script, repeated, ft, output):
+def runcase(script, loop, ft, output):
     cmd = load_file(script)
     with open(output, 'w') as f:
-        for i in xrange(repeated):
+        for i in xrange(loop):
             f.write(ft)
             f.write('\n')
             f.write(execute(cmd))

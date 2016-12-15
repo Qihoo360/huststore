@@ -14,6 +14,7 @@
         "hustdbha": "10.125.98.245:8082",
         "hustmqha": "10.125.98.246:8080"
     },
+    "latency_distribution": ["0.1", "0.5", "1", "3", "5", "10", "15", "20", "30", "40", "50", "80", "90", "99", "99.9"],
     "filter": "@huststore_benchmark",
     "loop_file": "loop.txt",
     "outputs":

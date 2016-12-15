@@ -31,7 +31,7 @@ def get_avg_success_rate(items):
     reqs = sum([item[0] for item in items])
     errs = sum([item[1] for item in items])
     rate = float(reqs - errs) * float(100) / float(reqs)
-    return '%.2f%% [%d/%d (errs/reqs)]' % (rate, errs, reqs)
+    return { "success rate": '%.2f%%' % rate, "reqs": { "total": reqs, "errs": errs } }
 def get_avg_latency(items):
     avgdict = {}
     for item in items:
@@ -41,10 +41,7 @@ def get_avg_latency(items):
             avgdict[key] = [latency]
         else:
             avgdict[key].append(latency)
-    latency = {}
-    for key in avgdict:
-        latency[key] = get_float_avg(avgdict[key])
-    return latency
+    return sorted([[key, '%.2fms' % get_float_avg(avgdict[key])] for key in avgdict])
 def get_avg_thread_stats(unit):
     def get_avg(items):
         avgs = [[],[],[],[]]
@@ -52,11 +49,12 @@ def get_avg_thread_stats(unit):
         for item in items:
             for i in xrange(size):
                 avgs[i].append(item[i])
+        get_avg_str = lambda items, unit: '%.2f%s' % (get_float_avg(items), unit)
         return {
-            'Avg(%s)' % unit: get_float_avg(avgs[0]),
-            'Stdev(%s)' % unit: get_float_avg(avgs[1]),
-            'Max(%s)' % unit: get_float_avg(avgs[2]),
-            '+/- Stdev(%)': get_float_avg(avgs[3])
+            'Avg': get_avg_str(avgs[0], unit),
+            'Stdev': get_avg_str(avgs[1], unit),
+            'Max': get_avg_str(avgs[2], unit),
+            '+/- Stdev': '%.2f%%' % get_float_avg(avgs[3])
             }
     return get_avg
 def init_patterns():
@@ -69,10 +67,10 @@ def init_patterns():
             False
         ],
         [
-            'Transfer/sec(MB)', 
+            'Transfer/sec', 
             re.compile('^Transfer/sec:\s+(?P<io>[\d|\.]+)MB$'), 
             lambda d: float(d['io']),
-            get_float_avg,
+            lambda items: '%.2fMB' % get_float_avg(items),
             False
         ],
         [
@@ -83,8 +81,8 @@ def init_patterns():
             False
         ],
         [
-            'Latency Distribution(ms)', 
-            re.compile('^\s+(?P<key>[\d]+)%\s+(?P<latency>[\d|\.]+)ms$'), 
+            'Latency Distribution', 
+            re.compile('^\[Latency Distribution\]\s+(?P<key>[\d|\.]+)%\s+(?P<latency>[\d|\.]+)ms$'), 
             lambda d: [''.join([d['key'], '%']), float(d['latency'])],
             get_avg_latency,
             True

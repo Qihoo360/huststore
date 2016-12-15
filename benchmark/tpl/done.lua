@@ -1,4 +1,10 @@
 function done(summary, latency, requests)
+    print("--------------------------------------------------")
+    for _, p in pairs({ $var_distribution }) do
+        n = latency:percentile(p) / 1000.0
+        print(string.format("[Latency Distribution]  %4g%%  %.2fms", p, n))
+    end
+    print("--------------------------------------------------")
 $var_head
     local total_requests = 0
     local total_fails = 0

@@ -41,7 +41,9 @@ def get_avg_latency(items):
             avgdict[key] = [latency]
         else:
             avgdict[key].append(latency)
-    return sorted([[key, '%.2fms' % get_float_avg(avgdict[key])] for key in avgdict])
+    avgs = [[key, get_float_avg(avgdict[key])] for key in avgdict]
+    avgs.sort(key = lambda item : item[0], reverse = False)
+    return [['%.3f%%' % item[0], '%.2fms' % item[1]] for item in avgs]
 def get_avg_thread_stats(unit):
     def get_avg(items):
         avgs = [[],[],[],[]]
@@ -83,7 +85,7 @@ def init_patterns():
         [
             'Latency Distribution', 
             re.compile('^\[Latency Distribution\]\s+(?P<key>[\d|\.]+)%\s+(?P<latency>[\d|\.]+)ms$'), 
-            lambda d: [''.join([d['key'], '%']), float(d['latency'])],
+            lambda d: [float(d['key']), float(d['latency'])],
             get_avg_latency,
             True
         ],

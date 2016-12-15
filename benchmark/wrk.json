@@ -3,9 +3,9 @@
     {
         "threads": 12,
         "connections": 2000,
-        "duration": "3s",
-        "timeout": "3s",
-        "repeated": 5
+        "duration": "10s",
+        "timeout": "10s",
+        "repeated": 10
     },
     "srv":
     {
@@ -14,9 +14,19 @@
         "hustdbha": "10.125.98.245:8082",
         "hustmqha": "10.125.98.246:8080"
     },
-    "latency_distribution": ["0.1", "0.5", "1", "3", "5", "10", "15", "20", "30", "40", "50", "80", "90", "99", "99.9"],
+    "latency_distribution":
+    [
+        "0.01", "0.1", "0.5", "1", "3", "5", 
+        "10", "20", "30", "40", "50", "60", "70", "80", 
+        "90", "91", "92", "93", "94", "95", "96", "97", "98", 
+        "99", "99.9, 99.99, 99.999"
+    ],
     "filter": "@huststore_benchmark",
-    "loop_file": "loop.txt",
+    "status":
+    {
+        "loop_file": "loop.txt",
+        "status_file": "status.txt"
+    },
     "outputs":
     [
         "hustcache_put.lua",

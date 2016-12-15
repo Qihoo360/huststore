@@ -1,1 +1,1 @@
-    file:close()
+    f:close()

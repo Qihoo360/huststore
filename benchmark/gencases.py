@@ -66,9 +66,13 @@ def gen_done(loop_file, distribution, head, mid, tail):
         'var_mid': mid, 
         'var_tail': tail
         })
-def gen_benchmark(loop_file, method, load_tpl, init, request, done):
+def gen_benchmark(loop_file, status_file, method, load_tpl, init, request, done):
     return merge([
-        tpls['utils'].substitute({'var_loop': loop_file, 'var_method': method, 'var_auth': AUTH}),
+        tpls['utils'].substitute({
+            'var_loop': loop_file, 
+            'var_status_file': status_file, 
+            'var_method': method, 
+            'var_auth': AUTH}),
         load_tpl,
         tpls['setup'].template,
         init,
@@ -76,41 +80,44 @@ def gen_benchmark(loop_file, method, load_tpl, init, request, done):
         tpls['response'].template,
         done
         ])
-def gen_set_done(loop_file, distribution, requests_file):
+def gen_set_done(loop_file, distribution):
     return gen_done(
         loop_file,
         distribution,
-        tpls['done_head'].substitute({'var_requests_file': requests_file}),
+        tpls['done_head'].template,
         tpls['done_mid'].template, 
         tpls['done_tail'].template
         )
 
-def gen_http_set(uri, tpl_key, loop_file, distribution, requests_file):
+def gen_http_set(loop_file, status_file, distribution, uri, tpl_key):
     return gen_benchmark(
         loop_file,
+        status_file,
         'POST',
         tpls['load_body'].template,
         gen_init(MAX_REQUESTS, tpls['init_set'].template),
         gen_request(tpls[tpl_key].substitute({'var_uri': uri})),
-        gen_set_done(loop_file, distribution, requests_file)
+        gen_set_done(loop_file, distribution)
         )
-def gen_http_get(uri, tpl_key, loop_file, distribution, requests_file):
+def gen_http_get(loop_file, status_file, distribution, uri, tpl_key):
     return gen_benchmark(
         loop_file,
+        status_file,
         'GET',
         tpls['load_requests'].template,
-        gen_init('get_requests("%s", id)' % requests_file, tpls['init_get'].template),
+        gen_init('get_requests(status_file, id)', tpls['init_get'].template),
         gen_request(tpls[tpl_key].substitute({'var_uri': uri})),
         gen_done(loop_file, distribution, FILTER, FILTER, FILTER)
         )
-def gen_http_post(uri, tpl_key, loop_file, distribution, requests_file):
+def gen_http_post(loop_file, status_file, distribution, uri, tpl_key):
     return gen_benchmark(
         loop_file,
+        status_file,
         'POST',
         merge([tpls['load_body'].template, tpls['load_requests'].template]),
-        gen_init('get_requests("%s", id)' % requests_file, tpls['init_post'].template),
+        gen_init('get_requests(status_file, id)', tpls['init_post'].template),
         gen_request(tpls[tpl_key].substitute({'var_uri': uri})),
-        gen_set_done(loop_file, distribution, requests_file)
+        gen_set_done(loop_file, distribution)
         )
 
 def gen(wrk, out):
@@ -122,7 +129,7 @@ def gen(wrk, out):
     OUT = 4
     func_dict = { 'http_set': gen_http_set, 'http_get': gen_http_get, 'http_post': gen_http_post }
     lines = []
-    loop_file = wrk['loop_file']
+    loop_file = wrk['status']['loop_file']
     for item in items:
         if None == item:
             continue
@@ -130,11 +137,12 @@ def gen(wrk, out):
             if not item[OUT] in wrk['outputs']:
                 continue
         write_file(os.path.join(out, item[OUT]), func_dict[item[FUNC]](
+            loop_file,
+            wrk['status']['status_file'],
+            wrk['latency_distribution'],
             item[URI], 
-            get_tpl_key(item[TPL]), 
-            loop_file, 
-            wrk['latency_distribution'], 
-            'thread.requests'))
+            get_tpl_key(item[TPL])
+            ))
         case = os.path.splitext(item[OUT])[0]
         script = '%s.sh' % case
         log = '%s.log' % case

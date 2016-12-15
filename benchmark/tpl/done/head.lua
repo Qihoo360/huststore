@@ -1,2 +1,2 @@
-    local file = io.open("$var_requests_file", "w")
-    assert(file)
+    local f = io.open(status_file, "w")
+    assert(f)

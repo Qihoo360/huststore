@@ -1,1 +1,1 @@
-        file:write(tostring(id), " ", tostring(requests), "\n")
+        f:write(tostring(id), " ", tostring(requests), "\n")

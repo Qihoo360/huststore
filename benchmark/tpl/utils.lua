@@ -13,6 +13,7 @@ function get_loop(path)
 end
 
 local loop = get_loop("$var_loop")
+local status_file = string.format("loop.%d.$var_status_file", loop)
 
 wrk.method = "$var_method"
 wrk.headers["Content-Type"] = "text/plain"

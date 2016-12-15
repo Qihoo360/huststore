@@ -4,6 +4,7 @@
 import sys
 import os
 import time
+import json
 import shutil
 
 def manual(): 
@@ -18,23 +19,17 @@ def init(argv):
     size = len(argv)
     if 2 != size:
         return False
-    items = [
-        ['256B', '256'], 
-        ['1KB', '1024'], 
-        ['4KB', '4096'], 
-        ['16KB', '16384'], 
-        ['64KB', '65536']
-        ]
-    DIR = 0
-    BYTES = 1
+    uri = argv[1]
+    with open(uri) as f:
+        data = json.load(f)['data']
     host_file = 'hosts'
-    for item in items:
-        if not os.path.exists(item[DIR]):
-            os.mkdir(item[DIR])
+    for key in data:
+        if not os.path.exists(key):
+            os.mkdir(key)
         if os.path.exists(host_file):
-            shutil.copy(host_file, item[DIR])
-        os.system('python gendata.py %s %s/data' % (item[BYTES], item[DIR]))
-        os.system('python gencases.py %s %s' % (argv[1], item[DIR]))
+            shutil.copy(host_file, key)
+        os.system('python gendata.py %d %s/data' % (data[key], key))
+        os.system('python gencases.py %s %s' % (uri, key))
     return True
 
 if __name__ == "__main__":

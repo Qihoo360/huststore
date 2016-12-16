@@ -39,6 +39,11 @@ char * ngx_http_hustdb_ha_init_main_conf(ngx_conf_t * cf, void * conf);
 static ngx_http_request_item_t hustdb_ha_handler_dict[] =
 {
     {
+        ngx_string("/version"),
+        ngx_null_string,
+        hustdb_ha_version_handler
+    },
+    {
         ngx_string("/get"),
         ngx_string("/hustdb/get"),
         hustdb_ha_get_handler
@@ -272,7 +277,7 @@ static ngx_http_request_item_t hustdb_ha_handler_dict[] =
 
 static size_t hustdb_ha_handler_dict_len = sizeof(hustdb_ha_handler_dict) / sizeof(ngx_http_request_item_t);
 
-static ngx_command_t ngx_http_hustdb_ha_commands[] =
+static ngx_command_t ngx_http_hustdb_ha_commands[] = 
 {
     {
         ngx_string("hustdb_ha"),
@@ -306,7 +311,7 @@ static ngx_command_t ngx_http_hustdb_ha_commands[] =
     ngx_null_command
 };
 
-static ngx_http_module_t ngx_http_hustdb_ha_module_ctx =
+static ngx_http_module_t ngx_http_hustdb_ha_module_ctx = 
 {
     NULL, // ngx_int_t (*preconfiguration)(ngx_conf_t *cf);
     NULL, // ngx_int_t (*postconfiguration)(ngx_conf_t *cf);
@@ -315,10 +320,10 @@ static ngx_http_module_t ngx_http_hustdb_ha_module_ctx =
     NULL, // void * (*create_srv_conf)(ngx_conf_t *cf);
     NULL, // char * (*merge_srv_conf)(ngx_conf_t *cf, void *prev, void *conf);
     NULL, // void * (*create_loc_conf)(ngx_conf_t *cf);
-    NULL // char * (*merge_loc_conf)(ngx_conf_t *cf, void *prev, void *conf);
+    NULL  // char * (*merge_loc_conf)(ngx_conf_t *cf, void *prev, void *conf);
 };
 
-ngx_module_t ngx_http_hustdb_ha_module =
+ngx_module_t ngx_http_hustdb_ha_module = 
 {
     NGX_MODULE_V1,
     &ngx_http_hustdb_ha_module_ctx,

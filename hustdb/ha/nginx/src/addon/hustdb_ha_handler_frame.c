@@ -1,6 +1,13 @@
 #include "hustdb_ha_handler.h"
 #include "hustdb_ha_write_handler.h"
 
+ngx_int_t hustdb_ha_version_handler(ngx_str_t * backend_uri, ngx_http_request_t *r)
+{
+    static ngx_str_t version = ngx_string("hustdbha 1.6");
+    r->headers_out.status = NGX_HTTP_OK;
+    return ngx_http_send_response_imp(r->headers_out.status, &version, r);
+}
+
 ngx_int_t hustdb_ha_cache_append_handler(ngx_str_t * backend_uri, ngx_http_request_t *r)
 {
     return hustdb_ha_write_cache_handler(NULL, backend_uri, r);

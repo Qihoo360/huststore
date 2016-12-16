@@ -30,9 +30,10 @@
         ["sync_passwd", "sync"],
         ["binlog_uri", "/hustdb/binlog"]
     ],
-    "auth_filter": [],
+    "auth_filter": ["version"],
     "local_cmds": 
     [
+        "version",
         "put",
         "get",
         "get2",

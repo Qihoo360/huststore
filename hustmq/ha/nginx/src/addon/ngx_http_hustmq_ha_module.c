@@ -44,6 +44,11 @@ static ngx_uint_t g_max_queue_size = 0;
 static ngx_http_request_item_t hustmq_ha_handler_dict[] =
 {
     {
+        ngx_string("/version"),
+        ngx_null_string,
+        hustmq_ha_version_handler
+    },
+    {
         ngx_string("/worker"),
         ngx_string("/hustmq/worker"),
         hustmq_ha_worker_handler
@@ -142,7 +147,7 @@ static ngx_http_request_item_t hustmq_ha_handler_dict[] =
 
 static size_t hustmq_ha_handler_dict_len = sizeof(hustmq_ha_handler_dict) / sizeof(ngx_http_request_item_t);
 
-static ngx_command_t ngx_http_hustmq_ha_commands[] =
+static ngx_command_t ngx_http_hustmq_ha_commands[] = 
 {
     {
         ngx_string("hustmq_ha"),
@@ -179,7 +184,7 @@ static ngx_command_t ngx_http_hustmq_ha_commands[] =
     ngx_null_command
 };
 
-static ngx_http_module_t ngx_http_hustmq_ha_module_ctx =
+static ngx_http_module_t ngx_http_hustmq_ha_module_ctx = 
 {
     NULL, // ngx_int_t (*preconfiguration)(ngx_conf_t *cf);
     NULL, // ngx_int_t (*postconfiguration)(ngx_conf_t *cf);
@@ -188,10 +193,10 @@ static ngx_http_module_t ngx_http_hustmq_ha_module_ctx =
     NULL, // void * (*create_srv_conf)(ngx_conf_t *cf);
     NULL, // char * (*merge_srv_conf)(ngx_conf_t *cf, void *prev, void *conf);
     NULL, // void * (*create_loc_conf)(ngx_conf_t *cf);
-    NULL // char * (*merge_loc_conf)(ngx_conf_t *cf, void *prev, void *conf);
+    NULL  // char * (*merge_loc_conf)(ngx_conf_t *cf, void *prev, void *conf);
 };
 
-ngx_module_t ngx_http_hustmq_ha_module =
+ngx_module_t ngx_http_hustmq_ha_module = 
 {
     NGX_MODULE_V1,
     &ngx_http_hustmq_ha_module_ctx,

@@ -5,6 +5,13 @@
 #include "hustmq_ha_handler_filter.h"
 #include "hustmq_ha_request_handler.h"
 
+ngx_int_t hustmq_ha_version_handler(ngx_str_t * backend_uri, ngx_http_request_t *r)
+{
+    static ngx_str_t version = ngx_string("hustmqha 1.6\n");
+    r->headers_out.status = NGX_HTTP_OK;
+    return ngx_http_send_response_imp(r->headers_out.status, &version, r);
+}
+
 static ngx_bool_t __check_lock_request(ngx_http_request_t *r, hustmq_ha_queue_dict_t * queue_dict, ngx_str_t * queue)
 {
     char * val = ngx_http_get_param_val(&r->args, "on", r->pool);

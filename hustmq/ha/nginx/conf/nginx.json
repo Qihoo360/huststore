@@ -6,10 +6,10 @@
     "keepalive": 32768,
     "http_basic_auth_file": "/data/hustmqha/conf/htpasswd",
     "nginx_root": "/data/hustmqha/html",
-    "auth_filter": ["get", "sub"],
+    "auth_filter": ["version", "get", "sub"],
     "local_cmds":
     [
-        "autost", "stat_all", "stat",
+        "version", "autost", "stat_all", "stat",
         "put", "get", "ack", "timeout", 
         "lock", "max", "purge", 
         "worker", "evget", "evsub", 

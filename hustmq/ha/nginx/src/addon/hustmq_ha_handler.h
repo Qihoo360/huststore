@@ -4,6 +4,7 @@
 #include <ngx_http.h>
 #include <nginx.h>
 
+ngx_int_t hustmq_ha_version_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
 ngx_int_t hustmq_ha_worker_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
 ngx_int_t hustmq_ha_put_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
 ngx_int_t hustmq_ha_get_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);

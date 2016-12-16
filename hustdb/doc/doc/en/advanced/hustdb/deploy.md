@@ -8,6 +8,10 @@ Deployment
 
 ### Usage ###
 
+#### Show Version ####
+
+    ./hustdb -v
+
 #### Service Start (Daemon, work in background) ####
 
     ./hustdb

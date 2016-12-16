@@ -194,6 +194,15 @@ void hustdb_hset_handler(hustdb_hset_ctx_t& args, evhtp_request_t * request, hus
     hustdb_network::send_write_reply(ctx->db->errno_int_status(r), ver, ctxt, request);
 }
 
+void hustdb_hincrby_handler(hustdb_hincrby_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx)
+{
+    PRE_READ;
+    hustdb_network::unescape_key(false, request, args.key);
+    int r = ctx->db->hustdb_hincrby(args.tb.data, args.tb.len, args.key.data, args.key.len, args.val, args.host.data, args.host.len,
+        rsp, rsp_len, ver, args.ttl, args.is_dup, conn, ctxt);
+    hustdb_network::post_handler(r, rsp, rsp_len, request, ctx);
+}
+
 void hustdb_hdel_handler(hustdb_hdel_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx)
 {
     PRE_WRITE;

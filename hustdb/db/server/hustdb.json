@@ -118,6 +118,22 @@
             "check": "!request || !ctx || !ctx->db->ok()"
         },
         {
+            "uri": "/hustdb/hincrby",
+            "methods": ["GET"],
+            "args":
+            [
+                ["string", "tb"],
+                ["string", "key"],
+                ["uint64_t", "val"],
+                ["uint32_t", "ttl", "0"],
+                ["uint32_t", "ver", "0"],
+                ["string", "host"],
+                ["bool", "is_dup", "false"]
+            ],
+            "required": ["tb", "key", "val"],
+            "check": "!request || !ctx || !ctx->db->ok()"
+        },
+        {
             "uri": "/hustdb/hdel", 
             "methods": ["GET"],
             "args":

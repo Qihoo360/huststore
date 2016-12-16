@@ -290,6 +290,33 @@ void hustdb_hset_frame(evhtp_request_t * request, void * data)
     hustdb_hset_handler(args, request, ctx);
 }
 
+void hustdb_hincrby_frame(evhtp_request_t * request, void * data)
+{
+    hustdb_network_ctx_t * ctx = reinterpret_cast<hustdb_network_ctx_t *>(data);
+    if (!request || !ctx || !ctx->db->ok())
+    {
+        evhtp::send_reply(EVHTP_RES_500, request);
+        return;
+    }
+    if (!evhtp::check_auth(request, &ctx->base))
+    {
+        return;
+    }
+    htp_method method = evhtp_request_get_method(request);
+    if (htp_method_GET != method)
+    {
+        evhtp::invalid_method(request);
+        return;
+    }
+    hustdb_hincrby_ctx_t args(request->uri->query);
+    if (!args.has_tb || !args.has_key || !args.has_val)
+    {
+        evhtp::send_reply(EVHTP_RES_NOTFOUND, request);
+        return;
+    }
+    hustdb_hincrby_handler(args, request, ctx);
+}
+
 void hustdb_hdel_frame(evhtp_request_t * request, void * data)
 {
     hustdb_network_ctx_t * ctx = reinterpret_cast<hustdb_network_ctx_t *>(data);

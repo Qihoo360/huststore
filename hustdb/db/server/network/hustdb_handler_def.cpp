@@ -394,6 +394,81 @@ hustdb_hset_ctx_t::hustdb_hset_ctx_t(evhtp_query_t * htp_query)
     }
 }
 
+hustdb_hincrby_ctx_t::hustdb_hincrby_ctx_t(evhtp_query_t * htp_query)
+{
+    // reset
+    has_tb = false;
+    has_key = false;
+    has_val = false;
+    has_ttl = false;
+    has_ver = false;
+    has_host = false;
+    has_is_dup = false;
+
+    memset(&tb, 0, sizeof(evhtp::c_str_t));
+    memset(&key, 0, sizeof(evhtp::c_str_t));
+    memset(&val, 0, sizeof(uint64_t));
+    ttl = 0;
+    ver = 0;
+    memset(&host, 0, sizeof(evhtp::c_str_t));
+    is_dup = false;
+
+    if (!htp_query)
+    {
+        return;
+    }
+    // parse from htp_query
+    evhtp_kv_s * kv = htp_query->tqh_first;
+    while (kv)
+    {
+        static evhtp::c_str_t __tb = evhtp_make_str("tb");
+        static evhtp::c_str_t __key = evhtp_make_str("key");
+        static evhtp::c_str_t __val = evhtp_make_str("val");
+        static evhtp::c_str_t __ttl = evhtp_make_str("ttl");
+        static evhtp::c_str_t __ver = evhtp_make_str("ver");
+        static evhtp::c_str_t __host = evhtp_make_str("host");
+        static evhtp::c_str_t __is_dup = evhtp_make_str("is_dup");
+
+        if (kv->klen == __tb.len && 0 == strncmp(__tb.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
+        {
+            has_tb = true;
+            tb.assign(kv->val, kv->vlen);
+        }
+        else if (kv->klen == __key.len && 0 == strncmp(__key.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
+        {
+            has_key = true;
+            key.assign(kv->val, kv->vlen);
+        }
+        else if (kv->klen == __val.len && 0 == strncmp(__val.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
+        {
+            has_val = true;
+            val = evhtp::cast <uint64_t> (std::string(kv->val, kv->vlen));
+        }
+        else if (kv->klen == __ttl.len && 0 == strncmp(__ttl.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
+        {
+            has_ttl = true;
+            ttl = evhtp::cast <uint32_t> (std::string(kv->val, kv->vlen));
+        }
+        else if (kv->klen == __ver.len && 0 == strncmp(__ver.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
+        {
+            has_ver = true;
+            ver = evhtp::cast <uint32_t> (std::string(kv->val, kv->vlen));
+        }
+        else if (kv->klen == __host.len && 0 == strncmp(__host.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
+        {
+            has_host = true;
+            host.assign(kv->val, kv->vlen);
+        }
+        else if (kv->klen == __is_dup.len && 0 == strncmp(__is_dup.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
+        {
+            has_is_dup = true;
+            is_dup = (4 == kv->vlen && 0 == strncmp(kv->val, "true", 4)) ||
+                (1 == kv->vlen && 0 == strncmp(kv->val, "1", 1));
+        }
+        kv = kv->next.tqe_next;
+    }
+}
+
 hustdb_hdel_ctx_t::hustdb_hdel_ctx_t(evhtp_query_t * htp_query)
 {
     // reset

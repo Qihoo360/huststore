@@ -125,6 +125,27 @@ struct hustdb_hset_ctx_t
     hustdb_hset_ctx_t(evhtp_query_t * htp_query);
 };
 
+struct hustdb_hincrby_ctx_t
+{
+    evhtp::c_str_t tb;
+    evhtp::c_str_t key;
+    uint64_t val;
+    uint32_t ttl;
+    uint32_t ver;
+    evhtp::c_str_t host;
+    bool is_dup;
+
+    bool has_tb;
+    bool has_key;
+    bool has_val;
+    bool has_ttl;
+    bool has_ver;
+    bool has_host;
+    bool has_is_dup;
+
+    hustdb_hincrby_ctx_t(evhtp_query_t * htp_query);
+};
+
 struct hustdb_hdel_ctx_t
 {
     evhtp::c_str_t tb;

@@ -16,6 +16,7 @@ void hustdb_stat_all_handler(evhtp_request_t * request, hustdb_network_ctx_t * c
 void hustdb_hexist_handler(hustdb_hexist_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx);
 void hustdb_hget_handler(hustdb_hget_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx);
 void hustdb_hset_handler(hustdb_hset_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx);
+void hustdb_hincrby_handler(hustdb_hincrby_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx);
 void hustdb_hdel_handler(hustdb_hdel_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx);
 void hustdb_hkeys_handler(hustdb_hkeys_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx);
 void hustdb_sismember_handler(hustdb_sismember_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx);

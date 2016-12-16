@@ -895,9 +895,9 @@ char hustdb_t::real_table_type (
 }
 
 bool hustdb_t::generate_hash_conf (
-                                    int                             file_count,
-                                    int                             copy_count,
-                                    std::string &                   hash_conf
+                                    int file_count,
+                                    int copy_count,
+                                    std::string & hash_conf
                                     )
 {
     hash_conf.resize ( 0 );

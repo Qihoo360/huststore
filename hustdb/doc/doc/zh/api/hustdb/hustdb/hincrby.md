@@ -2,13 +2,13 @@
 
 **Interface:** `/hustdb/hincrby`
 
-**Method:** `GET | POST`
+**Method:** `GET`
 
 **Parameter:** 
 
 *  **tb** (必选)  
 *  **key** (必选)  
-*  **val** (必选, GET：val即参数 or POST：val即body)  
+*  **val** (必选)  
 *  **ttl** (可选, default: 0)
 *  **ver** (可选, default: 0) 
 

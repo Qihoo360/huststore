@@ -7,11 +7,15 @@ static void manual()
     printf("    usage:\n");
     printf("        ./hustdb [option]\n");
     printf("            [option]\n");
+    printf("                -help: show manual\n");
+    printf("                -v: show version\n");
     printf("                -d: run in debug mode\n");
     printf("                -q: quit\n");
     printf("\n");
     printf("    sample:\n");
+    printf("        ./hustdb -help\n");
     printf("        ./hustdb\n");
+    printf("        ./hustdb -v\n");
     printf("        ./hustdb -d\n");
     printf("        ./hustdb -q\n");
     printf("\n");
@@ -28,9 +32,21 @@ static bool parse_args(int argc, char *argv[], bool& daemon_mode)
     if (2 == argc)
     {
         std::string option = argv[1];
+        std::string help("-help");
+        std::string version("-v");
         std::string debug("-d");
         std::string quit("-q");
-        if (option == debug)
+        if (option == help)
+        {
+            manual();
+            return false;
+        }
+        else if (option == version)
+        {
+            printf("huststore 1.6\n");
+            return false;
+        }
+        else if (option == debug)
         {
             daemon_mode = false;
         }

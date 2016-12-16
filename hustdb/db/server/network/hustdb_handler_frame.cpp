@@ -1675,6 +1675,7 @@ bool hustdb_init_handlers(hustdb_network_ctx_t * ctx, evhtp_t * htp)
     if (!evhtp_set_cb(htp, "/hustdb/hexist", hustdb_hexist_frame, ctx)) return false;
     if (!evhtp_set_cb(htp, "/hustdb/hget", hustdb_hget_frame, ctx)) return false;
     if (!evhtp_set_cb(htp, "/hustdb/hset", hustdb_hset_frame, ctx)) return false;
+    if (!evhtp_set_cb(htp, "/hustdb/hincrby", hustdb_hincrby_frame, ctx)) return false;
     if (!evhtp_set_cb(htp, "/hustdb/hdel", hustdb_hdel_frame, ctx)) return false;
     if (!evhtp_set_cb(htp, "/hustdb/hkeys", hustdb_hkeys_frame, ctx)) return false;
     if (!evhtp_set_cb(htp, "/hustdb/sismember", hustdb_sismember_frame, ctx)) return false;

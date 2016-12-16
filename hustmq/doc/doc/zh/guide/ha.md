@@ -95,16 +95,18 @@ hustmq ha
 
 输入如下测试命令：
 
-    curl -i -X GET 'localhost:8080/autost'
+    curl -i -X GET 'localhost:8080/version'
 
 可以看到服务器返回如下内容：
 
     HTTP/1.1 200 OK
     Server: nginx/1.10.0
-    Date: Tue, 01 Mar 2016 08:13:42 GMT
+    Date: Fri, 16 Dec 2016 10:54:47 GMT
     Content-Type: text/plain
-    Content-Length: 0
+    Content-Length: 13
     Connection: keep-alive
+
+    hustmqha 1.6
 
 返回该结果说明服务器工作正常。
 

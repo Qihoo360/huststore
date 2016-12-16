@@ -189,18 +189,18 @@ hustdb ha
 
 输入如下测试命令：
 
-    curl -i -X GET 'localhost:8082/sync_alive'
+    curl -i -X GET 'localhost:8082/version'
 
 可以看到服务器返回如下内容：
 
     HTTP/1.1 200 OK
     Server: nginx/1.10.0
-    Date: Tue, 07 Jun 2016 03:25:18 GMT
+    Date: Fri, 16 Dec 2016 10:56:55 GMT
     Content-Type: text/plain
-    Content-Length: 3
+    Content-Length: 13
     Connection: keep-alive
-    
-    ok
+
+    hustdbha 1.6
 
 返回该结果说明服务器工作正常。
 

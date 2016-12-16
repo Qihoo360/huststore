@@ -189,18 +189,18 @@ After finish configuration, start `HA` and `sync server` **in order**:
 
 Type in commands:
 
-    curl -i -X GET 'localhost:8082/sync_alive'
+    curl -i -X GET 'localhost:8082/version'
 
 We should be able to see the below infomation:
 
     HTTP/1.1 200 OK
     Server: nginx/1.10.0
-    Date: Tue, 07 Jun 2016 03:25:18 GMT
+    Date: Fri, 16 Dec 2016 10:56:55 GMT
     Content-Type: text/plain
-    Content-Length: 3
+    Content-Length: 13
     Connection: keep-alive
-    
-    ok
+
+    hustdbha 1.6
 
 The result shows that the servers work as expected
 

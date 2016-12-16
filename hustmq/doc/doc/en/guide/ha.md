@@ -95,16 +95,18 @@ After configuration, start nginx:
 
 Input the following test command:
 
-    curl -i -X GET 'localhost:8080/autost'
+    curl -i -X GET 'localhost:8080/version'
 
 Then server will output the following information:
 
     HTTP/1.1 200 OK
     Server: nginx/1.10.0
-    Date: Tue, 01 Mar 2016 08:13:42 GMT
+    Date: Fri, 16 Dec 2016 10:54:47 GMT
     Content-Type: text/plain
-    Content-Length: 0
+    Content-Length: 13
     Connection: keep-alive
+
+    hustmqha 1.6
 
 Server works just fine if the above result is returned.
 

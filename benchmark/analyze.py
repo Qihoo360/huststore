@@ -13,7 +13,6 @@ AVG = 3
 REP = 4
 
 get_float_avg = lambda items: sum(items) / float(len(items))
-get_stats_pattern = lambda key: ''.join([])
 
 def manual(): 
     print """

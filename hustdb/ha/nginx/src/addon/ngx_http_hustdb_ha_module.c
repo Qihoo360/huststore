@@ -1,5 +1,6 @@
 #include <dlfcn.h>
 #include <pthread.h>
+#include <c_dict.h>
 #include <ngx_http_fetch.h>
 #include "hustdb_ha_table_def.h"
 #include "hustdb_ha_handler.h"
@@ -276,6 +277,48 @@ static ngx_http_request_item_t hustdb_ha_handler_dict[] =
 };
 
 static size_t hustdb_ha_handler_dict_len = sizeof(hustdb_ha_handler_dict) / sizeof(ngx_http_request_item_t);
+
+typedef c_dict_t(ngx_http_request_item_t *) addon_handler_dict_t;
+static addon_handler_dict_t * addon_handler_dict = NULL;
+
+static ngx_bool_t __init_addon_handler_dict(ngx_http_request_item_t dict[], size_t size)
+{
+    if (addon_handler_dict)
+    {
+        return true;
+    }
+    addon_handler_dict = malloc(sizeof(addon_handler_dict_t));
+    if (!addon_handler_dict)
+    {
+        return false;
+    }
+    c_dict_init(addon_handler_dict);
+    size_t i = 0;
+    for (i = 0; i < size; ++i)
+    {
+        ngx_http_request_item_t ** it = c_dict_get(addon_handler_dict, (const char *) dict[i].uri.data);
+        if (it && *it)
+        {
+            return false;
+        }
+        c_dict_set(addon_handler_dict, (const char *) dict[i].uri.data, &dict[i]);
+    }
+    return true;
+}
+
+static void __uninit_addon_handler_dict()
+{
+    if (!addon_handler_dict)
+    {
+        return;
+    }
+    c_dict_deinit(addon_handler_dict);
+    if (addon_handler_dict)
+    {
+        free(addon_handler_dict);
+        addon_handler_dict = NULL;
+    }
+}
 
 static ngx_command_t ngx_http_hustdb_ha_commands[] = 
 {
@@ -675,13 +718,20 @@ static char *ngx_http_hustdb_ha(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
 static ngx_int_t ngx_http_hustdb_ha_handler(ngx_http_request_t *r)
 {
-    ngx_http_request_item_t * it = ngx_http_get_request_item(
-        hustdb_ha_handler_dict, hustdb_ha_handler_dict_len, &r->uri);
-    if (!it)
+    if (!r->uri.data)
     {
         return NGX_ERROR;
     }
-    return it->handler(&it->backend_uri, r);
+    u_char tmp = r->uri.data[r->uri.len];
+    r->uri.data[r->uri.len] = '\0';
+    ngx_http_request_item_t ** it = c_dict_get(addon_handler_dict, (const char *)r->uri.data);
+    r->uri.data[r->uri.len] = tmp;
+    
+    if (!it || !*it)
+    {
+        return NGX_ERROR;
+    }
+    return (*it)->handler(&(*it)->backend_uri, r);
 }
 
 static ngx_int_t ngx_http_hustdb_ha_init_module(ngx_cycle_t * cycle)
@@ -692,12 +742,18 @@ static ngx_int_t ngx_http_hustdb_ha_init_module(ngx_cycle_t * cycle)
 
 static ngx_int_t ngx_http_hustdb_ha_init_process(ngx_cycle_t * cycle)
 {
+    if (!__init_addon_handler_dict(hustdb_ha_handler_dict, hustdb_ha_handler_dict_len))
+    {
+        ngx_log_error(NGX_LOG_ALERT, ngx_cycle->log, 0, "init addon_handler_dict error\n");
+        return NGX_ERROR;
+    }
     // TODO: initialize in worker process
     return NGX_OK;
 }
 
 static void ngx_http_hustdb_ha_exit_process(ngx_cycle_t * cycle)
 {
+    __uninit_addon_handler_dict(hustdb_ha_handler_dict, hustdb_ha_handler_dict_len);
     // TODO: uninitialize in worker process
 }
 

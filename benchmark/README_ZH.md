@@ -6,7 +6,8 @@
     * [使用](#id_guide_usage)  
 * [进阶](#id_advanced)  
     * [用例](#id_advanced_cases)  
-    * [组件](#id_advanced_components)  
+    * [工具](#id_advanced_tools)  
+    * [FAQ](#id_advanced_faq)  
 
 <h2 id="id_guide">快速入门</h2>
 
@@ -192,16 +193,84 @@
 
 [回顶部](#id_top)
 
-<h3 id="id_advanced_components">组件</h3>
+<h3 id="id_advanced_tools">工具</h3>
 
-* `gendata.py`: 用于生成数据文件  
-* `tpl` : 生成代码的模板文件  
-* `gencases.py`: 用于生成测试用例  
-* `runcase.py`: 用于批量运行测试用例  
-* `analyze.py`: 用于分析测试脚本生成的日志文件，统计整体结果，并输出性能测试报告  
-* `init.py`: 用于初始化所有的测试用例  
-* `wrk.json`: 配置文件，用于指定 `init.py` 依赖的参数  
+#### gendata.py ####
+
+用于生成数据文件。
+
+    usage:
+        python gendata.py [bytes] [output]
+    sample:
+        python gendata.py 256 256B/data
+
+#### gencases.py ####
+
+用于生成测试用例到指定目录。
+
+    usage:
+        python gencases.py [conf] [output]
+    sample:
+        python gencases.py wrk.json .
+
+
+#### runcase.py ####
+
+用于批量运行测试用例，并根据输入的间隔符将结果输出到日志文件。
+
+    usage:
+        python runcase.py [script] [loop] [separator] [output]
+    sample:
+        python runcase.py hustdb_put.sh 5 @huststore_benchmark hustdb_put.log
+
+#### analyze.py ####
+
+用于分析 `runcase.py` 生成的日志文件，统计整体结果，并输出性能测试报告。
+
+    usage:
+        python analyze.py [log] [separator] [output]
+    sample:
+        python analyze.py hustdb_put.log @huststore_benchmark hustdb_put.json
+
+#### init.py ####
+
+工程的入口点，用于初始化所有的测试用例。
+
+    usage:
+        python init.py [conf]
+    sample:
+        python init.py wrk.json
 
 [回顶部](#id_top)
+
+<h3 id="id_advanced_faq">FAQ</h3>
+
+### Q: 测试用例每次使用的请求参数是固定的吗？ ###
+
+不固定，以 `/hustdb/put` 接口为例，每次请求的 `key` 生成的方法如下：
+
+    function get_key(loop, id, requests)
+        return string.format("benchmark_key_%d_%d_%d", loop, id, requests)
+    end
+
+可以看到，生成 `key` 依赖于三个变量：  
+
+* loop : 当前脚本执行的轮数，默认从0开始，脚本每执行一次，值加一（这个值会记录在文件里）  
+* id : 线程序号，每个线程的序号都不同  
+* requests : 已发送的请求数量，从0开始，每发送一个请求，值加一  
+
+`requests` 的变化保证了同一个线程内，每个请求的 `key` 都不会重复；  
+`id` 的变化保证了任意两个线程生成的 `key` 都不会重复；  
+`loop` 的变化保证了任意两次脚本执行时使用的 `key` 都不会重复。
+
+另外，`body` 是由 `gendata.py` 生成的数据和 `key` 拼接而来：
+
+    --make_request
+    local key = get_key(loop, id, requests)
+    uri = string.format("/hustdb/put?key=%s", key)
+    local bufs = { [1] = body, [2] = key }
+    wrk.body = table.concat(bufs, "")
+
+由于任意两个请求的key都不会重复，因此生成的 `body` 也是不会重复的。
 
 [回首页](../README_ZH.md)

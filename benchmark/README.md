@@ -246,9 +246,9 @@ Entry of benchmark, used for the initialization of test cases.
 
 <h3 id="id_advanced_faq">FAQ</h3>
 
-### Q: The arguments of requests are fixed or not? Why? ###
+### Q: Are arguments of requests invariable or not? ###
 
-Variable. Take `/hustdb/put` as example, the `key` of each request is generated as following:  
+**Variable**. Take `/hustdb/put` as example, the `key` of each request is generated as following:  
 
     function get_key(loop, id, requests)
         return string.format("benchmark_key_%d_%d_%d", loop, id, requests)

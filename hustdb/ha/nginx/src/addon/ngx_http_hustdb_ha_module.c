@@ -80,6 +80,11 @@ static ngx_http_request_item_t hustdb_ha_handler_dict[] =
         hustdb_ha_hset_handler
     },
     {
+        ngx_string("/hincrby"),
+        ngx_string("/hustdb/hincrby"),
+        hustdb_ha_hincrby_handler
+    },
+    {
         ngx_string("/hget"),
         ngx_string("/hustdb/hget"),
         hustdb_ha_hget_handler

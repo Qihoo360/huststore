@@ -11,6 +11,7 @@ ngx_int_t hustdb_ha_put_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
 ngx_int_t hustdb_ha_del_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
 ngx_int_t hustdb_ha_keys_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
 ngx_int_t hustdb_ha_hset_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
+ngx_int_t hustdb_ha_hincrby_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
 ngx_int_t hustdb_ha_hget_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
 ngx_int_t hustdb_ha_hget2_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);
 ngx_int_t hustdb_ha_hdel_handler(ngx_str_t * backend_uri, ngx_http_request_t *r);

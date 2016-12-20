@@ -1,11 +1,11 @@
 {
     "wrk":
     {
-        "threads": 12,
+        "threads": 16,
         "connections": 2000,
-        "duration": "10s",
-        "timeout": "10s",
-        "loop": 10
+        "duration": "5s",
+        "timeout": "5s",
+        "loop": 15
     },
     "data":
     {

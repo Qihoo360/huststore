@@ -42,6 +42,6 @@
 	Version: 1
 	VerError: true
 
-[Previous](../hustcache.md)
+[Previous](../hustdb.md)
 
 [Home](../../../index.md)

@@ -24,7 +24,7 @@ def manual():
                 uri: ip:port
             [action]
                 put | get | get2 | del | exist |
-                hset | hget | hget2 |hdel | hexist |
+                hset | hincrby | hget | hget2 |hdel | hexist |
                 sadd | srem | sismember | sismember2 |
                 zadd | zrem | zismember | zscore | zscore2 |
                 cache_exist | cache_get | cache_ttl | 
@@ -218,10 +218,13 @@ def test_ha(log_dir, host, cmd):
         print_result(r, cmd, r.content)
     def get_nobody_base(sess, cmd, result):
         print_result(sess.get(cmd, auth=(USER, PASSWD)), cmd, result)
-    def hincrby_base(cmd, val):
+    def hincrby_base(sess, cmd, val):
         set_cache_base(sess, '%s&val=%s' % (hash_cmd('cache/hset'), val))
         set_cache_base(sess, '%s&val=%s' % (hash_cmd('cache/%s' % cmd), val))
         get_base(sess, hash_cmd('cache/hget'))
+    def hincrby_impl(sess, val):
+        write_base(sess, '%s&val=%s' % (hash_cmd('hset'), val))
+        get_base(sess, '%s&val=1' % hash_cmd('hincrby'))
 
     # vars
     sess = requests.Session()
@@ -251,6 +254,7 @@ def test_ha(log_dir, host, cmd):
         'exist': lambda: get_nobody_base(sess, kv_cmd('exist'), 'exist'),
         # hash
         'hset': lambda: write_body_base(sess, hash_cmd('hset'), hash_val),
+        'hincrby': lambda: hincrby_impl(sess, '5'),
         'hget': lambda: get_base(sess, hash_cmd('hget')),
         'hget2': lambda: get2_base(sess, hash_cmd('hget2')),
         'hdel': lambda: write_base(sess, hash_cmd('hdel')),
@@ -278,8 +282,8 @@ def test_ha(log_dir, host, cmd):
         'cache_hget': lambda: get_base(sess, hash_cmd('cache/hget')),
         'cache_hset': lambda: post_cache_base(sess, hash_cmd('cache/hset'), hash_val),
         'cache_hdel': lambda: post_cache_base(sess, hash_cmd('cache/hdel'), ''),
-        'cache_hincrby': lambda: hincrby_base('hincrby', '5'),
-        'cache_hincrbyfloat': lambda: hincrby_base('hincrbyfloat', '5.125')
+        'cache_hincrby': lambda: hincrby_base(sess, 'hincrby', '5'),
+        'cache_hincrbyfloat': lambda: hincrby_base(sess, 'hincrbyfloat', '5.125')
         }
     if cmd in func_dict:
         func_dict[cmd]()

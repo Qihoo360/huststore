@@ -44,13 +44,13 @@ ngx_bool_t ngx_http_append_arg(const ngx_str_t * key, const ngx_str_t * val, ngx
         size += arglist[i]->len;
     }
 
-    ngx_str_t args;
-    args.data = ngx_palloc(r->pool, size);
+    ngx_str_t args = ngx_null_string;
+    args.data = ngx_palloc(r->pool, size + 1);
     if (!args.data)
     {
         return false;
     }
-    memset(args.data, 0, size);
+    memset(args.data, 0, size + 1);
 
     size_t off = 0;
     for (i = 0; i < arglist_size; ++i)
@@ -59,6 +59,7 @@ ngx_bool_t ngx_http_append_arg(const ngx_str_t * key, const ngx_str_t * val, ngx
         off += arglist[i]->len;
     }
     args.len = size;
+    r->args = args;
     return true;
 }
 

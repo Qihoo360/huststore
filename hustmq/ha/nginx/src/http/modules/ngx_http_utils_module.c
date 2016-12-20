@@ -5,22 +5,6 @@
     #include "ngx_http_upstream_check_module.h"
 #endif
 
-ngx_http_request_item_t * ngx_http_get_request_item(
-    ngx_http_request_item_t dict[],
-    size_t size,
-    const ngx_str_t * uri)
-{
-    size_t i = 0;
-    for (i = 0; i < size; ++i)
-    {
-        if (ngx_http_str_eq(uri, &dict[i].uri))
-        {
-            return dict + i;
-        }
-    }
-    return NULL;
-}
-
 ngx_str_t ngx_http_get_conf_path(ngx_cycle_t * cycle, ngx_str_t * name)
 {
     ngx_str_t path = { 0, 0 };
@@ -322,6 +306,45 @@ static ngx_str_t __remove_mid_param(const ngx_str_t * args, ngx_http_str_pos_t *
     result.data[size] = '\0';
     result.len = size;
     return result;
+}
+
+ngx_bool_t ngx_http_append_arg(const ngx_str_t * key, const ngx_str_t * val, ngx_http_request_t *r)
+{
+    if (!key || !val || !key->data || !val->data || !r || !r->args.data)
+    {
+        return false;
+    }
+
+    static ngx_str_t TAG_AND = ngx_string("&");
+    static ngx_str_t TAG_EQ = ngx_string("=");
+
+    const ngx_str_t * arglist[] = { &r->args, &TAG_AND, key, &TAG_EQ, val };
+    size_t arglist_size = sizeof(arglist) / sizeof(ngx_str_t *);
+
+    size_t size = 0;
+    size_t i = 0;
+    for (i = 0; i < arglist_size; ++i)
+    {
+        size += arglist[i]->len;
+    }
+
+    ngx_str_t args = ngx_null_string;
+    args.data = ngx_palloc(r->pool, size + 1);
+    if (!args.data)
+    {
+        return false;
+    }
+    memset(args.data, 0, size + 1);
+
+    size_t off = 0;
+    for (i = 0; i < arglist_size; ++i)
+    {
+        memcpy(args.data + off, arglist[i]->data, arglist[i]->len);
+        off += arglist[i]->len;
+    }
+    args.len = size;
+    r->args = args;
+    return true;
 }
 
 ngx_str_t ngx_http_remove_param(const ngx_str_t * args, const ngx_str_t * key, ngx_pool_t * pool)

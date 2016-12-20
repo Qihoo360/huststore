@@ -33,12 +33,6 @@ typedef struct
     ngx_int_t (*handler) (ngx_str_t * backend_uri, ngx_http_request_t *r);
 } ngx_http_request_item_t;
 
-ngx_http_request_item_t * ngx_http_get_request_item(
-        ngx_http_request_item_t dict[],
-        size_t size,
-        const ngx_str_t * uri);
-
-
 ngx_str_t ngx_http_get_conf_path(ngx_cycle_t * cycle, ngx_str_t * name);
 int ngx_http_get_flag_slot(ngx_conf_t * cf);
 ngx_bool_t ngx_http_str_eq(const ngx_str_t * src, const ngx_str_t * dst);
@@ -58,6 +52,7 @@ ngx_http_str_pos_t ngx_http_match_key(const ngx_str_t * args, const char * key, 
 size_t ngx_http_get_buf_size(const ngx_buf_t * buf);
 char * ngx_http_get_param_val(const ngx_str_t * args, const char * key, ngx_pool_t * pool);
 ngx_str_t ngx_http_get_empty_str(ngx_pool_t * pool);
+ngx_bool_t ngx_http_append_arg(const ngx_str_t * key, const ngx_str_t * val, ngx_http_request_t *r);
 ngx_str_t ngx_http_remove_param(const ngx_str_t * args, const ngx_str_t * key, ngx_pool_t * pool);
 ngx_bool_t ngx_http_check_key(ngx_http_request_t *r);
 

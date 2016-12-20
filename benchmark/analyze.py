@@ -136,7 +136,8 @@ def analyze(uri, ft, output):
     stats = {}
     for key in results:
         stats[key] = avgdict[key](results[key])
-    stats['Thread Stats'] = {'Latency': stats.pop('Thread Latency'),'Req/Sec': stats.pop('Thread QPS')}    
+    pop_val = lambda stats, key: stats.pop(key) if key in stats else ''
+    stats['Thread Stats'] = {'Latency': pop_val(stats, 'Thread Latency'), 'Req/Sec': pop_val(stats, 'Thread QPS')}    
     with open(output, 'w') as f:
         json.dump(stats, f, indent = 4)
     return True

@@ -24,45 +24,6 @@ static ngx_bool_t __check_parameter(ngx_str_t * backend_uri, ngx_http_request_t 
     return true;
 }
 
-ngx_bool_t ngx_http_append_arg(const ngx_str_t * key, const ngx_str_t * val, ngx_http_request_t *r)
-{
-    if (!key || !val || !key->data || !val->data || !r || !r->args.data)
-    {
-        return false;
-    }
-
-    static ngx_str_t TAG_AND = ngx_string("&");
-    static ngx_str_t TAG_EQ = ngx_string("=");
-
-    const ngx_str_t * arglist[] = { &r->args, &TAG_AND, key, &TAG_EQ, val };
-    size_t arglist_size = sizeof(arglist) / sizeof(ngx_str_t *);
-
-    size_t size = 0;
-    size_t i = 0;
-    for (i = 0; i < arglist_size; ++i)
-    {
-        size += arglist[i]->len;
-    }
-
-    ngx_str_t args = ngx_null_string;
-    args.data = ngx_palloc(r->pool, size + 1);
-    if (!args.data)
-    {
-        return false;
-    }
-    memset(args.data, 0, size + 1);
-
-    size_t off = 0;
-    for (i = 0; i < arglist_size; ++i)
-    {
-        memcpy(args.data + off, arglist[i]->data, arglist[i]->len);
-        off += arglist[i]->len;
-    }
-    args.len = size;
-    r->args = args;
-    return true;
-}
-
 static hustdb_ha_hincrby_ctx_t * __create_ctx(ngx_str_t * backend_uri, ngx_http_request_t *r)
 {
     hustdb_ha_hincrby_ctx_t * ctx = ngx_palloc(r->pool, sizeof(hustdb_ha_hincrby_ctx_t));

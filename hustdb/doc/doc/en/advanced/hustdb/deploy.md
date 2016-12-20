@@ -32,8 +32,8 @@ Deployment
     tcp.enable_reuseport            = true
     tcp.enable_nodelay              = true
     tcp.enable_defer_accept         = true
-    tcp.max_body_size               = 16777216
-    tcp.max_keepalive_requests      = 1024          //Max number of requests for a single connection 
+    tcp.max_body_size               = 33554432
+    tcp.max_keepalive_requests      = 8192          //Max number of requests for a single connection 
     tcp.recv_timeout                = 300           //Max live time for for a single connection
     tcp.send_timeout                = 300           //Timeout for a single connection
 

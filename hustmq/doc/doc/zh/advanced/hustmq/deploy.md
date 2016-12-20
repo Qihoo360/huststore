@@ -29,7 +29,7 @@
     tcp.enable_nodelay              = true
     tcp.enable_defer_accept         = true
     tcp.max_body_size               = 16777216
-    tcp.max_keepalive_requests      = 1024          //单链接最大请求数 
+    tcp.max_keepalive_requests      = 8192          //单链接最大请求数 
     tcp.recv_timeout                = 300           //单链接最长存活时间
     tcp.send_timeout                = 300           //单链接发送数据超时
 

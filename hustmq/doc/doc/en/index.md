@@ -15,7 +15,6 @@ Index
     * [`hustmq ha`](api/ha.md)
 * [Advanced](advanced/index.md)
     * [`hustmq`](advanced/hustmq/index.md)
-    * [`hustmq performance`](advanced/hustmq/hustmq_performance.md)
     * [`hustmq ha`](advanced/ha/index.md)
 * [Appendix](appendix/index.md)
     * [FAQ](appendix/faq.md)

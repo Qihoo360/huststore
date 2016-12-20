@@ -15,7 +15,6 @@ hustmq
     * [`hustmq ha`](api/ha.md)
 * [进阶](advanced/index.md)
     * [`hustmq`](advanced/hustmq/index.md)
-    * [`hustmq performance`](advanced/hustmq/hustmq_performance.md)
     * [`hustmq ha`](advanced/ha/index.md)
 * [附录](appendix/index.md)
     * [FAQ](appendix/faq.md)

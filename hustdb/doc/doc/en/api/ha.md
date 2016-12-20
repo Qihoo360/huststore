@@ -17,6 +17,7 @@ HTTP interface provided by `hustdb ha`:
 * [exist](ha/exist.md)
 * [keys](ha/keys.md)
 * [hset](ha/hset.md)
+* [hincrby](ha/hincrby.md)
 * [hget](ha/hget.md)
 * [hget2](ha/hget2.md)
 * [hdel](ha/hdel.md)

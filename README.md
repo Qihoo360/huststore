@@ -86,60 +86,48 @@ Above includes detailed documents of design, deployments, `API` usage and test s
 
 ## Performance ##
 
-### `hustdb` ###
+### Environment ###
 
-**Machine Configuration:** `24core, 64gb, 1tb sata(7200rpm)`
+    CPU: Intel(R) Xeon(R) CPU E5-2630 @ 2.30GHz (6cores x2)
+    Memory: 144G
+    Disk: Intel SSD DC S3500 Series (300GB, 2.5in SATA 6Gb/s, 20nm, MLC) ,  x4, RAID10(softraid)
+    SAS Controller: LSI Logic SAS2008 PCI-Express Fusion-MPT SAS-2
+    Network Adapter: Intel I350
+    OS: CentOS release 6.8 x86_64 (2.6.32-642.4.2.el6.x86_64)
 
-**Stress Test:** `100 concurrent, 1000 thousand querys`
+### Products ###
 
-**DB CONF:** `single instance, thread model, 10 workers`
+* [redis 3.2.6](https://redis.io/)
+* [ssdb 1.9.4](http://ssdb.io)
+* [hustdb 1.5](https://github.com/Qihoo360/huststore)
 
-**Benchmark Result:**
+### Tools ###
 
-    （1）PUT
-    	<1>value: 256B;      qps: 95 thousand
-	    <2>value: 1KB;       qps: 85 thousand
-	    <3>value: 4KB;       qps: 25 thousand
-	    <4>value: 16KB;      qps: 7 thousand
-	    <5>value: 64KB;      qps: 2 thousand
+* [redis-benchmark](https://redis.io/topics/benchmarks)
+* [wrk](https://github.com/wg/wrk)
 
-	（2）GET
-	    <1>value: 256B;      qps: 100 thousand
-	    <2>value: 1KB;       qps: 95 thousand
-	    <3>value: 4KB;       qps: 25 thousand
-	    <4>value: 16KB;      qps: 7 thousand
-	    <5>value: 64KB;      qps: 2 thousand
+### Arguments ###
 
-	（3）DEL
-    	<1>value: 256B;      qps: 100 thousand
-	    <2>value: 1KB;       qps: 100 thousand
-    	<3>value: 4KB;       qps: 100 thousand
-    	<4>value: 16KB;      qps: 100 thousand
-    	<5>value: 64KB;      qps: 100 thousand
+abbr         |concurrency |value (bytes)
+-------------|------------|--------------
+C1000-V256   |1000        |256
+C1000-V512   |1000        |512
+C1000-V1024  |1000        |1024
+C2000-V256   |2000        |256
+C2000-V512   |2000        |512
+C2000-V1024  |2000        |1024
 
-### `hustmq` ###
+### Benchmark ###
 
-**Machine Configuration:** `24core, 64gb, 1tb sata(7200rpm)`
+#### PUT ####
 
-**Stress Test Parameters:** `100 concurrent, 1000 thousand querys, single queue`
+![benchmark_put](res/benchmark_put.png)
 
-**DB Configuration:** `single instance, thread model, 10 workers`
+#### GET ####
 
-**Benchmark Result:**
+![benchmark_get](res/benchmark_get.png)
 
-    （1）PUT
-	    <1>item: 256B;      qps: 30 thousand
-	    <2>item: 1KB;       qps: 25 thousand
-	    <3>item: 4KB;       qps: 20 thousand
-	    <4>item: 16KB;      qps: 7 thousand
-	    <5>item: 64KB;      qps: 2 thousand
-
-	（2）GET
-	    <1>item: 256B;      qps: 25 thousand
-	    <2>item: 1KB;       qps: 20 thousand
-	    <3>item: 4KB;       qps: 18 thousand
-	    <4>item: 16KB;      qps: 7 thousand
-	    <5>item: 64KB;      qps: 2 thousand
+See more details in [here](benchmark/README.md)
 
 ## LICENSE ##
 

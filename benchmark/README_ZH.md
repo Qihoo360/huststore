@@ -8,6 +8,10 @@
     * [用例](#id_advanced_cases)  
     * [工具](#id_advanced_tools)  
     * [FAQ](#id_advanced_faq)  
+* [附录](#id_appendix)
+    * [性能测试配置](#id_appendix_conf)
+    * [性能测试结果](#id_appendix_result)
+    * [性能测试日志](benchmark/index_zh.md)
 
 <h2 id="id_guide">快速入门</h2>
 
@@ -272,5 +276,111 @@
     wrk.body = table.concat(bufs, "")
 
 由于任意两个请求的key都不会重复，因此生成的 `body` 也是不会重复的。
+
+[回顶部](#id_top) 
+
+<h2 id="id_appendix">附录</h2>
+
+<h3 id="id_appendix_conf">性能测试配置</h3>
+
+`Huststore Benchmark` 的配置如下：
+
+    {
+        "wrk":
+        {
+            "threads": 16,
+            "connections": 2000,
+            "duration": "10s",
+            "timeout": "10s",
+            "loop": 10
+        },
+        "data":
+        {
+            "256B": 256,
+            "512B": 512,
+            "1KB": 1024
+        },
+        "srv":
+        {
+            "hustdb": "0.0.0.0:8085"
+        },
+        "latency_distribution":
+        [
+            "0.01", "0.1", "0.5", "1", "3", "5", 
+            "10", "20", "30", "40", "50", "60", "70", "80", "90", "91", "92", 
+            "93", "93.5", "94", "94.5", "95", "95.5", "96", "96.5", "97", "97.5", "98", "98.5", 
+            "99", "99.1", "99.2", "99.3", "99.4", "99.5", "99.6", "99.7", "99.8", "99.9", "99.99", "99.999"
+        ],
+        "separator": "@huststore_benchmark",
+        "status":
+        {
+            "loop_file": "loop.txt",
+            "status_file": "status.txt"
+        },
+        "outputs":
+        [
+            "hustdb_put.lua",
+            "hustdb_get.lua"
+        ]
+    }
+
+请使用真实的参数替换 "srv" 字段的内容。
+
+`redis-benchmark` 的相关参数如下：
+
+    # "redis" 的测试命令,请使用真实的 IP 和 Port 替换 "0.0.0.0" 和 "6379"
+    redis-benchmark -e -h 0.0.0.0 -p 6379 -c 1000 -n 10000000 -r 100000000 -d 256 -t set,get
+    redis-benchmark -e -h 0.0.0.0 -p 6379 -c 1000 -n 10000000 -r 100000000 -d 512 -t set,get
+    redis-benchmark -e -h 0.0.0.0 -p 6379 -c 1000 -n 10000000 -r 100000000 -d 1024 -t set,get
+    redis-benchmark -e -h 0.0.0.0 -p 6379 -c 2000 -n 10000000 -r 100000000 -d 256 -t set,get
+    redis-benchmark -e -h 0.0.0.0 -p 6379 -c 2000 -n 10000000 -r 100000000 -d 512 -t set,get
+    redis-benchmark -e -h 0.0.0.0 -p 6379 -c 2000 -n 10000000 -r 100000000 -d 1024 -t set,get
+    # "ssdb" 的测试命令,请使用真实的 IP 和 Port 替换 "0.0.0.0" 和 "8888"
+    redis-benchmark -e -h 0.0.0.0 -p 8888 -c 1000 -n 10000000 -r 100000000 -d 256 -t set,get
+    redis-benchmark -e -h 0.0.0.0 -p 8888 -c 1000 -n 10000000 -r 100000000 -d 512 -t set,get
+    redis-benchmark -e -h 0.0.0.0 -p 8888 -c 1000 -n 10000000 -r 100000000 -d 1024 -t set,get
+    redis-benchmark -e -h 0.0.0.0 -p 8888 -c 2000 -n 10000000 -r 100000000 -d 256 -t set,get
+    redis-benchmark -e -h 0.0.0.0 -p 8888 -c 2000 -n 10000000 -r 100000000 -d 512 -t set,get
+    redis-benchmark -e -h 0.0.0.0 -p 8888 -c 2000 -n 10000000 -r 100000000 -d 1024 -t set,get
+
+[回顶部](#id_top)
+
+<h3 id="id_appendix_result">性能测试结果</h3>
+
+#### C1000-V256 ####
+
+![C1000_V256](../res/benchmark/C1000_V256.png)
+
+[回顶部](#id_top)
+
+#### C1000-V512 ####
+
+![C1000_V512](../res/benchmark/C1000_V512.png)
+
+[回顶部](#id_top)
+
+#### C1000-V1024 ####
+
+![C1000_V1024](../res/benchmark/C1000_V1024.png)
+
+[回顶部](#id_top)
+
+#### C2000-V256 ####
+
+![C2000_V256](../res/benchmark/C2000_V256.png)
+
+[回顶部](#id_top)
+
+#### C2000-V512 ####
+
+![C2000_V512](../res/benchmark/C2000_V512.png)
+
+[回顶部](#id_top)
+
+#### C2000-V1024 ####
+
+![C2000_V1024](../res/benchmark/C2000_V1024.png)
+
+[回顶部](#id_top)
 
 [回首页](../README_ZH.md)

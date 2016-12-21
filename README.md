@@ -8,10 +8,10 @@
 In addtion, `huststore` implements a distributed message queue by integrating a special `HA` module, features including message Push Stream, and message Publish-SubScribe, these features can be used as replacements of the corresponding features in rabbitmq and gearman.
 
 ## Features ##
-`huststore` has two core components, `hustdb` and `HA`. `hustdb` uses `fastdb`,  a database engine developed by our own, in the fundamental architecture. `HA` is implemented as a `nginx` module. It is well-known that `nginx` is a industry-proven high quality code base, thus by inheriting it `huststore` gains the below advantages:
+`huststore` has two core components, `hustdb` and `HA`. `hustdb` is a database engine developed by our own, in the fundamental architecture. `HA` is implemented as a `nginx` module. It is well-known that `nginx` is a industry-proven high quality code base, thus by inheriting it `huststore` gains the below advantages:
 
 * High Throughput  
-`hustdb` uses [libevhtp](https://github.com/ellzey/libevhtp), a open source network library, as the inner network communication system, by incorporating it with `fastdb` storage engine, `hustdb` achieves a extremely high performance, the benchmark shows that `QPS` hits **100 thousand** and even more.
+`hustdb` uses [libevhtp](https://github.com/ellzey/libevhtp), a open source network library, as the inner network communication system, by incorporating it with high-performance storage engine, `hustdb` achieves a extremely high performance, the benchmark shows that `QPS` hits **100 thousand** and even more.
 
 * High Concurrency  
 Please refer to concurrency report of `nginx` for more details.
@@ -35,7 +35,7 @@ In addition, `HA` cluster uses a distributed architecture design by incorporatin
 * Distributed KV storage  = HA（hustdb ha） + DB（hustdb）
 * Distributed Message Queue  = HA（hustmq ha） + DB（hustdb）
 
-## Database Engine (fastdb) ##
+## Database Engine ##
 ![hustdb](res/hustdb.png)
 
 ## Dependency ##
@@ -89,9 +89,8 @@ Above includes detailed documents of design, deployments, `API` usage and test s
 ### Environment ###
 
     CPU: Intel(R) Xeon(R) CPU E5-2630 @ 2.30GHz (6cores x2)
-    Memory: 144G
-    Disk: Intel SSD DC S3500 Series (300GB, 2.5in SATA 6Gb/s, 20nm, MLC) ,  x4, RAID10(softraid)
-    SAS Controller: LSI Logic SAS2008 PCI-Express Fusion-MPT SAS-2
+    Memory: 64G
+    Disk: Intel SSD DC S3500 Series (300GB, 2.5in SATA 6Gb/s, 20nm, MLC), x4, RAID10(softraid), SAS Controller: LSI Logic SAS2008 PCI-Express Fusion-MPT SAS-2
     Network Adapter: Intel I350
     OS: CentOS release 6.8 x86_64 (2.6.32-642.4.2.el6.x86_64)
 

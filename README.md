@@ -22,7 +22,10 @@ The fundamental design architecture of `huststore` guarantees the high availabil
 In addition, `HA` cluster uses a distributed architecture design by incorporating LVS as the director, each `HA` node is separated and work independently. When one of the `HA` node is down, `LVS` will re-direct the request to other available `HA` node, thus avoids `HA`'s failure on single point node.
 
 * Language-free Interface  
-`huststroe` use `http` as the communication protocol, therefore the client side implementation is not limited in any specific programming language.
+`huststore` use `http` as the communication protocol, therefore the client side implementation is not limited in any specific programming language.
+
+* Persistence  
+**You do not need to worry about the loss of data** as most of interfaces will persist data to disk.  
 
 * Support Binary Key-Value  
 

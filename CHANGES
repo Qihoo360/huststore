@@ -1,3 +1,11 @@
+Changes with huststore release 1.6                                        22 Dec 2016
+
+    A summary of what is in this release since 1.5:
+    *) Add huststore benchmark tool kit & performance report & benchmark log.  
+    *) Add "/hustdb/hincrby" for hustdb, and "hincrby" for hustdb HA.  
+    *) Performance tuning on hustdb HA & hustmq HA.  
+    *) Many other fixes and improvements, 50+ commits since 1.5.  
+
 Changes with huststore release 1.5                                        25 Nov 2016
 
     A summary of what is in this release since 1.4:

@@ -81,6 +81,7 @@ Below is a complete **one-key script for remote deployment**, it also includes d
         rm -rf huststore; \
         tar -zxf huststore.tar.gz -C .; \
         cd /data/tmp/huststore/hustdb/ha/nginx; \
+        chmod a+x configure; \
         sh Config.sh; \
         make -j; \
         make install; \
@@ -137,6 +138,7 @@ If only `HA` needs to be re-deployed, you can refer to the below scripts:
         rm -rf huststore; \
         tar -zxf huststore.tar.gz -C .; \
         cd /data/tmp/huststore/hustdb/ha/nginx; \
+        chmod a+x configure; \
         sh Config.sh; \
         make -j; \
         make install; \

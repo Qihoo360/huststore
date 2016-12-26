@@ -80,6 +80,7 @@
         rm -rf huststore; \
         tar -zxf huststore.tar.gz -C .; \
         cd /data/tmp/huststore/hustdb/ha/nginx; \
+        chmod a+x configure; \
         sh Config.sh; \
         make -j; \
         make install; \
@@ -136,6 +137,7 @@
         rm -rf huststore; \
         tar -zxf huststore.tar.gz -C .; \
         cd /data/tmp/huststore/hustdb/ha/nginx; \
+        chmod a+x configure; \
         sh Config.sh; \
         make -j; \
         make install; \

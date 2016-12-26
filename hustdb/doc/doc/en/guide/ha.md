@@ -7,14 +7,19 @@ First, install all the dependent common modules for `hustdb ha`:
 * [libevent-2.0.22-stable](https://github.com/libevent/libevent/releases/download/release-2.0.22-stable/libevent-2.0.22-stable.tar.gz)
 * [libevhtp-1.2.10](https://github.com/ellzey/libevhtp/releases)
 
+Install `pcre`：
+
+    sudo yum install -y pcre-devel
+
 Build `libcurl`：
 
     $ cd third_party
-    $ build_libcurl.sh
+    $ sh build_libcurl.sh
 
 Install `ha` and `sync server`:  
 
-    $ cd hustdb/ha/nginx
+    $ cd ../hustdb/ha/nginx
+    $ chmod a+x configure
     $ sh Config.sh
     $ make -j
     $ make install

@@ -8,8 +8,6 @@ Index
     * [`hustdb`](intro/hustdb.md)
     * [`hustdb ha`](intro/ha.md)
 * [Guide](guide/index.md)
-    * [`hustdb`](guide/hustdb.md)
-    * [`hustdb ha`](guide/ha.md)
 * [API manual](api/index.md)
     * [`hustdb`](api/hustdb.md)
     * [`hustdb ha`](api/ha.md)

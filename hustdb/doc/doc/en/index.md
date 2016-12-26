@@ -13,6 +13,5 @@ Index
     * [`hustdb`](advanced/hustdb.md)
     * [`hustdb ha`](advanced/ha.md)
 * [Appendix](appendix/index.md)
-    * [FAQ](appendix/faq.md)
 
 [Copyright (c) 2015](https://opensource.org/licenses/MIT)

@@ -64,8 +64,8 @@
 * [hustmq](hustmq/doc/doc/zh/advanced/index.md)
 
 ### FAQ ###
-* [hustdb](hustdb/doc/doc/zh/appendix/faq.md)
-* [hustmq](hustmq/doc/doc/zh/appendix/faq.md)
+* [hustdb](hustdb/doc/doc/zh/appendix/index.md)
+* [hustmq](hustmq/doc/doc/zh/appendix/index.md)
 
 ## 目录 ##
 

@@ -70,8 +70,8 @@ Above includes detailed documents of design, deployments, `API` usage and test s
 * [hustmq](hustmq/doc/doc/en/advanced/index.md)
 
 ### FAQ ###
-* [hustdb](hustdb/doc/doc/en/appendix/faq.md)
-* [hustmq](hustmq/doc/doc/en/appendix/faq.md)
+* [hustdb](hustdb/doc/doc/en/appendix/index.md)
+* [hustmq](hustmq/doc/doc/en/appendix/index.md)
 
 ## Table Content ##
 

@@ -38,8 +38,8 @@ The following is complete **Automatic Remote Deployment Script**, just for refer
         rm -rf nginx; \
         rm -f nginx.tar.gz; \
         cd /data/tmp/; \
-        cp upgrade.sh /data/hustmqha/sbin/; \
-        cd /data/hustmqha/html/; \
+        cp upgrade.sh /opt/huststore/hustmqha/sbin/; \
+        cd /opt/huststore/hustmqha/html/; \
         rm -f status.html; \
         echo "ok" > status.html; \
         '

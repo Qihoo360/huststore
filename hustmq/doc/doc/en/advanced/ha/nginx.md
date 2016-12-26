@@ -13,8 +13,8 @@ The following is complete configuration file:
         "listen": 8080,
         "keepalive_timeout": 540,
         "keepalive": 32768,
-        "http_basic_auth_file": "/data/hustmqha/conf/htpasswd",
-        "nginx_root": "/data/hustmqha/html",
+        "http_basic_auth_file": "/opt/huststore/hustmqha/conf/htpasswd",
+        "nginx_root": "/opt/huststore/hustmqha/html",
         "auth_filter": ["get", "sub"],
         "local_cmds":
         [
@@ -213,84 +213,84 @@ The content of `nginx.conf` is as followed:
             do_get_timeout            180s;
 
             location /status.html {
-                root /data/hustmqha/html;
+                root /opt/huststore/hustmqha/html;
             }
 
             location /autost {
                 hustmq_ha;
-                http_basic_auth_file /data/hustmqha/conf/htpasswd;
+                http_basic_auth_file /opt/huststore/hustmqha/conf/htpasswd;
             }
             location /stat_all {
                 hustmq_ha;
-                http_basic_auth_file /data/hustmqha/conf/htpasswd;
+                http_basic_auth_file /opt/huststore/hustmqha/conf/htpasswd;
             }
             location /stat {
                 hustmq_ha;
-                http_basic_auth_file /data/hustmqha/conf/htpasswd;
+                http_basic_auth_file /opt/huststore/hustmqha/conf/htpasswd;
             }
             location /put {
                 hustmq_ha;
-                http_basic_auth_file /data/hustmqha/conf/htpasswd;
+                http_basic_auth_file /opt/huststore/hustmqha/conf/htpasswd;
             }
             location /get {
                 hustmq_ha;
-                #http_basic_auth_file /data/hustmqha/conf/htpasswd;
+                #http_basic_auth_file /opt/huststore/hustmqha/conf/htpasswd;
             }
             location /ack {
                 hustmq_ha;
-                http_basic_auth_file /data/hustmqha/conf/htpasswd;
+                http_basic_auth_file /opt/huststore/hustmqha/conf/htpasswd;
             }
             location /timeout {
                 hustmq_ha;
-                http_basic_auth_file /data/hustmqha/conf/htpasswd;
+                http_basic_auth_file /opt/huststore/hustmqha/conf/htpasswd;
             }
             location /lock {
                 hustmq_ha;
-                http_basic_auth_file /data/hustmqha/conf/htpasswd;
+                http_basic_auth_file /opt/huststore/hustmqha/conf/htpasswd;
             }
             location /max {
                 hustmq_ha;
-                http_basic_auth_file /data/hustmqha/conf/htpasswd;
+                http_basic_auth_file /opt/huststore/hustmqha/conf/htpasswd;
             }
             location /purge {
                 hustmq_ha;
-                http_basic_auth_file /data/hustmqha/conf/htpasswd;
+                http_basic_auth_file /opt/huststore/hustmqha/conf/htpasswd;
             }
             location /worker {
                 hustmq_ha;
-                http_basic_auth_file /data/hustmqha/conf/htpasswd;
+                http_basic_auth_file /opt/huststore/hustmqha/conf/htpasswd;
             }
             location /evget {
                 hustmq_ha;
-                http_basic_auth_file /data/hustmqha/conf/htpasswd;
+                http_basic_auth_file /opt/huststore/hustmqha/conf/htpasswd;
             }
             location /evsub {
                 hustmq_ha;
-                http_basic_auth_file /data/hustmqha/conf/htpasswd;
+                http_basic_auth_file /opt/huststore/hustmqha/conf/htpasswd;
             }
             location /sub {
                 hustmq_ha;
-                #http_basic_auth_file /data/hustmqha/conf/htpasswd;
+                #http_basic_auth_file /opt/huststore/hustmqha/conf/htpasswd;
             }
             location /pub {
                 hustmq_ha;
-                http_basic_auth_file /data/hustmqha/conf/htpasswd;
+                http_basic_auth_file /opt/huststore/hustmqha/conf/htpasswd;
             }
             location /do_get {
                 hustmq_ha;
-                http_basic_auth_file /data/hustmqha/conf/htpasswd;
+                http_basic_auth_file /opt/huststore/hustmqha/conf/htpasswd;
             }
             location /do_post {
                 hustmq_ha;
-                http_basic_auth_file /data/hustmqha/conf/htpasswd;
+                http_basic_auth_file /opt/huststore/hustmqha/conf/htpasswd;
             }
             location /do_get_status {
                 hustmq_ha;
-                http_basic_auth_file /data/hustmqha/conf/htpasswd;
+                http_basic_auth_file /opt/huststore/hustmqha/conf/htpasswd;
             }
             location /do_post_status {
                 hustmq_ha;
-                http_basic_auth_file /data/hustmqha/conf/htpasswd;
+                http_basic_auth_file /opt/huststore/hustmqha/conf/htpasswd;
             }
 
             location /hustmq/stat_all {

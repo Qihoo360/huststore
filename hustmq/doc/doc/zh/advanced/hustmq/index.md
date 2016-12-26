@@ -3,30 +3,30 @@ hustmq
 
 ### 程序 ###
 
-* `/data/hustmq/hustdb`
-* `/data/hustmq/hustdb.conf`
+* `/opt/huststore/hustmq/hustdb`
+* `/opt/huststore/hustmq/hustdb.conf`
 
 ### 使用方法 ###
 
 #### 查看当前版本 ####
 
     $ export LD_LIBRARY_PATH=/usr/local/lib
-    $ /data/hustmq/hustdb -v
+    $ /opt/huststore/hustmq/hustdb -v
 
 #### 启动服务（守护进程方式，后台运行） ####
 
     $ export LD_LIBRARY_PATH=/usr/local/lib
-    $ /data/hustmq/hustdb
+    $ /opt/huststore/hustmq/hustdb
 
 #### 退出服务 ####
 
     $ export LD_LIBRARY_PATH=/usr/local/lib
-    $ /data/hustmq/hustdb -q
+    $ /opt/huststore/hustmq/hustdb -q
 
 #### 启动服务（调试方式，前台运行） ####
 
     $ export LD_LIBRARY_PATH=/usr/local/lib
-    $ /data/hustmq/hustdb -d
+    $ /opt/huststore/hustmq/hustdb -d
 
 ### 配置 ###
 

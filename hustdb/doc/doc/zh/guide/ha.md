@@ -27,7 +27,11 @@ hustdb ha
     $ make -j
     $ make install
 
-修改 `hustdb/ha/nginx/conf/nginx.json` 内容如下，其中 **`backends` 请替换为真实的 `hustdb` 机器列表，至少要有两个：**
+打开配置文件：
+
+    $ vi ../ha/nginx/conf/nginx.json
+
+修改 `nginx.json` 内容如下，其中 **`backends` 请替换为真实的 `hustdb` 机器列表，至少要有两个：**
 
     {
         "module": "hustdb_ha",

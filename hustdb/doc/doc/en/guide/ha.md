@@ -27,7 +27,11 @@ Install `ha` and `sync server`:
     $ make -j
     $ make install
 
-Modify contents of `hustdb/ha/nginx/conf/nginx.json` as below ( **replace `backends` to your real `hustdb` machine list, at list two machine are required:**
+Open the configuration:  
+
+    $ vi ../ha/nginx/conf/nginx.json
+
+Modify contents of `nginx.json` as below ( **replace `backends` to your real `hustdb` machine list, at list two machine are required:**
 
     {
         "module": "hustdb_ha",

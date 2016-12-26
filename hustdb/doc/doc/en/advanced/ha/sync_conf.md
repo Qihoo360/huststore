@@ -4,7 +4,7 @@ Sync Server Configuration
 ### Service Configuration ###
   
 Source code path: `hustdb/sync/module/sync_server.json`  
-Installation path: `/data/hustdbsync/sync_server.json`
+Installation path: `/opt/huststore/hustdbsync/sync_server.json`
 
 A complete example of configuration file: 
 
@@ -29,9 +29,9 @@ A complete example of configuration file:
         "sync":
         {
             "daemon": true,
-            "logs_path": "/data/hustdbha/logs/",
-            "ngx_path":  "/data/hustdbha/",
-            "auth_path": "/data/hustdbha/conf/htpasswd",
+            "logs_path": "/opt/huststore/hustdbha/logs/",
+            "ngx_path":  "/opt/huststore/hustdbha/",
+            "auth_path": "/opt/huststore/hustdbha/conf/htpasswd",
             "threads": 4,
             "release_interval": 5000,
             "checkdb_interval": 5000,
@@ -83,9 +83,9 @@ A complete example of configuration file:
     default = "[%d] [%V] | %m%n"
     
     [rules]
-    hustdbsync.*             "/data/hustdbsync/logs/%d(%Y-%m-%d).log"; default
+    hustdbsync.*             "/opt/huststore/hustdbsync/logs/%d(%Y-%m-%d).log"; default
 
-If the deployment path of `sync server` is not `/data/hustdbsync`, then its `[rules]` should be changed to the corresponding path.
+If the deployment path of `sync server` is not `/opt/huststore/hustdbsync`, then its `[rules]` should be changed to the corresponding path.
 
 
 [Previous](conf.md)

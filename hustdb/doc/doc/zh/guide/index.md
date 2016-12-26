@@ -106,9 +106,9 @@
 **先后** 启动 `HA` 以及 `sync server`：
 
     $ export LD_LIBRARY_PATH=/usr/local/lib
-    $ /data/hustdbha/sbin/nginx
-    $ cd /data/hustdbsync
-    $ /data/hustdbsync/hustdbsync
+    $ /opt/huststore/hustdbha/sbin/nginx
+    $ cd /opt/huststore/hustdbsync
+    $ /opt/huststore/hustdbsync/hustdbsync
 
 输入如下测试命令：
 

@@ -85,10 +85,10 @@ Below is a complete **one-key script for remote deployment**, it also includes d
         sh Config.sh; \
         make -j; \
         make install; \
-        cd /data/hustdbha/html/; \
+        cd /opt/huststore/hustdbha/html/; \
         rm -f status.html; \
         echo "ok" > status.html; \
-        cp /data/tmp/huststore/hustdb/ha/upgrade.sh /data/hustdbha/sbin/; \
+        cp /data/tmp/huststore/hustdb/ha/upgrade.sh /opt/huststore/hustdbha/sbin/; \
         cd /data/tmp/huststore/third_party; \
         ./build_libcurl.sh; \
         cp /data/tmp/huststore/hustdb/sync; \
@@ -142,10 +142,10 @@ If only `HA` needs to be re-deployed, you can refer to the below scripts:
         sh Config.sh; \
         make -j; \
         make install; \
-        cd /data/hustdbha/html/; \
+        cd /opt/huststore/hustdbha/html/; \
         rm -f status.html; \
         echo "ok" > status.html; \
-        cp /data/tmp/huststore/hustdb/ha/upgrade.sh /data/hustdbha/sbin/; \
+        cp /data/tmp/huststore/hustdb/ha/upgrade.sh /opt/huststore/hustdbha/sbin/; \
         cd /data/tmp/; \
         rm -rf huststore; \
         rm -f huststore.tar.gz; \
@@ -188,9 +188,9 @@ If only `sync server` needs to be re-deployed, you can refer to the below script
 
 Make sure `sync server` has exit before executing the above script, command to exit `sync server` is:
 
-    $ cd /data/hustdbsync
+    $ cd /opt/huststore/hustdbsync
     $ export LD_LIBRARY_PATH=/usr/local/lib
-    $ /data/hustdbsync/hustdbsync -q
+    $ /opt/huststore/hustdbsync/hustdbsync -q
 
 Script for remote operations:
 
@@ -200,9 +200,9 @@ Script for remote operations:
         ssh -oStrictHostKeyChecking=no \
         jobs@192.168.1.101 \
         ' \
-        cd  /data/hustdbsync; \
+        cd  /opt/huststore/hustdbsync; \
         export LD_LIBRARY_PATH=/usr/local/lib; \
-        /data/hustdbsync/hustdbsync -q; \
+        /opt/huststore/hustdbsync/hustdbsync -q; \
         '
     
     echo 'finish!'

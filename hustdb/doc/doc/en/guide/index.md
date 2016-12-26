@@ -106,9 +106,9 @@ After finish configuration, install `ha` and `sync server`:
 Start `HA` and `sync server` **in order**:
 
     $ export LD_LIBRARY_PATH=/usr/local/lib
-    $ /data/hustdbha/sbin/nginx
-    $ cd /data/hustdbsync
-    $ /data/hustdbsync/hustdbsync
+    $ /opt/huststore/hustdbha/sbin/nginx
+    $ cd /opt/huststore/hustdbsync
+    $ /opt/huststore/hustdbsync/hustdbsync
 
 Type in commands:
 

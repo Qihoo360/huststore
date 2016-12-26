@@ -84,10 +84,10 @@
         sh Config.sh; \
         make -j; \
         make install; \
-        cd /data/hustdbha/html/; \
+        cd /opt/huststore/hustdbha/html/; \
         rm -f status.html; \
         echo "ok" > status.html; \
-        cp /data/tmp/huststore/hustdb/ha/upgrade.sh /data/hustdbha/sbin/; \
+        cp /data/tmp/huststore/hustdb/ha/upgrade.sh /opt/huststore/hustdbha/sbin/; \
         cd /data/tmp/huststore/third_party; \
         ./build_libcurl.sh; \
         cp /data/tmp/huststore/hustdb/sync; \
@@ -141,10 +141,10 @@
         sh Config.sh; \
         make -j; \
         make install; \
-        cd /data/hustdbha/html/; \
+        cd /opt/huststore/hustdbha/html/; \
         rm -f status.html; \
         echo "ok" > status.html; \
-        cp /data/tmp/huststore/hustdb/ha/upgrade.sh /data/hustdbha/sbin/; \
+        cp /data/tmp/huststore/hustdb/ha/upgrade.sh /opt/huststore/hustdbha/sbin/; \
         cd /data/tmp/; \
         rm -rf huststore; \
         rm -f huststore.tar.gz; \
@@ -187,9 +187,9 @@
 
 在执行上述脚本之前，请先确保 `sync server` 进程已经退出。退出 `sync server` 的命令为：
 
-    $ cd /data/hustdbsync
+    $ cd /opt/huststore/hustdbsync
     $ export LD_LIBRARY_PATH=/usr/local/lib
-    $ /data/hustdbsync/hustdbsync -q
+    $ /opt/huststore/hustdbsync/hustdbsync -q
 
 远程操作的脚本如下：
 
@@ -199,9 +199,9 @@
         ssh -oStrictHostKeyChecking=no \
         jobs@192.168.1.101 \
         ' \
-        cd  /data/hustdbsync; \
+        cd  /opt/huststore/hustdbsync; \
         export LD_LIBRARY_PATH=/usr/local/lib; \
-        /data/hustdbsync/hustdbsync -q; \
+        /opt/huststore/hustdbsync/hustdbsync -q; \
         '
     
     echo 'finish!'

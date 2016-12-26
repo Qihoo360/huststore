@@ -3,30 +3,30 @@ hustdb
 
 ### 程序 ###
 
-* `/data/hustdb/hustdb`
-* `/data/hustdb/hustdb.conf`
+* `/opt/huststore/hustdb/hustdb`
+* `/opt/huststore/hustdb/hustdb.conf`
 
 ### 使用方法 ###
 
 #### 查看当前版本 ####
 
     $ export LD_LIBRARY_PATH=/usr/local/lib
-    $ /data/hustdb/hustdb -v
+    $ /opt/huststore/hustdb/hustdb -v
 
 #### 启动服务（守护进程方式，后台运行） ####
 
     $ export LD_LIBRARY_PATH=/usr/local/lib
-    $ /data/hustdb/hustdb
+    $ /opt/huststore/hustdb/hustdb
 
 #### 退出服务 ####
 
     $ export LD_LIBRARY_PATH=/usr/local/lib
-    $ /data/hustdb/hustdb -q
+    $ /opt/huststore/hustdb/hustdb -q
 
 #### 启动服务（调试方式，前台运行） ####
 
     $ export LD_LIBRARY_PATH=/usr/local/lib
-    $ /data/hustdb/hustdb -d
+    $ /opt/huststore/hustdb/hustdb -d
 
 ### 配置 ###
 

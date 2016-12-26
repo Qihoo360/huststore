@@ -3,30 +3,30 @@ hustdb
 
 ### Program ###
 
-* `/data/hustdb/hustdb`
-* `/data/hustdb/hustdb.conf`
+* `/opt/huststore/hustdb/hustdb`
+* `/opt/huststore/hustdb/hustdb.conf`
 
 ### Usage ###
 
 #### Show Version ####
 
     $ export LD_LIBRARY_PATH=/usr/local/lib
-    $ /data/hustdb/hustdb -v
+    $ /opt/huststore/hustdb/hustdb -v
 
 #### Service Start (Daemon, work in background) ####
 
     $ export LD_LIBRARY_PATH=/usr/local/lib
-    $ /data/hustdb/hustdb
+    $ /opt/huststore/hustdb/hustdb
 
 #### Service Stop ####
 
     $ export LD_LIBRARY_PATH=/usr/local/lib
-    $ /data/hustdb/hustdb -q
+    $ /opt/huststore/hustdb/hustdb -q
 
 #### Service Start (Debug, work in foreground) ####
 
     $ export LD_LIBRARY_PATH=/usr/local/lib
-    $ /data/hustdb/hustdb -d
+    $ /opt/huststore/hustdb/hustdb -d
 
 ### Configuration ###
 

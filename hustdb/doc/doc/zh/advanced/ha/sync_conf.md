@@ -4,7 +4,7 @@ sync server 配置文件
 ### 服务配置 ###
   
 源码路径：`hustdb/sync/module/sync_server.json`  
-安装路径：`/data/hustdbsync/sync_server.json`
+安装路径：`/opt/huststore/hustdbsync/sync_server.json`
 
 以下是一个完整的配置文件：
 
@@ -29,9 +29,9 @@ sync server 配置文件
         "sync":
         {
             "daemon": true,
-            "logs_path": "/data/hustdbha/logs/",
-            "ngx_path":  "/data/hustdbha/",
-            "auth_path": "/data/hustdbha/conf/htpasswd",
+            "logs_path": "/opt/huststore/hustdbha/logs/",
+            "ngx_path":  "/opt/huststore/hustdbha/",
+            "auth_path": "/opt/huststore/hustdbha/conf/htpasswd",
             "threads": 4,
             "release_interval": 5000,
             "checkdb_interval": 5000,
@@ -83,9 +83,9 @@ sync server 配置文件
     default = "[%d] [%V] | %m%n"
     
     [rules]
-    hustdbsync.*             "/data/hustdbsync/logs/%d(%Y-%m-%d).log"; default
+    hustdbsync.*             "/opt/huststore/hustdbsync/logs/%d(%Y-%m-%d).log"; default
 
-如果 `sync server` 的部署路径不是 `/data/hustdbsync`，则其中 `[rules]` 需要变更为对应的路径。
+如果 `sync server` 的部署路径不是 `/opt/huststore/hustdbsync`，则其中 `[rules]` 需要变更为对应的路径。
 
 
 [上一页](conf.md)

@@ -29,4 +29,4 @@
 **Q** :  `hustdb ha` 的接口中 `/cache/xxx` 与 `/xxx` 的差别是什么？例如 `/cache/put` 和 `put`。   
 **A** :  参考 [这里](../api/ha.md) 。
 
-[根目录](../index.md)
+[回首页](../index.md)

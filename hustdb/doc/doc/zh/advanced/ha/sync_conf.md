@@ -90,4 +90,4 @@ sync server 配置文件
 
 [上一级](conf.md)
 
-[根目录](../../index.md)
+[回首页](../../index.md)

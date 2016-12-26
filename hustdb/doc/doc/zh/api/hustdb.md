@@ -100,4 +100,4 @@ fastdb编号，0~N-1（N为hustdb.conf中fastdb.count值）
 
 [上一级](index.md)
 
-[根目录](../index.md)
+[回首页](../index.md)

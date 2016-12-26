@@ -134,4 +134,4 @@
 * [hustdb ha 负载均衡表](../advanced/ha/table.md)
 * [hustdb ha 日志配置](../advanced/ha/zlog.md)
 
-[根目录](../index.md)
+[回首页](../index.md)

@@ -17,4 +17,4 @@ hash_item
 
 [上一级](../table.md)
 
-[根目录](../../../index.md)
+[回首页](../../../index.md)

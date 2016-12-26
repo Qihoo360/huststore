@@ -7,6 +7,6 @@ hustmq ha
 * [测试](test.md)
 * [平滑升级](upgrade.md)
 
-[上一级](../index.md)
+[上一页](../index.md)
 
 [回首页](../../index.md)

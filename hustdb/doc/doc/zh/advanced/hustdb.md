@@ -118,6 +118,6 @@ hustdb
     # UNIT MB, 16 ~ 128, default 64
     cache                           = 64            //contentdb缓存
 
-[上一级](index.md)
+[上一页](index.md)
 
 [回首页](../index.md)

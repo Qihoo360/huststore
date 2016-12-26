@@ -48,6 +48,6 @@
     
 更加详尽的测试代码可参考 `hustmq/ha/nginx/test/do_post.py`
 
-[上一级](../ha.md)
+[上一页](../ha.md)
 
 [回首页](../../index.md)

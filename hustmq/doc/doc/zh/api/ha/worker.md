@@ -14,6 +14,6 @@
 
     curl -i -X GET "http://localhost:8080/worker?queue=test_queue"
 
-[上一级](../ha.md)
+[上一页](../ha.md)
 
 [回首页](../../index.md)

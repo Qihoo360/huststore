@@ -98,6 +98,6 @@ fastdb编号，0~N-1（N为hustdb.conf中fastdb.count值）
 #### `async` ####
 通过snapshot获取数据，snapshot由export接口产生，用于keys，hkeys等接口，默认false，即不使用snapshot
 
-[上一级](index.md)
+[上一页](index.md)
 
 [回首页](../index.md)

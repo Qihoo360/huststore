@@ -29,6 +29,6 @@
 * free_workers: 剩余可被分配的 `worker` 数量，每来一个 [`do_post`](do_post.md) 请求，该值都会减一，相应的 `cache_executers` 会加一
 * total: 分配的 `worker` 缓存总数
 
-[上一级](../ha.md)
+[上一页](../ha.md)
 
 [回首页](../../index.md)

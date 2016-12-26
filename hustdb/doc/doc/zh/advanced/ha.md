@@ -14,6 +14,6 @@ hustdb ha
 * [测试](ha/test.md)
 * [平滑升级](ha/upgrade.md)
 
-[上一级](index.md)
+[上一页](index.md)
 
 [回首页](../index.md)

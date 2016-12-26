@@ -48,6 +48,6 @@
 * `Version1`：`master1` 的值的版本号。  
 * `Version2`：`master2` 的值的版本号。
 
-[上一级](../ha.md)
+[上一页](../ha.md)
 
 [回首页](../../index.md)

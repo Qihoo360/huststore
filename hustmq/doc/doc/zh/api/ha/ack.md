@@ -16,6 +16,6 @@
 
 请参考脚本 `hustmq/ha/nginx/test/autotest.py`
 
-[上一级](../ha.md)
+[上一页](../ha.md)
 
 [回首页](../../index.md)

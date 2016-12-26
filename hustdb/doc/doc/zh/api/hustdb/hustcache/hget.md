@@ -25,6 +25,6 @@
 
 	test_val
 
-[上一级](../hustcache.md)
+[上一页](../hustcache.md)
 
 [回首页](../../../index.md)

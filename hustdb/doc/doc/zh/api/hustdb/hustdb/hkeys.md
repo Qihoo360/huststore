@@ -69,6 +69,6 @@
     //ty: table type (H: hash, S: set, Z: sort set)
 	[{"key":"eHVydWlib19rZXlfOTM=","ver":1},{"key":"eHVydWlib19rZXlfNTM=","ver":1},{"key":"eHVydWlib19rZXlfMTc=","ver":1},{"key":"eHVydWlib19rZXlfNjE=","ver":1},{"key":"a2V5XzU0","ver":1},{"key":"eHVydWlib19rZXlfOTE=","ver":1},{"key":"eHVydWlib19rZXlfNQ==","ver":1},{"key":"a2V5XzUy","ver":1},{"key":"a2V5Xzg2","ver":1},{"key":"a2V5XzQ0","ver":1}]
 
-[上一级](../hustdb.md)
+[上一页](../hustdb.md)
 
 [回首页](../../../index.md)

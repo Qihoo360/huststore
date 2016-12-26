@@ -48,6 +48,6 @@
 **动画效果:**
 ![stat_all](../../../res/stat_all.gif)
 
-[上一级](../ha.md)
+[上一页](../ha.md)
 
 [回首页](../../index.md)

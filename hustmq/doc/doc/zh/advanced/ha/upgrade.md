@@ -39,6 +39,6 @@
 
     sh upgrade.sh jobs
 
-[上一级](index.md)
+[上一页](index.md)
 
 [回首页](../../index.md)

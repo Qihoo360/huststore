@@ -16,6 +16,6 @@
 
     curl -i -X GET "http://localhost:8082/cache/hset?tb=test_table&key=test_key&val=test_val"
 
-[上一级](../cache.md)
+[上一页](../cache.md)
 
 [回首页](../../../index.md)

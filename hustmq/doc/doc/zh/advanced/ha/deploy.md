@@ -68,6 +68,6 @@
     tar -zcf nginx.tar.gz nginx
     cp upgrade.sh nginx.tar.gz ../deploy/
 
-[上一级](index.md)
+[上一页](index.md)
 
 [回首页](../../index.md)

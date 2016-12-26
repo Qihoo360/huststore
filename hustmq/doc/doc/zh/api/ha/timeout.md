@@ -24,6 +24,6 @@
     Content-Length: 0
     Connection: keep-alive
 
-[上一级](../ha.md)
+[上一页](../ha.md)
 
 [回首页](../../index.md)

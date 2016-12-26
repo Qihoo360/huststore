@@ -88,6 +88,6 @@ sync server 配置文件
 如果 `sync server` 的部署路径不是 `/data/hustdbsync`，则其中 `[rules]` 需要变更为对应的路径。
 
 
-[上一级](conf.md)
+[上一页](conf.md)
 
 [回首页](../../index.md)

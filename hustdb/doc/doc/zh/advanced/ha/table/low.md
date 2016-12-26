@@ -9,6 +9,6 @@ low
 
 `low` 表示扩容后的低位区间，包含 [key](key.md) 和 [val](val.md) 两个成员。
 
-[上一级](../table.md)
+[上一页](../table.md)
 
 [回首页](../../../index.md)

@@ -31,6 +31,6 @@
 
 相关的字段含义可参考 [`/hustmq/stat_all`](../hustmq/stat_all.md) 。
 
-[上一级](../ha.md)
+[上一页](../ha.md)
 
 [回首页](../../index.md)

@@ -14,6 +14,6 @@
 
     curl -i -X GET "http://localhost:8082/cache/get?key=test_key"
 
-[上一级](../cache.md)
+[上一页](../cache.md)
 
 [回首页](../../../index.md)

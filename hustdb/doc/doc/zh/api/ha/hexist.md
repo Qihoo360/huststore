@@ -15,6 +15,6 @@
 
     curl -i -X GET "http://localhost:8082/hexist?tb=test_table&key=test_key"
 
-[上一级](../ha.md)
+[上一页](../ha.md)
 
 [回首页](../../index.md)

@@ -15,6 +15,6 @@
 
     curl -i -X GET "http://localhost:8082/cache/expire?key=test_key&ttl=60"
 	
-[上一级](../cache.md)
+[上一页](../cache.md)
 
 [回首页](../../../index.md)

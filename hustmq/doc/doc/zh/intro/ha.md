@@ -15,6 +15,6 @@ hustmq ha
 
 > [nginx 配置之 proxy](http://nginx.org/en/docs/http/ngx_http_proxy_module.html)
 
-[上一级](index.md)
+[上一页](index.md)
 
 [回首页](../index.md)

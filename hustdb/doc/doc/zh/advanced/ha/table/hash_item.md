@@ -15,6 +15,6 @@ hash_item
 
 - [decrease](decrease.md) 
 
-[上一级](../table.md)
+[上一页](../table.md)
 
 [回首页](../../../index.md)

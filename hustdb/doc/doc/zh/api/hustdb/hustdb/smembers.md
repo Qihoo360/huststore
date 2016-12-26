@@ -51,6 +51,6 @@
 	//key format: base64
 	[{"key":"eHVydWlib3NldF9Sb2NrZXQsSHVzdERCLEh1c3RNUSxIdXN0TkdYXzc1","ver":1},{"key":"Um9ja2V0LEh1c3REQixIdXN0TVEsSHVzdE5HWF8xNA==","ver":1},{"key":"Um9ja2V0LEh1c3REQixIdXN0TVEsSHVzdE5HWF8xNg==","ver":1},{"key":"eHVydWlib3NldF9Sb2NrZXQsSHVzdERCLEh1c3RNUSxIdXN0TkdYXzUx","ver":1},{"key":"eHVydWlib3NldF9Sb2NrZXQsSHVzdERCLEh1c3RNUSxIdXN0TkdYXzE1","ver":1},{"key":"eHVydWlib3NldF9Sb2NrZXQsSHVzdERCLEh1c3RNUSxIdXN0TkdYXzY3","ver":1},{"key":"Um9ja2V0LEh1c3REQixIdXN0TVEsSHVzdE5HWF83OA==","ver":1},{"key":"eHVydWlib3NldF9Sb2NrZXQsSHVzdERCLEh1c3RNUSxIdXN0TkdYXzMz","ver":1},{"key":"Um9ja2V0LEh1c3REQixIdXN0TVEsSHVzdE5HWF84","ver":1},{"key":"Um9ja2V0LEh1c3REQixIdXN0TVEsSHVzdE5HWF80OA==","ver":1}]
 
-[上一级](../hustdb.md)
+[上一页](../hustdb.md)
 
 [回首页](../../../index.md)

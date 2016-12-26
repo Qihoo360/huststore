@@ -17,6 +17,6 @@
 
     curl -i -X GET "http://localhost:8080/pub?queue=test_queue&item=test_value"
 
-[上一级](../ha.md)
+[上一页](../ha.md)
 
 [回首页](../../index.md)

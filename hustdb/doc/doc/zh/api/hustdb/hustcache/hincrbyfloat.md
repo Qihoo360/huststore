@@ -22,6 +22,6 @@
 
 	7.5 //if original value of test_key is 1.7, 1.7 + 5.8 = 7.5
 
-[上一级](../hustcache.md)
+[上一页](../hustcache.md)
 
 [回首页](../../../index.md)

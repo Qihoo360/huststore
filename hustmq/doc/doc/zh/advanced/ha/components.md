@@ -50,6 +50,6 @@
 
 具体的使用方法可以参考 `hustmq/ha/nginx/src/addon/hustmq_ha_fetch_stat.c`
 
-[上一级](index.md)
+[上一页](index.md)
 
 [回首页](../../index.md)

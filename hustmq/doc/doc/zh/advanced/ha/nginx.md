@@ -433,6 +433,6 @@ nginx 配置文件
 * 如何禁用 `http basic authentication` ？  
 配置 `nginx.json` 时，直接删掉 `"http_basic_auth_file"` 字段以及相应的值，利用 `genconf.py` 重新生成 `nginx.conf` 即可
 
-[上一级](index.md)
+[上一页](index.md)
 
 [回首页](../../index.md)

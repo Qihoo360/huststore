@@ -9,6 +9,6 @@ increase
 
 `increase` 用于定义负载均衡表的扩容语义，包含 [low](low.md) 和 [high](high.md) 两个成员。
 
-[上一级](../table.md)
+[上一页](../table.md)
 
 [回首页](../../../index.md)

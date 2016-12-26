@@ -9,6 +9,6 @@ decrease
 
 `decrease` 用于定义负载均衡表的减容语义，包含 [remove](remove.md) 和 [replace_by](replace_by.md) 两个成员。
 
-[上一级](../table.md)
+[上一页](../table.md)
 
 [回首页](../../../index.md)

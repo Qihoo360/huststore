@@ -29,6 +29,6 @@
 	HTTP/1.1 200 OK
 	Version: 1
 
-[上一级](../hustdb.md)
+[上一页](../hustdb.md)
 
 [回首页](../../../index.md)

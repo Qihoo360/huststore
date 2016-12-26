@@ -16,6 +16,6 @@
 参考测试脚本的写法。  
 脚本路径： `hustdb/ha/nginx/test/autotest.py`
 
-[上一级](../ha.md)
+[上一页](../ha.md)
 
 [回首页](../../index.md)

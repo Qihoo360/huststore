@@ -36,6 +36,6 @@
     # terminal 2
     $ python autotest.py evput
 
-[上一级](index.md)
+[上一页](index.md)
 
 [回首页](../../index.md)

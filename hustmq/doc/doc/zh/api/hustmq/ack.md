@@ -25,6 +25,6 @@
 
 	HTTP/1.1 200 OK
 
-[上一级](../hustmq.md)
+[上一页](../hustmq.md)
 
 [回首页](../../index.md)

@@ -94,7 +94,7 @@
 **Q:** `sync server` 的局限与风险？  
 **A:**  对于 `sync server` 开启前生成的日志， `sync server`无法自动同步。如果要同步这些日志，需要手动重新拷贝到 `logs`目录下对应的 `backends` 目录中。
 
-[上一级](../ha.md)
+[上一页](../ha.md)
 
 [回首页](../../index.md)
 

@@ -9,6 +9,6 @@ table
 
 负载均衡哈希表，每一个子项都是 [hash_item](hash_item.md)。
 
-[上一级](../table.md)
+[上一页](../table.md)
 
 [回首页](../../../index.md)

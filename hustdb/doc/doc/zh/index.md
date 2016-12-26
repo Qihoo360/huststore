@@ -5,8 +5,6 @@ hustdb
 ==
 
 * [简介](intro/index.md)
-    * [`hustdb`](intro/hustdb.md)
-    * [`hustdb ha`](intro/ha.md)
 * [快速入门](guide/index.md)
 * [API 手册](api/index.md)
     * [`hustdb`](api/hustdb.md)

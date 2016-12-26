@@ -12,10 +12,6 @@ Dependency
 	$ make 
 	$ sudo make install
 
-	$ sudo vi /etc/ld.so.conf
-	/usr/local/lib
-	$ sudo ldconfig
-
 ### libcurl ###
 
 `sync server` needs to `POST` data to the backend machines which are synchronizing. An open source library [libcurl](https://curl.haxx.se) is used for transporting data.

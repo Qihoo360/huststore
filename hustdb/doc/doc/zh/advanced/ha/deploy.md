@@ -12,10 +12,6 @@
 	$ make 
 	$ sudo make install
 
-	$ sudo vi /etc/ld.so.conf
-	/usr/local/lib
-	$ sudo ldconfig
-
 ### libcurl ###
 
 `sync server` 同步时需要将数据 `POST` 到后端机。这里使用了开源的 `url` 传输库 [libcurl](https://curl.haxx.se)。
@@ -188,7 +184,7 @@
 在执行上述脚本之前，请先确保 `sync server` 进程已经退出。退出 `sync server` 的命令为：
 
     $ cd /opt/huststore/hustdbsync
-    $ export LD_LIBRARY_PATH=/usr/local/lib
+    $ export LD_LIBRARY_PATH=/opt/huststore/3rd/lib
     $ /opt/huststore/hustdbsync/hustdbsync -q
 
 远程操作的脚本如下：
@@ -200,7 +196,7 @@
         jobs@192.168.1.101 \
         ' \
         cd  /opt/huststore/hustdbsync; \
-        export LD_LIBRARY_PATH=/usr/local/lib; \
+        export LD_LIBRARY_PATH=/opt/huststore/3rd/lib; \
         /opt/huststore/hustdbsync/hustdbsync -q; \
         '
     

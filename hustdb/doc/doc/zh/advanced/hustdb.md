@@ -10,22 +10,22 @@ hustdb
 
 #### 查看当前版本 ####
 
-    $ export LD_LIBRARY_PATH=/usr/local/lib
+    $ export LD_LIBRARY_PATH=/opt/huststore/3rd/lib
     $ /opt/huststore/hustdb/hustdb -v
 
 #### 启动服务（守护进程方式，后台运行） ####
 
-    $ export LD_LIBRARY_PATH=/usr/local/lib
+    $ export LD_LIBRARY_PATH=/opt/huststore/3rd/lib
     $ /opt/huststore/hustdb/hustdb
 
 #### 退出服务 ####
 
-    $ export LD_LIBRARY_PATH=/usr/local/lib
+    $ export LD_LIBRARY_PATH=/opt/huststore/3rd/lib
     $ /opt/huststore/hustdb/hustdb -q
 
 #### 启动服务（调试方式，前台运行） ####
 
-    $ export LD_LIBRARY_PATH=/usr/local/lib
+    $ export LD_LIBRARY_PATH=/opt/huststore/3rd/lib
     $ /opt/huststore/hustdb/hustdb -d
 
 ### 配置 ###

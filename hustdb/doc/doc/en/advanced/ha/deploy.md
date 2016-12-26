@@ -12,10 +12,6 @@ Deployment
 	$ make 
 	$ sudo make install
 
-	$ sudo vi /etc/ld.so.conf
-	/usr/local/lib
-	$ sudo ldconfig
-
 ### libcurl ###
 
 `sync server` needs to `POST` data to the backend machines synchronizing. An open source library [libcurl](https://curl.haxx.se) is used for transproting data.
@@ -189,7 +185,7 @@ If only `sync server` needs to be re-deployed, you can refer to the below script
 Make sure `sync server` has exit before executing the above script, command to exit `sync server` is:
 
     $ cd /opt/huststore/hustdbsync
-    $ export LD_LIBRARY_PATH=/usr/local/lib
+    $ export LD_LIBRARY_PATH=/opt/huststore/3rd/lib
     $ /opt/huststore/hustdbsync/hustdbsync -q
 
 Script for remote operations:
@@ -201,7 +197,7 @@ Script for remote operations:
         jobs@192.168.1.101 \
         ' \
         cd  /opt/huststore/hustdbsync; \
-        export LD_LIBRARY_PATH=/usr/local/lib; \
+        export LD_LIBRARY_PATH=/opt/huststore/3rd/lib; \
         /opt/huststore/hustdbsync/hustdbsync -q; \
         '
     

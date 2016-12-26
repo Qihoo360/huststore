@@ -16,7 +16,7 @@ Target path
 Start service
 
     $ cd hustdb/db/server/make/linux/
-    $ export LD_LIBRARY_PATH=/usr/local/lib
+    $ export LD_LIBRARY_PATH=/opt/huststore/3rd/lib
     $ ./hustdb
 
 Type in the below command to test:
@@ -105,7 +105,7 @@ After finish configuration, install `ha` and `sync server`:
 
 Start `HA` and `sync server` **in order**:
 
-    $ export LD_LIBRARY_PATH=/usr/local/lib
+    $ export LD_LIBRARY_PATH=/opt/huststore/3rd/lib
     $ /opt/huststore/hustdbha/sbin/nginx
     $ cd /opt/huststore/hustdbsync
     $ /opt/huststore/hustdbsync/hustdbsync

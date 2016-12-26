@@ -16,7 +16,7 @@
 启动服务
 
     $ cd hustdb/db/server/make/linux/
-    $ export LD_LIBRARY_PATH=/usr/local/lib
+    $ export LD_LIBRARY_PATH=/opt/huststore/3rd/lib
     $ ./hustdb
 
 输入如下测试命令：
@@ -105,7 +105,7 @@
 
 **先后** 启动 `HA` 以及 `sync server`：
 
-    $ export LD_LIBRARY_PATH=/usr/local/lib
+    $ export LD_LIBRARY_PATH=/opt/huststore/3rd/lib
     $ /opt/huststore/hustdbha/sbin/nginx
     $ cd /opt/huststore/hustdbsync
     $ /opt/huststore/hustdbsync/hustdbsync

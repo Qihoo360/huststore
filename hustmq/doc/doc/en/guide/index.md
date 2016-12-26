@@ -72,7 +72,7 @@ After configuration, install `hustmq ha`:
 
 Start nginx:
 
-    $ export LD_LIBRARY_PATH=/usr/local/lib
+    $ export LD_LIBRARY_PATH=/opt/huststore/3rd/lib
     $ /opt/huststore/hustmqha/sbin/nginx
 
 Input the following test command:

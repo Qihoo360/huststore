@@ -10,22 +10,22 @@ hustmq
 
 #### Show Version ####
 
-    $ export LD_LIBRARY_PATH=/usr/local/lib
+    $ export LD_LIBRARY_PATH=/opt/huststore/3rd/lib
     $ /opt/huststore/hustmq/hustdb -v
 
 #### Service Start (Daemon, work in background) ####
 
-    $ export LD_LIBRARY_PATH=/usr/local/lib
+    $ export LD_LIBRARY_PATH=/opt/huststore/3rd/lib
     $ /opt/huststore/hustmq/hustdb
 
 #### Service Stop ####
 
-    $ export LD_LIBRARY_PATH=/usr/local/lib
+    $ export LD_LIBRARY_PATH=/opt/huststore/3rd/lib
     $ /opt/huststore/hustmq/hustdb -q
 
 #### Service Start (Debug, work in foreground) ####
 
-    $ export LD_LIBRARY_PATH=/usr/local/lib
+    $ export LD_LIBRARY_PATH=/opt/huststore/3rd/lib
     $ /opt/huststore/hustmq/hustdb -d
 
 ### Configuration ###

@@ -97,4 +97,4 @@
 * [hustmq ha 配置细节](../advanced/ha/nginx.md)
 * [hustmq ha 部署细节](../advanced/ha/deploy.md)
 
-[根目录](../index.md)
+[回首页](../index.md)

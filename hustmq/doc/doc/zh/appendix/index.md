@@ -23,4 +23,4 @@
 **Q** :  `hustmq ha` 如何保证队列数据的先进先出？  
 **A** :  参考 [这一节](../advanced/ha/nginx.md) 关于 `queue_hash` 的配置。
 
-[根目录](../index.md)
+[回首页](../index.md)

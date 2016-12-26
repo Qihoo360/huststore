@@ -21,146 +21,19 @@ Open the configuration:
     $ cd ../hustdb/ha/nginx/conf/
     $ vi nginx.json
 
-Modify contents of `nginx.json` as below ( **replace `backends` to your real `hustdb` machine list, at list two machine are required:**
+**Replace `backends` to your real `hustdb` machine list, at list two machine are required:**
 
     {
-        "module": "hustdb_ha",
-        "worker_processes": 4,
-        "worker_connections": 1048576,
-        "listen": 8082,
-        "keepalive_timeout": 540,
-        "keepalive": 32768,
-        "main_conf":
-        [
-            ["zlog_mdc", "sync_dir"],
-            ["hustdbtable_file", "hustdbtable.json"],
-            ["hustdb_ha_shm_name", "hustdb_ha_share_memory"],
-            ["hustdb_ha_shm_size", "10m"],
-            ["public_pem", "public.pem"],
-            ["identifier_cache_size", 128],
-            ["identifier_timeout", "10s"],
-            ["fetch_req_pool_size", "4k"],
-            ["keepalive_cache_size", 1024],
-            ["connection_cache_size", 1024],
-            ["fetch_connect_timeout", "2s"],
-            ["fetch_send_timeout", "60s"],
-            ["fetch_read_timeout", "60s"],
-            ["fetch_timeout", "60s"],
-            ["fetch_buffer_size", "64m"],
-            ["sync_port", "8089"],
-            ["sync_status_uri", "/sync_status"],
-            ["sync_user", "sync"],
-            ["sync_passwd", "sync"],
-            ["binlog_uri", "/hustdb/binlog"]
-        ],
-        "local_cmds": 
-        [
-            "put",
-            "get",
-            "get2",
-            "del",
-            "exist",
-            "keys",
-            "hset",
-            "hget",
-            "hget2",
-            "hdel",
-            "hexist",
-            "hkeys",
-            "sadd",
-            "srem",
-            "sismember",
-            "sismember2",
-            "smembers",
-            "zadd",
-            "zrem",
-            "zismember",
-            "zscore",
-            "zscore2",
-            "zrangebyrank",
-            "zrangebyscore",
-            "stat",
-            "stat_all",
-            "file_count",
-            "peer_count",
-            "sync_status",
-            "sync_alive",
-            "get_table",
-            "set_table",
-            "cache/exist",
-            "cache/get",
-            "cache/ttl",
-            "cache/put",
-            "cache/append",
-            "cache/del",
-            "cache/expire",
-            "cache/persist",
-            "cache/hexist",
-            "cache/hget",
-            "cache/hset",
-            "cache/hdel", 
-            "cache/hincrby",
-            "cache/hincrbyfloat"
-        ],
+        ......
         "proxy":
         {
-            "health_check": 
-            [
-                "check interval=5000 rise=1 fall=3 timeout=5000 type=http",
-                "check_http_send \"GET /status.html HTTP/1.1\\r\\n\\r\\n\"",
-                "check_http_expect_alive http_2xx"
-            ],
-            "auth": "aHVzdHN0b3JlOmh1c3RzdG9yZQ==",
-            "proxy_connect_timeout": "2s",
-            "proxy_send_timeout": "60s",
-            "proxy_read_timeout": "60s",
-            "proxy_buffer_size": "64m",
+            ......
             "backends": 
             [
                 "192.168.1.101:9999", 
                 "192.168.1.102:9999"
             ],
-            "proxy_cmds":
-            [
-                "/hustdb/put",
-                "/hustdb/get", 
-                "/hustdb/del", 
-                "/hustdb/exist",
-                "/hustdb/keys", 
-                "/hustdb/hset", 
-                "/hustdb/hget", 
-                "/hustdb/hdel", 
-                "/hustdb/hexist", 
-                "/hustdb/hkeys",
-                "/hustdb/sadd", 
-                "/hustdb/srem", 
-                "/hustdb/sismember", 
-                "/hustdb/smembers",
-                "/hustdb/zadd",
-                "/hustdb/zrem",
-                "/hustdb/zismember",
-                "/hustdb/zscore",
-                "/hustdb/zrangebyrank",
-                "/hustdb/zrangebyscore",
-                "/hustdb/stat",
-                "/hustdb/stat_all",
-                "/hustdb/file_count",
-                "/hustdb/binlog",
-                "/hustcache/exist",
-                "/hustcache/get",
-                "/hustcache/ttl",
-                "/hustcache/put",
-                "/hustcache/append",
-                "/hustcache/del",
-                "/hustcache/expire",
-                "/hustcache/persist",
-                "/hustcache/hexist",
-                "/hustcache/hget",
-                "/hustcache/hset",
-                "/hustcache/hdel", 
-                "/hustcache/hincrby",
-                "/hustcache/hincrbyfloat"
-            ]
+            ......
         }
     }
 
@@ -172,12 +45,12 @@ Edit file `hosts`:
 
     $ vi hosts
 
-Add contents as below, **please replace to your real hustdb nodes**：
+Add contents as below and save, **please replace to your real hustdb nodes**：
 
     192.168.1.101:9999
     192.168.1.102:9999
 
-运行如下命令：
+Execute command：
 
     python gen_table.py hosts hustdbtable.json
 
@@ -195,7 +68,6 @@ After finish configuration, install `ha` and `sync server`:
 Start `HA` and `sync server` **in order**:
 
     $ export LD_LIBRARY_PATH=/usr/local/lib
-    $ cd /data/hustdbha/sbin
     $ /data/hustdbha/sbin/nginx
     $ cd /data/hustdbsync
     $ /data/hustdbsync/hustdbsync
@@ -215,7 +87,7 @@ We should be able to see the below infomation:
 
     hustdbha 1.6
 
-The result shows that the servers work as expected
+The result shows that the servers work as expected.
 
 [Previous](index.md)
 

@@ -16,20 +16,10 @@ Build `libcurl`：
     $ cd third_party
     $ sh build_libcurl.sh
 
-Install `ha` and `sync server`:  
-
-    $ cd ../hustdb/ha/nginx
-    $ chmod a+x configure
-    $ sh Config.sh
-    $ make -j
-    $ make install
-    $ cd ../../sync
-    $ make -j
-    $ make install
-
 Open the configuration:  
 
-    $ vi ../ha/nginx/conf/nginx.json
+    $ cd ../hustdb/ha/nginx/conf/
+    $ vi nginx.json
 
 Modify contents of `nginx.json` as below ( **replace `backends` to your real `hustdb` machine list, at list two machine are required:**
 
@@ -174,22 +164,35 @@ Modify contents of `nginx.json` as below ( **replace `backends` to your real `hu
         }
     }
 
-Execute `genconf.py` to generate `nginx.conf`, and replace the configuration:
+Execute `genconf.py` to generate `nginx.conf`:
 
     $ python genconf.py
-    $ cp nginx.conf /data/hustdbha/conf/
 
-Edit file `/data/hustdbha/conf/hustdbtable.json` as below(**replace `ip:port` of `val` to your real hustdb nodes**:
+Edit file `hosts`:  
 
-    {
-        "table":
-        [
-            { "item": { "key": [0, 512], "val": ["192.168.1.101:9999", "192.168.1.102:9999"] } }
-            { "item": { "key": [512, 1024], "val": ["192.168.1.102:9999", "192.168.1.101:9999"] } }
-        ]
-    }
+    $ vi hosts
 
-After finish configuration, start `HA` and `sync server` **in order**:
+Add contents as below, **please replace to your real hustdb nodes**：
+
+    192.168.1.101:9999
+    192.168.1.102:9999
+
+运行如下命令：
+
+    python gen_table.py hosts hustdbtable.json
+
+After finish configuration, install `ha` and `sync server`:  
+
+    $ cd ..
+    $ chmod a+x configure
+    $ sh Config.sh
+    $ make -j
+    $ make install
+    $ cd ../../sync
+    $ make -j
+    $ make install
+
+Start `HA` and `sync server` **in order**:
 
     $ export LD_LIBRARY_PATH=/usr/local/lib
     $ cd /data/hustdbha/sbin

@@ -16,20 +16,10 @@ hustdb ha
     $ cd third_party
     $ sh build_libcurl.sh
 
-安装 `ha` 以及 `sync server`：
-
-    $ cd ../hustdb/ha/nginx
-    $ chmod a+x configure
-    $ sh Config.sh
-    $ make -j
-    $ make install
-    $ cd ../../sync
-    $ make -j
-    $ make install
-
 打开配置文件：
 
-    $ vi ../ha/nginx/conf/nginx.json
+    $ cd ../hustdb/ha/nginx/conf/
+    $ vi nginx.json
 
 修改 `nginx.json` 内容如下，其中 **`backends` 请替换为真实的 `hustdb` 机器列表，至少要有两个：**
 
@@ -174,22 +164,35 @@ hustdb ha
         }
     }
 
-运行 `genconf.py` 生成 `nginx.conf`，并替换配置：
+运行 `genconf.py` 生成 `nginx.conf`：
 
     $ python genconf.py
-    $ cp nginx.conf /data/hustdbha/conf/
 
-编辑 `/data/hustdbha/conf/hustdbtable.json` 内容如下，其中 `val` 所配置的 `ip:port` **请替换为真实的 hustdb 节点**：
+编辑 `hosts` 文件：
+    
+    $ vi hosts
 
-    {
-        "table":
-        [
-            { "item": { "key": [0, 512], "val": ["192.168.1.101:9999", "192.168.1.102:9999"] } }
-            { "item": { "key": [512, 1024], "val": ["192.168.1.102:9999", "192.168.1.101:9999"] } }
-        ]
-    }
+添加内容如下，**请替换为真实的 hustdb 节点**：
 
-配置完毕之后， **先后** 启动 `HA` 以及 `sync server`：
+    192.168.1.101:9999
+    192.168.1.102:9999
+
+运行如下命令：
+
+    python gen_table.py hosts hustdbtable.json
+
+配置完毕之后，安装 `ha` 以及 `sync server`：
+
+    $ cd ..
+    $ chmod a+x configure
+    $ sh Config.sh
+    $ make -j
+    $ make install
+    $ cd ../../sync
+    $ make -j
+    $ make install
+
+**先后** 启动 `HA` 以及 `sync server`：
 
     $ export LD_LIBRARY_PATH=/usr/local/lib
     $ cd /data/hustdbha/sbin

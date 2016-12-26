@@ -30,7 +30,11 @@ Infomation returned:
 
 	ok
 
-The result shows that the servers work as expected
+The result shows that the servers work as expected.
+
+For detailed deployment and configuration, please check:
+
+* [hustmq deployment](../advanced/hustmq/index.md)
 
 ### hustmq ha ###
 
@@ -87,5 +91,10 @@ Then server will output the following information:
     hustmqha 1.6
 
 Server works just fine if the above result is returned.
+
+For detailed deployment and configuration, please check:
+
+* [hustdb ha configuration](../advanced/ha/nginx.md)
+* [hustdb ha deployment](../advanced/ha/deploy.md)
 
 [Home](../index.md)

@@ -32,6 +32,10 @@
 
 返回该结果说明服务器工作正常。
 
+更多细节，可以参考以下内容：
+
+* [hustmq 部署细节](../advanced/hustmq/index.md)
+
 ### hustmq ha ###
 
 安装 `pcre`：
@@ -87,5 +91,10 @@
     hustmqha 1.6
 
 返回该结果说明服务器工作正常。
+
+更多细节，可以参考以下内容：
+
+* [hustmq ha 配置细节](../advanced/ha/nginx.md)
+* [hustmq ha 部署细节](../advanced/ha/deploy.md)
 
 [根目录](../index.md)

@@ -21,7 +21,7 @@ hustdb ha
     $ cd ../hustdb/ha/nginx/conf/
     $ vi nginx.json
 
-修改 `nginx.json` 内容如下，其中 **`backends` 请替换为真实的 `hustdb` 机器列表，至少要有两个：**
+**替换 `backends` 为真实的 `hustdb` 机器列表，至少要有两个：**
 
     {
         ......

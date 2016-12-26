@@ -182,10 +182,11 @@ Edit file `/data/hustdbha/conf/hustdbtable.json` as below(**replace `ip:port` of
 
 After finish configuration, start `HA` and `sync server` **in order**:
 
-    cd /data/hustdbha/sbin
-    ./nginx
-    cd /data/hustdbsync
-    ./hustdbsync
+    $ export LD_LIBRARY_PATH=/usr/local/lib
+    $ cd /data/hustdbha/sbin
+    $ /data/hustdbha/sbin/nginx
+    $ cd /data/hustdbsync
+    $ /data/hustdbsync/hustdbsync
 
 Type in commands:
 

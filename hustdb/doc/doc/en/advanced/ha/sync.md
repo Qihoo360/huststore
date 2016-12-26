@@ -3,6 +3,15 @@ Data Synchronization Service
 
 `sync server` is used for synchronization local log to the backend `db`, it includes two main components: `libsync` and `network`.
 
+Note: **sync server is NOT necessity in deployment**. The following interfaces of HA will not work without `sync server`:
+
+* [sync_status](../../api/ha/sync_status.md)
+* [sync_alive](../../api/ha/sync_alive.md)
+
+Besides, if the network between HA and DB is bad, **risk of inconsistency will increase**.
+
+**Please make desicion by the production environment**.
+
 ### libsync ###
 
 Directory: `hustdb/sync/module` 

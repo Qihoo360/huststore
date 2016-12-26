@@ -14,6 +14,7 @@ hustdb
 启动服务
 
     $ cd hustdb/db/server/make/linux/
+    $ export LD_LIBRARY_PATH=/usr/local/lib
     $ ./hustdb
 
 输入如下测试命令：

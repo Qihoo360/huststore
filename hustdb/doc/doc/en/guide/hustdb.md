@@ -14,6 +14,7 @@ Target path
 Start service
 
     $ cd hustdb/db/server/make/linux/
+    $ export LD_LIBRARY_PATH=/usr/local/lib
     $ ./hustdb
 
 Type in the below command to test:

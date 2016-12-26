@@ -186,7 +186,8 @@
 在执行上述脚本之前，请先确保 `sync server` 进程已经退出。退出 `sync server` 的命令为：
 
     $ cd /data/hustdbsync
-    $ ./hustdbsync -q
+    $ export LD_LIBRARY_PATH=/usr/local/lib
+    $ /data/hustdbsync/hustdbsync -q
 
 远程操作的脚本如下：
 
@@ -196,7 +197,9 @@
         ssh -oStrictHostKeyChecking=no \
         jobs@192.168.1.101 \
         ' \
-        cd  /data/hustdbsync && ./hustdbsync -q; \
+        cd  /data/hustdbsync; \
+        export LD_LIBRARY_PATH=/usr/local/lib; \
+        /data/hustdbsync/hustdbsync -q; \
         '
     
     echo 'finish!'

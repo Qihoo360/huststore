@@ -90,8 +90,9 @@ Run `genconf.py` to generate `nginx.conf`, and replace configuration as followed
 
 After configuration, start nginx:
 
-    cd /data/hustmqha/sbin
-    ./nginx
+    $ export LD_LIBRARY_PATH=/usr/local/lib
+    $ cd /data/hustmqha/sbin
+    $ /data/hustmqha/sbin/nginx
 
 Input the following test command:
 

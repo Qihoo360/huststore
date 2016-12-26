@@ -187,7 +187,8 @@ If only `sync server` needs to be re-deployed, you can refer to the below script
 Make sure `sync server` has exit before executing the above script, command to exit `sync server` is:
 
     $ cd /data/hustdbsync
-    $ ./hustdbsync -q
+    $ export LD_LIBRARY_PATH=/usr/local/lib
+    $ /data/hustdbsync/hustdbsync -q
 
 Script for remote operations:
 
@@ -197,7 +198,9 @@ Script for remote operations:
         ssh -oStrictHostKeyChecking=no \
         jobs@192.168.1.101 \
         ' \
-        cd  /data/hustdbsync && ./hustdbsync -q; \
+        cd  /data/hustdbsync; \
+        export LD_LIBRARY_PATH=/usr/local/lib; \
+        /data/hustdbsync/hustdbsync -q; \
         '
     
     echo 'finish!'

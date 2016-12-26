@@ -182,10 +182,11 @@ hustdb ha
 
 配置完毕之后， **先后** 启动 `HA` 以及 `sync server`：
 
-    cd /data/hustdbha/sbin
-    ./nginx
-    cd /data/hustdbsync
-    ./hustdbsync
+    $ export LD_LIBRARY_PATH=/usr/local/lib
+    $ cd /data/hustdbha/sbin
+    $ /data/hustdbha/sbin/nginx
+    $ cd /data/hustdbsync
+    $ /data/hustdbsync/hustdbsync
 
 输入如下测试命令：
 

@@ -3,26 +3,30 @@ Deployment
 
 ### Program ###
 
-* `hustdb/db/server/make/linux/hustdb`
-* `hustdb/db/server/make/linux/hustdb.conf`
+* `/data/hustdb/hustdb`
+* `/data/hustdb/hustdb.conf`
 
 ### Usage ###
 
 #### Show Version ####
 
-    ./hustdb -v
+    $ export LD_LIBRARY_PATH=/usr/local/lib
+    $ /data/hustdb/hustdb -v
 
 #### Service Start (Daemon, work in background) ####
 
-    ./hustdb
+    $ export LD_LIBRARY_PATH=/usr/local/lib
+    $ /data/hustdb/hustdb
 
 #### Service Stop ####
 
-    ./hustdb -q
+    $ export LD_LIBRARY_PATH=/usr/local/lib
+    $ /data/hustdb/hustdb -q
 
 #### Service Start (Debug, work in foreground) ####
 
-    ./hustdb -d
+    $ export LD_LIBRARY_PATH=/usr/local/lib
+    $ /data/hustdb/hustdb -d
 
 ### Configuration ###
 

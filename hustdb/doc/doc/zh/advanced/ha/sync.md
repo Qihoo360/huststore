@@ -3,6 +3,15 @@
 
 `sync server` 用于将本地日志同步到后端 `db` 中，主要包含 `libsync` 和 `network` 两个模块。
 
+说明：**sync server 不是必须安装的模块**。如果不部署该服务，HA的如下接口将失效：
+
+* [sync_status](../../api/ha/sync_status.md)
+* [sync_alive](../../api/ha/sync_alive.md)
+
+同时，如果HA和DB之间的网络情况不理想，**数据不一致的概率会增加**。
+
+**请根据生产环境的实际情况来决定是否部署该服务**。
+
 ### libsync ###
 
 目录：`hustdb/sync/module`

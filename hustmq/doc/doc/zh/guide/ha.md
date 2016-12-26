@@ -90,8 +90,9 @@ hustmq ha
 
 配置完毕之后，启动 nginx：
 
-    cd /data/hustmqha/sbin
-    ./nginx
+    $ export LD_LIBRARY_PATH=/usr/local/lib
+    $ cd /data/hustmqha/sbin
+    $ /data/hustmqha/sbin/nginx
 
 输入如下测试命令：
 

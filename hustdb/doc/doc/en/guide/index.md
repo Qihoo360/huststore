@@ -8,7 +8,7 @@ For detailed deployment and configuration, please check:
 
 * [hustdb deployment](../advanced/hustdb/deploy.md)
 * [hustdb ha deployment](../advanced/ha/deploy.md)
-* [hustdb ha deployment](../advanced/ha/nginx.md)
+* [hustdb ha configuration](../advanced/ha/nginx.md)
 * [hustdb ha load balance table configuration](../advanced/ha/table.md)
 * [hustdb ha log configuration](../advanced/ha/zlog.md)
 

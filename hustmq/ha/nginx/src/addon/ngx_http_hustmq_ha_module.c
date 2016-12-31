@@ -41,6 +41,7 @@ static void * ngx_http_hustmq_ha_create_main_conf(ngx_conf_t *cf);
 static char * ngx_http_hustmq_ha_init_main_conf(ngx_conf_t * cf, void * conf);
 static ngx_int_t ngx_http_hustmq_ha_postconfiguration(ngx_conf_t * cf);
 
+static ngx_http_hustmq_ha_main_conf_t * g_mcf = NULL;
 static ngx_uint_t g_max_queue_size = 0;
 
 static ngx_http_request_item_t hustmq_ha_handler_dict[] =
@@ -712,6 +713,8 @@ static void * ngx_http_hustmq_ha_create_main_conf(ngx_conf_t *cf)
     return ngx_pcalloc(cf->pool, sizeof(ngx_http_hustmq_ha_main_conf_t));
 }
 
+static ngx_bool_t __init_addon(ngx_conf_t * cf, ngx_http_hustmq_ha_main_conf_t * mcf);
+
 static char * ngx_http_hustmq_ha_init_main_conf(ngx_conf_t * cf, void * conf)
 {
     ngx_http_hustmq_ha_main_conf_t * mcf = conf;
@@ -723,56 +726,64 @@ static char * ngx_http_hustmq_ha_init_main_conf(ngx_conf_t * cf, void * conf)
     mcf->log = cf->log;
     mcf->prefix = cf->cycle->prefix;
     // TODO: you can initialize mcf here
+    g_mcf = mcf;
     g_max_queue_size = mcf->max_queue_size;
-	ngx_http_upstream_rr_peers_t * peers = ngx_http_get_backends();
-	if (!hustmq_ha_init_peer_dict(peers))
-    {
-        return NGX_CONF_ERROR;
-    }
-	if (!hustmq_ha_init_peer_list(cf->pool, peers))
-	{
-	    return NGX_CONF_ERROR;
-	}
-	if (!hustmq_ha_init_hash(cf->pool, peers))
-    {
-        return NGX_CONF_ERROR;
-    }
 
-	ngx_http_fetch_essential_conf_t ecf = { mcf->fetch_req_pool_size, mcf->keepalive_cache_size, mcf->connection_cache_size, cf, peers };
-	ngx_http_fetch_upstream_conf_t ucf = {
-	    mcf->fetch_connect_timeout,
-	    mcf->fetch_send_timeout,
-	    mcf->fetch_read_timeout,
-	    mcf->fetch_timeout,
-	    mcf->fetch_buffer_size,
-	    { 0, 0 },
-	    0
-	};
-	if (NGX_OK != ngx_http_fetch_init_conf(&ecf, &ucf, NULL))
-	{
-	    return NGX_CONF_ERROR;
-	}
-
-	if (NGX_OK != hustmq_ha_init_stat_buffer(mcf))
-	{
-	    return NGX_CONF_ERROR;
-	}
-
-	if (NGX_OK != hustmq_ha_init_do_get(mcf))
-	{
-	    return NGX_CONF_ERROR;
-	}
-
-	if (NGX_OK != hustmq_ha_init_do_post(mcf))
-    {
-        return NGX_CONF_ERROR;
-    }
-
-	hustmq_ha_init_worker_buffer(cf->pool);
-	hustmq_ha_init_evget_handler(cf->log);
-	hustmq_ha_init_evsub_handler(cf->log);
-	hustmq_ha_init_pub_ref_dict();
     return NGX_CONF_OK;
+}
+
+static ngx_bool_t __init_addon(ngx_conf_t * cf, ngx_http_hustmq_ha_main_conf_t * mcf)
+{
+    ngx_http_upstream_rr_peers_t * peers = ngx_http_get_backends();
+    if (!hustmq_ha_init_peer_dict(peers))
+    {
+        return false;
+    }
+    if (!hustmq_ha_init_peer_list(cf->pool, peers))
+    {
+        return false;
+    }
+    if (!hustmq_ha_init_hash(cf->pool, peers))
+    {
+        return false;
+    }
+
+    ngx_http_fetch_essential_conf_t ecf = { mcf->fetch_req_pool_size, mcf->keepalive_cache_size, mcf->connection_cache_size, cf, peers };
+    ngx_http_fetch_upstream_conf_t ucf = {
+        mcf->fetch_connect_timeout,
+        mcf->fetch_send_timeout,
+        mcf->fetch_read_timeout,
+        mcf->fetch_timeout,
+        mcf->fetch_buffer_size,
+        { 0, 0 },
+        0
+    };
+    if (NGX_OK != ngx_http_fetch_init_conf(&ecf, &ucf, NULL))
+    {
+        return false;
+    }
+
+    if (NGX_OK != hustmq_ha_init_stat_buffer(mcf))
+    {
+        return false;
+    }
+
+    if (NGX_OK != hustmq_ha_init_do_get(mcf))
+    {
+        return false;
+    }
+
+    if (NGX_OK != hustmq_ha_init_do_post(mcf))
+    {
+        return false;
+    }
+
+    hustmq_ha_init_worker_buffer(cf->pool);
+    hustmq_ha_init_evget_handler(cf->log);
+    hustmq_ha_init_evsub_handler(cf->log);
+    hustmq_ha_init_pub_ref_dict();
+
+    return true;
 }
 
 ngx_uint_t hustmq_ha_get_max_queue_size()
@@ -789,6 +800,10 @@ static ngx_int_t ngx_http_hustmq_ha_postconfiguration(ngx_conf_t * cf)
         ngx_http_conf_get_module_main_conf(cf, ngx_http_upstream_module), 
         &backend, &addon_upstream_peers);
     if (!rc)
+    {
+        return NGX_ERROR;
+    }
+    if (!__init_addon(cf, g_mcf))
     {
         return NGX_ERROR;
     }

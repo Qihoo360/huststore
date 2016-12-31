@@ -821,6 +821,8 @@ static ngx_bool_t __init_fetch(ngx_conf_t * cf, ngx_http_hustdb_ha_main_conf_t *
     return true;
 }
 
+static ngx_bool_t __init_addon(ngx_conf_t * cf, ngx_http_hustdb_ha_main_conf_t * mcf);
+
 static char * ngx_http_hustdb_ha_init_main_conf(ngx_conf_t * cf, void * conf)
 {
     ngx_http_hustdb_ha_main_conf_t * mcf = conf;
@@ -834,59 +836,64 @@ static char * ngx_http_hustdb_ha_init_main_conf(ngx_conf_t * cf, void * conf)
     // TODO: you can initialize mcf here
     g_mcf = mcf;
 
+    return NGX_CONF_OK;
+}
+
+static ngx_bool_t __init_addon(ngx_conf_t * cf, ngx_http_hustdb_ha_main_conf_t * mcf)
+{
     mcf->zone = ngx_http_addon_init_shm(cf, &mcf->hustdb_ha_shm_name, mcf->hustdb_ha_shm_size,
         sizeof(hustdb_ha_shctx_t), ngx_http_addon_init_shm_ctx, &ngx_http_hustdb_ha_module);
 
     hustdb_ha_init_peer_count(cf->pool);
-	if (!hustdb_ha_init_peer_dict())
-	{
-		return NGX_CONF_ERROR;
-	}
+    if (!hustdb_ha_init_peer_dict())
+    {
+        return false;
+    }
 
-	if (!hustdb_ha_init_peer_array(cf->pool))
-	{
-	    return NGX_CONF_ERROR;
-	}
+    if (!hustdb_ha_init_peer_array(cf->pool))
+    {
+        return false;
+    }
 
-	if (!hustdb_ha_init_log_dirs(&mcf->prefix, mcf->pool))
-	{
-	    return NGX_CONF_ERROR;
-	}
+    if (!hustdb_ha_init_log_dirs(&mcf->prefix, mcf->pool))
+    {
+        return false;
+    }
 
-	if (!__init_fetch(cf, mcf))
-	{
-	    return NGX_CONF_ERROR;
-	}
+    if (!__init_fetch(cf, mcf))
+    {
+        return false;
+    }
 
-	mcf->public_pem_full_path = ngx_http_get_conf_path(cf->cycle, &mcf->public_pem);
-    
-	ngx_str_t table_path = ngx_http_get_conf_path(cf->cycle, &mcf->hustdbtable_file);
-	if (!table_path.data)
-	{
-		return NGX_CONF_ERROR;
-	}
-	if (!hustdb_ha_init_table_str(&table_path, cf->pool))
-	{
-	    return NGX_CONF_ERROR;
-	}
-	HustDbHaTable table;
-	if (!cjson_load_hustdbhatable_from_file((const char *)table_path.data, &table))
-	{
-		return NGX_CONF_ERROR;
-	}
-	if (!table.json_has_table)
-	{
-	    return NGX_CONF_ERROR;
-	}
-	if (!hustdb_ha_build_table(&table, cf->pool))
-	{
-		return NGX_CONF_ERROR;
-	}
-	cjson_dispose_hustdbhatable(&table);
+    mcf->public_pem_full_path = ngx_http_get_conf_path(cf->cycle, &mcf->public_pem);
 
-	hustdb_ha_init_table_path(table_path, cf->pool);
+    ngx_str_t table_path = ngx_http_get_conf_path(cf->cycle, &mcf->hustdbtable_file);
+    if (!table_path.data)
+    {
+        return false;
+    }
+    if (!hustdb_ha_init_table_str(&table_path, cf->pool))
+    {
+        return false;
+    }
+    HustDbHaTable table;
+    if (!cjson_load_hustdbhatable_from_file((const char *)table_path.data, &table))
+    {
+        return false;
+    }
+    if (!table.json_has_table)
+    {
+        return false;
+    }
+    if (!hustdb_ha_build_table(&table, cf->pool))
+    {
+        return false;
+    }
+    cjson_dispose_hustdbhatable(&table);
 
-    return NGX_CONF_OK;
+    hustdb_ha_init_table_path(table_path, cf->pool);
+
+    return true;
 }
 
 static ngx_http_addon_upstream_peers_t addon_upstream_peers = { 0, 0 };
@@ -898,6 +905,10 @@ static ngx_int_t ngx_http_hustdb_ha_postconfiguration(ngx_conf_t * cf)
         ngx_http_conf_get_module_main_conf(cf, ngx_http_upstream_module), 
         &backend, &addon_upstream_peers);
     if (!rc)
+    {
+        return NGX_ERROR;
+    }
+    if (!__init_addon(cf, g_mcf))
     {
         return NGX_ERROR;
     }

@@ -35,7 +35,8 @@ static char * ngx_http_sync_user(ngx_conf_t * cf, ngx_command_t * cmd, void * co
 static char * ngx_http_sync_passwd(ngx_conf_t * cf, ngx_command_t * cmd, void * conf);
 static char * ngx_http_binlog_uri(ngx_conf_t * cf, ngx_command_t * cmd, void * conf);
 static void * ngx_http_hustdb_ha_create_main_conf(ngx_conf_t *cf);
-char * ngx_http_hustdb_ha_init_main_conf(ngx_conf_t * cf, void * conf);
+static char * ngx_http_hustdb_ha_init_main_conf(ngx_conf_t * cf, void * conf);
+static ngx_int_t ngx_http_hustdb_ha_postconfiguration(ngx_conf_t * cf);
 
 static ngx_http_request_item_t hustdb_ha_handler_dict[] =
 {
@@ -362,7 +363,7 @@ static ngx_command_t ngx_http_hustdb_ha_commands[] =
 static ngx_http_module_t ngx_http_hustdb_ha_module_ctx = 
 {
     NULL, // ngx_int_t (*preconfiguration)(ngx_conf_t *cf);
-    NULL, // ngx_int_t (*postconfiguration)(ngx_conf_t *cf);
+    ngx_http_hustdb_ha_postconfiguration,
     ngx_http_hustdb_ha_create_main_conf,
     ngx_http_hustdb_ha_init_main_conf,
     NULL, // void * (*create_srv_conf)(ngx_conf_t *cf);
@@ -820,7 +821,7 @@ static ngx_bool_t __init_fetch(ngx_conf_t * cf, ngx_http_hustdb_ha_main_conf_t *
     return true;
 }
 
-char * ngx_http_hustdb_ha_init_main_conf(ngx_conf_t * cf, void * conf)
+static char * ngx_http_hustdb_ha_init_main_conf(ngx_conf_t * cf, void * conf)
 {
     ngx_http_hustdb_ha_main_conf_t * mcf = conf;
     if (!mcf)
@@ -886,6 +887,31 @@ char * ngx_http_hustdb_ha_init_main_conf(ngx_conf_t * cf, void * conf)
 	hustdb_ha_init_table_path(table_path, cf->pool);
 
     return NGX_CONF_OK;
+}
+
+static ngx_http_addon_upstream_peers_t addon_upstream_peers = { 0, 0 };
+
+static ngx_int_t ngx_http_hustdb_ha_postconfiguration(ngx_conf_t * cf)
+{
+    static ngx_str_t backend = ngx_string("backend");
+    ngx_bool_t rc = ngx_http_init_addon_backends(
+        ngx_http_conf_get_module_main_conf(cf, ngx_http_upstream_module), 
+        &backend, &addon_upstream_peers);
+    if (!rc)
+    {
+        return NGX_ERROR;
+    }
+    return NGX_OK;
+}
+
+ngx_http_upstream_rr_peers_t * ngx_http_get_backends()
+{
+    return addon_upstream_peers.peer;
+}
+
+size_t ngx_http_get_backend_count()
+{
+    return addon_upstream_peers.count;
 }
 
 void * ngx_http_get_addon_module_ctx(ngx_http_request_t * r)

@@ -77,7 +77,6 @@ if :; then
                      src/http/ngx_http_script.h \
                      src/http/ngx_http_upstream.h \
                      src/http/ngx_http_upstream_round_robin.h \
-                     src/http/ngx_http_peer_selector.h \
                      src/http/modules/ngx_http_utils_module.h \
                      src/http/modules/ngx_http_fetch_utils.h \
                      src/http/modules/ngx_http_fetch_cache.h \

@@ -147,4 +147,15 @@ ngx_shm_zone_t * ngx_http_addon_init_shm(
     ngx_http_addon_init_shm_ctx_t init_sh,
     void * module);
 
+typedef struct
+{
+    ngx_http_upstream_rr_peers_t * peer;
+    ngx_int_t count;
+} ngx_http_addon_upstream_peers_t;
+
+ngx_bool_t ngx_http_init_addon_backends(
+    ngx_http_upstream_main_conf_t * umcf,
+    ngx_str_t * backend,
+    ngx_http_addon_upstream_peers_t * peers);
+
 #endif // __ngx_http_utils_module_20150910210608_h__

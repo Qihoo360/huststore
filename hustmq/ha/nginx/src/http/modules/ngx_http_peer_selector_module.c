@@ -1,7 +1,6 @@
 #include <ngx_config.h>
 #include <ngx_core.h>
 #include <ngx_http.h>
-#include <ngx_http_peer_selector.h>
 #include <ngx_http_addon_def.h>
 
 typedef struct
@@ -13,7 +12,6 @@ typedef struct
 static ngx_int_t __init_peer(ngx_http_request_t * r, ngx_http_upstream_srv_conf_t * us);
 static ngx_int_t __get_peer(ngx_peer_connection_t * pc, void * data);
 static char * ngx_http_peer_selector(ngx_conf_t * cf, ngx_command_t * cmd, void * conf);
-
 
 static ngx_command_t  ngx_http_peer_selector_commands[] = {
     {
@@ -54,39 +52,12 @@ ngx_module_t  ngx_http_peer_selector_module = {
     NGX_MODULE_V1_PADDING
 };
 
-static ngx_http_upstream_rr_peers_t * g_peer_selector_backends = NULL;
-
-static size_t g_peer_selector_backend_count = 0;
-
-ngx_http_upstream_rr_peers_t * ngx_http_get_backends()
-{
-	return g_peer_selector_backends;
-}
-
-size_t ngx_http_get_backend_count()
-{
-	return g_peer_selector_backend_count;
-}
-
-static ngx_int_t __get_backend_count(ngx_http_upstream_rr_peer_t * peer)
-{
-	ngx_int_t count = 0;
-	while(peer)
-	{
-		count++;
-		peer = peer->next;
-	}
-	return count;
-}
-
 static ngx_int_t ngx_http_peer_selector_init(ngx_conf_t * cf, ngx_http_upstream_srv_conf_t * us)
 {
     if (ngx_http_upstream_init_round_robin(cf, us) != NGX_OK)
     {
         return NGX_ERROR;
     }
-	g_peer_selector_backends = us->peer.data;
-	g_peer_selector_backend_count = __get_backend_count(g_peer_selector_backends->peer);
     us->peer.init = __init_peer;
     return NGX_OK;
 }

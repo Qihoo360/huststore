@@ -4,7 +4,6 @@
 #include <ngx_core.h>
 #include <ngx_http.h>
 #include <ngx_http_addon_def.h>
-#include <ngx_http_peer_selector.h>
 #include <ngx_http_utils_module.h>
 #include <ngx_http_fetch.h>
 #include "message_queue_def.h"
@@ -66,6 +65,9 @@ typedef enum
 } hustmq_queue_type_t;
 
 void * hustmq_ha_get_module_main_conf(ngx_http_request_t * r);
+
+ngx_http_upstream_rr_peers_t * ngx_http_get_backends();
+size_t ngx_http_get_backend_count();
 
 ngx_uint_t hustmq_ha_get_max_queue_size();
 ngx_bool_t hustmq_ha_check_queue(const char * qname, const int qname_len);

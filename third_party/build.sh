@@ -4,8 +4,6 @@ set -e
 
 export PATH=/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/sbin:/home/search/bin
 
-export prefix=/opt/huststore/3rd
-
 bash -e ./build_snappy.sh       || { echo "Build snappy   failed." ; false }
 bash -e ./build_leveldb.sh      || { echo "Build leveldb  failed." ; false }
 bash -e ./build_cmake.sh        || { echo "Build cmake    failed." ; false }

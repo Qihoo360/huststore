@@ -1,0 +1,64 @@
+
+SERVER      = $(top_srcdir)/server/
+
+DEPS        = $(top_srcdir)/../../third_party/
+DEPS_PREFIX = /opt/huststore/3rd
+
+INCLUDES    = -I $(SERVER)/ -I $(SERVER)/module -I $(SERVER)/include -I $(MDB_SRC)lib -I $(SERVER)/module/rdb/lib -I $(DEPS)/leveldb/include/ -I $(DEPS)/include/curl -I $(DEPS_PREFIX)/include/curl -I /usr/local/include -I /usr/local/include/evhtp -I $(DEPS)/libevhtp/ -I /usr/local/include/event2 -I $(DEPS_PREFIX)/include
+
+AM_CPPFLAGS = -fPIC -O0 -g3 -fmessage-length=0 -D_FILE_OFFSET_BITS=64 -D_LARGE_FILE -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -DUSE_TCMALLOC $(INCLUDES)
+AM_CFLAGS = -std=gnu99 $(AM_CPPFLAGS)
+
+AM_LDFLAGS   = -export-dynamic -L/usr/lib -L/usr/local/lib -L$(DEPS_PREFIX)/lib -lpthread -lssl -lcrypto -pthread -lrt -levent -levent_pthreads -levent_openssl -levhtp -ldl -lz -ltcmalloc -lidn
+
+
+
+
+STATIC_LIBS = $(DEPS_PREFIX)/lib/libleveldb.a $(DEPS_PREFIX)/lib/libsnappy.a $(DEPS_PREFIX)/lib/libcurl.a
+
+
+bin_PROGRAMS    = hustdb
+hustdb_LDFLAGS  = -rdynamic $(AM_LDFLAGS)
+
+hustdb_SOURCES = $(SERVER)/main.cpp \
+$(SERVER)/server_utils.h \
+$(SERVER)/server_utils.cpp \
+$(SERVER)/module/appini.cpp \
+$(SERVER)/module/apptool.cpp \
+$(SERVER)/module/hustdb.cpp \
+$(SERVER)/module/tasks/slow_task_thread.cpp \
+$(SERVER)/module/tasks/task_binlog_scan.cpp \
+$(SERVER)/module/tasks/task_export.cpp \
+$(SERVER)/module/tasks/task_ttl_scan.cpp \
+$(SERVER)/module/utils/md5.cpp \
+$(SERVER)/module/utils/timer.cpp \
+$(SERVER)/module/kv/create_kv.cpp \
+$(SERVER)/module/kv/leveldb/bloom_filter.cpp \
+$(SERVER)/module/kv/leveldb/kv_leveldb.cpp \
+$(SERVER)/module/kv/md5db/bucket.cpp \
+$(SERVER)/module/kv/md5db/bucket_array.cpp \
+$(SERVER)/module/kv/md5db/conflict.cpp \
+$(SERVER)/module/kv/md5db/conflict_array.cpp \
+$(SERVER)/module/kv/md5db/content.cpp \
+$(SERVER)/module/kv/md5db/content_array.cpp \
+$(SERVER)/module/kv/md5db/fast_conflict.cpp \
+$(SERVER)/module/kv/md5db/fast_conflict_array.cpp \
+$(SERVER)/module/kv/md5db/fullkey.cpp \
+$(SERVER)/module/kv/md5db/fullkey_array.cpp \
+$(SERVER)/module/kv/md5db/kv_md5db.cpp \
+$(SERVER)/module/kv/kv_array/key_hash.cpp \
+$(SERVER)/module/kv/kv_array/kv_array.cpp \
+$(SERVER)/module/kv/kv_array/kv_config.cpp
+
+hustdb_LDADD  = \
+    $(STATIC_LIBS) \
+    network/libnetwork.la \
+    module/mdb/libmdb.la \
+    module/rdb/librdb.la \
+    module/binlog/libbinlog.la
+
+
+
+confdir = $(prefix)/conf
+conf_DATA = module/hustdb.conf
+

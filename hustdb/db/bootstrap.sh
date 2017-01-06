@@ -2,6 +2,8 @@
 set -e
 set -x
 
+
+touch NEWS README ChangeLog AUTHORS COPYING INSTALL
 cp -v  /usr/share/automake-1.*/{depcomp,compile}  ./
 
 aclocal

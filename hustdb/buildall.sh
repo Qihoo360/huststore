@@ -2,11 +2,10 @@
 set -e
 set -x
 
-export prefix=/opt/huststore/3rd
+export prefix_3rd=/opt/huststore/3rd
+export prefix_hustdb=/opt/huststore/hustdb
 
 
 ( cd ../third_party/ && bash -e build.sh )
 
-./confiure --prefix=${prefix}
-make
-sudo make install
+( cd db && ./configure --prefix=${prefix_hustdb} --bindir=${prefix_hustdb} && make && sudo make install ;)

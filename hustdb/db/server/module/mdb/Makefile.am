@@ -3,7 +3,7 @@ SERVER      = $(top_srcdir)/server/
 DEPS        = $(top_srcdir)/../../third_party/
 DEPS_PREFIX = /opt/huststore/3rd
 
-INCLUDES    = -I $(SERVER)/ -I $(SERVER)/module -I $(SERVER)/include -I $(MDB_SRC)lib -I $(SERVER)/module/rdb/lib -I $(DEPS)/leveldb/include/ -I $(DEPS)/include/curl -I $(DEPS_PREFIX)/include/curl -I /usr/local/include -I /usr/local/include/evhtp -I $(DEPS)/libevhtp/ -I /usr/local/include/event2 -I $(DEPS_PREFIX)/include
+INCLUDES    = -I $(SERVER)/ -I $(SERVER)/module -I $(SERVER)/include -I $(MDB_SRC)lib -I $(SERVER)/module/rdb/lib -I $(DEPS_PREFIX)/include -I $(DEPS_PREFIX)/include/evhtp -I $(DEPS)/leveldb/include/ -I $(DEPS)/include/curl -I $(DEPS_PREFIX)/include/curl
 
 AM_CFLAGS = -std=gnu99 -fPIC -O0 -g3 -fmessage-length=0 -D_FILE_OFFSET_BITS=64 -D_LARGE_FILE -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -DUSE_TCMALLOC
 

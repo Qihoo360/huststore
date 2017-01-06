@@ -1,7 +1,7 @@
 rm -fr libevhtp
 tar -zxvf libevhtp.tar.gz
 cd libevhtp/build
-cmake ..
-make
+cmake -DCMAKE_INSTALL_PREFIX:PATH=${prefix_3rd} ..
+make -j`nproc`
 sudo make install
-cd ..
+cd ../../

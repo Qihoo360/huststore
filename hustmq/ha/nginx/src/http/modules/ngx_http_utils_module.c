@@ -22,6 +22,19 @@ ngx_str_t ngx_http_get_conf_path(ngx_cycle_t * cycle, ngx_str_t * name)
     return path;
 }
 
+ngx_bool_t ngx_http_decode_bool(ngx_str_t * val)
+{
+    if (!val || !val->data || val->len < 1)
+    {
+        return false;
+    }
+    static ngx_str_t TRUE_STR = ngx_string("true");
+    static ngx_str_t TRUE_NUM = ngx_string("1");
+
+    return (0 == ngx_strncasecmp(val->data, TRUE_STR.data, TRUE_STR.len)
+        || 0 == ngx_strncasecmp(val->data, TRUE_NUM.data, TRUE_NUM.len));
+}
+
 int ngx_http_get_flag_slot(ngx_conf_t * cf)
 {
     ngx_str_t * value = cf->args->elts;

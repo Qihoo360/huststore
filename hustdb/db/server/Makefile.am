@@ -1,14 +1,25 @@
 SERVER      = $(top_srcdir)/server/
 
-DEPS        = $(top_srcdir)/../../third_party/
 DEPS_PREFIX = /opt/huststore/3rd
 
-INCLUDES    = -I $(SERVER)/ -I $(SERVER)/module -I $(SERVER)/include -I $(MDB_SRC)lib -I $(SERVER)/module/rdb/lib -I $(DEPS_PREFIX)/include -I $(DEPS_PREFIX)/include/evhtp -I $(DEPS)/leveldb/include/ -I $(DEPS)/include/curl -I $(DEPS_PREFIX)/include/curl
+INCLUDES    = \
+    -I $(SERVER)/ \
+    -I $(SERVER)/module \
+    -I $(SERVER)/include \
+    -I $(SERVER)/module/mdb/lib \
+    -I $(SERVER)/module/rdb/lib \
+    -I $(DEPS_PREFIX)/include \
+    -I $(DEPS_PREFIX)/include/evhtp \
+    -I $(DEPS_PREFIX)/include/gperftools \
+    -I $(DEPS_PREFIX)/include/google \
+    -I $(DEPS_PREFIX)/include/leveldb \
+    -I $(DEPS_PREFIX)/include/event2 \
+    -I $(DEPS_PREFIX)/include/curl
 
 AM_CPPFLAGS = -fPIC -O0 -g3 -fmessage-length=0 -D_FILE_OFFSET_BITS=64 -D_LARGE_FILE -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -DUSE_TCMALLOC $(INCLUDES)
 AM_CFLAGS = -std=gnu99 $(AM_CPPFLAGS)
 
-AM_LDFLAGS   = -export-dynamic -L/usr/lib -L/usr/local/lib -L$(DEPS_PREFIX)/lib -lpthread -lssl -lcrypto -pthread -lrt -levent -levent_pthreads -levent_openssl -levhtp -ldl -lz -ltcmalloc -lidn
+AM_LDFLAGS   = -export-dynamic -L$(DEPS_PREFIX)/lib -L/usr/lib -L/usr/local/lib -lpthread -lssl -lcrypto -pthread -lrt -levent -levent_pthreads -levent_openssl -levhtp -ldl -lz -ltcmalloc -lidn
 
 
 
@@ -18,6 +29,12 @@ STATIC_LIBS = $(DEPS_PREFIX)/lib/libleveldb.a $(DEPS_PREFIX)/lib/libsnappy.a $(D
 
 bin_PROGRAMS    = hustdb
 hustdb_LDFLAGS  = -rdynamic $(AM_LDFLAGS)
+hustdb_LDADD  = \
+    $(STATIC_LIBS) \
+    network/libnetwork.la \
+    module/mdb/libmdb.la \
+    module/rdb/librdb.la \
+    module/binlog/libbinlog.la
 
 hustdb_SOURCES = $(SERVER)/main.cpp \
 $(SERVER)/server_utils.h \
@@ -49,12 +66,6 @@ $(SERVER)/module/kv/kv_array/key_hash.cpp \
 $(SERVER)/module/kv/kv_array/kv_array.cpp \
 $(SERVER)/module/kv/kv_array/kv_config.cpp
 
-hustdb_LDADD  = \
-    $(STATIC_LIBS) \
-    network/libnetwork.la \
-    module/mdb/libmdb.la \
-    module/rdb/librdb.la \
-    module/binlog/libbinlog.la
 
 
 

@@ -5,8 +5,6 @@ hustmq
 ==
 
 * [简介](intro/index.md)
-    * [`hustmq`](intro/hustmq.md)
-    * [`hustmq ha`](intro/ha.md)
 * [API 手册](api/index.md)
     * [`hustmq`](api/hustmq.md)
     * [`hustmq ha`](api/ha.md)

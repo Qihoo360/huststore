@@ -2,10 +2,15 @@
 set -e
 set -x
 
-export prefix_3rd=/opt/huststore/3rd
-export prefix_hustdb=/opt/huststore/hustdb
-export prefix_hustdbsync=/opt/huststore/hustdbsync
-export prefix_hustdbha=/opt/huststore/hustdbha
+
+export prefix_top=/opt/huststore/
+
+export prefix_3rd=${prefix_top}/3rd
+export prefix_hustdb=${prefix_top}/hustdb
+export prefix_hustdbsync=${prefix_top}/hustdbsync
+export prefix_hustdbha=${prefix_top}/hustdbha
+export prefix_hustmq=${prefix_top}/hustmq
+export prefix_hustmqha=${prefix_top}/hustmqha
 
 
 ( cd ../third_party/ && bash -e build.sh )
@@ -16,3 +21,4 @@ export prefix_hustdbha=/opt/huststore/hustdbha
   --with-cc-opt="-g3 -O0 -I${prefix_3rd}/include" \
   --with-ld-opt="-L${prefix_3rd}/lib -lzlog -lpthread -lm -ldl -lcrypto" \
   --prefix=${prefix_hustdbha} --add-module=src/addon && make -j$(nproc) && sudo make install ;)
+

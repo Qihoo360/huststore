@@ -19,7 +19,7 @@ INCLUDES    = \
 AM_CPPFLAGS = -fPIC -O0 -g3 -fmessage-length=0 -D_FILE_OFFSET_BITS=64 -D_LARGE_FILE -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -DUSE_TCMALLOC $(INCLUDES)
 AM_CFLAGS = -std=gnu99 $(AM_CPPFLAGS)
 
-AM_LDFLAGS   = -export-dynamic -L$(DEPS_PREFIX)/lib -L/usr/lib -L/usr/local/lib -lpthread -lssl -lcrypto -pthread -lrt -levent -levent_pthreads -levent_openssl -levhtp -ldl -lz -ltcmalloc -lidn
+AM_LDFLAGS   = -export-dynamic -L$(DEPS_PREFIX)/lib -L/usr/lib -lpthread -lssl -lcrypto -pthread -lrt -levent -levent_pthreads -levent_openssl -levhtp -ldl -lz -ltcmalloc -lidn
 
 
 

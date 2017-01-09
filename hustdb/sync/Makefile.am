@@ -1,7 +1,7 @@
 DEPS_PREFIX = /opt/huststore/3rd
 
 AM_CPPFLAGS = -O0 -g3 -Wall -fmessage-length=0
-AM_LDFLAGS  = -L $(DEPS_PREFIX)/lib -L /usr/local/lib -L /usr/lib64 -L /usr/lib
+AM_LDFLAGS  = -L $(DEPS_PREFIX)/lib -L /usr/lib64 -L /usr/lib
 AM_LDFLAGS += -levent -levent_pthreads -levent_openssl -lssl -lcrypto -levhtp -ldl -lrt -lpthread -lzlog -lz -lidn
 
 AM_CPPFLAGS += \
@@ -20,7 +20,6 @@ STATIC_LIBS = \
 
 
 bin_PROGRAMS    = hustdbsync
-hustdbsync_LDFLAGS  = $(AM_LDFLAGS)
 hustdbsync_LDADD = $(STATIC_LIBS)
 hustdbsync_SOURCES = \
 		$(top_srcdir)/include/rapidjson/rapidjson.h \

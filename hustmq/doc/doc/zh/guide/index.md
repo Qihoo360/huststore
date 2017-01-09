@@ -34,7 +34,7 @@
 
 更多细节，可以参考以下内容：
 
-* [hustmq 部署细节](../advanced/hustmq/index.md)
+* [hustmq 配置细节](../advanced/hustmq/index.md)
 
 ### hustmq ha ###
 

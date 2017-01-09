@@ -34,7 +34,7 @@ The result shows that the servers work as expected.
 
 For detailed deployment and configuration, please check:
 
-* [hustmq deployment](../advanced/hustmq/index.md)
+* [hustmq configuration](../advanced/hustmq/index.md)
 
 ### hustmq ha ###
 

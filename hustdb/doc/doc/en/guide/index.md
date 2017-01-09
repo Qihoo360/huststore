@@ -35,7 +35,7 @@ The result shows that the servers work as expected.
 
 For detailed deployment and configuration, please check:
 
-* [hustdb deployment](../advanced/hustdb/deploy.md)
+* [hustdb configuration](../advanced/hustdb.md)
 
 ### hustdb ha ###
 

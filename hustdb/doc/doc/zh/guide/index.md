@@ -35,7 +35,7 @@
 
 更多细节，可以参考以下内容：
 
-* [hustdb 部署细节](../advanced/hustdb/deploy.md)
+* [hustdb 配置细节](../advanced/hustdb.md)
 
 ### hustdb ha ###
 

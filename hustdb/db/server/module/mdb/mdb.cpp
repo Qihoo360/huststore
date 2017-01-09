@@ -40,7 +40,9 @@ bool mdb_t::open (
 
     if ( size <= 0 )
     {
-        size = 64;
+        m_ok = false;
+        
+        return true;
     }
 
     if ( mdb_init ( size ) != 0 )
@@ -132,17 +134,15 @@ int mdb_t::del (
 
 void mdb_t::set_mdb_timestamp ( time_t timestamp )
 {
-    set_current_time ( timestamp );
+    if ( m_ok )
+    {
+        set_current_time ( timestamp );
+    }
 }
 
 std::string * mdb_t::buffer (
                               conn_ctxt_t    conn
                               )
 {
-    if ( unlikely ( ! m_ok ) )
-    {
-        return NULL;
-    }
-
     return m_buffers[ conn.worker_id ];
 }

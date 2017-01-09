@@ -43,7 +43,9 @@ bool rdb_t::open (
 
     if ( size <= 0 )
     {
-        size = 64;
+        m_ok = false;
+        
+        return true;
     }
 
     if ( rdb_init ( size ) != 0 )
@@ -420,6 +422,12 @@ void rdb_t::close ( )
     {
         delete ( * it );
     }
-
+    
     m_ok = false;
+    
+    if ( m_rdb )
+    {
+        freeClient ( m_rdb );
+        m_rdb = NULL;
+    }
 }

@@ -211,6 +211,11 @@ public:
     {
         return m_mdb_ok;
     }
+    
+    bool rdb_ok ( )
+    {
+        return m_rdb_ok;
+    }
 
     i_server_kv_t * get_storage ( )
     {

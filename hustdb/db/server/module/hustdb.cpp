@@ -4128,7 +4128,10 @@ static void timestamp_cb (
 
     db->set_current_timestamp ( tv.tv_sec );
 
-    db->get_mdb ()->set_mdb_timestamp ( tv.tv_sec );
+    if ( db->mdb_ok () )
+    {
+        db->get_mdb ()->set_mdb_timestamp ( tv.tv_sec );
+    }
 }
 
 static void over_threshold_cb (

@@ -5,7 +5,6 @@ Index
 ==
 
 * [Intro](intro/index.md)
-* [Guide](guide/index.md)
 * [API manual](api/index.md)
     * [`hustdb`](api/hustdb.md)
     * [`hustdb ha`](api/ha.md)

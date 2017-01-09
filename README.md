@@ -49,29 +49,16 @@ In addition, `HA` cluster uses a distributed architecture design by incorporatin
 * [libevhtp](https://github.com/ellzey/libevhtp)
 * [zlog](https://github.com/HardySimpson/zlog)
 
+## Quick Start ##
+
+Read the [Quick Start](quickstart.md).
+
 ## Documents ##
 
-### Catalog ###
 * [hustdb](hustdb/doc/doc/en/index.md)
 * [hustmq](hustmq/doc/doc/en/index.md)
 
 Above includes detailed documents of design, deployments, `API` usage and test samples. You can refer quickly to common problems in `FAQ` part.
-
-### Guide ###
-* [hustdb](hustdb/doc/doc/en/guide/index.md)
-* [hustmq](hustmq/doc/doc/en/guide/index.md)
-
-### API manual ###
-* [hustdb](hustdb/doc/doc/en/api/index.md)
-* [hustmq](hustmq/doc/doc/en/api/index.md)
-
-### Advanced ###
-* [hustdb](hustdb/doc/doc/en/advanced/index.md)
-* [hustmq](hustmq/doc/doc/en/advanced/index.md)
-
-### FAQ ###
-* [hustdb](hustdb/doc/doc/en/appendix/index.md)
-* [hustmq](hustmq/doc/doc/en/appendix/index.md)
 
 ## Table Content ##
 

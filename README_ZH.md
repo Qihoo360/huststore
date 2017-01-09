@@ -43,29 +43,16 @@
 * [libevhtp](https://github.com/ellzey/libevhtp)
 * [zlog](https://github.com/HardySimpson/zlog)
 
+## 快速入门 ##
+
+请查看[这里](quickstart_zh.md)。
+
 ## 文档 ##
 
-### 目录 ###
 * [hustdb](hustdb/doc/doc/zh/index.md)
 * [hustmq](hustmq/doc/doc/zh/index.md)
 
 以上包含了 `huststore` 从设计、部署、`API` 到测试样例的详细文档，并提供了 `FAQ` 对常见问题进行快速检索。
-
-### 快速入门 ###
-* [hustdb](hustdb/doc/doc/zh/guide/index.md)
-* [hustmq](hustmq/doc/doc/zh/guide/index.md)
-
-### API ###
-* [hustdb](hustdb/doc/doc/zh/api/index.md)
-* [hustmq](hustmq/doc/doc/zh/api/index.md)
-
-### 进阶 ###
-* [hustdb](hustdb/doc/doc/zh/advanced/index.md)
-* [hustmq](hustmq/doc/doc/zh/advanced/index.md)
-
-### FAQ ###
-* [hustdb](hustdb/doc/doc/zh/appendix/index.md)
-* [hustmq](hustmq/doc/doc/zh/appendix/index.md)
 
 ## 目录 ##
 

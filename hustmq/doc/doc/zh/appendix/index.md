@@ -11,6 +11,9 @@
 **Q** :  如何配置 `hustmq ha`？  
 **A** :  参考 [这里](../advanced/ha/nginx.md) 。
 
+**Q** :  `hustmq ha` 如何配置 `worker_processes`？  
+**A** :  `hustmq ha` **只能配置单个 `worker`**。
+
 **Q** :  `hustmq ha` 如何禁用 `http basic authentication`？  
 **A** :  参考 [这一节](../advanced/ha/nginx.md) 的末尾对常见问题的解答。
 

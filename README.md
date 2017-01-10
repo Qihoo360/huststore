@@ -60,20 +60,6 @@ Read the [Quick Start](quickstart.md).
 
 Above includes detailed documents of design, deployments, `API` usage and test samples. You can refer quickly to common problems in `FAQ` part.
 
-## Table Content ##
-
-`hustdb`  
-　　`doc`  
-　　`db`  
-　　`ha`  
-　　`sync`    
-`hustmq`  
-　　`doc`  
-　　`ha`  
-
-`hustdb/ha` provides service for storage engine, could configured with multiple `worker`s.  
-`hustmq/ha` provides service for message queue, **can only configured with one `worker`**.
-
 ## Performance ##
 
 ### Environment ###

@@ -1,11 +1,29 @@
 <h1 id="id_top">快速入门</h1>
 
-* [hustdb](#id_hustdb)  
-* [hustdb ha](#id_hustdbha)  
-* [hustmq](#id_hustmq)  
-* [hustmq ha](#id_hustmqha)  
+* [快速试用](#id_try)
+* [更多](#id_adv)
+    * [构建脚本](#id_adv_script)
+    * [依赖安装](#id_adv_dep)
+    * [hustdb 集群部署](#id_adv_hustdb_cluster)
+    * [hustmq 集群部署](#id_adv_hustmq_cluster)
 
-<h2 id="id_hustdb">hustdb</h2>
+<h2 id="id_try">快速试用</h2>
+
+[回顶部](#id_top)
+
+<h2 id="id_adv">更多</h2>
+
+<h3 id="id_adv_script">构建脚本</h3>
+
+[回顶部](#id_top)
+
+<h3 id="id_adv_dep">依赖安装</h3>
+
+[回顶部](#id_top)
+
+<h3 id="id_adv_hustdb_cluster">hustdb 集群部署</h3>
+
+#### hustdb ####
 
 安装 `hustdb`（需要sudo权限，用于安装libsnappy,libevhtp,libevent2.0）：
 
@@ -43,7 +61,7 @@
 
 [回顶部](#id_top)
 
-<h2 id="id_hustdbha">hustdb ha</h2>
+#### hustdb ha ####
 
 首先安装 `hustdb ha` 所依赖的公共组件：  
 
@@ -142,7 +160,9 @@
 
 [回顶部](#id_top)
 
-<h2 id="id_hustmq">hustmq</h2>
+<h3 id="id_adv_hustmq_cluster">hustmq 集群部署</h3>
+
+#### hustmq ####
 
 安装 `hustdb`（需要sudo权限，用于安装libsnappy,libevhtp,libevent2.0）：
 
@@ -179,7 +199,7 @@
 
 [回顶部](#id_top)
 
-<h2 id="id_hustmqha">hustmq ha</h2>
+#### hustmq ha ####
 
 安装 `pcre`：
 

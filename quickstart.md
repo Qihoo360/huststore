@@ -1,11 +1,29 @@
 <h1 id="id_top">Quick Start</h1>
 
-* [hustdb](#id_hustdb)  
-* [hustdb ha](#id_hustdbha)  
-* [hustmq](#id_hustmq)  
-* [hustmq ha](#id_hustmqha)  
+* [Quickstart & Try](#id_try)  
+* [More](#id_adv)
+    * [buildscript](#id_adv_script)
+    * [install third-party](#id_adv_dep)
+    * [hustdb cluster deployment](#id_adv_hustdb_cluster)
+    * [hustmq cluster deployment](#id_adv_hustmq_cluster)
 
-<h2 id="id_hustdb">hustdb</h2>
+<h2 id="id_try">Quickstart & Try</h2>
+
+[回顶部](#id_top)
+
+<h2 id="id_adv">More</h2>
+
+<h3 id="id_adv_script">buildscript</h3>
+
+[回顶部](#id_top)
+
+<h3 id="id_adv_dep">install third-party</h3>
+
+[回顶部](#id_top)
+
+<h3 id="id_adv_hustdb_cluster">hustdb cluster deployment</h3>
+
+#### hustdb ####
 
 Install `hustdb`(need sudo, used for libsnappy, libevhtp, libevent2.0): 
 
@@ -43,7 +61,7 @@ For detailed deployment and configuration, please check:
 
 [Back to top](#id_top)
 
-<h2 id="id_hustdbha">hustdb ha</h2>
+#### hustdb ha ####
 
 First, install all the dependent common modules for `hustdb ha`:  
 
@@ -142,7 +160,9 @@ For detailed deployment and configuration, please check:
 
 [Back to top](#id_top)
 
-<h2 id="id_hustmq">hustmq</h2>
+<h3 id="id_adv_hustmq_cluster">hustmq cluster deployment</h3>
+
+#### hustmq ####
 
 Install `hustdb`(need sudo, used for libsnappy, libevhtp, libevent2.0): 
 
@@ -179,7 +199,7 @@ For detailed deployment and configuration, please check:
 
 [Back to top](#id_top)
 
-<h2 id="id_hustmqha">hustmq ha</h2>
+#### hustmq ha ####
 
 Install `pcre`：
 

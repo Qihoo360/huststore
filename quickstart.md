@@ -9,17 +9,17 @@
 
 <h2 id="id_try">Quickstart & Try</h2>
 
-[回顶部](#id_top)
+[Back to top](#id_top)
 
 <h2 id="id_adv">More</h2>
 
 <h3 id="id_adv_script">buildscript</h3>
 
-[回顶部](#id_top)
+[Back to top](#id_top)
 
 <h3 id="id_adv_dep">install third-party</h3>
 
-[回顶部](#id_top)
+[Back to top](#id_top)
 
 <h3 id="id_adv_hustdb_cluster">hustdb cluster deployment</h3>
 

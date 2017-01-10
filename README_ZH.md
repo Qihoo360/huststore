@@ -29,8 +29,8 @@
 ![architect](res/architect.png)
 
 ### 部署 ###
-* 分布式KV存储 = HA（hustdb ha） + DB（hustdb）
-* 分布式消息队列 = HA（hustmq ha） + DB（hustdb）
+* 分布式KV存储 : HA (hustdb ha) + DB (hustdb)
+* 分布式消息队列 : HA (hustmq ha) + DB (hustdb)
 
 ## 存储引擎 ##
 ![hustdb](res/hustdb.png)
@@ -68,7 +68,7 @@
 
 * [redis 3.2.6](https://redis.io/)
 * [ssdb 1.9.4](http://ssdb.io)
-* [hustdb 1.5](https://github.com/Qihoo360/huststore)
+* [hustdb](https://github.com/Qihoo360/huststore)
 
 ### 测试工具 ###
 

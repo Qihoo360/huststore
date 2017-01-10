@@ -35,8 +35,8 @@ In addition, `HA` cluster uses a distributed architecture design by incorporatin
 ![architect](res/architect.png)
 
 ### Deployment ###
-* Distributed KV storage  = HA（hustdb ha） + DB（hustdb）
-* Distributed Message Queue  = HA（hustmq ha） + DB（hustdb）
+* Distributed KV storage  : HA (hustdb ha) + DB (hustdb)
+* Distributed Message Queue  : HA (hustmq ha) + DB (hustdb)
 
 ## Database Engine ##
 ![hustdb](res/hustdb.png)
@@ -74,7 +74,7 @@ Above includes detailed documents of design, deployments, `API` usage and test s
 
 * [redis 3.2.6](https://redis.io/)
 * [ssdb 1.9.4](http://ssdb.io)
-* [hustdb 1.5](https://github.com/Qihoo360/huststore)
+* [hustdb](https://github.com/Qihoo360/huststore)
 
 ### Tools ###
 

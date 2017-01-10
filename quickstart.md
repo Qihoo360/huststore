@@ -1,11 +1,11 @@
 <h1 id="id_top">Quick Start</h1>
 
-* [HustDB](#id_hustdb)  
-* [HustDB HA](#id_hustdbha)  
-* [HustMQ](#id_hustmq)  
-* [HustMQ HA](#id_hustmqha)  
+* [hustdb](#id_hustdb)  
+* [hustdb ha](#id_hustdbha)  
+* [hustmq](#id_hustmq)  
+* [hustmq ha](#id_hustmqha)  
 
-<h2 id="id_hustdb">HustDB</h2>
+<h2 id="id_hustdb">hustdb</h2>
 
 Install `hustdb`(need sudo, used for libsnappy, libevhtp, libevent2.0): 
 
@@ -43,7 +43,7 @@ For detailed deployment and configuration, please check:
 
 [Back to top](#id_top)
 
-<h2 id="id_hustdbha">HustDB HA</h2>
+<h2 id="id_hustdbha">hustdb ha</h2>
 
 First, install all the dependent common modules for `hustdb ha`:  
 
@@ -142,7 +142,7 @@ For detailed deployment and configuration, please check:
 
 [Back to top](#id_top)
 
-<h2 id="id_hustmq">HustMQ</h2>
+<h2 id="id_hustmq">hustmq</h2>
 
 Install `hustdb`(need sudo, used for libsnappy, libevhtp, libevent2.0): 
 
@@ -179,7 +179,7 @@ For detailed deployment and configuration, please check:
 
 [Back to top](#id_top)
 
-<h2 id="id_hustmqha">HustMQ HA</h2>
+<h2 id="id_hustmqha">hustmq ha</h2>
 
 Install `pcre`：
 
@@ -241,3 +241,5 @@ For detailed deployment and configuration, please check:
 * [hustmq ha deployment](hustmq/doc/doc/en/advanced/ha/deploy.md)
 
 [Back to top](#id_top)
+
+[Home](README.md)

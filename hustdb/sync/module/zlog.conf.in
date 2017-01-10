@@ -1,0 +1,12 @@
+[global]
+strict init = true
+buffer min = 2MB
+buffer max = 64MB
+rotate lock file = /tmp/zlog_hustdbsync.lock
+file perms = 755
+
+[formats]
+default = "[%d] [%V] | %m%n"
+
+[rules]
+hustdbsync.*             "@@PREFIX_HUSTDBSYNC@@/logs/%d(%Y-%m-%d).log"; default

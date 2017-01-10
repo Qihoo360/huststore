@@ -1,6 +1,6 @@
 SERVER      = $(top_srcdir)/server/
 
-DEPS_PREFIX = /opt/huststore/3rd
+DEPS_PREFIX =  ${prefix}/../3rd
 
 INCLUDES    = \
     -I $(SERVER)/ \

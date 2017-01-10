@@ -1,0 +1,85 @@
+#!/bin/bash
+set -e
+
+export PATH=/bin:/usr/bin:/usr/sbin:/sbin:${PATH}
+
+help(){
+echo "Usage:"
+echo "       $0 --module=3rd|hustdb|hustdbha|hustmq|hustmqha  # choose which module to build and install"
+echo "       $0 --help|-h"
+return 1
+}
+
+build_3rd(){
+  ( cd third_party/ && bash -e build.sh; )
+}
+build_hustdb(){
+  ( cd hustdb/db       && bash -e ./Config.sh && make -j$(nproc) && sudo make install ;)
+}
+build_hustdbha(){
+  ( cd hustdb/sync     && bash -e ./Config.sh && make -j$(nproc) && sudo make install ;)
+  ( cd hustdb/ha/nginx && bash -e ./Config.sh && make -j$(nproc) && sudo make install ;)
+}
+build_hustmq(){ true; }
+build_hustmqha(){
+  ( cd hustmq/ha/nginx && bash -e ./Config.sh && make -j$(nproc) && sudo make install ;)
+}
+
+make_elf(){
+  local mod=$1
+  local path=$2
+
+}
+
+
+
+if ! options=$(getopt -o h -l help,module: -- "$@")
+then
+    help
+    exit 1
+fi
+
+eval set -- $options
+MODULES=''
+
+while [ $# -gt 0 ]
+do
+    case $1 in
+    -h|--help) help; exit 1 ;;
+    -m|--module) MODULES="$2" ; shift;;
+    (--) shift; break;;
+    (-*) echo "$0: error - unrecognized option $1" 1>&2; help; exit 1;;
+    (*) break;;
+    esac
+    shift
+done
+
+declare -a exec_cmds=()
+
+OLDIFS=$IFS
+IFS=','
+for mod in ${MODULES}; do
+  case $mod in
+    3rd )
+      exec_cmds=(build_3rd ${exec_cmds[@]})
+      ;;
+    hustdb )
+      exec_cmds+=(build_hustdb)
+      ;;
+    hustdbha )
+      exec_cmds+=(build_hustdbha)
+      ;;
+    hustmq )
+      exec_cmds+=(build_hustmq)
+      ;;
+    hustmqha )
+      exec_cmds+=(build_hustmqha)
+      ;;
+  esac
+done
+IFS=${OLDIFS}
+
+for cmd in ${exec_cmds[@]}; do
+  eval $cmd
+done
+

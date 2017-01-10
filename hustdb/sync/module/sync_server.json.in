@@ -1,0 +1,30 @@
+{
+    "network":
+    {
+        "port": 8089,
+        "backlog": 512,
+        "disable_100_cont": true,
+        "enable_reuseport": true,
+        "enable_nodelay": true,
+        "enable_defer_accept": true,
+        "max_body_size": 16777216,
+        "max_keepalive_requests": 1024,
+        "recv_timeout": 300,
+        "send_timeout": 300,
+        "threads": 2,
+        "user": "sync",
+        "passwd": "sync",
+        "access_allow": "127.0.0.1"
+    },
+    "sync":
+    {
+        "daemon": true,
+        "logs_path": "@@PREFIX_HUSTDBHA@@/logs/",
+        "ngx_path":  "@@PREFIX_HUSTDBHA@@/",
+        "auth_path": "@@PREFIX_HUSTDBHA@@/conf/htpasswd",
+        "threads": 4,
+        "release_interval": 5000,
+        "checkdb_interval": 5000,
+        "checklog_interval": 60000
+    }
+}

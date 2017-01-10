@@ -2,6 +2,9 @@
 
 set -e
 
+
+export prefix_3rd=@@PREFIX_3RD@@ # ${prefix_3rd} used by build_xxxx.sh
+
 export PATH=/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/sbin:${prefix_3rd}/bin:${prefix_3rd}/sbin
 
 bash -e ./build_snappy.sh       || { echo "Build snappy   failed." ; false; }

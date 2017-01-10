@@ -1,0 +1,6 @@
+LD_LIBRARY_PATH=@@PREFIX_3RD@@/lib \
+./configure \
+  --with-cc-opt="-g3 -O0 -I@@PREFIX_3RD@@/include" \
+  --with-ld-opt="-L@@PREFIX_3RD@@/lib -lzlog -lpthread -lm -ldl -lcrypto" \
+  --prefix=@@PREFIX_HUSTDBHA@@ --add-module=src/addon
+

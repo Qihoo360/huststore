@@ -1,0 +1,6 @@
+LD_LIBRARY_PATH=@@PREFIX_3RD@@/lib \
+./configure \
+  --with-cc-opt="-g3 -O0 -I@@PREFIX_3RD@@/include" \
+  --with-ld-opt="-lm -L@@PREFIX_3RD@@/lib" \
+  --prefix=@@PREFIX_HUSTMQHA@@ \
+  --add-module=src/addon

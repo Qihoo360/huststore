@@ -1,0 +1,4 @@
+./bootstrap.sh && \
+./configure \
+  --prefix=@@PREFIX_HUSTDBSYNC@@ \
+  --bindir=@@PREFIX_HUSTDBSYNC@@

@@ -1,4 +1,4 @@
-DEPS_PREFIX = /opt/huststore/3rd
+DEPS_PREFIX =  ${prefix}/../3rd
 
 AM_CPPFLAGS = -O0 -g3 -Wall -fmessage-length=0
 AM_LDFLAGS  = -L $(DEPS_PREFIX)/lib -L /usr/lib64 -L /usr/lib

@@ -11,7 +11,7 @@ get_cmd = lambda user, cmd: 'sudo -u %s %s -oStrictHostKeyChecking=no' % (user, 
 def manual(): 
     print """
     usage:
-        python remote_deploy.py [user] [host_file] [prefix] [elf]
+        python remote_deploy.py [user] [host_file] [prefix] [tar]
     sample:
         python remote_deploy.py jobs host.txt /opt/huststore elf_hustdb.tar.gz
         """
@@ -29,14 +29,14 @@ def gen_ssh_cmd(user, host, cmds):
         '    \''
         ])
 
-def remote_deploy(user, host, prefix, elf):
+def remote_deploy(user, host, prefix, tar):
     return merge([
-        '%s %s %s@%s:/tmp;' % (get_cmd(user, 'scp'), elf, user, host),
+        '%s %s %s@%s:/tmp;' % (get_cmd(user, 'scp'), tar, user, host),
         gen_ssh_cmd(user, host, [
-            'mv /tmp/%s %s' % (elf, prefix),
+            'mv /tmp/%s %s' % (tar, prefix),
             'cd %s' % prefix,
-            'tar -zxf %s -C .' % elf,
-            'rm -f %s' % elf,
+            'tar -zxf %s -C .' % tar,
+            'rm -f %s' % tar,
             ])
         ])
 
@@ -44,10 +44,10 @@ def parse_shell(argv):
     size = len(argv)
     if size != 5:
         return False
-    (user, host_file, prefix, elf) = (argv[1], argv[2], argv[3], argv[4])
+    (user, host_file, prefix, tar) = (argv[1], argv[2], argv[3], argv[4])
     for host in get_items(host_file):
         print host
-        os.system(remote_deploy(user, host, prefix, elf))
+        os.system(remote_deploy(user, host, prefix, tar))
     return True
 
 if __name__ == "__main__":

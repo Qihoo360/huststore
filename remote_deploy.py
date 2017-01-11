@@ -26,8 +26,8 @@ def remote_ssh(key, option, user, host_file, cmds):
     return True
 
 def remote_deploy(user, host_file, prefix, tar):
-    os.system('python remote_scp.py -s %s %s /tmp %s' % (user, host_file, tar))
-    return remote_ssh('remote_deploy', '-s', user, host_file, [
+    os.system('python remote_scp.py --silent %s %s /tmp %s' % (user, host_file, tar))
+    return remote_ssh('remote_deploy', '--silent', user, host_file, [
         'mv /tmp/%s %s' % (tar, prefix),
         'cd %s' % prefix,
         'tar -zxf %s -C .' % tar,

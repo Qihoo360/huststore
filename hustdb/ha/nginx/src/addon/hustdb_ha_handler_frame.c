@@ -3,7 +3,7 @@
 
 ngx_int_t hustdb_ha_version_handler(ngx_str_t * backend_uri, ngx_http_request_t *r)
 {
-    static ngx_str_t version = ngx_string("hustdbha 1.6\n");
+    static ngx_str_t version = ngx_string("hustdbha 1.7\n");
     r->headers_out.status = NGX_HTTP_OK;
     return ngx_http_send_response_imp(r->headers_out.status, &version, r);
 }

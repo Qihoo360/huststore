@@ -5,9 +5,9 @@
     * [tools](#id_adv_tools)
     * [prepare](#id_adv_prepare)
     * [install third-party](#id_adv_dep)
-    * [generate configuration](#id_adv_conf)
     * [deploy hustdb cluster](#id_adv_hustdb_cluster)
     * [deploy hustmq cluster](#id_adv_hustmq_cluster)
+* [Appendix](#id_appendix)
 
 <h2 id="id_try">Quickstart & Try</h2>
 
@@ -68,6 +68,8 @@ This chapter shows the instructions of deployment for **cluster**, not single-ma
 
 <h3 id="id_adv_tools">tools</h3>
 
+**NOTE: All of the tools below are under root folder of huststore.**
+
 #### prebuild.sh ####
 
 `prebuild.sh` is used to prepare the build environment of huststore, usage:  
@@ -111,6 +113,10 @@ NOTE: if `--prefix` is not set, `prebuild.sh` will use `/opt/huststore` as defau
     sample:
         sh build.sh --help
         sh build.sh --module=hustdb
+        sh build.sh --module=3rd,hustdb
+        sh build.sh --module=3rd,hustdb,hustdbha
+        sh build.sh --module=3rd,hustmq,hustmqha
+
         sh build.sh
 
 NOTE: if `--module` is not set, `build.sh` will build **all modules of huststore**, and generate the installation packages as following:  
@@ -128,6 +134,38 @@ If `--module` is set as specified name, for example, `hustdb`, then only `elf_hu
 WARNING: **you need to build & install 3rd first** before build other modules:  
     
     $ sh build.sh --module=3rd
+
+[Back to top](#id_top)
+
+#### remote_scp.py ####
+
+`remote_scp.py` is a wrapper of `scp`, which supports **batch scp**.
+
+    usage:
+        python remote_scp.py [option] [user] [host_file] [remote_folder] [local_file1] [local_file2] ...
+        
+        [option]
+            --silent                          run in silent mode
+
+    sample:
+        python remote_scp.py jobs host.txt /opt/huststore/hustdbha/conf nginx.conf hustdbtable.json
+        python remote_scp.py --silent jobs host.txt /opt/huststore/hustdbha/conf nginx.conf hustdbtable.json
+
+[Back to top](#id_top)
+
+#### remote_ssh.py ####
+
+`remote_ssh.py` is a wrapper of `ssh`, which supports **batch ssh**.
+
+    usage:
+        python remote_ssh.py [option] [user] [host_file] [cmds_file]
+        
+        [option]
+            --silent                          run in silent mode
+            
+    sample:
+        python remote_ssh.py jobs host.txt cmds.txt
+        python remote_ssh.py --silent jobs host.txt cmds.txt
 
 [Back to top](#id_top)
 
@@ -167,22 +205,44 @@ For convienience, you can add contents as below to the file `/etc/sudoers` of re
 `remote_prefix.py` is used to deploy installation package to remote machines, usage:
 
     usage:
-        python remote_deploy.py [user] [host_file] [prefix] [elf]
+        python remote_deploy.py [user] [host_file] [prefix] [tar]
     sample:
         python remote_deploy.py jobs host.txt /opt/huststore elf_hustdb.tar.gz
 
 Arguments:
 
-* `user` : username for ssh
-* `host_file` : remote host list file
-* `prefix` : installation folder
-* `elf` : elf installation package
+* `user` : user name for `ssh` & `scp` command
+* `host_file` : remote host list stored in file
+* `prefix` : installation folder in **remote host**
+* `tar` : **local** elf installation package
 
 For example, if you run this command:
 
     python remote_deploy.py jobs host.txt /opt/huststore elf_hustdb.tar.gz
 
-Then `remote_deploy.py` will login by user `jobs` to the machines stored in `host.txt` one by one, copy installation package `elf_hustdb.tar.gz` to remote machine, and untar it to the folder `/opt/huststore`.
+Then `remote_deploy.py` will login by user `jobs` to the machines stored in `host.txt` one by one, copy installation package `elf_hustdb.tar.gz` to remote machine, and **untar** it to the folder `/opt/huststore`.
+
+#### remote_service.py ####
+
+`remote_service.py` is used to control huststore services in remote machines, usage:
+
+    usage:
+        python remote_service.py [user] [host_file] [bin_folder] [action]
+        
+        [action]
+            --start                           start remote service
+            --stop                            stop remote service
+            
+    sample:
+        python remote_service.py jobs host.txt /opt/huststore/hustdb --start
+        python remote_service.py jobs host.txt /opt/huststore/hustdb --stop
+
+Arguments:
+
+* `user` : user name for `ssh` & `scp` command
+* `host_file` : remote host list stored in file
+* `bin_folder` : binary folder of service in remote host
+* `action` : start or stop service
 
 [Back to top](#id_top)
 
@@ -205,12 +265,11 @@ Run `prebuild.sh` to prepare the build environment.
 
 Run `remote_prefix.py` to set the installation path:  
 
-    $ python remote_prefix.py jobs hosts /opt/huststore
+    $ python remote_prefix.py jobs hosts /opt/huststore jobs
 
 [Back to top](#id_top)
 
 <h3 id="id_adv_dep">install third-party</h3>
-
 
 Run instructions as below:
 
@@ -221,9 +280,44 @@ Run instructions as below:
 
 [Back to top](#id_top)
 
-<h3 id="id_adv_conf">generate configuration</h3>
+<h3 id="id_adv_hustdb_cluster">deploy hustdb cluster</h3>
+
+#### hustdb ####
+
+Build and make installation package of `hustdb`: 
+
+    $ sh build.sh --module=hustdb
+
+Deploy `hustdb`:
+
+    $ python remote_deploy.py jobs hosts /opt/huststore elf_hustdb.tar.gz
+
+Start service
+
+    $ python remote_service.py jobs hosts /opt/huststore/hustdb --start
+
+Type in the below command to test:
+
+    curl -i -X GET '192.168.1.101:8085/status.html'
+    curl -i -X GET '192.168.1.102:8085/status.html'
+
+Infomation returned:
+
+    HTTP/1.1 200 OK
+	Content-Length: 3
+	Content-Type: text/plain
+
+	ok
+
+The result shows that the servers work as expected.
+
+[Back to top](#id_top)
 
 #### hustdb ha ####
+
+Build and make installation package of `hustdb ha`: 
+
+    $ sh build.sh --module=hustdbha
 
 Open the configuration:  
 
@@ -261,13 +355,108 @@ Add contents as below and save, **please replace to your real hustdb nodes**：
 
 Execute command：
 
-    python gen_table.py hosts hustdbtable.json
+    $ python gen_table.py hosts hustdbtable.json
 
-#### hustmq ha ####
+Switch to the root folder:
+
+    $ cd ../../../../
+
+Deploy `hustdb ha`:
+
+    $ python remote_deploy.py jobs hosts /opt/huststore elf_hustdbha.tar.gz
+    $ python remote_scp.py --silent jobs hosts /opt/huststore/hustdbha/conf \
+          hustdb/ha/nginx/conf/nginx.conf \
+          hustdb/ha/nginx/conf/hustdbtable.json
+
+Start service
+
+    $ python remote_service.py jobs hosts /opt/huststore/hustdbha/sbin --start
+    $ python remote_service.py jobs hosts /opt/huststore/hustdbsync --start
+
+Type in commands:
+
+    curl -i -X GET '192.168.1.101:8082/version'
+    curl -i -X GET '192.168.1.102:8082/version'
+
+We should be able to see the below infomation:
+
+    HTTP/1.1 200 OK
+    Server: nginx/1.10.0
+    Date: Fri, 16 Dec 2016 10:56:55 GMT
+    Content-Type: text/plain
+    Content-Length: 13
+    Connection: keep-alive
+
+    hustdbha 1.7
+
+The result shows that the servers work as expected.
+
+[Back to top](#id_top)
+
+<h3 id="id_adv_hustmq_cluster">deploy hustmq cluster</h3>
+
+#### hustmq ####
+
+Build and make installation package of `hustmq`: 
+
+    $ sh build.sh --module=hustmq
 
 Open the configuration:  
 
-    $ cd ../../../../ # switch to the root dir of huststore
+    $ vi hustdb/db/server/module/hustdb.conf
+
+Pay attention to the contents as below:
+
+    [server]
+    tcp.port                        = 8085
+    ......
+    [contentdb]
+    # enable if count large than 0
+    count                           = 0
+
+Replace the value of `tcp.port` and `count` and save:
+
+    [server]
+    tcp.port                        = 8086
+    ......
+    [contentdb]
+    # enable if count large than 0
+    count                           = 256
+
+Deploy `hustmq`:
+
+    $ python remote_deploy.py jobs hosts /opt/huststore elf_hustmq.tar.gz
+    $ python remote_scp.py --silent jobs hosts /opt/huststore/hustmq \
+          hustdb/db/server/module/hustdb.conf
+
+Start service
+
+    $ python remote_service.py jobs hosts /opt/huststore/hustmq --start
+
+Type in the below command to test:
+
+    curl -i -X GET '192.168.1.101:8086/status.html'
+    curl -i -X GET '192.168.1.102:8086/status.html'
+
+Infomation returned:
+
+    HTTP/1.1 200 OK
+	Content-Length: 3
+	Content-Type: text/plain
+
+	ok
+
+The result shows that the servers work as expected.
+
+[Back to top](#id_top)
+
+#### hustmq ha ####
+
+Build and make installation package of `hustmq ha`: 
+
+    $ sh build.sh --module=hustmqha
+
+Open the configuration:  
 
     $ cd hustmq/ha/nginx/conf/
     $ vi nginx.json
@@ -292,150 +481,24 @@ Run `genconf.py` to generate `nginx.conf`:
 
     $ python genconf.py
 
+Switch to the root folder:
 
-[Back to top](#id_top)
+    $ cd ../../../../
 
-<h3 id="id_adv_hustdb_cluster">deploy hustdb cluster</h3>
+Deploy `hustmq ha`:
 
-#### hustdb ####
-
-Build and make installation package of `hustdb`: 
-
-    $ cd ../../../../ # switch to the root dir of huststore
-    $ sh build.sh --module=hustdb
-
-Deploy `hustdb`:
-
-    
+    $ python remote_deploy.py jobs hosts /opt/huststore elf_hustmqha.tar.gz
+    $ python remote_scp.py --silent jobs hosts /opt/huststore/hustmqha/conf \
+          hustmq/ha/nginx/conf/nginx.conf
 
 Start service
 
-    $ cd hustdb/db/server/make/linux/
-    $ export LD_LIBRARY_PATH=/opt/huststore/3rd/lib
-    $ ./hustdb
-
-Type in the below command to test:
-
-    curl -i -X GET 'localhost:8085/status.html'
-
-Infomation returned:
-
-    HTTP/1.1 200 OK
-	Content-Length: 3
-	Content-Type: text/plain
-
-	ok
-
-The result shows that the servers work as expected.
-
-For detailed deployment and configuration, please check:
-
-* [hustdb configuration](hustdb/doc/doc/en/advanced/hustdb.md)
-
-[Back to top](#id_top)
-
-#### hustdb ha ####
-
-Install `ha` and `sync server`:  
-
-    $ cd ..
-    $ chmod a+x configure
-    $ sh Config.sh
-    $ make -j
-    $ make install
-    $ cd ../../sync
-    $ make -j
-    $ make install
-
-Start `HA` and `sync server` **in order**:
-
-    $ export LD_LIBRARY_PATH=/opt/huststore/3rd/lib
-    $ /opt/huststore/hustdbha/sbin/nginx
-    $ cd /opt/huststore/hustdbsync
-    $ /opt/huststore/hustdbsync/hustdbsync
-
-Type in commands:
-
-    curl -i -X GET 'localhost:8082/version'
-
-We should be able to see the below infomation:
-
-    HTTP/1.1 200 OK
-    Server: nginx/1.10.0
-    Date: Fri, 16 Dec 2016 10:56:55 GMT
-    Content-Type: text/plain
-    Content-Length: 13
-    Connection: keep-alive
-
-    hustdbha 1.6
-
-The result shows that the servers work as expected.
-
-For detailed deployment and configuration, please check:
-
-* [hustdb ha deployment](hustdb/doc/doc/en/advanced/ha/deploy.md)
-* [hustdb ha configuration](hustdb/doc/doc/en/advanced/ha/nginx.md)
-* [hustdb ha load balance table configuration](hustdb/doc/doc/en/advanced/ha/table.md)
-* [hustdb ha log configuration](hustdb/doc/doc/en/advanced/ha/zlog.md)
-
-[Back to top](#id_top)
-
-<h3 id="id_adv_hustmq_cluster">deploy hustmq cluster</h3>
-
-#### hustmq ####
-
-Install `hustmq`(need sudo, used for libsnappy, libevhtp, libevent2.0): 
-
-    $ cd hustdb/db/server/make/linux/
-    $ sh build.sh
-
-Target path
-
-* `hustdb/db/server/make/linux/hustdb`
-* `hustdb/db/server/make/linux/hustdb.conf`
-
-Start service
-
-    $ cd hustdb/db/server/make/linux/
-    $ ./hustdb
-
-Type in the below command to test:
-
-    curl -i -X GET 'localhost:8085/status.html'
-
-Infomation returned:
-
-    HTTP/1.1 200 OK
-	Content-Length: 3
-	Content-Type: text/plain
-
-	ok
-
-The result shows that the servers work as expected.
-
-For detailed deployment and configuration, please check:
-
-* [hustmq configuration](hustmq/doc/doc/en/advanced/hustmq/index.md)
-
-[Back to top](#id_top)
-
-#### hustmq ha ####
-
-After configuration, install `hustmq ha`:
-
-    $ cd hustmq/ha/nginx
-    $ sh Config.sh
-    $ make -j
-    $ make install
-
-Start nginx:
-
-    $ export LD_LIBRARY_PATH=/opt/huststore/3rd/lib
-    $ /opt/huststore/hustmqha/sbin/nginx
+    $ python remote_service.py jobs hosts /opt/huststore/hustmqha/sbin --start
 
 Input the following test command:
 
-    curl -i -X GET 'localhost:8080/version'
+    curl -i -X GET '192.168.1.101:8080/version'
+    curl -i -X GET '192.168.1.102:8080/version'
 
 Then server will output the following information:
 
@@ -446,12 +509,20 @@ Then server will output the following information:
     Content-Length: 13
     Connection: keep-alive
 
-    hustmqha 1.6
+    hustmqha 1.7
 
 Server works just fine if the above result is returned.
 
-For detailed deployment and configuration, please check:
+[Back to top](#id_top)
 
+<h2 id="id_appendix">Appendix</h2>
+
+* [hustdb configuration](hustdb/doc/doc/en/advanced/hustdb.md)
+* [hustdb ha deployment](hustdb/doc/doc/en/advanced/ha/deploy.md)
+* [hustdb ha configuration](hustdb/doc/doc/en/advanced/ha/nginx.md)
+* [hustdb ha load balance table configuration](hustdb/doc/doc/en/advanced/ha/table.md)
+* [hustdb ha log configuration](hustdb/doc/doc/en/advanced/ha/zlog.md)
+* [hustmq configuration](hustmq/doc/doc/en/advanced/hustmq/index.md)
 * [hustmq ha configuration](hustmq/doc/doc/en/advanced/ha/nginx.md)
 * [hustmq ha deployment](hustmq/doc/doc/en/advanced/ha/deploy.md)
 

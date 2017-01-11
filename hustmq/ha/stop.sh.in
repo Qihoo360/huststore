@@ -1,0 +1,17 @@
+#!/bin/bash
+set -e
+
+cwd=$(dirname $(readlink -fn $0))
+cd ${cwd}
+LD_LIBRARY_PATH=@@PREFIX_3RD@@/lib ${cwd}/nginx -s stop
+
+pidfile=${cwd}/../logs/nginx.pid
+
+sleep 1
+
+if test -e $pidfile;then
+  pid=$(cat $pidfile)
+  kill -0 $pid 2>/dev/null &&  kill -9 $pid
+else
+  exit 0
+fi

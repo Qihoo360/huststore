@@ -1,11 +1,22 @@
 #!/bin/bash
+set -e
+
 export PATH=/bin:/usr/bin:/usr/sbin:/sbin:${PATH}
 
 help(){
-echo "Usage:"
-echo "       $0    # prefix default to /opt/huststore "
-echo "       $0 --prefix </opt/huststore>    # specify prefix"
-echo "       $0 --help|-h"
+cat<<HELP
+usage:
+  $0 [option]
+
+[option]
+  --help show the manual
+  --prefix=PATH set installation prefix of 3rd & huststore
+
+sample:
+  $0 --help
+  $0 --prefix=/opt/huststore
+  $0
+HELP
 return 1
 }
 
@@ -23,7 +34,7 @@ do
     -h|--help) help; exit 1 ;;
     -p|--prefix) prefix="$2" ; shift;;
     (--) shift; break;;
-    (-*) echo "$0: error - unrecognized option $1" 1>&2; help; exit 1;;
+    (-*) echo "$0: error - unknown option $1" 1>&2; help; exit 1;;
     (*) break;;
     esac
     shift
@@ -40,6 +51,7 @@ export PREFIX_HUSTMQHA=${HUSTSTORE_TOP}/hustmqha
 
 
 for oldf in \
+  build.sh.in \
   third_party/build.sh.in \
   hustdb/ha/nginx/Config.sh.in \
   hustdb/ha/nginx/conf/nginx.json.in \
@@ -50,10 +62,19 @@ for oldf in \
   hustdb/sync/Config.sh.in \
   hustdb/sync/module/sync_server.json.in \
   hustdb/sync/module/zlog.conf.in \
+  hustdb/db/start.sh.in \
+  hustdb/db/stop.sh.in \
+  hustdb/ha/start.sh.in \
+  hustdb/ha/stop.sh.in \
+  hustdb/sync/start.sh.in \
+  hustdb/sync/stop.sh.in \
+  hustmq/ha/start.sh.in \
+  hustmq/ha/stop.sh.in \
 ; do
   newf=${oldf%.in}
   sed \
     "s,@@PREFIX_3RD@@,${PREFIX_3RD},g;
+    s,@@HUSTSTORE_TOP@@,${HUSTSTORE_TOP},g;
     s,@@PREFIX_HUSTDB@@,${PREFIX_HUSTDB},g;
     s,@@PREFIX_HUSTDBSYNC@@,${PREFIX_HUSTDBSYNC},g;
     s,@@PREFIX_HUSTDBHA@@,${PREFIX_HUSTDBHA},g;
@@ -61,5 +82,22 @@ for oldf in \
     s,@@PREFIX_HUSTMQHA@@,${PREFIX_HUSTMQHA},g;
     " ${oldf} > ${newf}
     [[ $(basename ${newf}) == Config.sh ]] && chmod +x ${newf}
+    [[ $(basename ${newf}) == build.sh ]] && chmod +x ${newf}
+    [[ $(basename ${newf}) == start.sh ]] && chmod +x ${newf}
+    [[ $(basename ${newf}) == stop.sh ]] && chmod +x ${newf}
 done
 
+for oldm in \
+  hustdb/db/Makefile.am.in \
+  hustdb/db/server/Makefile.am.in \
+  hustdb/db/server/module/binlog/Makefile.am.in \
+  hustdb/db/server/module/mdb/Makefile.am.in \
+  hustdb/db/server/module/rdb/Makefile.am.in \
+  hustdb/db/server/network/Makefile.am.in \
+  hustdb/sync/Makefile.am.in \
+; do
+  newm=${oldm%.in}
+  sed "s,@@PREFIX_3RD@@,${PREFIX_3RD},g;" ${oldm} > ${newm}
+done
+
+echo "Success."

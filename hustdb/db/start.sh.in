@@ -1,0 +1,7 @@
+#!/bin/bash
+
+set -e
+
+cwd=$(dirname $(readlink -fn $0))
+cd ${cwd}
+LD_LIBRARY_PATH=@@PREFIX_3RD@@/lib ./hustdb

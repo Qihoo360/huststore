@@ -4,6 +4,7 @@
 * [更多](#id_adv)
     * [构建脚本](#id_adv_script)
     * [依赖安装](#id_adv_dep)
+    * [配置生成](#id_adv_conf)
     * [hustdb 集群部署](#id_adv_hustdb_cluster)
     * [hustmq 集群部署](#id_adv_hustmq_cluster)
 
@@ -20,6 +21,10 @@
 <h3 id="id_adv_dep">依赖安装</h3>
 
 [回顶部](#id_top)
+
+<h3 id="id_adv_conf">配置生成</h3>
+
+[Back to top](#id_top)
 
 <h3 id="id_adv_hustdb_cluster">hustdb 集群部署</h3>
 

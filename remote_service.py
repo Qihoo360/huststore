@@ -11,7 +11,7 @@ merge = lambda l: string.join(l, '\n')
 def manual(): 
     print """
     usage:
-        python remote_service.py [user] [host_file] [prefix] [action]
+        python remote_service.py [user] [host_file] [bin_folder] [action]
         
         [action]
             --start                           start remote service
@@ -31,14 +31,14 @@ def remote_ssh(key, option, user, host_file, cmds):
         os.remove(cmd_file)
     return True
 
-def remote_service(user, host_file, prefix, action):
+def remote_service(user, host_file, bin_folder, action):
     if '--start' == action:
         cmd = 'sh start.sh'
     elif '--stop' == action:
         cmd = 'sh stop.sh'
     else:
         return False
-    return remote_ssh('remote_service', '--slient', user, host_file, ['cd %s' % prefix, cmd])
+    return remote_ssh('remote_service', '--slient', user, host_file, ['cd %s' % bin_folder, cmd])
 
 def parse_shell(argv):
     size = len(argv)

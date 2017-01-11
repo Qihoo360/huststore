@@ -14,11 +14,11 @@ def manual():
         python remote_ssh.py [option] [user] [host_file] [cmds_file]
         
         [option]
-            -s : run in silent mode
-
+            --silent                          run in silent mode
+            
     sample:
         python remote_ssh.py jobs host.txt cmds.txt
-        python remote_ssh.py -s jobs host.txt cmds.txt
+        python remote_ssh.py --silent jobs host.txt cmds.txt
         """
 
 def get_items(uri):
@@ -38,7 +38,7 @@ def parse_shell(argv):
     size = len(argv)
     if size < 4 or size > 5:
         return False
-    silent = True if '-s' == argv[1] else False
+    silent = True if '--silent' == argv[1] else False
     idx = 2 if silent else 1
     (user, host_file, cmds_file) = (argv[idx], argv[idx + 1], argv[idx + 2])
     for host in get_items(host_file):

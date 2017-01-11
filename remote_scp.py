@@ -14,11 +14,11 @@ def manual():
         python remote_scp.py [option] [user] [host_file] [remote_folder] [local_file1] [local_file2] ...
         
         [option]
-            -s : run in silent mode
-
+            --silent                          run in silent mode
+            
     sample:
         python remote_scp.py jobs host.txt /opt/huststore/hustdbha/conf nginx.conf hustdbtable.json
-        python remote_scp.py -s jobs host.txt /opt/huststore/hustdbha/conf nginx.conf hustdbtable.json
+        python remote_scp.py --silent jobs host.txt /opt/huststore/hustdbha/conf nginx.conf hustdbtable.json
         """
 
 def get_items(uri):
@@ -33,7 +33,7 @@ def parse_shell(argv):
     size = len(argv)
     if size < 5:
         return False
-    silent = True if '-s' == argv[1] else False
+    silent = True if '--silent' == argv[1] else False
     idx = 2 if silent else 1
     (user, host_file, prefix, files) = (argv[idx], argv[idx + 1], argv[idx + 2], argv[(idx + 3):])
     for host in get_items(host_file):

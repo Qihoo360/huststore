@@ -249,6 +249,30 @@ Arguments:
 
 [Back to top](#id_top)
 
+#### make_conf.py ####
+
+`make_conf.py` is used to generate configuration of `hustdb ha` or `hustmq ha` quickly, usage:
+
+    usage:
+        python make_conf.py [host_file] [module] [HA port] [backend port]
+        
+        [module]
+            hustdbha
+            hustmqha
+
+    sample:
+        python make_conf.py host.txt hustdbha 8082 8085
+        python make_conf.py host.txt hustmqha 8080 8086
+
+Arguments:
+
+* `host_file` : remote host list stored in file
+* `module` : `hustdbha` | `hustmqha`
+* `HA port` : listen port of `hustdbha` | `hustmqha`
+* `backend port` : listen port of `hustdb` | `hustmq`
+
+[Back to top](#id_top)
+
 <h3 id="id_adv_prepare">prepare</h3>
 
 Edit file `hosts`:  
@@ -326,47 +350,9 @@ Build and make installation package of `hustdb ha`:
 
     $ sh build.sh --module=hustdbha
 
-Open the configuration:  
+Generate configuration of `hustdb ha`: 
 
-    $ cd hustdb/ha/nginx/conf/
-    $ vi nginx.json
-
-**Replace `backends` to your real `hustdb` machine list(at least two nodes):**
-
-    {
-        ......
-        "proxy":
-        {
-            ......
-            "backends": 
-            [
-                "192.168.1.101:8085", 
-                "192.168.1.102:8085"
-            ],
-            ......
-        }
-    }
-
-Execute `genconf.py` to generate `nginx.conf`:
-
-    $ python genconf.py
-
-Edit file `hosts`:  
-
-    $ vi hosts
-
-Add contents as below and save, **please replace to your real hustdb nodes**：
-
-    192.168.1.101:8085
-    192.168.1.102:8085
-
-Execute command：
-
-    $ python gen_table.py hosts hustdbtable.json
-
-Switch to the root folder:
-
-    $ cd ../../../../
+    $ python make_conf.py hosts hustdbha 8082 8085
 
 Deploy `hustdb ha` (copy installation package to remote machines and untar to `/opt/huststore`, then replace the configuration):
 
@@ -463,34 +449,9 @@ Build and make installation package of `hustmq ha`:
 
     $ sh build.sh --module=hustmqha
 
-Open the configuration:  
+Generate configuration of `hustmq ha`: 
 
-    $ cd hustmq/ha/nginx/conf/
-    $ vi nginx.json
-
-**Replace `backends` to your real `hustdb` machine list:**
-
-    {
-        ......
-        "proxy":
-        {
-            ......
-            "backends":
-            [
-                "192.168.1.101:8086",
-                "192.168.1.102:8086"
-            ],
-            ......
-        }
-    }
-
-Run `genconf.py` to generate `nginx.conf`:
-
-    $ python genconf.py
-
-Switch to the root folder:
-
-    $ cd ../../../../
+    $ python make_conf.py hosts hustdbha 8080 8086
 
 Deploy `hustmq ha` (copy installation package to remote machines and untar to `/opt/huststore`, then replace the configuration):
 

@@ -249,6 +249,30 @@
 
 [回顶部](#id_top)
 
+#### make_conf.py ####
+
+`make_conf.py` 用于快速生成 `hustdb ha` 或 `hustmq ha` 的配置，用法：
+
+    usage:
+        python make_conf.py [host_file] [module] [HA port] [backend port]
+        
+        [module]
+            hustdbha
+            hustmqha
+
+    sample:
+        python make_conf.py host.txt hustdbha 8082 8085
+        python make_conf.py host.txt hustmqha 8080 8086
+
+参数：
+
+* `host_file` : 记录远程机器列表的文件名
+* `module` : `hustdbha` | `hustmqha`
+* `HA port` : `hustdbha` | `hustmqha` 的监听端口
+* `backend port` : `hustdb` | `hustmq` 的监听端口
+
+[回顶部](#id_top)
+
 <h3 id="id_adv_prepare">预备工作</h3>
 
 编辑 `hosts`：  
@@ -326,47 +350,9 @@
 
     $ sh build.sh --module=hustdbha
 
-打开配置文件：  
+生成 `hustdb ha` 的配置： 
 
-    $ cd hustdb/ha/nginx/conf/
-    $ vi nginx.json
-
-**替换 `backends` 为真实的 `hustdb` 机器列表：**
-
-    {
-        ......
-        "proxy":
-        {
-            ......
-            "backends": 
-            [
-                "192.168.1.101:8085", 
-                "192.168.1.102:8085"
-            ],
-            ......
-        }
-    }
-
-运行 `genconf.py` 生成 `nginx.conf`：
-
-    $ python genconf.py
-
-编辑 `hosts` 文件：
-    
-    $ vi hosts
-
-添加内容如下，**请替换为真实的 hustdb 节点（最少两个）**：
-
-    192.168.1.101:8085
-    192.168.1.102:8085
-
-运行命令：
-
-    $ python gen_table.py hosts hustdbtable.json
-
-切换到项目根目录：
-
-    $ cd ../../../../
+    $ python make_conf.py hosts hustdbha 8082 8085
 
 部署 `hustdb ha`（将安装包拷贝至远程机器，并解压至目录 `/opt/huststore`，然后替换配置文件）：
 
@@ -463,34 +449,9 @@
 
     $ sh build.sh --module=hustmqha
 
-打开配置文件：
+生成 `hustmq ha` 的配置： 
 
-    $ cd hustmq/ha/nginx/conf/
-    $ vi nginx.json
-
-**将 `backends` 替换为真实的 `hustmq` 机器列表：**
-
-    {
-        ......
-        "proxy":
-        {
-            ......
-            "backends":
-            [
-                "192.168.1.101:8086",
-                "192.168.1.102:8086"
-            ],
-            ......
-        }
-    }
-
-运行 `genconf.py` 生成 `nginx.conf`：
-
-    $ python genconf.py
-
-切换到项目的根目录：
-
-    $ cd ../../../../
+    $ python make_conf.py hosts hustdbha 8080 8086
 
 部署 `hustmq ha`（将安装包拷贝至远程机器，并解压至目录 `/opt/huststore`，然后替换配置文件）：
 

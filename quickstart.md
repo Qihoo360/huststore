@@ -2,11 +2,11 @@
 
 * [Quickstart & Try](#id_try)  
 * [More](#id_adv)
-    * [tools](#id_adv_tools)
-    * [prepare](#id_adv_prepare)
-    * [install third-party](#id_adv_dep)
-    * [deploy hustdb cluster](#id_adv_hustdb_cluster)
-    * [deploy hustmq cluster](#id_adv_hustmq_cluster)
+    * [Tools](#id_adv_tools)
+    * [Preparation](#id_adv_prepare)
+    * [Dependency Deployment](#id_adv_dep)
+    * [Hustdb Cluster Deployment](#id_adv_hustdb_cluster)
+    * [Hustmq Cluster Deployment](#id_adv_hustmq_cluster)
 * [Appendix](#id_appendix)
 
 <h2 id="id_try">Quickstart & Try</h2>
@@ -55,21 +55,23 @@ See more API from [here](hustdb/doc/doc/en/api/hustdb/hustdb.md)
 
 This chapter shows the instructions of deployment for **cluster**, not single-machine, which is prefered in production environment.  
 
-* Please read the following instructions **section by section**.
-* **At least two machines** are required to deploy huststore, for example: `["192.168.1.101", "192.168.1.102"]`.
+* Please read the following instructions **section by section without any skip**.
+* **At least two machines** are required to deploy huststore, for example: `["192.168.1.101", "192.168.1.102"]`.  
+* **A standalone build machine is strongly suggested**, for example: `192.168.1.100`.  
 
 **Assumption**
 
 * `user`: `jobs`
-* `machines` : `["192.168.1.101", "192.168.1.102"]`
+* `build machine` : `192.168.1.100`  
+* `deployment machines` : `["192.168.1.101", "192.168.1.102"]`
 * `hustdb`: `["192.168.1.101:8085", "192.168.1.102:8085"]`
 * `hustdb ha`: `["192.168.1.101:8082", "192.168.1.102:8082"]`
 * `hustmq`: `["192.168.1.101:8086", "192.168.1.102:8086"]`
 * `hustmq ha`: `["192.168.1.101:8080", "192.168.1.102:8080"]`
 
-**Please replace the arguments above (`user`, `machines`) to your real values in production environment**.
+**Please replace the arguments above (`user`, `build machine`, `deployment machines`) to your real values in production environment**.
 
-<h3 id="id_adv_tools">tools</h3>
+<h3 id="id_adv_tools">Tools</h3>
 
 **NOTE: All of the tools below are under root folder of huststore.**
 
@@ -273,13 +275,20 @@ Arguments:
 
 [Back to top](#id_top)
 
-<h3 id="id_adv_prepare">prepare</h3>
+<h3 id="id_adv_prepare">Preparation</h3>
+
+Login to **build machine** (`192.168.1.100`), download huststore src and untar it:  
+
+    $ ssh 192.168.1.100  # please replace the ip with your build machine
+    $ wget https://github.com/Qihoo360/huststore/archive/v1.7.tar.gz -O huststore-1.7.tar.gz
+    $ tar -zxf huststore-1.7.tar.gz
+    $ cd huststore-1.7
 
 Edit file `hosts`:  
 
     $ vi hosts
 
-Add contents as below and save, **please replace to your real machines**：
+Add contents as below and save, **please replace to your real deployment machines**：
 
     192.168.1.101
     192.168.1.102
@@ -296,7 +305,7 @@ Run `remote_prefix.py` to set the installation path:
 
 [Back to top](#id_top)
 
-<h3 id="id_adv_dep">install third-party</h3>
+<h3 id="id_adv_dep">Dependency Deployment</h3>
 
 Build third-party and generate installation package:
 
@@ -311,7 +320,7 @@ Install third-party (copy installation package to remote machines and untar to `
 
 [Back to top](#id_top)
 
-<h3 id="id_adv_hustdb_cluster">deploy hustdb cluster</h3>
+<h3 id="id_adv_hustdb_cluster">Hustdb Cluster Deployment</h3>
 
 #### hustdb ####
 
@@ -386,7 +395,7 @@ The result shows that the servers work as expected.
 
 [Back to top](#id_top)
 
-<h3 id="id_adv_hustmq_cluster">deploy hustmq cluster</h3>
+<h3 id="id_adv_hustmq_cluster">Hustmq Cluster Deployment</h3>
 
 #### hustmq ####
 

@@ -13,7 +13,8 @@
 
 这一部分展示了 `huststore` 在 **单机** 上的部署试用过程，不含集群的部署内容。整个过程只有 `hustdb` 一个组件会被用到，其他的模块用不上。集群的试用请参考[这里](#id_adv)。
 
-    $ sudo yum install -y pcre-devel
+    $ sudo yum groupinstall -y 'Development tools'
+    $ sudo yum install -y pcre-devel libidn-devel openssl-devel
 
     $ wget https://github.com/Qihoo360/huststore/archive/v1.7.tar.gz -O huststore-1.7.tar.gz
     $ tar -zxf huststore-1.7.tar.gz
@@ -44,7 +45,7 @@
 停止服务：
 
     $ cd /opt/huststore/hustdb
-    $ sh start.sh
+    $ sh stop.sh
 
 更多 API 请参考[这里](hustdb/doc/doc/zh/api/hustdb/hustdb.md)
 
@@ -275,7 +276,8 @@
 
 运行如下的指令：
 
-    $ sudo yum install -y pcre-devel
+    $ sudo yum groupinstall -y 'Development tools'
+    $ sudo yum install -y pcre-devel libidn-devel openssl-devel
     $ sh prebuild.sh --prefix=/opt/huststore
     $ sh build.sh --module=3rd
     $ python remote_deploy.py jobs hosts /opt/huststore elf_hustdb.tar.gz
@@ -352,8 +354,8 @@
 
 添加内容如下，**请替换为真实的 hustdb 节点（最少两个）**：
 
-    192.168.1.101:9999
-    192.168.1.102:9999
+    192.168.1.101:8085
+    192.168.1.102:8085
 
 运行命令：
 

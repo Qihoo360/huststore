@@ -13,7 +13,8 @@
 
 This chapter shows the instructions of deployment for **single-machine**, not cluster. Only `hustdb` will be used for test, other modules of huststore are skipped. See more details on cluster deployment in [here](#id_adv).
 
-    $ sudo yum install -y pcre-devel
+    $ sudo yum groupinstall -y 'Development tools'
+    $ sudo yum install -y pcre-devel libidn-devel openssl-devel
 
     $ wget https://github.com/Qihoo360/huststore/archive/v1.7.tar.gz -O huststore-1.7.tar.gz
     $ tar -zxf huststore-1.7.tar.gz
@@ -44,7 +45,7 @@ Infomation returned:
 Stop the service:
 
     $ cd /opt/huststore/hustdb
-    $ sh start.sh
+    $ sh stop.sh
 
 See more API from [here](hustdb/doc/doc/en/api/hustdb/hustdb.md)
 
@@ -275,7 +276,8 @@ Run `remote_prefix.py` to set the installation path:
 
 Run instructions as below:
 
-    $ sudo yum install -y pcre-devel
+    $ sudo yum groupinstall -y 'Development tools'
+    $ sudo yum install -y pcre-devel libidn-devel openssl-devel
     $ sh prebuild.sh --prefix=/opt/huststore
     $ sh build.sh --module=3rd
     $ python remote_deploy.py jobs hosts /opt/huststore elf_hustdb.tar.gz

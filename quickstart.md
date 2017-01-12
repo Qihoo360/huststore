@@ -534,7 +534,7 @@ Server works just fine if the above result is returned.
 * `API`
     * [`hustdb`](hustdb/doc/doc/en/api/hustdb/hustdb.md)
     * [`hustdb ha`](hustdb/doc/doc/en/api/ha.md)
-    * [`hustmq`](hustmq/doc/doc/zh/en/hustmq.md)
+    * [`hustmq`](hustmq/doc/doc/en/api/hustmq.md)
     * [`hustmq ha`](hustmq/doc/doc/en/api/ha.md)
 
 [Back to top](#id_top)

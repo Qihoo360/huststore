@@ -53,7 +53,7 @@ See more API from [here](hustdb/doc/doc/en/api/hustdb/hustdb.md)
 
 <h2 id="id_adv">More</h2>
 
-This chapter shows the instructions of deployment for **cluster**, not single-machine, which is prefered in production environment.  
+This chapter shows the instructions of deployment for **cluster**, not single-machine, which is preferred in production environment.  
 
 * Please read the following instructions **section by section without any skip**.
 * **At least two machines** are required to deploy huststore, for example: `["192.168.1.101", "192.168.1.102"]`.  

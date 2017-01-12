@@ -46,6 +46,8 @@ Stop the service:
     $ cd /opt/huststore/hustdb
     $ sh start.sh
 
+See more API from [here](hustdb/doc/doc/en/api/hustdb/hustdb.md)
+
 [Back to top](#id_top)
 
 <h2 id="id_adv">More</h2>
@@ -529,6 +531,11 @@ Server works just fine if the above result is returned.
 * `hustmq ha`
     * [hustmq ha configuration](hustmq/doc/doc/en/advanced/ha/nginx.md)
     * [hustmq ha deployment](hustmq/doc/doc/en/advanced/ha/deploy.md)
+* `API`
+    * [`hustdb`](hustdb/doc/doc/en/api/hustdb/hustdb.md)
+    * [`hustdb ha`](hustdb/doc/doc/en/api/ha.md)
+    * [`hustmq`](hustmq/doc/doc/zh/en/hustmq.md)
+    * [`hustmq ha`](hustmq/doc/doc/en/api/ha.md)
 
 [Back to top](#id_top)
 

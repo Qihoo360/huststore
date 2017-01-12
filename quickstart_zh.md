@@ -46,6 +46,8 @@
     $ cd /opt/huststore/hustdb
     $ sh start.sh
 
+更多 API 请参考[这里](hustdb/doc/doc/zh/api/hustdb/hustdb.md)
+
 [回顶部](#id_top)
 
 <h2 id="id_adv">更多</h2>
@@ -529,6 +531,11 @@
 * `hustmq ha`
     * [hustmq ha 配置细节](hustmq/doc/doc/zh/advanced/ha/nginx.md)
     * [hustmq ha 部署细节](hustmq/doc/doc/zh/advanced/ha/deploy.md)
+* `API`
+    * [`hustdb`](hustdb/doc/doc/zh/api/hustdb/hustdb.md)
+    * [`hustdb ha`](hustdb/doc/doc/zh/api/ha.md)
+    * [`hustmq`](hustmq/doc/doc/zh/api/hustmq.md)
+    * [`hustmq ha`](hustmq/doc/doc/zh/api/ha.md)
 
 [回顶部](#id_top)
 

@@ -35,11 +35,7 @@ def remote_deploy(user, host_file, prefix, tar):
         ])
 
 def parse_shell(argv):
-    size = len(argv)
-    if size != 5:
-        return False
-    remote_deploy(argv[1], argv[2], argv[3], argv[4])
-    return True
+    return remote_deploy(argv[1], argv[2], argv[3], argv[4]) if 5 == len(argv) else False
 
 if __name__ == "__main__":
     if not parse_shell(sys.argv):

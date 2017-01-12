@@ -41,11 +41,7 @@ def remote_service(user, host_file, bin_folder, action):
     return remote_ssh('remote_service', '--slient', user, host_file, ['cd %s' % bin_folder, cmd])
 
 def parse_shell(argv):
-    size = len(argv)
-    if size != 4:
-        return False
-    remote_service(argv[1], argv[2], argv[3], argv[4])
-    return True
+    return remote_service(argv[1], argv[2], argv[3], argv[4]) if 4 == len(argv) else False
 
 if __name__ == "__main__":
     if not parse_shell(sys.argv):

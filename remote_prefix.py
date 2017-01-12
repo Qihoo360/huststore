@@ -32,10 +32,7 @@ def remote_prefix(user, host_file, prefix, owner):
         ])
 
 def parse_shell(argv):
-    size = len(argv)
-    if size != 5:
-        return False
-    return remote_prefix(argv[1], argv[2], argv[3], argv[4])
+    return remote_prefix(argv[1], argv[2], argv[3], argv[4]) if 5 == len(argv) else False
 
 if __name__ == "__main__":
     if not parse_shell(sys.argv):

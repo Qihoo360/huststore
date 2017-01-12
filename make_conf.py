@@ -64,11 +64,13 @@ def gen_hustdbha_conf(host_file, ha_port, backend_port, prefix):
     table_file = os.path.join(prefix, 'hustdbtable.json')
     os.system('python %s %s %s' % (script, backend_host_file, table_file))
     os.remove(backend_host_file)
+    print 'ok'
     return True
 
 def gen_hustmqha_conf(host_file, ha_port, backend_port, prefix):
     backend_host_file = gen_ngx_conf(host_file, ha_port, backend_port, prefix)
     os.remove(backend_host_file)
+    print 'ok'
     return True
 
 def gen_conf(host_file, module, ha_port, backend_port):

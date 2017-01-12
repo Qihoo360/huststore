@@ -28,6 +28,7 @@ In addition, `HA` cluster uses a distributed architecture design by incorporatin
 **You do not need to worry about the loss of data** as most of interfaces will persist data to disk.  
 
 * Support Binary Key-Value  
+* Support Version Clock
 
 ## Operation and Maintenance ##
 

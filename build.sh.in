@@ -49,11 +49,13 @@ mk_pkg(){
   shift
   local srv
   declare -a srv=("$@")
-  cd ${dir} && tar cvzf ${topdir}/../$(pkg_name ${srv[0]}) -- ${srv[@]}
+  cd ${dir} && tar cvzf ${topdir}/$(pkg_name ${srv[0]}) -- ${srv[@]}
 }
 
 build_3rd(){
-  cd ${topdir}/third_party/ && bash -e build.sh;
+  if [[ ! -d ${PREFIX_3RD} ]]; then
+    cd ${topdir}/third_party/ && bash -e build.sh;
+  fi
   mk_pkg ${HUSTSTORE_TOP} 3rd
 }
 

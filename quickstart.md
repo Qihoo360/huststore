@@ -86,7 +86,7 @@ This chapter shows the instructions of deployment for **cluster**, not single-ma
         sh prebuild.sh --prefix=/opt/huststore
         sh prebuild.sh
 
-NOTE: if `--prefix` is not set, `prebuild.sh` will use `/opt/huststore` as default installation path.
+**NOTE: if `--prefix` is not set, `prebuild.sh` will use `/opt/huststore` as default installation path. Please make sure there are enough disk spaces in this folder.**
 
 [Back to top](#id_top)
 
@@ -127,7 +127,7 @@ NOTE: if `--module` is not set, `build.sh` will build **all modules of huststore
     elf_hustmq.tar.gz
     elf_hustmqha.tar.gz
 
-These installation packages are placed in the same folder as `prebuild.sh`, which could be installed by `scp` & `tar` to production environment under installation path `/opt/huststore`:
+These installation packages are placed in the same folder as `prebuild.sh`, which could be installed by `scp` & `tar` to production environment under installation path `/opt/huststore`.  
 
 If `--module` is set as specified name, for example, `hustdb`, then only `elf_hustdb.tar.gz` will be generated.
 
@@ -239,9 +239,9 @@ Then `remote_deploy.py` will login by user `jobs` to the machines stored in `hos
 
 Arguments:
 
-* `user` : user name for `ssh` & `scp` command
+* `user` : user name for `ssh` command
 * `host_file` : remote host list stored in file
-* `bin_folder` : binary folder of service in remote host
+* `bin_folder` : binary folder of installed huststore's service in remote host
 * `action` : start or stop service
 
 [Back to top](#id_top)
@@ -292,7 +292,7 @@ Deploy `hustdb`:
 
     $ python remote_deploy.py jobs hosts /opt/huststore elf_hustdb.tar.gz
 
-Start service
+Start service:
 
     $ python remote_service.py jobs hosts /opt/huststore/hustdb --start
 
@@ -324,7 +324,7 @@ Open the configuration:
     $ cd hustdb/ha/nginx/conf/
     $ vi nginx.json
 
-**Replace `backends` to your real `hustdb` machine list:**
+**Replace `backends` to your real `hustdb` machine list(at least two nodes):**
 
     {
         ......
@@ -368,7 +368,7 @@ Deploy `hustdb ha`:
           hustdb/ha/nginx/conf/nginx.conf \
           hustdb/ha/nginx/conf/hustdbtable.json
 
-Start service
+Start service:
 
     $ python remote_service.py jobs hosts /opt/huststore/hustdbha/sbin --start
     $ python remote_service.py jobs hosts /opt/huststore/hustdbsync --start
@@ -429,7 +429,7 @@ Deploy `hustmq`:
     $ python remote_scp.py --silent jobs hosts /opt/huststore/hustmq \
           hustdb/db/server/module/hustdb.conf
 
-Start service
+Start service:
 
     $ python remote_service.py jobs hosts /opt/huststore/hustmq --start
 
@@ -491,7 +491,7 @@ Deploy `hustmq ha`:
     $ python remote_scp.py --silent jobs hosts /opt/huststore/hustmqha/conf \
           hustmq/ha/nginx/conf/nginx.conf
 
-Start service
+Start service:
 
     $ python remote_service.py jobs hosts /opt/huststore/hustmqha/sbin --start
 
@@ -517,14 +517,18 @@ Server works just fine if the above result is returned.
 
 <h2 id="id_appendix">Appendix</h2>
 
-* [hustdb configuration](hustdb/doc/doc/en/advanced/hustdb.md)
-* [hustdb ha deployment](hustdb/doc/doc/en/advanced/ha/deploy.md)
-* [hustdb ha configuration](hustdb/doc/doc/en/advanced/ha/nginx.md)
-* [hustdb ha load balance table configuration](hustdb/doc/doc/en/advanced/ha/table.md)
-* [hustdb ha log configuration](hustdb/doc/doc/en/advanced/ha/zlog.md)
-* [hustmq configuration](hustmq/doc/doc/en/advanced/hustmq/index.md)
-* [hustmq ha configuration](hustmq/doc/doc/en/advanced/ha/nginx.md)
-* [hustmq ha deployment](hustmq/doc/doc/en/advanced/ha/deploy.md)
+* `hustdb`
+    * [hustdb configuration](hustdb/doc/doc/en/advanced/hustdb.md)
+* `hustdb ha`
+    * [hustdb ha deployment](hustdb/doc/doc/en/advanced/ha/deploy.md)
+    * [hustdb ha configuration](hustdb/doc/doc/en/advanced/ha/nginx.md)
+    * [hustdb ha load balance table configuration](hustdb/doc/doc/en/advanced/ha/table.md)
+    * [hustdb ha log configuration](hustdb/doc/doc/en/advanced/ha/zlog.md)
+* `hustmq`
+    * [hustmq configuration](hustmq/doc/doc/en/advanced/hustmq/index.md)
+* `hustmq ha`
+    * [hustmq ha configuration](hustmq/doc/doc/en/advanced/ha/nginx.md)
+    * [hustmq ha deployment](hustmq/doc/doc/en/advanced/ha/deploy.md)
 
 [Back to top](#id_top)
 

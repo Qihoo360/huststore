@@ -274,12 +274,15 @@
 
 <h3 id="id_adv_dep">安装第三方依赖</h3>
 
-运行如下的指令：
+构建第三方库并生成安装包：
 
     $ sudo yum groupinstall -y 'Development tools'
     $ sudo yum install -y pcre-devel libidn-devel openssl-devel
     $ sh prebuild.sh --prefix=/opt/huststore
     $ sh build.sh --module=3rd
+
+安装第三方依赖（将安装包拷贝至远程机器，并解压至目录 `/opt/huststore`）：
+
     $ python remote_deploy.py jobs hosts /opt/huststore elf_hustdb.tar.gz
 
 [回顶部](#id_top)
@@ -292,11 +295,11 @@
 
     $ sh build.sh --module=hustdb
 
-部署 `hustdb`：
+部署 `hustdb`（将安装包拷贝至远程机器，并解压至目录 `/opt/huststore`）：
 
     $ python remote_deploy.py jobs hosts /opt/huststore elf_hustdb.tar.gz
 
-启动服务：
+启动服务（`ssh` 到每台远程机器，运行脚本 `/opt/huststore/hustdb/start.sh`）：
 
     $ python remote_service.py jobs hosts /opt/huststore/hustdb --start
 
@@ -365,14 +368,14 @@
 
     $ cd ../../../../
 
-部署 `hustdb ha`：
+部署 `hustdb ha`（将安装包拷贝至远程机器，并解压至目录 `/opt/huststore`，然后替换配置文件）：
 
     $ python remote_deploy.py jobs hosts /opt/huststore elf_hustdbha.tar.gz
     $ python remote_scp.py --silent jobs hosts /opt/huststore/hustdbha/conf \
           hustdb/ha/nginx/conf/nginx.conf \
           hustdb/ha/nginx/conf/hustdbtable.json
 
-启动服务：
+启动服务（`ssh` 到每台远程机器，运行脚本 `/opt/huststore/hustdbha/sbin/start.sh` 和 `/opt/huststore/hustdbsync/start.sh`）：
 
     $ python remote_service.py jobs hosts /opt/huststore/hustdbha/sbin --start
     $ python remote_service.py jobs hosts /opt/huststore/hustdbsync --start
@@ -427,13 +430,13 @@
     # enable if count large than 0
     count                           = 256
 
-部署 `hustmq`：
+部署 `hustmq`（将安装包拷贝至远程机器，并解压至目录 `/opt/huststore`）：
 
     $ python remote_deploy.py jobs hosts /opt/huststore elf_hustmq.tar.gz
     $ python remote_scp.py --silent jobs hosts /opt/huststore/hustmq \
           hustdb/db/server/module/hustdb.conf
 
-启动服务：
+启动服务（`ssh` 到每台远程机器，运行脚本 `/opt/huststore/hustmq/start.sh`）：
 
     $ python remote_service.py jobs hosts /opt/huststore/hustmq --start
 
@@ -489,13 +492,13 @@
 
     $ cd ../../../../
 
-部署 `hustmq ha`：
+部署 `hustmq ha`（将安装包拷贝至远程机器，并解压至目录 `/opt/huststore`，然后替换配置文件）：
 
     $ python remote_deploy.py jobs hosts /opt/huststore elf_hustmqha.tar.gz
     $ python remote_scp.py --silent jobs hosts /opt/huststore/hustmqha/conf \
           hustmq/ha/nginx/conf/nginx.conf
 
-启动服务：
+启动服务（`ssh` 到每台远程机器，运行脚本 `/opt/huststore/hustmqha/sbin/start.sh`）：
 
     $ python remote_service.py jobs hosts /opt/huststore/hustmqha/sbin --start
 

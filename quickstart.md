@@ -274,12 +274,15 @@ Run `remote_prefix.py` to set the installation path:
 
 <h3 id="id_adv_dep">install third-party</h3>
 
-Run instructions as below:
+Build third-party and generate installation package:
 
     $ sudo yum groupinstall -y 'Development tools'
     $ sudo yum install -y pcre-devel libidn-devel openssl-devel
     $ sh prebuild.sh --prefix=/opt/huststore
     $ sh build.sh --module=3rd
+
+Install third-party (copy installation package to remote machines and untar to `/opt/huststore`):
+    
     $ python remote_deploy.py jobs hosts /opt/huststore elf_hustdb.tar.gz
 
 [Back to top](#id_top)
@@ -292,11 +295,11 @@ Build and make installation package of `hustdb`:
 
     $ sh build.sh --module=hustdb
 
-Deploy `hustdb`:
+Deploy `hustdb` (copy installation package to remote machines and untar to `/opt/huststore`):
 
     $ python remote_deploy.py jobs hosts /opt/huststore elf_hustdb.tar.gz
 
-Start service:
+Start service (ssh to remote mathines one by one, run script `/opt/huststore/hustdb/start.sh`):
 
     $ python remote_service.py jobs hosts /opt/huststore/hustdb --start
 
@@ -365,14 +368,14 @@ Switch to the root folder:
 
     $ cd ../../../../
 
-Deploy `hustdb ha`:
+Deploy `hustdb ha` (copy installation package to remote machines and untar to `/opt/huststore`, then replace the configuration):
 
     $ python remote_deploy.py jobs hosts /opt/huststore elf_hustdbha.tar.gz
     $ python remote_scp.py --silent jobs hosts /opt/huststore/hustdbha/conf \
           hustdb/ha/nginx/conf/nginx.conf \
           hustdb/ha/nginx/conf/hustdbtable.json
 
-Start service:
+Start service (ssh to remote mathines one by one, run script `/opt/huststore/hustdbha/sbin/start.sh` and `/opt/huststore/hustdbsync/start.sh`):
 
     $ python remote_service.py jobs hosts /opt/huststore/hustdbha/sbin --start
     $ python remote_service.py jobs hosts /opt/huststore/hustdbsync --start
@@ -427,13 +430,13 @@ Replace the value of `tcp.port` and `count` and save:
     # enable if count large than 0
     count                           = 256
 
-Deploy `hustmq`:
+Deploy `hustmq` (copy installation package to remote machines and untar to `/opt/huststore`):
 
     $ python remote_deploy.py jobs hosts /opt/huststore elf_hustmq.tar.gz
     $ python remote_scp.py --silent jobs hosts /opt/huststore/hustmq \
           hustdb/db/server/module/hustdb.conf
 
-Start service:
+Start service (ssh to remote mathines one by one, run script `/opt/huststore/hustmq/start.sh`):
 
     $ python remote_service.py jobs hosts /opt/huststore/hustmq --start
 
@@ -489,13 +492,13 @@ Switch to the root folder:
 
     $ cd ../../../../
 
-Deploy `hustmq ha`:
+Deploy `hustmq ha` (copy installation package to remote machines and untar to `/opt/huststore`, then replace the configuration):
 
     $ python remote_deploy.py jobs hosts /opt/huststore elf_hustmqha.tar.gz
     $ python remote_scp.py --silent jobs hosts /opt/huststore/hustmqha/conf \
           hustmq/ha/nginx/conf/nginx.conf
 
-Start service:
+Start service (ssh to remote mathines one by one, run script `/opt/huststore/hustmqha/sbin/start.sh`):
 
     $ python remote_service.py jobs hosts /opt/huststore/hustmqha/sbin --start
 

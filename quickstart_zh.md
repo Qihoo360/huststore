@@ -25,12 +25,14 @@
     $ sudo chown -R $USER:$USER /opt/huststore
     $ sh build.sh --module=3rd,hustdb
 
-**警告：请确保目录 `/opt/huststore` 下有足够的磁盘空间，否则请换一个路径。**
+**警告：请确保目录 `/opt/huststore` 下有足够的磁盘空间（不小于10G），否则请换一个路径。**
 
 启动服务：
 
     $ cd /opt/huststore/hustdb
     $ sh start.sh
+
+备注：初次启动服务，会耗费 **大约30秒** 的时间来初始化相关数据，请耐心等待 ^_^
 
 测试服务：
 
@@ -93,7 +95,7 @@
         sh prebuild.sh --prefix=/opt/huststore
         sh prebuild.sh
 
-**备注：如果未设置 `--prefix` ， `prebuild.sh` 将使用 `/opt/huststore` 作为默认的安装路径。请确保该目录下有足够的磁盘空间**
+**备注：如果未设置 `--prefix` ， `prebuild.sh` 将使用 `/opt/huststore` 作为默认的安装路径。请确保该目录下有足够的磁盘空间（不小于10G）**
 
 [回顶部](#id_top)
 
@@ -305,7 +307,7 @@
     $ sudo mkdir /opt/huststore
     $ sudo chown -R $USER:$USER /opt/huststore
 
-**警告：请确保目录 `/opt/huststore` 下有足够的磁盘空间，否则请换一个路径。**
+**警告：请确保目录 `/opt/huststore` 下有足够的磁盘空间（不小于10G），否则请换一个路径。**
 
 运行 `remote_prefix.py` 批量设置远程机器的安装路径：
 

@@ -36,6 +36,14 @@
 ## 存储引擎 ##
 ![hustdb](res/hustdb.png)
 
+## 平台 ##
+
+目前测试通过的平台包括：
+
+Platform | Description
+---------|----------------------------------------------------------
+Linux    | CentOS 6.x  GCC 4.4.7
+
 ## 依赖 ##
 * [cmake](https://cmake.org/download/)
 * [leveldb](https://github.com/google/leveldb)

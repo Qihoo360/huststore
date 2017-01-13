@@ -25,12 +25,14 @@ This chapter shows the instructions of deployment for **single-machine**, not cl
     $ sudo chown -R $USER:$USER /opt/huststore
     $ sh build.sh --module=3rd,hustdb
 
-**WARNING: please make sure there are enough disk spaces in `/opt/huststore`, otherwise change a different location.**
+**WARNING: please make sure there are enough disk spaces in `/opt/huststore` (at least 10G), otherwise change a different location.**
 
 Start the service:
 
     $ cd /opt/huststore/hustdb
     $ sh start.sh
+
+NOTE: it will cost **about 30 seconds** to initialize data of hustdb for the first time, so do not be panic ^_^
 
 Test the service:
 
@@ -93,7 +95,7 @@ This chapter shows the instructions of deployment for **cluster**, not single-ma
         sh prebuild.sh --prefix=/opt/huststore
         sh prebuild.sh
 
-**NOTE: if `--prefix` is not set, `prebuild.sh` will use `/opt/huststore` as default installation path. Please make sure there are enough disk spaces in this folder.**
+**NOTE: if `--prefix` is not set, `prebuild.sh` will use `/opt/huststore` as default installation path. Please make sure there are enough disk spaces in this folder.  (at least 10G)**
 
 [Back to top](#id_top)
 
@@ -305,7 +307,7 @@ Run `prebuild.sh` to prepare the build environment.
     $ sudo mkdir /opt/huststore
     $ sudo chown -R $USER:$USER /opt/huststore
 
-**WARNING: please make sure there are enough disk spaces in `/opt/huststore`, otherwise change a different location.**
+**WARNING: please make sure there are enough disk spaces in `/opt/huststore` (at least 10G), otherwise change a different location.**
 
 Run `remote_prefix.py` to set the installation path:  
 

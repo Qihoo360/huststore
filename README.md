@@ -50,6 +50,14 @@ In addition, `HA` cluster uses a distributed architecture design by incorporatin
 * [libevhtp](https://github.com/ellzey/libevhtp)
 * [zlog](https://github.com/HardySimpson/zlog)
 
+## Platforms ##
+
+Tested platforms so far:
+
+Platform | Description
+---------|----------------------------------------------------------
+Linux    | CentOS 6.x  GCC 4.4.7
+
 ## Quick Start ##
 
 Read the [Quick Start](quickstart.md).

@@ -1,6 +1,8 @@
 hustmq
 --
 
+**Installation Path : `/opt/huststore`**
+
 ### Program ###
 
 * `/opt/huststore/hustmq/hustdb`

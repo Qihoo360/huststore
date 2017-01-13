@@ -1,6 +1,8 @@
 hustdb
 --
 
+**安装路径：`/opt/huststore`**
+
 ### 程序 ###
 
 * `/opt/huststore/hustdb/hustdb`

@@ -476,8 +476,6 @@ Server works just fine if the above result is returned.
 
 All together:
 
-    # NOTE: build machine & deployment machine can be the same
-
     # ssh to build machine
 
     wget https://github.com/Qihoo360/huststore/archive/v1.7.tar.gz -O huststore-1.7.tar.gz
@@ -501,25 +499,7 @@ All together:
     python make_conf.py hosts hustmqha 8080 8086
     cp hustmq/ha/nginx/conf/nginx.conf nginx.conf.mq
 
-    tar -zcf elf_huststore.tar.gz \
-        nginx.conf.db hustdbtable.json \
-        nginx.conf.mq \
-        elf_3rd.tar.gz \
-        elf_hustdb.tar.gz \
-        elf_hustdbha.tar.gz \
-        elf_hustmq.tar.gz \
-        elf_hustmqha.tar.gz \
-        remote_deploy.py \
-        remote_scp.py \
-        remote_service.py \
-        remote_ssh.py \
-        remote_status.py \
-        hosts
-
-    # scp elf_huststore.tar.gz to deployment machine
-    # ssh to deployment machine
-    tar -zxf elf_huststore.tar.gz
-
+    
     # deploy 3rd
     python remote_deploy.py jobs hosts /opt/huststore elf_3rd.tar.gz
 

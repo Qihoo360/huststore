@@ -403,33 +403,9 @@
 
     $ sh build.sh --module=hustmq
 
-打开配置文件：
-
-    $ vi hustdb/db/server/module/hustdb.conf
-
-请留意如下内容：
-
-    [server]
-    tcp.port                        = 8085
-    ......
-    [contentdb]
-    # enable if count large than 0
-    count                           = 0
-
-替换 `tcp.port` 和 `count` 的值，保存文件：
-
-    [server]
-    tcp.port                        = 8086
-    ......
-    [contentdb]
-    # enable if count large than 0
-    count                           = 256
-
 部署 `hustmq`（将安装包拷贝至远程机器，并解压至目录 `/opt/huststore`）：
 
     $ python remote_deploy.py jobs hosts /opt/huststore elf_hustmq.tar.gz
-    $ python remote_scp.py --silent jobs hosts /opt/huststore/hustmq \
-          hustdb/db/server/module/hustdb.conf
 
 启动服务（`ssh` 到每台远程机器，运行脚本 `/opt/huststore/hustmq/start.sh`）：
 

@@ -403,33 +403,9 @@ Build and make installation package of `hustmq`:
 
     $ sh build.sh --module=hustmq
 
-Open the configuration:  
-
-    $ vi hustdb/db/server/module/hustdb.conf
-
-Pay attention to the contents as below:
-
-    [server]
-    tcp.port                        = 8085
-    ......
-    [contentdb]
-    # enable if count large than 0
-    count                           = 0
-
-Replace the value of `tcp.port` and `count` and save:
-
-    [server]
-    tcp.port                        = 8086
-    ......
-    [contentdb]
-    # enable if count large than 0
-    count                           = 256
-
 Deploy `hustmq` (copy installation package to remote machines and untar to `/opt/huststore`):
 
     $ python remote_deploy.py jobs hosts /opt/huststore elf_hustmq.tar.gz
-    $ python remote_scp.py --silent jobs hosts /opt/huststore/hustmq \
-          hustdb/db/server/module/hustdb.conf
 
 Start service (ssh to remote mathines one by one, run script `/opt/huststore/hustmq/start.sh`):
 

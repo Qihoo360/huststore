@@ -115,6 +115,8 @@
             --module=hustdbha                  build and generate installation package for hustdbha
             --module=hustmq                    build and generate installation package for hustmq
             --module=hustmqha                  build and generate installation package for hustmqha
+            
+            --clean                            clean obj. files of specified modules
                 
     sample:
         sh build.sh --help
@@ -122,6 +124,9 @@
         sh build.sh --module=3rd,hustdb
         sh build.sh --module=3rd,hustdb,hustdbha
         sh build.sh --module=3rd,hustmq,hustmqha
+        
+        sh build.sh --module=hustdb --clean
+        sh build.sh --module=hustdb,hustmq,hustdbha,hustmqha --clean
 
         sh build.sh
 

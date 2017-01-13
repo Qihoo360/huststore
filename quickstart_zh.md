@@ -273,7 +273,7 @@
 
 参数：
 
-* `host_file` : 记录远程机器列表的文件名
+* `host_file` : 记录远程 `hustdb` | `hustmq` 机器列表的文件名
 * `module` : `hustdbha` | `hustmqha`
 * `HA port` : `hustdbha` | `hustmqha` 的监听端口
 * `backend port` : `hustdb` | `hustmq` 的监听端口

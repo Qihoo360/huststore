@@ -70,7 +70,7 @@ This chapter shows the instructions of deployment for **cluster**, not single-ma
 * `hustmq`: `["192.168.1.101:8086", "192.168.1.102:8086"]`
 * `hustmq ha`: `["192.168.1.101:8080", "192.168.1.102:8080"]`
 
-**Please replace the arguments above (`user`, `build machine`, `deployment machines`) to your real values in production environment**.
+**Please replace the arguments above (`user`, `build machine`, `deployment machines`) with your real values in production environment**.
 
 <h3 id="id_adv_tools">Tools</h3>
 
@@ -273,7 +273,7 @@ Arguments:
 
 Arguments:
 
-* `host_file` : remote host list stored in file
+* `host_file` : remote `hustdb` | `hustmq` host list stored in file
 * `module` : `hustdbha` | `hustmqha`
 * `HA port` : listen port of `hustdbha` | `hustmqha`
 * `backend port` : listen port of `hustdb` | `hustmq`

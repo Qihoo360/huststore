@@ -56,7 +56,7 @@ Tested platforms so far:
 
 Platform | Description
 ---------|----------------------------------------------------------
-Linux    | CentOS 6.x  GCC 4.4.7
+Linux    | CentOS 6.x (kernel >= 2.6.32) GCC 4.4.7
 
 ## Quick Start ##
 

@@ -58,10 +58,8 @@ for oldf in \
   hustdb/ha/nginx/conf/zlog.conf.in \
   hustmq/ha/nginx/conf/nginx.json.in \
   hustmq/ha/nginx/Config.sh.in \
-  hustdb/db/Config.sh.in \
-  hustdb/db/server/make/linux/Makefile.in \
+  hustdb/db/Makefile.in \
   hustdb/sync/Makefile.in \
-  hustdb/sync/Config.sh.in \
   hustdb/sync/module/sync_server.json.in \
   hustdb/sync/module/zlog.conf.in \
   hustdb/db/start.sh.in \

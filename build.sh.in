@@ -60,7 +60,7 @@ build_3rd(){
 }
 
 build_hustdb(){
-  cd ${topdir}/hustdb/db/server/make/linux && make -j$(nproc) && make prefix=${PREFIX_HUSTDB} install ;
+  cd ${topdir}/hustdb/db && make -j$(nproc) && make prefix=${PREFIX_HUSTDB} install ;
   cp -v ${topdir}/hustdb/db/start.sh ${PREFIX_HUSTDB}
   cp -v ${topdir}/hustdb/db/stop.sh ${PREFIX_HUSTDB}
   install -m 0644 ${PREFIX_HUSTDB}/hustdb.conf.db ${PREFIX_HUSTDB}/hustdb.conf
@@ -68,7 +68,7 @@ build_hustdb(){
 }
 
 build_hustdbha(){
-  cd ${topdir}/hustdb/sync      && make -j$(nproc) && make prefix=${PREFIX_HUSTDBSYNC} install ;
+  cd ${topdir}/hustdb/sync && make -j$(nproc) && make prefix=${PREFIX_HUSTDBSYNC} install ;
   cp -v ${topdir}/hustdb/sync/start.sh ${PREFIX_HUSTDBSYNC}
   cp -v ${topdir}/hustdb/sync/stop.sh ${PREFIX_HUSTDBSYNC}
 

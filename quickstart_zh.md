@@ -7,6 +7,7 @@
     * [安装第三方依赖](#id_adv_dep)
     * [hustdb 集群部署](#id_adv_hustdb_cluster)
     * [hustmq 集群部署](#id_adv_hustmq_cluster)
+    * [总结](#id_adv_summary)
 * [附录](#id_appendix)
 
 <h2 id="id_try">快速试用</h2>
@@ -468,6 +469,80 @@
     hustmqha 1.7
 
 返回该结果说明服务器工作正常。
+
+[回顶部](#id_top)
+
+<h3 id="id_adv_summary">总结</h3>
+
+All together:
+
+    # NOTE: build machine & deployment machine can be the same
+
+    # ssh to build machine
+
+    wget https://github.com/Qihoo360/huststore/archive/v1.7.tar.gz -O huststore-1.7.tar.gz
+    tar -zxf huststore-1.7.tar.gz
+    cd huststore-1.7
+
+    # edit hosts
+    # vi hosts
+    # 192.168.1.101
+    # 192.168.1.102
+
+    # prebuild
+    sh prebuild.sh --prefix=/opt/huststore
+    python remote_prefix.py jobs hosts /opt/huststore search
+
+    # build & make installation packages
+    sh build.sh
+    python make_conf.py hosts hustdbha 8082 8085
+    cp hustdb/ha/nginx/conf/nginx.conf nginx.conf.db
+    cp hustdb/ha/nginx/conf/hustdbtable.json .
+    python make_conf.py hosts hustmqha 8080 8086
+    cp hustmq/ha/nginx/conf/nginx.conf nginx.conf.mq
+
+    tar -zcf elf_huststore.tar.gz \
+        nginx.conf.db hustdbtable.json \
+        nginx.conf.mq \
+        elf_3rd.tar.gz \
+        elf_hustdb.tar.gz \
+        elf_hustdbha.tar.gz \
+        elf_hustmq.tar.gz \
+        elf_hustmqha.tar.gz \
+        remote_deploy.py \
+        remote_scp.py \
+        remote_service.py \
+        remote_ssh.py \
+        remote_status.py \
+        hosts
+
+    # scp elf_huststore.tar.gz to deployment machine
+    # ssh to deployment machine
+    tar -zxf elf_huststore.tar.gz
+
+    # deploy 3rd
+    python remote_deploy.py jobs hosts /opt/huststore elf_3rd.tar.gz
+
+    # deploy huststore
+    python remote_deploy.py jobs hosts /opt/huststore elf_hustdb.tar.gz
+    python remote_deploy.py jobs hosts /opt/huststore elf_hustmq.tar.gz
+
+    python remote_deploy.py jobs hosts /opt/huststore elf_hustdbha.tar.gz
+    cp nginx.conf.db nginx.conf
+    python remote_scp.py --silent jobs hosts /opt/huststore/hustdbha/conf nginx.conf hustdbtable.json
+    rm -f nginx.conf
+
+    python remote_deploy.py jobs hosts /opt/huststore elf_hustmqha.tar.gz
+    cp nginx.conf.mq nginx.conf
+    python remote_scp.py --silent jobs hosts /opt/huststore/hustmqha/conf nginx.conf
+    rm -f nginx.conf
+
+    # start huststore service
+    python remote_service.py jobs hosts /opt/huststore/hustdb --start
+    python remote_service.py jobs hosts /opt/huststore/hustmq --start
+    python remote_service.py jobs hosts /opt/huststore/hustdbha/sbin --start
+    python remote_service.py jobs hosts /opt/huststore/hustdbsync --start
+    python remote_service.py jobs hosts /opt/huststore/hustmqha/sbin --start
 
 [回顶部](#id_top)
 

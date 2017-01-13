@@ -361,13 +361,15 @@
 生成 `hustdb ha` 的配置： 
 
     $ python make_conf.py hosts hustdbha 8082 8085
+    $ cp hustdb/ha/nginx/conf/nginx.conf nginx.conf.db
+    $ cp hustdb/ha/nginx/conf/hustdbtable.json .
 
 部署 `hustdb ha`（将安装包拷贝至远程机器，并解压至目录 `/opt/huststore`，然后替换配置文件）：
 
     $ python remote_deploy.py jobs hosts /opt/huststore elf_hustdbha.tar.gz
-    $ python remote_scp.py --silent jobs hosts /opt/huststore/hustdbha/conf \
-          hustdb/ha/nginx/conf/nginx.conf \
-          hustdb/ha/nginx/conf/hustdbtable.json
+    $ cp nginx.conf.db nginx.conf
+    $ python remote_scp.py --silent jobs hosts /opt/huststore/hustdbha/conf nginx.conf hustdbtable.json
+    $ rm -f nginx.conf
 
 启动服务（`ssh` 到每台远程机器，运行脚本 `/opt/huststore/hustdbha/sbin/start.sh` 和 `/opt/huststore/hustdbsync/start.sh`）：
 
@@ -436,12 +438,14 @@
 生成 `hustmq ha` 的配置： 
 
     $ python make_conf.py hosts hustdbha 8080 8086
+    $ cp hustmq/ha/nginx/conf/nginx.conf nginx.conf.mq
 
 部署 `hustmq ha`（将安装包拷贝至远程机器，并解压至目录 `/opt/huststore`，然后替换配置文件）：
 
     $ python remote_deploy.py jobs hosts /opt/huststore elf_hustmqha.tar.gz
-    $ python remote_scp.py --silent jobs hosts /opt/huststore/hustmqha/conf \
-          hustmq/ha/nginx/conf/nginx.conf
+    $ cp nginx.conf.mq nginx.conf
+    $ python remote_scp.py --silent jobs hosts /opt/huststore/hustmqha/conf nginx.conf
+    $ rm -f nginx.conf
 
 启动服务（`ssh` 到每台远程机器，运行脚本 `/opt/huststore/hustmqha/sbin/start.sh`）：
 

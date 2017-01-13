@@ -361,13 +361,15 @@ Build and make installation package of `hustdb ha`:
 Generate configuration of `hustdb ha`: 
 
     $ python make_conf.py hosts hustdbha 8082 8085
+    $ cp hustdb/ha/nginx/conf/nginx.conf nginx.conf.db
+    $ cp hustdb/ha/nginx/conf/hustdbtable.json .
 
 Deploy `hustdb ha` (copy installation package to remote machines and untar to `/opt/huststore`, then replace the configuration):
 
     $ python remote_deploy.py jobs hosts /opt/huststore elf_hustdbha.tar.gz
-    $ python remote_scp.py --silent jobs hosts /opt/huststore/hustdbha/conf \
-          hustdb/ha/nginx/conf/nginx.conf \
-          hustdb/ha/nginx/conf/hustdbtable.json
+    $ cp nginx.conf.db nginx.conf
+    $ python remote_scp.py --silent jobs hosts /opt/huststore/hustdbha/conf nginx.conf hustdbtable.json
+    $ rm -f nginx.conf
 
 Start service (ssh to remote mathines one by one, run script `/opt/huststore/hustdbha/sbin/start.sh` and `/opt/huststore/hustdbsync/start.sh`):
 
@@ -436,12 +438,14 @@ Build and make installation package of `hustmq ha`:
 Generate configuration of `hustmq ha`: 
 
     $ python make_conf.py hosts hustdbha 8080 8086
+    $ cp hustmq/ha/nginx/conf/nginx.conf nginx.conf.mq
 
 Deploy `hustmq ha` (copy installation package to remote machines and untar to `/opt/huststore`, then replace the configuration):
 
     $ python remote_deploy.py jobs hosts /opt/huststore elf_hustmqha.tar.gz
-    $ python remote_scp.py --silent jobs hosts /opt/huststore/hustmqha/conf \
-          hustmq/ha/nginx/conf/nginx.conf
+    $ cp nginx.conf.mq nginx.conf
+    $ python remote_scp.py --silent jobs hosts /opt/huststore/hustmqha/conf nginx.conf
+    $ rm -f nginx.conf
 
 Start service (ssh to remote mathines one by one, run script `/opt/huststore/hustmqha/sbin/start.sh`):
 

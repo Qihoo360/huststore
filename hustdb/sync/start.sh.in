@@ -4,4 +4,4 @@ set -e
 
 cwd=$(dirname $(readlink -fn $0))
 cd ${cwd}
-LD_LIBRARY_PATH=@@PREFIX_3RD@@/lib ./hustdbsync
+LD_LIBRARY_PATH=@@PREFIX_3RD@@/lib ${cwd}/hustdbsync

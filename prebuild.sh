@@ -59,6 +59,8 @@ for oldf in \
   hustmq/ha/nginx/conf/nginx.json.in \
   hustmq/ha/nginx/Config.sh.in \
   hustdb/db/Config.sh.in \
+  hustdb/db/server/make/linux/Makefile.in \
+  hustdb/sync/Makefile.in \
   hustdb/sync/Config.sh.in \
   hustdb/sync/module/sync_server.json.in \
   hustdb/sync/module/zlog.conf.in \
@@ -87,17 +89,5 @@ for oldf in \
     [[ $(basename ${newf}) == stop.sh ]] && chmod +x ${newf}
 done
 
-for oldm in \
-  hustdb/db/Makefile.am.in \
-  hustdb/db/server/Makefile.am.in \
-  hustdb/db/server/module/binlog/Makefile.am.in \
-  hustdb/db/server/module/mdb/Makefile.am.in \
-  hustdb/db/server/module/rdb/Makefile.am.in \
-  hustdb/db/server/network/Makefile.am.in \
-  hustdb/sync/Makefile.am.in \
-; do
-  newm=${oldm%.in}
-  sed "s,@@PREFIX_3RD@@,${PREFIX_3RD},g;" ${oldm} > ${newm}
-done
 
 echo "Success."

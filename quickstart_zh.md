@@ -494,7 +494,7 @@
 
     # prebuild
     sh prebuild.sh --prefix=/opt/huststore
-    python remote_prefix.py jobs hosts /opt/huststore search
+    python remote_prefix.py jobs hosts /opt/huststore jobs
 
     # build & make installation packages
     sh build.sh

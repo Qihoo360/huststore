@@ -21,7 +21,7 @@ This chapter shows the instructions of deployment for **single-machine**, not cl
     $ tar -zxf huststore-1.7.tar.gz
     $ cd huststore-1.7
     $ sh prebuild.sh --prefix=/opt/huststore
-    $ sh build.sh --module=hustdb
+    $ sh build.sh --module=3rd,hustdb
     $ sudo chown -R $USER:$USER /opt/huststore
 
 **WARNING: please make sure there are enough disk spaces in `/opt/huststore`, otherwise change a different location.**

@@ -21,7 +21,7 @@
     $ tar -zxf huststore-1.7.tar.gz
     $ cd huststore-1.7
     $ sh prebuild.sh --prefix=/opt/huststore
-    $ sh build.sh --module=hustdb
+    $ sh build.sh --module=3rd,hustdb
     $ sudo chown -R $USER:$USER /opt/huststore
 
 **警告：请确保目录 `/opt/huststore` 下有足够的磁盘空间，否则请换一个路径。**

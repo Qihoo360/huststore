@@ -311,12 +311,11 @@
 
     $ sudo yum groupinstall -y 'Development tools'
     $ sudo yum install -y pcre-devel libidn-devel openssl-devel
-    $ sh prebuild.sh --prefix=/opt/huststore
     $ sh build.sh --module=3rd
 
 安装第三方依赖（将安装包拷贝至远程机器，并解压至目录 `/opt/huststore`）：
 
-    $ python remote_deploy.py jobs hosts /opt/huststore elf_hustdb.tar.gz
+    $ python remote_deploy.py jobs hosts /opt/huststore elf_3rd.tar.gz
 
 [回顶部](#id_top)
 

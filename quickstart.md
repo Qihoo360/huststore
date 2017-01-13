@@ -311,12 +311,11 @@ Build third-party and generate installation package:
 
     $ sudo yum groupinstall -y 'Development tools'
     $ sudo yum install -y pcre-devel libidn-devel openssl-devel
-    $ sh prebuild.sh --prefix=/opt/huststore
     $ sh build.sh --module=3rd
 
 Install third-party (copy installation package to remote machines and untar to `/opt/huststore`):
     
-    $ python remote_deploy.py jobs hosts /opt/huststore elf_hustdb.tar.gz
+    $ python remote_deploy.py jobs hosts /opt/huststore elf_3rd.tar.gz
 
 [Back to top](#id_top)
 

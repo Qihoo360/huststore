@@ -60,7 +60,6 @@ build_3rd(){
 }
 
 build_hustdb(){
-  cd ${topdir}/hustdb/db && [[ "${CLEAN}" == true ]] && make clean
   cd ${topdir}/hustdb/db && make -j$(nproc) && make prefix=${PREFIX_HUSTDB} install ;
   cp -v ${topdir}/hustdb/db/start.sh ${PREFIX_HUSTDB}
   cp -v ${topdir}/hustdb/db/stop.sh ${PREFIX_HUSTDB}
@@ -69,12 +68,10 @@ build_hustdb(){
 }
 
 build_hustdbha(){
-  cd ${topdir}/hustdb/sync && [[ "${CLEAN}" == true ]] && make clean
   cd ${topdir}/hustdb/sync && make -j$(nproc) && make prefix=${PREFIX_HUSTDBSYNC} install ;
   cp -v ${topdir}/hustdb/sync/start.sh ${PREFIX_HUSTDBSYNC}
   cp -v ${topdir}/hustdb/sync/stop.sh ${PREFIX_HUSTDBSYNC}
 
-  cd ${topdir}/hustdb/ha/nginx && [[ "${CLEAN}" == true ]] && make clean
   cd ${topdir}/hustdb/ha/nginx  && \
     bash -e ./Config.sh && \
     make -j$(nproc)     && \
@@ -104,7 +101,6 @@ build_hustmq(){
 }
 
 build_hustmqha(){
-  cd ${topdir}/hustmq/ha/nginx && [[ "${CLEAN}" == true ]] && make clean
   cd ${topdir}/hustmq/ha/nginx && \
     bash -e ./Config.sh && \
     make -j$(nproc) && \
@@ -119,10 +115,23 @@ build_hustmqha(){
   mk_pkg ${HUSTSTORE_TOP} hustmqha
 }
 
+make_clean(){
+  set +e
+  for prjdir in \
+    ${topdir}/hustdb/db \
+    ${topdir}/hustdb/sync \
+    ${topdir}/hustdb/ha/nginx \
+    ${topdir}/hustmq/ha/nginx
+  do
+    echo "#### Cleaning ${prjdir} ####"
+    cd ${prjdir} ; make clean
+  done
+  set -e
+}
 
 
 
-if ! options=$(getopt -o h -l help,clean,module: -- "$@")
+if ! options=$(getopt -o hcm: -l help,clean,module: -- "$@")
 then
     help
     exit 1
@@ -136,7 +145,7 @@ while [ $# -gt 0 ]
 do
     case $1 in
     -h|--help) help; exit 1 ;;
-    --clean) CLEAN=true ;;
+    -c|--clean) CLEAN=true ;;
     -m|--module) MODULES="$2" ; shift;;
     (--) shift; break;;
     (-*) echo "$0: error - unknown option $1" 1>&2; help; exit 1;;
@@ -144,6 +153,11 @@ do
     esac
     shift
 done
+
+if [[ ${CLEAN} == true ]]; then
+  make_clean
+  exit 0
+fi
 
 if [[ "x" == x"${MODULES}" ]]; then
   MODULES='3rd,hustdb,hustdbha,hustmq,hustmqha'

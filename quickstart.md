@@ -8,6 +8,7 @@
     * [Hustdb Cluster Deployment](#id_adv_hustdb_cluster)
     * [Hustmq Cluster Deployment](#id_adv_hustmq_cluster)
     * [Summary](#id_adv_summary)
+* [rpm & binary installation packages](#id_rpm)
 * [Appendix](#id_appendix)
 
 <h2 id="id_try">Quickstart & Try</h2>
@@ -554,6 +555,55 @@ All together:
     python remote_service.py jobs hosts /opt/huststore/hustdbha/sbin --start
     python remote_service.py jobs hosts /opt/huststore/hustdbsync --start
     python remote_service.py jobs hosts /opt/huststore/hustmqha/sbin --start
+
+[Back to top](#id_top)
+
+<h2 id="id_rpm">rpm & binary installation packages</h2>
+
+We assume that **you've already read all contents of [Quickstart & Try](#id_try) and [More](#id_adv)** before using rpm & binary installation packages.
+
+The [releases page](https://github.com/Qihoo360/huststore/releases) of huststore provides rpm & binary installation packages  built from **CentOS 6.2**:  
+
+    # rpm installation packages
+    hust3rd-1.7-1.el6.x86_64.rpm
+    hust3rd-1.7-1.el6.x86_64.rpm.md5sum
+    hust3rd-1.7-1.el6.x86_64.rpm.sha1sum
+    hustdb-1.7-1.el6.x86_64.rpm
+    hustdb-1.7-1.el6.x86_64.rpm.md5sum
+    hustdb-1.7-1.el6.x86_64.rpm.sha1sum
+    hustdbha-1.7-1.el6.x86_64.rpm
+    hustdbha-1.7-1.el6.x86_64.rpm.md5sum
+    hustdbha-1.7-1.el6.x86_64.rpm.sha1sum
+    hustmq-1.7-1.el6.x86_64.rpm
+    hustmq-1.7-1.el6.x86_64.rpm.md5sum
+    hustmq-1.7-1.el6.x86_64.rpm.sha1sum
+    hustmqha-1.7-1.el6.x86_64.rpm
+    hustmqha-1.7-1.el6.x86_64.rpm.md5sum
+    hustmqha-1.7-1.el6.x86_64.rpm.sha1sum
+
+    # binary installation packages
+    elf_3rd.tar.gz
+    elf_3rd.tar.gz.md5sum
+    elf_3rd.tar.gz.sha1sum
+    elf_hustdbha.tar.gz
+    elf_hustdbha.tar.gz.md5sum
+    elf_hustdbha.tar.gz.sha1sum
+    elf_hustdb.tar.gz
+    elf_hustdb.tar.gz.md5sum
+    elf_hustdb.tar.gz.sha1sum
+    elf_hustmqha.tar.gz
+    elf_hustmqha.tar.gz.md5sum
+    elf_hustmqha.tar.gz.sha1sum
+    elf_hustmq.tar.gz
+    elf_hustmq.tar.gz.md5sum
+    elf_hustmq.tar.gz.sha1sum
+
+Note:
+
+* Do NOT forget to check the packages by `*.md5sum` and `*.sha1sum`.  
+* The rpm & binary installation packages is **just for quickstart, so `/opt/huststore` is used as installation folder and could not be changed any more as it is set in build process**. So if you need to customize the installation folder, please **compile and install from source** as what [Quickstart & Try](#id_try) and [More](#id_adv) shows.  
+* If you use **rpm installation packages** for test, please do not forget to **change the owner** of folder `/opt/huststore` as what [Quickstart & Try](#id_try) and [More](#id_adv) shows.  
+* If you use **binary installation packages** for test, please do not forget to **create the folder `/opt/huststore` and change its owner** as what [Quickstart & Try](#id_try) and [More](#id_adv) shows.  
 
 [Back to top](#id_top)
 

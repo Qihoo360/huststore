@@ -49,7 +49,8 @@ mk_pkg(){
   shift
   local srv
   declare -a srv=("$@")
-  cd ${dir} && tar cvzf ${topdir}/$(pkg_name ${srv[0]}) -- ${srv[@]}
+  cd ${dir} && tar --exclude=DATA --exclude=EXPORT --exclude=LOG --exclude='*.log' --exclude='*.pid' \
+    -cvzf ${topdir}/$(pkg_name ${srv[0]}) -- ${srv[@]}
 }
 
 build_3rd(){
@@ -92,10 +93,11 @@ build_hustmq(){
   if [[ ! -x ${PREFIX_HUSTDB}/hustdb ]] ; then
     build_hustdb
   fi
-  if [[ -e ${PREFIX_HUSTMQ}/hustdb ]] ;then
-    echo "${PREFIX_HUSTMQ}/hustdb already there, maybe you want to delete it before installing new one.";false
-  fi
-  cp -a ${PREFIX_HUSTDB} ${PREFIX_HUSTMQ}
+
+  test -d ${PREFIX_HUSTMQ} || mkdir ${PREFIX_HUSTMQ}
+  cp -a ${PREFIX_HUSTDB}/hustdb ${PREFIX_HUSTMQ}/
+  cp -a ${PREFIX_HUSTDB}/hustdb.conf* ${PREFIX_HUSTMQ}/
+  cp -a ${PREFIX_HUSTDB}/*.sh ${PREFIX_HUSTMQ}/
   install -m 0644 ${PREFIX_HUSTMQ}/hustdb.conf.mq ${PREFIX_HUSTMQ}/hustdb.conf
   mk_pkg ${HUSTSTORE_TOP} hustmq
 }

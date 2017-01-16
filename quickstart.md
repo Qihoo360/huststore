@@ -150,6 +150,26 @@ WARNING: **you need to build & install 3rd first** before build other modules:
 
 [Back to top](#id_top)
 
+### start.sh ###
+
+After **build & install**, `start.sh` will be generated to binary folder of service, which is used to start service. Usage:  
+
+    # start process and quit WITHOUT waiting the initialization of service
+    sh start.sh
+
+    # start process and wait for the initialization of service. maximize waiting time : 90 seconds
+    sh start.sh check
+
+[Back to top](#id_top)
+
+### stop.sh ###
+
+After **build & install**, `stop.sh` will be generated to binary folder of service, which is used to stop service. Usage:  
+
+    sh stop.sh
+
+[Back to top](#id_top)
+
 #### remote_scp.py ####
 
 `remote_scp.py` is a wrapper of `scp`, which supports **batch scp**.

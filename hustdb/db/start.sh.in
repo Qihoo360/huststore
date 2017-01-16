@@ -8,12 +8,13 @@ check_proc(){
   for i in $(seq 1 90); do
     if ss -nltp | grep ${port} | grep -q hustdb >/dev/null 2>&1 ;then
       echo "Done"
-      break
+      return 0
     else
       echo -n .
       sleep 1
     fi
   done
+  echo "Starting not finished in time, please check."
 }
 
 check_space(){

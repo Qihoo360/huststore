@@ -154,11 +154,13 @@ WARNING: **you need to build & install 3rd first** before build other modules:
 
 After **build & install**, `start.sh` will be generated to binary folder of service, which is used to start service. Usage:  
 
-    # start process and quit WITHOUT waiting the initialization of service
     sh start.sh
 
-    # start process and wait for the initialization of service. maximize waiting time : 90 seconds
+For `hustdb` and `hustmq`, you can add option `check`:  
+
     sh start.sh check
+    
+It will start `hustdb` process and **wait for the initialization of service**. Maximize waiting time : 90 seconds.  
 
 [Back to top](#id_top)
 

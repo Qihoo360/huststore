@@ -8,7 +8,7 @@
     * [hustdb 集群部署](#id_adv_hustdb_cluster)
     * [hustmq 集群部署](#id_adv_hustmq_cluster)
     * [总结](#id_adv_summary)
-* [rpm & 二进制安装包](#id_rpm)
+* [RPM & 二进制安装包](#id_rpm)
 * [附录](#id_appendix)
 
 <h2 id="id_try">快速试用</h2>
@@ -558,13 +558,13 @@
 
 [回顶部](#id_top)
 
-<h2 id="id_rpm">rpm & 二进制安装包</h2>
+<h2 id="id_rpm">RPM & 二进制安装包</h2>
 
-在使用 rpm & 二进制安装包之前，我们假定 **您已经阅读了[快速试用](#id_try)和[更多](#id_adv)的全部内容** 。
+在使用 RPM & 二进制安装包之前，我们假定 **您已经阅读了[快速试用](#id_try)和[更多](#id_adv)的全部内容** 。
 
-`huststore` 的 [releases 页面](https://github.com/Qihoo360/huststore/releases) 提供了 rpm & 二进制安装包：
+`huststore` 的 [releases 页面](https://github.com/Qihoo360/huststore/releases) 提供了 RPM & 二进制安装包：
 
-    # rpm 安装包
+    # RPM 安装包
     hust3rd-1.7-1.el6.x86_64.rpm
     hust3rd-1.7-1.el6.x86_64.rpm.md5sum
     hust3rd-1.7-1.el6.x86_64.rpm.sha1sum
@@ -601,8 +601,8 @@
 备注：
 
 * 别忘记校验下载的安装包的正确性（利用 `*.md5sum` 和 `*.sha1sum`）。  
-* rpm & 二进制安装包 **仅仅用于快速试用，安装路径为 `/opt/huststore` 且无法变更，因为它是在构建过程中设置的**。 如果您需要定制安装路径，请选择 **从源代码编译安装**，参考 [快速试用](#id_try) 和 [更多](#id_adv) 的相关内容。  
-* 如果您试用 **rpm 安装包** ，请不要忘记 **变更目录 `/opt/huststore` 的所有者**，参考 [快速试用](#id_try) 和 [更多](#id_adv) 的相关内容。另外，在安装其他模块之前， **请务必先安装 `hust3rd-1.7-1.el6.x86_64.rpm`** 。  
+* RPM & 二进制安装包 **仅仅用于快速试用，安装路径为 `/opt/huststore` 且无法变更，因为它是在构建过程中设置的**。 如果您需要定制安装路径，请选择 **从源代码编译安装**，参考 [快速试用](#id_try) 和 [更多](#id_adv) 的相关内容。  
+* 如果您试用 **RPM 安装包** ，请不要忘记 **变更目录 `/opt/huststore` 的所有者**，参考 [快速试用](#id_try) 和 [更多](#id_adv) 的相关内容。另外，在安装其他模块之前， **请务必先安装 `hust3rd-1.7-1.el6.x86_64.rpm`** 。  
 * 如果您试用 **二进制安装包**，请不要忘记 **创建目录 `/opt/huststore` 并修改其所有者**，参考 [快速试用](#id_try) 和 [更多](#id_adv) 的相关内容。另外，在安装其他模块之前， **请务必先安装 `elf_3rd.tar.gz`** 。  
 
 [回顶部](#id_top)

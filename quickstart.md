@@ -8,7 +8,7 @@
     * [Hustdb Cluster Deployment](#id_adv_hustdb_cluster)
     * [Hustmq Cluster Deployment](#id_adv_hustmq_cluster)
     * [Summary](#id_adv_summary)
-* [rpm & binary installation packages](#id_rpm)
+* [RPM & binary installation packages](#id_rpm)
 * [Appendix](#id_appendix)
 
 <h2 id="id_try">Quickstart & Try</h2>
@@ -558,13 +558,13 @@ All together:
 
 [Back to top](#id_top)
 
-<h2 id="id_rpm">rpm & binary installation packages</h2>
+<h2 id="id_rpm">RPM & binary installation packages</h2>
 
-We assume that **you've already read all contents of [Quickstart & Try](#id_try) and [More](#id_adv)** before using rpm & binary installation packages.
+We assume that **you've already read all contents of [Quickstart & Try](#id_try) and [More](#id_adv)** before using RPM & binary installation packages.
 
-The [releases page](https://github.com/Qihoo360/huststore/releases) of huststore provides rpm & binary installation packages  built from **CentOS 6.2**:  
+The [releases page](https://github.com/Qihoo360/huststore/releases) of huststore provides RPM & binary installation packages  built from **CentOS 6.2**:  
 
-    # rpm installation packages
+    # RPM installation packages
     hust3rd-1.7-1.el6.x86_64.rpm
     hust3rd-1.7-1.el6.x86_64.rpm.md5sum
     hust3rd-1.7-1.el6.x86_64.rpm.sha1sum
@@ -601,8 +601,8 @@ The [releases page](https://github.com/Qihoo360/huststore/releases) of huststore
 Note:
 
 * Do NOT forget to check the packages by `*.md5sum` and `*.sha1sum`.  
-* The rpm & binary installation packages is **just for quickstart, so `/opt/huststore` is used as installation folder and could not be changed any more as it is set in build process**. So if you need to customize the installation folder, please **compile and install from source** as what [Quickstart & Try](#id_try) and [More](#id_adv) shows.  
-* If you use **rpm installation packages** for test, please do not forget to **change the owner** of folder `/opt/huststore` as what [Quickstart & Try](#id_try) and [More](#id_adv) shows. Besides, **you need to install `hust3rd-1.7-1.el6.x86_64.rpm` first** before installing any other module.  
+* The RPM & binary installation packages is **just for quickstart, so `/opt/huststore` is used as installation folder and could not be changed any more as it is set in build process**. So if you need to customize the installation folder, please **compile and install from source** as what [Quickstart & Try](#id_try) and [More](#id_adv) shows.  
+* If you use **RPM installation packages** for test, please do not forget to **change the owner** of folder `/opt/huststore` as what [Quickstart & Try](#id_try) and [More](#id_adv) shows. Besides, **you need to install `hust3rd-1.7-1.el6.x86_64.rpm` first** before installing any other module.  
 * If you use **binary installation packages** for test, please do not forget to **create the folder `/opt/huststore` and change its owner** as what [Quickstart & Try](#id_try) and [More](#id_adv) shows. Besides, **you need to install `elf_3rd.tar.gz` first** before installing any other module.  
 
 [Back to top](#id_top)

@@ -602,8 +602,8 @@ Note:
 
 * Do NOT forget to check the packages by `*.md5sum` and `*.sha1sum`.  
 * The rpm & binary installation packages is **just for quickstart, so `/opt/huststore` is used as installation folder and could not be changed any more as it is set in build process**. So if you need to customize the installation folder, please **compile and install from source** as what [Quickstart & Try](#id_try) and [More](#id_adv) shows.  
-* If you use **rpm installation packages** for test, please do not forget to **change the owner** of folder `/opt/huststore` as what [Quickstart & Try](#id_try) and [More](#id_adv) shows.  
-* If you use **binary installation packages** for test, please do not forget to **create the folder `/opt/huststore` and change its owner** as what [Quickstart & Try](#id_try) and [More](#id_adv) shows.  
+* If you use **rpm installation packages** for test, please do not forget to **change the owner** of folder `/opt/huststore` as what [Quickstart & Try](#id_try) and [More](#id_adv) shows. Besides, **you need to install `hust3rd-1.7-1.el6.x86_64.rpm` first** before installing any other module.  
+* If you use **binary installation packages** for test, please do not forget to **create the folder `/opt/huststore` and change its owner** as what [Quickstart & Try](#id_try) and [More](#id_adv) shows. Besides, **you need to install `elf_3rd.tar.gz` first** before installing any other module.  
 
 [Back to top](#id_top)
 

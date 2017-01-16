@@ -2,6 +2,41 @@
 
 set -e
 
+check_proc(){
+  port=$(grep 'tcp.port' hustdb.conf| grep -Po '\d+')
+  echo -n "Starting"
+  for i in $(seq 1 90); do
+    if ss -nltp | grep ${port} | grep -q hustdb >/dev/null 2>&1 ;then
+      echo "Done"
+      break
+    else
+      echo -n .
+      sleep 1
+    fi
+  done
+}
+
+check_space(){
+  test -d DATA && return 0
+  free_space=$(df -PmlT . | tail -1 | awk '{print $(NF-2)}')
+  # disk space < 10G , abort
+  if [[ ${free_space} -lt 10240 ]]; then
+    echo "Error: ${cwd} free space less than 10G, exit."
+    return 1
+  else
+    return 0
+  fi
+}
+
+
 cwd=$(dirname $(readlink -fn $0))
 cd ${cwd}
+check_space || exit 1
 LD_LIBRARY_PATH=@@PREFIX_3RD@@/lib ${cwd}/hustdb
+
+if [[ $1 != check ]]; then
+  exit 0
+else
+  check_proc
+fi
+

@@ -6,9 +6,9 @@ Appendix
 This section provide answers for FAQ of `hustmq`.
 
 **Q** :  How to deploy `hustmq`?  
-**A** :  Refer to [Here](../guide/hustmq.md) and [Here](../guide/ha.md).
+**A** :  Refer to [Here](../../../../../quickstart.md).
 
-**Q** :  How to configure `hustmq ha`?
+**Q** :  How to configure `hustmq ha`?  
 **A** :  Refer to [Here](../advanced/ha/nginx.md).
 
 **Q** :  How to configure `worker_processes` for `hustmq ha`?  

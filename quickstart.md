@@ -612,15 +612,14 @@ Note:
 * `hustdb`
     * [hustdb configuration](hustdb/doc/doc/en/advanced/hustdb.md)
 * `hustdb ha`
-    * [hustdb ha deployment](hustdb/doc/doc/en/advanced/ha/deploy.md)
     * [hustdb ha configuration](hustdb/doc/doc/en/advanced/ha/nginx.md)
     * [hustdb ha load balance table configuration](hustdb/doc/doc/en/advanced/ha/table.md)
     * [hustdb ha log configuration](hustdb/doc/doc/en/advanced/ha/zlog.md)
+    * [sync server configuration](hustdb/doc/doc/en/advanced/ha/sync_conf.md)
 * `hustmq`
     * [hustmq configuration](hustmq/doc/doc/en/advanced/hustmq/index.md)
 * `hustmq ha`
     * [hustmq ha configuration](hustmq/doc/doc/en/advanced/ha/nginx.md)
-    * [hustmq ha deployment](hustmq/doc/doc/en/advanced/ha/deploy.md)
 * `API`
     * [`hustdb`](hustdb/doc/doc/en/api/hustdb/hustdb.md)
     * [`hustdb ha`](hustdb/doc/doc/en/api/ha.md)

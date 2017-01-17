@@ -5,7 +5,6 @@ hustdb ha
 
 * [数据同步服务](ha/sync.md)
 * [依赖](ha/dep.md)
-* [部署](ha/deploy.md)
 * [配置](ha/conf.md)
 	* [nginx 配置文件](ha/nginx.md)
 	* [负载均衡配置文件](ha/table.md)

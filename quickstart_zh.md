@@ -612,15 +612,14 @@
 * `hustdb`
     * [hustdb 配置细节](hustdb/doc/doc/zh/advanced/hustdb.md)
 * `hustdb ha`
-    * [hustdb ha 部署细节](hustdb/doc/doc/zh/advanced/ha/deploy.md)
     * [hustdb ha 配置细节](hustdb/doc/doc/zh/advanced/ha/nginx.md)
     * [hustdb ha 负载均衡表](hustdb/doc/doc/zh/advanced/ha/table.md)
     * [hustdb ha 日志配置](hustdb/doc/doc/zh/advanced/ha/zlog.md)
+    * [sync server 配置细节](hustdb/doc/doc/zh/advanced/ha/sync_conf.md)
 * `hustmq`
     * [hustmq 配置细节](hustmq/doc/doc/zh/advanced/hustmq/index.md)
 * `hustmq ha`
     * [hustmq ha 配置细节](hustmq/doc/doc/zh/advanced/ha/nginx.md)
-    * [hustmq ha 部署细节](hustmq/doc/doc/zh/advanced/ha/deploy.md)
 * `API`
     * [`hustdb`](hustdb/doc/doc/zh/api/hustdb/hustdb.md)
     * [`hustdb ha`](hustdb/doc/doc/zh/api/ha.md)

@@ -6,7 +6,7 @@
 本节提供 `hustmq` 常见问题的答案。
 
 **Q** :  如何部署 `hustmq`？  
-**A** :  参考 [这里](../guide/hustmq.md) 和 [这里](../guide/ha.md) 。
+**A** :  参考 [这里](../../../../../quickstart_zh.md)。
 
 **Q** :  如何配置 `hustmq ha`？  
 **A** :  参考 [这里](../advanced/ha/nginx.md) 。

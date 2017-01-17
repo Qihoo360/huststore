@@ -5,7 +5,6 @@ hustdb ha
 
 * [Data Synchronization Service](ha/sync.md)
 * [Dependency](ha/dep.md)
-* [Deployment](ha/deploy.md)
 * [Configuration](ha/conf.md)
 	* [nginx configuration](ha/nginx.md)
 	* [load balance configuration](ha/table.md)

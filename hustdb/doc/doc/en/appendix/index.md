@@ -6,7 +6,7 @@ Appendix
 This chapter provides answers for faq of `hustdb`:
 
 **Q** :  How to deploy `hustdb`?  
-**A** :  Check [here](../guide/hustdb.md) and [here](../advanced/hustdb/deploy.md) .
+**A** :  Check [here](../../../../../quickstart.md) .
 
 **Q** :  How to config `hustdb ha`?  
 **A** :  Check [here](../advanced/ha/nginx.md) .

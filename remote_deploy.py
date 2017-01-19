@@ -11,9 +11,14 @@ merge = lambda l: string.join(l, '\n')
 def manual(): 
     print """
     usage:
-        python remote_deploy.py [user] [host_file] [prefix] [tar]
+        python remote_deploy.py [option] [user] [host_file] [prefix] [tar]
+        
+        [option]
+            --silent                          run in silent mode
+        
     sample:
         python remote_deploy.py jobs host.txt /opt/huststore elf_hustdb.tar.gz
+        python remote_deploy.py --silent jobs host.txt /opt/huststore elf_hustdb.tar.gz
         """
 
 def remote_ssh(key, option, user, host_file, cmds):
@@ -25,9 +30,9 @@ def remote_ssh(key, option, user, host_file, cmds):
         os.remove(cmd_file)
     return True
 
-def remote_deploy(user, host_file, prefix, tar):
-    os.system('python remote_scp.py --silent %s %s /tmp %s' % (user, host_file, tar))
-    return remote_ssh('remote_deploy', '--silent', user, host_file, [
+def remote_deploy(option, user, host_file, prefix, tar):
+    os.system('python remote_scp.py %s %s %s /tmp %s' % (option, user, host_file, tar))
+    return remote_ssh('remote_deploy', option, user, host_file, [
         'mv /tmp/%s %s' % (tar, prefix),
         'cd %s' % prefix,
         'tar -zxf %s -C .' % tar,
@@ -35,7 +40,13 @@ def remote_deploy(user, host_file, prefix, tar):
         ])
 
 def parse_shell(argv):
-    return remote_deploy(argv[1], argv[2], argv[3], argv[4]) if 5 == len(argv) else False
+    size = len(argv)
+    if size < 5 or size > 6:
+        return False
+    silent = True if '--silent' == argv[1] else False
+    idx = 2 if silent else 1
+    option = '--silent' if silent else ''
+    return remote_deploy(option, argv[idx], argv[idx + 1], argv[idx + 2], argv[idx + 3])
 
 if __name__ == "__main__":
     if not parse_shell(sys.argv):

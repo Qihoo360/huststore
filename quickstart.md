@@ -241,9 +241,14 @@ For convienience, you can add contents as below to the file `/etc/sudoers` of re
 `remote_prefix.py` is used to deploy installation package to remote machines, usage:
 
     usage:
-        python remote_deploy.py [user] [host_file] [prefix] [tar]
+        python remote_deploy.py [option] [user] [host_file] [prefix] [tar]
+        
+        [option]
+            --silent                          run in silent mode
+        
     sample:
         python remote_deploy.py jobs host.txt /opt/huststore elf_hustdb.tar.gz
+        python remote_deploy.py --silent jobs host.txt /opt/huststore elf_hustdb.tar.gz
 
 Arguments:
 
@@ -254,7 +259,7 @@ Arguments:
 
 For example, if you run this command:
 
-    python remote_deploy.py jobs host.txt /opt/huststore elf_hustdb.tar.gz
+    python remote_deploy.py --silent jobs host.txt /opt/huststore elf_hustdb.tar.gz
 
 Then `remote_deploy.py` will login by user `jobs` to the machines stored in `host.txt` one by one, copy installation package `elf_hustdb.tar.gz` to remote machine, and **untar** it to the folder `/opt/huststore`.
 
@@ -263,7 +268,10 @@ Then `remote_deploy.py` will login by user `jobs` to the machines stored in `hos
 `remote_service.py` is used to control huststore services in remote machines, usage:
 
     usage:
-        python remote_service.py [user] [host_file] [bin_folder] [action]
+        python remote_service.py [option] [user] [host_file] [bin_folder] [action]
+        
+        [option]
+            --silent                          run in silent mode
         
         [action]
             --start                           start remote service
@@ -272,6 +280,9 @@ Then `remote_deploy.py` will login by user `jobs` to the machines stored in `hos
     sample:
         python remote_service.py jobs host.txt /opt/huststore/hustdb --start
         python remote_service.py jobs host.txt /opt/huststore/hustdb --stop
+        
+        python remote_service.py --silent jobs host.txt /opt/huststore/hustdb --start
+        python remote_service.py --silent jobs host.txt /opt/huststore/hustdb --stop
 
 Arguments:
 
@@ -347,8 +358,8 @@ Build third-party and generate installation package:
     $ sh build.sh --module=3rd
 
 Install third-party (copy installation package to remote machines and untar to `/opt/huststore`):
-    
-    $ python remote_deploy.py jobs hosts /opt/huststore elf_3rd.tar.gz
+
+    $ python remote_deploy.py --silent jobs hosts /opt/huststore elf_3rd.tar.gz
 
 [Back to top](#id_top)
 
@@ -362,11 +373,11 @@ Build and make installation package of `hustdb`:
 
 Deploy `hustdb` (copy installation package to remote machines and untar to `/opt/huststore`):
 
-    $ python remote_deploy.py jobs hosts /opt/huststore elf_hustdb.tar.gz
+    $ python remote_deploy.py --silent jobs hosts /opt/huststore elf_hustdb.tar.gz
 
 Start service (ssh to remote mathines one by one, run script `/opt/huststore/hustdb/start.sh`):
 
-    $ python remote_service.py jobs hosts /opt/huststore/hustdb --start
+    $ python remote_service.py --silent jobs hosts /opt/huststore/hustdb --start
 
 Type in the below command to test:
 
@@ -399,15 +410,15 @@ Generate configuration of `hustdb ha`:
 
 Deploy `hustdb ha` (copy installation package to remote machines and untar to `/opt/huststore`, then replace the configuration):
 
-    $ python remote_deploy.py jobs hosts /opt/huststore elf_hustdbha.tar.gz
+    $ python remote_deploy.py --silent jobs hosts /opt/huststore elf_hustdbha.tar.gz
     $ cp nginx.conf.db nginx.conf
     $ python remote_scp.py --silent jobs hosts /opt/huststore/hustdbha/conf nginx.conf hustdbtable.json
     $ rm -f nginx.conf
 
 Start service (ssh to remote mathines one by one, run script `/opt/huststore/hustdbha/sbin/start.sh` and `/opt/huststore/hustdbsync/start.sh`):
 
-    $ python remote_service.py jobs hosts /opt/huststore/hustdbha/sbin --start
-    $ python remote_service.py jobs hosts /opt/huststore/hustdbsync --start
+    $ python remote_service.py --silent jobs hosts /opt/huststore/hustdbha/sbin --start
+    $ python remote_service.py --silent jobs hosts /opt/huststore/hustdbsync --start
 
 Type in commands:
 
@@ -439,11 +450,11 @@ Build and make installation package of `hustmq`:
 
 Deploy `hustmq` (copy installation package to remote machines and untar to `/opt/huststore`):
 
-    $ python remote_deploy.py jobs hosts /opt/huststore elf_hustmq.tar.gz
+    $ python remote_deploy.py --silent jobs hosts /opt/huststore elf_hustmq.tar.gz
 
 Start service (ssh to remote mathines one by one, run script `/opt/huststore/hustmq/start.sh`):
 
-    $ python remote_service.py jobs hosts /opt/huststore/hustmq --start
+    $ python remote_service.py --silent jobs hosts /opt/huststore/hustmq --start
 
 Type in the below command to test:
 
@@ -475,14 +486,14 @@ Generate configuration of `hustmq ha`:
 
 Deploy `hustmq ha` (copy installation package to remote machines and untar to `/opt/huststore`, then replace the configuration):
 
-    $ python remote_deploy.py jobs hosts /opt/huststore elf_hustmqha.tar.gz
+    $ python remote_deploy.py --silent jobs hosts /opt/huststore elf_hustmqha.tar.gz
     $ cp nginx.conf.mq nginx.conf
     $ python remote_scp.py --silent jobs hosts /opt/huststore/hustmqha/conf nginx.conf
     $ rm -f nginx.conf
 
 Start service (ssh to remote mathines one by one, run script `/opt/huststore/hustmqha/sbin/start.sh`):
 
-    $ python remote_service.py jobs hosts /opt/huststore/hustmqha/sbin --start
+    $ python remote_service.py --silent jobs hosts /opt/huststore/hustmqha/sbin --start
 
 Input the following test command:
 
@@ -531,30 +542,30 @@ All together:
     python make_conf.py hosts hustmqha 8080 8086
     cp hustmq/ha/nginx/conf/nginx.conf nginx.conf.mq
 
-    
+
     # deploy 3rd
-    python remote_deploy.py jobs hosts /opt/huststore elf_3rd.tar.gz
+    python remote_deploy.py --silent jobs hosts /opt/huststore elf_3rd.tar.gz
 
     # deploy huststore
-    python remote_deploy.py jobs hosts /opt/huststore elf_hustdb.tar.gz
-    python remote_deploy.py jobs hosts /opt/huststore elf_hustmq.tar.gz
+    python remote_deploy.py --silent jobs hosts /opt/huststore elf_hustdb.tar.gz
+    python remote_deploy.py --silent jobs hosts /opt/huststore elf_hustmq.tar.gz
 
-    python remote_deploy.py jobs hosts /opt/huststore elf_hustdbha.tar.gz
+    python remote_deploy.py --silent jobs hosts /opt/huststore elf_hustdbha.tar.gz
     cp nginx.conf.db nginx.conf
     python remote_scp.py --silent jobs hosts /opt/huststore/hustdbha/conf nginx.conf hustdbtable.json
     rm -f nginx.conf
 
-    python remote_deploy.py jobs hosts /opt/huststore elf_hustmqha.tar.gz
+    python remote_deploy.py --silent jobs hosts /opt/huststore elf_hustmqha.tar.gz
     cp nginx.conf.mq nginx.conf
     python remote_scp.py --silent jobs hosts /opt/huststore/hustmqha/conf nginx.conf
     rm -f nginx.conf
 
     # start huststore service
-    python remote_service.py jobs hosts /opt/huststore/hustdb --start
-    python remote_service.py jobs hosts /opt/huststore/hustmq --start
-    python remote_service.py jobs hosts /opt/huststore/hustdbha/sbin --start
-    python remote_service.py jobs hosts /opt/huststore/hustdbsync --start
-    python remote_service.py jobs hosts /opt/huststore/hustmqha/sbin --start
+    python remote_service.py --silent jobs hosts /opt/huststore/hustdb --start
+    python remote_service.py --silent jobs hosts /opt/huststore/hustmq --start
+    python remote_service.py --silent jobs hosts /opt/huststore/hustdbha/sbin --start
+    python remote_service.py --silent jobs hosts /opt/huststore/hustdbsync --start
+    python remote_service.py --silent jobs hosts /opt/huststore/hustmqha/sbin --start
 
 [Back to top](#id_top)
 

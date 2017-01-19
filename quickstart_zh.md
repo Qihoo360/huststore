@@ -241,9 +241,14 @@
 `remote_prefix.py` 用于将安装包一键部署至远程机器中，用法：
 
     usage:
-        python remote_deploy.py [user] [host_file] [prefix] [tar]
+        python remote_deploy.py [option] [user] [host_file] [prefix] [tar]
+        
+        [option]
+            --silent                          run in silent mode
+        
     sample:
         python remote_deploy.py jobs host.txt /opt/huststore elf_hustdb.tar.gz
+        python remote_deploy.py --silent jobs host.txt /opt/huststore elf_hustdb.tar.gz
 
 参数：
 
@@ -254,7 +259,7 @@
 
 例如，当执行以下命令：
 
-    python remote_deploy.py jobs host.txt /opt/huststore elf_hustdb.tar.gz
+    python remote_deploy.py --silent jobs host.txt /opt/huststore elf_hustdb.tar.gz
 
 `remote_deploy.py` 将以用户名 `jobs` 逐台登陆 `host.txt` 所包含的远程机器列表，将本地安装包 `elf_hustdb.tar.gz` 拷贝至远程机器上，并 **解压** 至目录 `/opt/huststore` 。
 
@@ -263,7 +268,10 @@
 `remote_service.py` 用于控制远程机器上安装的 `huststore` 的服务，用法：
 
     usage:
-        python remote_service.py [user] [host_file] [bin_folder] [action]
+        python remote_service.py [option] [user] [host_file] [bin_folder] [action]
+        
+        [option]
+            --silent                          run in silent mode
         
         [action]
             --start                           start remote service
@@ -272,6 +280,9 @@
     sample:
         python remote_service.py jobs host.txt /opt/huststore/hustdb --start
         python remote_service.py jobs host.txt /opt/huststore/hustdb --stop
+        
+        python remote_service.py --silent jobs host.txt /opt/huststore/hustdb --start
+        python remote_service.py --silent jobs host.txt /opt/huststore/hustdb --stop
 
 参数：
 
@@ -348,7 +359,7 @@
 
 安装第三方依赖（将安装包拷贝至远程机器，并解压至目录 `/opt/huststore`）：
 
-    $ python remote_deploy.py jobs hosts /opt/huststore elf_3rd.tar.gz
+    $ python remote_deploy.py --silent jobs hosts /opt/huststore elf_3rd.tar.gz
 
 [回顶部](#id_top)
 
@@ -362,11 +373,11 @@
 
 部署 `hustdb`（将安装包拷贝至远程机器，并解压至目录 `/opt/huststore`）：
 
-    $ python remote_deploy.py jobs hosts /opt/huststore elf_hustdb.tar.gz
+    $ python remote_deploy.py --silent jobs hosts /opt/huststore elf_hustdb.tar.gz
 
 启动服务（`ssh` 到每台远程机器，运行脚本 `/opt/huststore/hustdb/start.sh`）：
 
-    $ python remote_service.py jobs hosts /opt/huststore/hustdb --start
+    $ python remote_service.py --silent jobs hosts /opt/huststore/hustdb --start
 
 输入如下测试命令：
 
@@ -399,15 +410,15 @@
 
 部署 `hustdb ha`（将安装包拷贝至远程机器，并解压至目录 `/opt/huststore`，然后替换配置文件）：
 
-    $ python remote_deploy.py jobs hosts /opt/huststore elf_hustdbha.tar.gz
+    $ python remote_deploy.py --silent jobs hosts /opt/huststore elf_hustdbha.tar.gz
     $ cp nginx.conf.db nginx.conf
     $ python remote_scp.py --silent jobs hosts /opt/huststore/hustdbha/conf nginx.conf hustdbtable.json
     $ rm -f nginx.conf
 
 启动服务（`ssh` 到每台远程机器，运行脚本 `/opt/huststore/hustdbha/sbin/start.sh` 和 `/opt/huststore/hustdbsync/start.sh`）：
 
-    $ python remote_service.py jobs hosts /opt/huststore/hustdbha/sbin --start
-    $ python remote_service.py jobs hosts /opt/huststore/hustdbsync --start
+    $ python remote_service.py --silent jobs hosts /opt/huststore/hustdbha/sbin --start
+    $ python remote_service.py --silent jobs hosts /opt/huststore/hustdbsync --start
 
 输入如下测试命令：
 
@@ -439,11 +450,11 @@
 
 部署 `hustmq`（将安装包拷贝至远程机器，并解压至目录 `/opt/huststore`）：
 
-    $ python remote_deploy.py jobs hosts /opt/huststore elf_hustmq.tar.gz
+    $ python remote_deploy.py --silent jobs hosts /opt/huststore elf_hustmq.tar.gz
 
 启动服务（`ssh` 到每台远程机器，运行脚本 `/opt/huststore/hustmq/start.sh`）：
 
-    $ python remote_service.py jobs hosts /opt/huststore/hustmq --start
+    $ python remote_service.py --silent jobs hosts /opt/huststore/hustmq --start
 
 输入如下测试命令：
 
@@ -475,14 +486,14 @@
 
 部署 `hustmq ha`（将安装包拷贝至远程机器，并解压至目录 `/opt/huststore`，然后替换配置文件）：
 
-    $ python remote_deploy.py jobs hosts /opt/huststore elf_hustmqha.tar.gz
+    $ python remote_deploy.py --silent jobs hosts /opt/huststore elf_hustmqha.tar.gz
     $ cp nginx.conf.mq nginx.conf
     $ python remote_scp.py --silent jobs hosts /opt/huststore/hustmqha/conf nginx.conf
     $ rm -f nginx.conf
 
 启动服务（`ssh` 到每台远程机器，运行脚本 `/opt/huststore/hustmqha/sbin/start.sh`）：
 
-    $ python remote_service.py jobs hosts /opt/huststore/hustmqha/sbin --start
+    $ python remote_service.py --silent jobs hosts /opt/huststore/hustmqha/sbin --start
 
 输入如下测试命令：
 
@@ -533,28 +544,28 @@
 
 
     # deploy 3rd
-    python remote_deploy.py jobs hosts /opt/huststore elf_3rd.tar.gz
+    python remote_deploy.py --silent jobs hosts /opt/huststore elf_3rd.tar.gz
 
     # deploy huststore
-    python remote_deploy.py jobs hosts /opt/huststore elf_hustdb.tar.gz
-    python remote_deploy.py jobs hosts /opt/huststore elf_hustmq.tar.gz
+    python remote_deploy.py --silent jobs hosts /opt/huststore elf_hustdb.tar.gz
+    python remote_deploy.py --silent jobs hosts /opt/huststore elf_hustmq.tar.gz
 
-    python remote_deploy.py jobs hosts /opt/huststore elf_hustdbha.tar.gz
+    python remote_deploy.py --silent jobs hosts /opt/huststore elf_hustdbha.tar.gz
     cp nginx.conf.db nginx.conf
     python remote_scp.py --silent jobs hosts /opt/huststore/hustdbha/conf nginx.conf hustdbtable.json
     rm -f nginx.conf
 
-    python remote_deploy.py jobs hosts /opt/huststore elf_hustmqha.tar.gz
+    python remote_deploy.py --silent jobs hosts /opt/huststore elf_hustmqha.tar.gz
     cp nginx.conf.mq nginx.conf
     python remote_scp.py --silent jobs hosts /opt/huststore/hustmqha/conf nginx.conf
     rm -f nginx.conf
 
     # start huststore service
-    python remote_service.py jobs hosts /opt/huststore/hustdb --start
-    python remote_service.py jobs hosts /opt/huststore/hustmq --start
-    python remote_service.py jobs hosts /opt/huststore/hustdbha/sbin --start
-    python remote_service.py jobs hosts /opt/huststore/hustdbsync --start
-    python remote_service.py jobs hosts /opt/huststore/hustmqha/sbin --start
+    python remote_service.py --silent jobs hosts /opt/huststore/hustdb --start
+    python remote_service.py --silent jobs hosts /opt/huststore/hustmq --start
+    python remote_service.py --silent jobs hosts /opt/huststore/hustdbha/sbin --start
+    python remote_service.py --silent jobs hosts /opt/huststore/hustdbsync --start
+    python remote_service.py --silent jobs hosts /opt/huststore/hustmqha/sbin --start
 
 [回顶部](#id_top)
 

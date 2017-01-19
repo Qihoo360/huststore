@@ -11,7 +11,10 @@ merge = lambda l: string.join(l, '\n')
 def manual(): 
     print """
     usage:
-        python remote_service.py [user] [host_file] [bin_folder] [action]
+        python remote_service.py [option] [user] [host_file] [bin_folder] [action]
+        
+        [option]
+            --silent                          run in silent mode
         
         [action]
             --start                           start remote service
@@ -20,6 +23,9 @@ def manual():
     sample:
         python remote_service.py jobs host.txt /opt/huststore/hustdb --start
         python remote_service.py jobs host.txt /opt/huststore/hustdb --stop
+        
+        python remote_service.py --silent jobs host.txt /opt/huststore/hustdb --start
+        python remote_service.py --silent jobs host.txt /opt/huststore/hustdb --stop
         """
 
 def remote_ssh(key, option, user, host_file, cmds):
@@ -31,17 +37,23 @@ def remote_ssh(key, option, user, host_file, cmds):
         os.remove(cmd_file)
     return True
 
-def remote_service(user, host_file, bin_folder, action):
+def remote_service(option, user, host_file, bin_folder, action):
     if '--start' == action:
         cmd = 'sh start.sh'
     elif '--stop' == action:
         cmd = 'sh stop.sh'
     else:
         return False
-    return remote_ssh('remote_service', '--silent', user, host_file, ['cd %s' % bin_folder, cmd])
+    return remote_ssh('remote_service', option, user, host_file, ['cd %s' % bin_folder, cmd])
 
 def parse_shell(argv):
-    return remote_service(argv[1], argv[2], argv[3], argv[4]) if 5 == len(argv) else False
+    size = len(argv)
+    if size < 5 or size > 6:
+        return False
+    silent = True if '--silent' == argv[1] else False
+    idx = 2 if silent else 1
+    option = '--silent' if silent else ''
+    return remote_service(option, argv[idx], argv[idx + 1], argv[idx + 2], argv[idx + 3])
 
 if __name__ == "__main__":
     if not parse_shell(sys.argv):

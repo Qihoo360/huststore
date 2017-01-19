@@ -187,6 +187,16 @@ After **build & install**, `stop.sh` will be generated to binary folder of servi
         python remote_scp.py jobs host.txt /opt/huststore/hustdbha/conf nginx.conf hustdbtable.json
         python remote_scp.py --silent jobs host.txt /opt/huststore/hustdbha/conf nginx.conf hustdbtable.json
 
+Note : with option `--silent`, `remote_scp.py` will sudo to `[user]` first, then run `scp` with option `StrictHostKeyChecking=no`.  
+
+For convienience, you can add contents as below to the file `/etc/sudoers` of remote machines: 
+
+    # just a example
+    %jobs ALL=(jobs) ALL
+    User_Alias USERS = %jobs
+    USERS ALL= (jobs) NOPASSWD:ALL
+    USERS ALL= NOPASSWD: /bin/su - jobs
+
 [Back to top](#id_top)
 
 #### remote_ssh.py ####
@@ -202,6 +212,16 @@ After **build & install**, `stop.sh` will be generated to binary folder of servi
     sample:
         python remote_ssh.py jobs host.txt cmds.txt
         python remote_ssh.py --silent jobs host.txt cmds.txt
+
+Note : with option `--silent`, `remote_ssh.py` will sudo to `[user]` first, then run `ssh` with option `StrictHostKeyChecking=no`.  
+
+For convienience, you can add contents as below to the file `/etc/sudoers` of remote machines: 
+
+    # just a example
+    %jobs ALL=(jobs) ALL
+    User_Alias USERS = %jobs
+    USERS ALL= (jobs) NOPASSWD:ALL
+    USERS ALL= NOPASSWD: /bin/su - jobs
 
 [Back to top](#id_top)
 

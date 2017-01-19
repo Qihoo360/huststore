@@ -187,6 +187,16 @@
         python remote_scp.py jobs host.txt /opt/huststore/hustdbha/conf nginx.conf hustdbtable.json
         python remote_scp.py --silent jobs host.txt /opt/huststore/hustdbha/conf nginx.conf hustdbtable.json
 
+备注：如果带上参数 `--silent` ，`remote_scp.py` 将会先 `sudo` 至用户 `[user]`，然后以选项 `StrictHostKeyChecking=no` 执行 `scp` 命令。 
+
+出于便利，你可以将以下内容添加到远程机器的 `/etc/sudoers` 文件中：
+
+    # 范例
+    %jobs ALL=(jobs) ALL
+    User_Alias USERS = %jobs
+    USERS ALL= (jobs) NOPASSWD:ALL
+    USERS ALL= NOPASSWD: /bin/su - jobs 
+
 [回顶部](#id_top)
 
 #### remote_ssh.py ####
@@ -202,6 +212,16 @@
     sample:
         python remote_ssh.py jobs host.txt cmds.txt
         python remote_ssh.py --silent jobs host.txt cmds.txt
+
+备注：如果带上参数 `--silent` ，`remote_ssh.py` 将会先 `sudo` 至用户 `[user]`，然后以选项 `StrictHostKeyChecking=no` 执行 `ssh` 命令。  
+
+出于便利，你可以将以下内容添加到远程机器的 `/etc/sudoers` 文件中：
+
+    # 范例
+    %jobs ALL=(jobs) ALL
+    User_Alias USERS = %jobs
+    USERS ALL= (jobs) NOPASSWD:ALL
+    USERS ALL= NOPASSWD: /bin/su - jobs 
 
 [回顶部](#id_top)
 

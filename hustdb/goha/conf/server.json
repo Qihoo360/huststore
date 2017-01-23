@@ -1,0 +1,25 @@
+{
+    "Server": {
+        "Id": 0,
+        "Port": 55555
+    },
+    "Hustdb": {
+        "User": "huststore",
+        "Passwd": "huststore"
+    },
+    "Http": {
+        "MaxIdleConnsPerHost": 5000,
+        "ResponseHeaderTimeout": 200,
+        "Timeout": 200,
+        "KeepAlive": 180
+    },
+	"Binlog":{
+		"RoutineCnt": 3,
+		"TaskChanCap": 10000
+	},
+	"Healthcheck":{
+		"HealthCheckCycle": 5,
+		"Timeout":2
+	},
+    "Concurrency": 1024
+}

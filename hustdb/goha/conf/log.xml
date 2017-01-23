@@ -1,0 +1,37 @@
+<seelog minlevel="trace">
+    <outputs formatid="main">
+        <filter levels="critical">
+            <buffered size="8388608" flushperiod="3000">
+				<rollingfile type="date" filename="./logs/log.critical" fullname="true" datepattern="2006.01.02" maxrolls="7"/>
+            </buffered>
+        </filter>
+        <filter levels="error">
+            <buffered size="8388608" flushperiod="3000">
+				<rollingfile type="date" filename="./logs/log.error" fullname="true" datepattern="2006.01.02" maxrolls="7"/>
+            </buffered>
+        </filter>
+        <filter levels="warn">
+            <buffered size="8388608" flushperiod="3000">
+                <rollingfile type="date" filename="./logs/log.warn" fullname="true" datepattern="2006.01.02" maxrolls="7"/>
+            </buffered>
+        </filter>
+        <filter levels="info">
+            <buffered size="8388608" flushperiod="3000">
+                <rollingfile type="date" filename="./logs/log.info" fullname="true" datepattern="2006.01.02" maxrolls="7"/>
+            </buffered>
+        </filter>
+        <filter levels="debug">
+            <buffered size="8388608" flushperiod="3000">
+                <rollingfile type="date" filename="./logs/log.debug" fullname="true" datepattern="2006.01.02" maxrolls="7"/>
+            </buffered>
+        </filter>
+        <filter levels="trace">
+            <buffered size="8388608" flushperiod="3000">
+                <rollingfile type="date" filename="./logs/log.trace" fullname="true" datepattern="2006.01.02" maxrolls="7"/>
+            </buffered>
+        </filter>
+    </outputs>
+    <formats>
+        <format id="main" format="[%Date %Time] [%LEVEL] [%Func|%Line] | %Msg%n"/>
+    </formats>
+</seelog>

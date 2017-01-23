@@ -1,0 +1,98 @@
+{
+    "set": {
+        "params": ["string", "string", ["string", "string"], ["string", "string"], ["string|string"]], // set key val [ex seconds] [px milliseconds] [nx|xx]
+        "return": ["string", "nil"] // ok or nil
+    },
+    "get": {
+        "params": ["string"], // get key
+        "return":["string", "nil"]
+    },
+    "exists": {
+        "params": ["string"], //exists key
+        "return":["integer"] //1 or 0
+    },
+    "del": {
+        "params": ["string", "..."], //del key [key...]
+        "return":["integer"] //删除的个数
+    },
+    "strlen": {
+        "params": ["string"], //strlen key
+        "return":["integer"] //字符串长度
+    },
+
+    "hdel": {
+        "params": ["string", "string", "..."], //hdel tb key [key...]
+        "return":["integer"] //删除的数量
+    },
+    "hexists": {
+        "params": ["string", "string"], //hexists tb key
+        "return": ["integer"] //1 or 0
+    },
+    "hget": {
+        "params": ["string", "string"], //hget tb key
+        "return": ["string", "nil"]
+    },
+    "hincrby": {
+        "params": ["string", "string", "string"], //hincrby tb key increment
+        "return": ["string", "err"] //hincrby后key的值; ERR hash value is not an integer
+    },
+    "hset": {
+        "params": ["string", "string", "string", "string"], //hset tb key val
+        "return": ["integer"] // 1: new key; 0: old key
+    },
+    /*
+    "hkeys": {
+        "params": ["string"], // hkeys tb
+        "return": ["array"]
+    },
+    */
+
+    "sadd": {
+        "params": ["string", "string", "..."], //sadd tb key [key...]
+        "return": ["integer"] //添加的元素个数
+    },
+    "sismember": {
+        "params": ["string", "string"], //sismember tb key
+        "return": ["integer"] // 1 or 0
+    },
+    "srem": {
+        "params": ["string", "string", ["..."]], //srem tb key [key...]
+        "return": ["integer"] //删除的元素个数
+    },
+    /*
+    "smembers": {
+        "params": ["string"], //smembers tb
+        "return": ["array"]
+    },
+    */
+
+    "zadd": {
+        "params": ["string", ["string", "string"], "..."], //zadd tb score key [[score, key]...]
+        "return": ["integer"]
+    },
+    "zrange": {
+        "params": ["string", "string", "string", "*string"], //zrange tb start stop [withscores]
+        "return": ["array"]
+    },
+    "zrangebyscore": {
+        "params": ["string", "string", "string", "*string", ], //zrangebyscore tb min max [withscores] [limit offset count] 默认闭区间，(开区间 
+        "return": ["array"]        
+    },
+    "zrem": {
+        "params": ["string", "string", "..."], //zrem tb key [key...]
+        "return": ["integer"]
+    },
+    "zscore": {
+        "params": ["string", "string"], // zscore tb key
+        "return": ["string", "nil"]
+    },
+
+    "echo": {
+        "params": ["string"], //echo key
+        "return": ["string"]
+    },
+    "ping": {
+        "return": ["string"] //ping
+    },
+    "quit": {} //quit
+}

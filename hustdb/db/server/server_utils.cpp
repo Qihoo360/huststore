@@ -38,6 +38,10 @@ pid_file_t::pid_file_t(const std::string& pid_file)
 
 pid_file_t::~pid_file_t()
 {
+    if (!fp_)
+    {
+        return;
+    }
     fclose(fp_);
     remove(pid_file_.c_str());
 }

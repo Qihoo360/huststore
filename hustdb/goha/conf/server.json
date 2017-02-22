@@ -9,9 +9,9 @@
     },
     "Http": {
         "MaxIdleConnsPerHost": 5000,
-        "ResponseHeaderTimeout": 200,
+        "ResponseHeaderTimeout": 60,
         "Timeout": 200,
-        "KeepAlive": 180
+        "KeepAlive": 360
     },
 	"Binlog":{
 		"RoutineCnt": 3,

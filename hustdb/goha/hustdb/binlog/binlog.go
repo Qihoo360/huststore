@@ -46,6 +46,14 @@ func Do(succBackend, failBackend, cmd string, args map[string][]byte, val []byte
 		args["method"] = []byte(BinlogMethodCodeMap["srem"])
 		args["host"] = []byte(failBackend)
 		HandleHustdbWriteFailedTask(succBackend, args, val)
+	case "zadd":
+		args["method"] = []byte(BinlogMethodCodeMap["zadd"])
+		args["host"] = []byte(failBackend)
+		HandleHustdbWriteFailedTask(succBackend, args, val)
+	case "zrem":
+		args["method"] = []byte(BinlogMethodCodeMap["zrem"])
+		args["host"] = []byte(failBackend)
+		HandleHustdbWriteFailedTask(succBackend, args, val)
 	default:
 		seelog.Warnf("Unknow Binlog Type : %v\n", cmd)
 	}

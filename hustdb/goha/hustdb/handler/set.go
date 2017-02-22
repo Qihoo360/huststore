@@ -28,6 +28,7 @@ func (p *HustdbHandler) HustdbSadd(args map[string][]byte) *comm.HustdbResponse 
 	}
 
 	putSucc := 0
+	maxVer := 0
 	var putFailedBackend string
 	var putSuccessBackend string
 	hustdbResp := &comm.HustdbResponse{Code: 0}
@@ -37,6 +38,10 @@ func (p *HustdbHandler) HustdbSadd(args map[string][]byte) *comm.HustdbResponse 
 			putSucc++
 			hustdbResp.Code = comm.HttpOk
 			putSuccessBackend = resp.Backend
+			if resp.Version > maxVer {
+				hustdbResp.Version = resp.Version
+				maxVer = resp.Version
+			}
 		} else {
 			putFailedBackend = resp.Backend
 		}

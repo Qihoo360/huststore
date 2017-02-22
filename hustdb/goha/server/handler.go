@@ -130,7 +130,11 @@ func setHandle(args [][]byte) *Result {
 					data:   []byte("ERR value is not an integer or out of range"),
 				}
 			}
-			params["ttl"] = []byte(strconv.FormatInt(val/1000, 10))
+			val = val / 1000
+			if val == 0 {
+				val = 1
+			}
+			params["ttl"] = []byte(strconv.FormatInt(val, 10))
 		} else {
 			return &Result{
 				status: errStatus,
@@ -375,7 +379,11 @@ func saddHandle(args [][]byte) *Result {
 		}
 		go func(params map[string][]byte) {
 			resp := IDBHandle.HustdbSadd(params)
-			ch <- resp.Code
+			if resp.Version == 1 {
+				ch <- resp.Code
+			} else {
+				ch <- 404
+			}
 		}(params)
 	}
 	for i := 0; i < argc; i++ {
@@ -454,7 +462,11 @@ func zaddHandle(args [][]byte) *Result {
 		}
 		go func(params map[string][]byte) {
 			resp := IDBHandle.HustdbZadd(params)
-			ch <- resp.Code
+			if resp.Version == 1 {
+				ch <- resp.Code
+			} else {
+				ch <- 404
+			}
 		}(params)
 	}
 	for i := 0; i < argc; i += 2 {

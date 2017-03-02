@@ -65,6 +65,11 @@ void zlibc_free ( void *ptr )
 #define rdb_calloc(count,size) je_calloc(count,size)
 #define rdb_realloc(ptr,size) je_realloc(ptr,size)
 #define rdb_free(ptr) je_free(ptr)
+#else
+#define rdb_malloc(size) malloc(size)
+#define rdb_calloc(count, size) calloc(count, size)
+#define rdb_realloc(ptr, size) realloc(ptr, size)
+#define rdb_free(ptr) free(ptr)
 #endif
 
 #if defined(__ATOMIC_RELAXED)

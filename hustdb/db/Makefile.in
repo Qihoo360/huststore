@@ -20,7 +20,7 @@ INCLUDE    = \
     -I $(DEPS_PREFIX)/include/curl
 
 LIB         = -L$(DEPS_PREFIX)/lib -L/usr/lib -lpthread -lssl -lcrypto -pthread -lrt
-CFLAGS      = -fPIC -O0 -g3 -fmessage-length=0 -D_FILE_OFFSET_BITS=64 -D_LARGE_FILE -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -DUSE_TCMALLOC
+CFLAGS      = -fPIC -O0 -g3 -fmessage-length=0 -D_FILE_OFFSET_BITS=64 -D_LARGE_FILE -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE 
 STATIC_LIB = $(DEPS_PREFIX)/lib/libleveldb.a $(DEPS_PREFIX)/lib/libsnappy.a $(DEPS_PREFIX)/lib/libcurl.a
 
 

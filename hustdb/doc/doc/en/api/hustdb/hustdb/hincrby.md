@@ -14,7 +14,7 @@
 
 **Sample A:**
 
-    curl -i -X GET "http://localhost:8085/hustdb/hset?tb=test_table&key=test_key&val=7"
+    curl -i -X GET "http://localhost:8085/hustdb/hincrby?tb=test_table&key=test_key&val=7"
 
 **Result A1:**
 
@@ -34,7 +34,7 @@
 
 **Sample B:**
 
-    curl -i -X GET "http://localhost:8085/hustdb/hset?tb=test_table&key=test_key&val=7&ver=2"
+    curl -i -X GET "http://localhost:8085/hustdb/hincrby?tb=test_table&key=test_key&val=7&ver=2"
 
 **Result B1:**
 

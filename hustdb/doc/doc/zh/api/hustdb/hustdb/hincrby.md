@@ -14,7 +14,7 @@
 
 **使用范例A:**
 
-    curl -i -X GET "http://localhost:8085/hustdb/hset?tb=test_table&key=test_key&val=7"
+    curl -i -X GET "http://localhost:8085/hustdb/hincrby?tb=test_table&key=test_key&val=7"
 
 **结果范例A1:**
 
@@ -34,7 +34,7 @@
 
 **使用范例B:**
 
-    curl -i -X GET "http://localhost:8085/hustdb/hset?tb=test_table&key=test_key&val=7&ver=2"
+    curl -i -X GET "http://localhost:8085/hustdb/hincrby?tb=test_table&key=test_key&val=7&ver=2"
 
 **结果范例B1:**
 

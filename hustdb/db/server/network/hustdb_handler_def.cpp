@@ -407,7 +407,7 @@ hustdb_hincrby_ctx_t::hustdb_hincrby_ctx_t(evhtp_query_t * htp_query)
 
     memset(&tb, 0, sizeof(evhtp::c_str_t));
     memset(&key, 0, sizeof(evhtp::c_str_t));
-    memset(&val, 0, sizeof(uint64_t));
+    memset(&val, 0, sizeof(int64_t));
     ttl = 0;
     ver = 0;
     memset(&host, 0, sizeof(evhtp::c_str_t));
@@ -442,7 +442,7 @@ hustdb_hincrby_ctx_t::hustdb_hincrby_ctx_t(evhtp_query_t * htp_query)
         else if (kv->klen == __val.len && 0 == strncmp(__val.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
             has_val = true;
-            val = evhtp::cast <uint64_t> (std::string(kv->val, kv->vlen));
+            val = evhtp::cast <int64_t> (std::string(kv->val, kv->vlen));
         }
         else if (kv->klen == __ttl.len && 0 == strncmp(__ttl.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
@@ -1479,7 +1479,7 @@ hustdb_zadd_ctx_t::hustdb_zadd_ctx_t(evhtp_query_t * htp_query)
         else if (kv->klen == __score.len && 0 == strncmp(__score.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
             has_score = true;
-            score = evhtp::cast <uint64_t> (std::string(kv->val, kv->vlen));
+            score = evhtp::cast <int64_t> (std::string(kv->val, kv->vlen));
         }
         else if (kv->klen == __opt.len && 0 == strncmp(__opt.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
@@ -1684,12 +1684,12 @@ hustdb_zrangebyscore_ctx_t::hustdb_zrangebyscore_ctx_t(evhtp_query_t * htp_query
         else if (kv->klen == __min.len && 0 == strncmp(__min.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
             has_min = true;
-            min = evhtp::cast <uint64_t> (std::string(kv->val, kv->vlen));
+            min = evhtp::cast <int64_t> (std::string(kv->val, kv->vlen));
         }
         else if (kv->klen == __max.len && 0 == strncmp(__max.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {
             has_max = true;
-            max = evhtp::cast <uint64_t> (std::string(kv->val, kv->vlen));
+            max = evhtp::cast <int64_t> (std::string(kv->val, kv->vlen));
         }
         else if (kv->klen == __offset.len && 0 == strncmp(__offset.data, kv->key, kv->klen) && kv->val && kv->vlen > 0)
         {

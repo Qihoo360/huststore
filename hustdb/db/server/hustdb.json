@@ -124,7 +124,7 @@
             [
                 ["string", "tb"],
                 ["string", "key"],
-                ["uint64_t", "val"],
+                ["int64_t", "val"],
                 ["uint32_t", "ttl", "0"],
                 ["uint32_t", "ver", "0"],
                 ["string", "host"],
@@ -435,7 +435,7 @@
             "args":
             [
                 ["string", "tb"],
-                ["uint64_t", "score", "0"],
+                ["int64_t", "score", "0"],
                 ["int32_t", "opt", "0"],
                 ["string", "key"],
                 ["uint32_t", "ver", "0"],
@@ -482,8 +482,8 @@
             "args":
             [
                 ["string", "tb"],
-                ["uint64_t", "min", "0"],
-                ["uint64_t", "max", "0"],
+                ["int64_t", "min", "0"],
+                ["int64_t", "max", "0"],
                 ["int32_t", "offset", "-1"],
                 ["int32_t", "size", "-1"],
                 ["int32_t", "start", "0"],

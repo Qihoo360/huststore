@@ -129,7 +129,7 @@ struct hustdb_hincrby_ctx_t
 {
     evhtp::c_str_t tb;
     evhtp::c_str_t key;
-    uint64_t val;
+    int64_t val;
     uint32_t ttl;
     uint32_t ver;
     evhtp::c_str_t host;
@@ -443,7 +443,7 @@ struct hustdb_zscore_ctx_t
 struct hustdb_zadd_ctx_t
 {
     evhtp::c_str_t tb;
-    uint64_t score;
+    int64_t score;
     int32_t opt;
     evhtp::c_str_t key;
     uint32_t ver;
@@ -500,8 +500,8 @@ struct hustdb_zrangebyrank_ctx_t
 struct hustdb_zrangebyscore_ctx_t
 {
     evhtp::c_str_t tb;
-    uint64_t min;
-    uint64_t max;
+    int64_t min;
+    int64_t max;
     int32_t offset;
     int32_t size;
     int32_t start;

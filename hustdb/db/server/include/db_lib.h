@@ -1084,6 +1084,109 @@ int stdstr_replace ( std::string & s, const char * lpszOld, const char * lpszNew
 
     return count;
 }
+
+static inline
+bool db_strtoull ( const char *str, uint64_t *out )
+{
+    assert ( out != NULL );
+    errno = 0;
+    *out = 0;
+    char *endptr;
+    unsigned long long ull = strtoull ( str, &endptr, 10 );
+    if ( ( errno == ERANGE ) || ( str == endptr ) )
+    {
+        return false;
+    }
+
+    if ( isspace ( ( unsigned char ) ( *endptr ) ) || ( *endptr == '\0' && endptr != str ) )
+    {
+        if ( ( long long ) ull < 0 )
+        {
+            if ( strchr ( str, '-' ) != NULL )
+            {
+                return false;
+            }
+        }
+        *out = ull;
+        return true;
+    }
+    return false;
+}
+
+static inline
+bool db_strtoll ( const char *str, int64_t *out )
+{
+    assert ( out != NULL );
+    errno = 0;
+    *out = 0;
+    char *endptr;
+    long long ll = strtoll ( str, &endptr, 10 );
+    if ( ( errno == ERANGE ) || ( str == endptr ) )
+    {
+        return false;
+    }
+
+    if ( isspace ( ( unsigned char ) ( *endptr ) ) || ( *endptr == '\0' && endptr != str ) )
+    {
+        *out = ll;
+        return true;
+    }
+    return false;
+}
+
+static inline
+bool db_strtoul ( const char *str, uint32_t *out )
+{
+    char *endptr = NULL;
+    unsigned long l = 0;
+    assert ( out );
+    assert ( str );
+    *out = 0;
+    errno = 0;
+
+    l = strtoul ( str, &endptr, 10 );
+    if ( ( errno == ERANGE ) || ( str == endptr ) )
+    {
+        return false;
+    }
+
+    if ( isspace ( ( unsigned char ) ( *endptr ) ) || ( *endptr == '\0' && endptr != str ) )
+    {
+        if ( ( long ) l < 0 )
+        {
+            if ( strchr ( str, '-' ) != NULL )
+            {
+                return false;
+            }
+        }
+        *out = l;
+        return true;
+    }
+
+    return false;
+}
+
+static inline
+bool db_strtol ( const char *str, int32_t *out )
+{
+    assert ( out != NULL );
+    errno = 0;
+    *out = 0;
+    char *endptr;
+    long l = strtol ( str, &endptr, 10 );
+    if ( ( errno == ERANGE ) || ( str == endptr ) )
+    {
+        return false;
+    }
+
+    if ( isspace ( ( unsigned char ) ( *endptr ) ) || ( *endptr == '\0' && endptr != str ) )
+    {
+        *out = l;
+        return true;
+    }
+    return false;
+}
+
 #endif // #ifdef __cplusplus
 #endif // #ifndef _base_string_h_
 

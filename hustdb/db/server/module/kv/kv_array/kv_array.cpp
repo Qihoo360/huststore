@@ -857,8 +857,9 @@ int kv_array_t::export_db_mem (
     size_t              table_len             = 0;
     const char *        table                 = NULL;
     size_t              type_len              = 0;
-    uint64_t            min                   = 0;
-    uint64_t            max                   = 0;
+    int64_t             min                   = 0;
+    int64_t             max                   = 0;
+    bool                byscore               = false;
     char                type[ 2 ]             = { };
     bool                noval                 = true;
     bool                ignore_this_record    = false;
@@ -884,6 +885,7 @@ int kv_array_t::export_db_mem (
     noval                            = cb_pm->noval;
     min                              = cb_pm->min;
     max                              = cb_pm->max;
+    byscore                          = cb_pm->byscore;
 
     noval_flag = noval ? flag_k : flag_kv;
 
@@ -1060,9 +1062,9 @@ int kv_array_t::export_db_mem (
         do
         {
 
-            if ( max > 0 )
+            if ( byscore )
             {
-                sprintf ( max21, "%021lu", max );
+                sprintf ( max21, "%021li", max );
             }
 
             it = kv->iterator ();
@@ -1075,9 +1077,9 @@ int kv_array_t::export_db_mem (
 
             if ( is_seek )
             {
-                if ( min > 0 )
+                if ( byscore )
                 {
-                    sprintf ( min21, "%021lu", min );
+                    sprintf ( min21, "%021li", min );
 
                     std::string zset_seek ( ctxt->key );
                     zset_seek += min21;
@@ -1151,7 +1153,7 @@ int kv_array_t::export_db_mem (
 
                 if ( unlikely ( is_seek &&
                                ( strncmp ( key, ctxt->key.c_str (), ctxt->key.size () ) != 0 ||
-                                 max > 0 &&
+                                 byscore &&
                                  ( key_len != ctxt->key.size () + ZSET_SCORE_LEN + sizeof ( md5db::block_id_t ) ||
                                    strncmp ( key + key_len - sizeof ( md5db::block_id_t ) - ZSET_SCORE_LEN, max21, ZSET_SCORE_LEN ) > 0
                                    )

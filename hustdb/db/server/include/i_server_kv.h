@@ -97,11 +97,12 @@ struct export_cb_param_t
     uint32_t offset;
     uint32_t size;
     uint32_t total;
-    uint64_t min;
-    uint64_t max;
+    int64_t  min;
+    int64_t  max;
     int file_id;
     bool noval;
     bool async;
+    bool byscore;
 
 } __attribute__ ( ( aligned ( 64 ) ) );
 

@@ -1617,6 +1617,7 @@ int hustdb_t::hustdb_keys (
     cb_pm.total             = 0;
     cb_pm.min               = 0;
     cb_pm.max               = 0;
+    cb_pm.byscore           = false;
 
     r = m_storage->export_db_mem ( conn, rsp, ctxt, NULL, & cb_pm );
     if ( 0 != r )
@@ -2125,7 +2126,7 @@ int hustdb_t::hustdb_hincrby (
                                size_t table_len,
                                const char * key,
                                size_t key_len,
-                               uint64_t score,
+                               int64_t score,
                                const char * host,
                                size_t host_len,
                                std::string * & rsp,
@@ -2145,13 +2146,12 @@ int hustdb_t::hustdb_hincrby (
     size_t          val_len      = 0;
     char            val[ 32 ]    = { };
     uint32_t        cur_ver      = 0;
-    uint64_t        cur_score    = 0;
+    int64_t         cur_score    = 0;
     int             offset       = - 1;
 
     if ( unlikely ( ! tb_name_check ( table, table_len ) ||
                    CHECK_VERSION ||
-                   CHECK_STRING ( key ) ||
-                   score <= 0
+                   CHECK_STRING ( key )
                    )
          )
     {
@@ -2199,12 +2199,16 @@ int hustdb_t::hustdb_hincrby (
     
     if ( 0 == r )
     {
-        cur_score = strtoul ( rsp->c_str (), NULL, 10 );
+        if ( unlikely ( ! db_strtoll ( rsp->c_str (), & cur_score ) ) )
+        {
+            LOG_DEBUG ( "[hustdb][db_hincrby]unable to operate on this data" );
+            return ENOMEM;
+        }
     }
     
     score += cur_score;
     
-    sprintf ( val, "%lu", score );
+    sprintf ( val, "%li", score );
     val_len = strlen ( val );
 
     if ( ttl <= 0 || ttl > m_store_conf.db_ttl_maximum )
@@ -2401,6 +2405,7 @@ int hustdb_t::hustdb_hkeys (
     cb_pm.total             = 0;
     cb_pm.min               = 0;
     cb_pm.max               = 0;
+    cb_pm.byscore           = false;
 
     r = m_storage->export_db_mem ( conn, rsp, ctxt, NULL, & cb_pm );
     if ( 0 != r )
@@ -2652,6 +2657,7 @@ int hustdb_t::hustdb_smembers (
     cb_pm.total             = 0;
     cb_pm.min               = 0;
     cb_pm.max               = 0;
+    cb_pm.byscore           = false;
 
     r = m_storage->export_db_mem ( conn, rsp, ctxt, NULL, & cb_pm );
     if ( 0 != r )
@@ -2715,7 +2721,7 @@ int hustdb_t::hustdb_zadd (
                             size_t table_len,
                             const char * key,
                             size_t key_len,
-                            uint64_t score,
+                            int64_t score,
                             int opt,
                             uint32_t & ver,
                             uint32_t ttl,
@@ -2734,7 +2740,7 @@ int hustdb_t::hustdb_zadd (
     char            val[ 32 ]    = { };
     char            val21[ 32 ]  = { };
     uint32_t        cur_ver      = 0;
-    uint64_t        cur_score    = 0;
+    int64_t         cur_score    = 0;
     int             rsp_len      = 0;
     bool            has_been     = false;
     item_ctxt_t *   ctxt         = NULL;
@@ -2743,8 +2749,7 @@ int hustdb_t::hustdb_zadd (
 
     if ( unlikely ( ! tb_name_check ( table, table_len ) ||
                    CHECK_VERSION ||
-                   CHECK_STRING ( key ) ||
-                   score <= 0
+                   CHECK_STRING ( key )
                    )
          )
     {
@@ -2795,7 +2800,12 @@ int hustdb_t::hustdb_zadd (
     if ( 0 == r )
     {
         has_been  = true;
-        cur_score = strtoul ( rsp->c_str (), NULL, 10 );
+        
+        if ( unlikely ( ! db_strtoll ( rsp->c_str (), & cur_score ) ) )
+        {
+            LOG_DEBUG ( "[hustdb][db_zadd]unable to operate on this data" );
+            return ENOMEM;
+        }
 
         if ( opt == 0 &&
              cur_score == score &&
@@ -2808,17 +2818,17 @@ int hustdb_t::hustdb_zadd (
             return 0;
         }
     }
-
+    
     if ( opt > 0 )
     {
         score = cur_score + score;
     }
     else if ( opt < 0 )
     {
-        score = ( cur_score > score ) ? ( cur_score - score ) : 0;
+        score = cur_score - score;
     }
 
-    sprintf ( val, "%lu", score );
+    sprintf ( val, "%li", score );
     val_len = strlen ( val );
 
     if ( ttl > 0 && ttl <= m_store_conf.db_ttl_maximum )
@@ -2873,7 +2883,7 @@ int hustdb_t::hustdb_zadd (
 
     if ( has_been )
     {
-        sprintf ( val21, "%021lu", cur_score );
+        sprintf ( val21, "%021li", cur_score );
         m_storage->set_inner_table ( table, table_len, ZSET_TB, conn, val21 );
 
         user_ver = 0;
@@ -2891,7 +2901,7 @@ int hustdb_t::hustdb_zadd (
         }
     }
 
-    sprintf ( val21, "%021lu", score );
+    sprintf ( val21, "%021li", score );
     m_storage->set_inner_table ( table, table_len, ZSET_TB, conn, val21 );
 
     user_ver = ver;
@@ -3014,7 +3024,7 @@ int hustdb_t::hustdb_zrem (
     int             offset       = - 1;
     char            val21[ 32 ]  = { };
     uint32_t        cur_ver      = 0;
-    uint64_t        cur_score    = 0;
+    int64_t         cur_score    = 0;
     std::string *   rsp          = NULL;
 
     if ( unlikely ( ! tb_name_check ( table, table_len ) ||
@@ -3043,7 +3053,11 @@ int hustdb_t::hustdb_zrem (
     r = m_storage->get ( key, key_len, cur_ver, conn, rsp, ctxt );
     if ( 0 == r )
     {
-        cur_score = strtoul ( rsp->c_str (), NULL, 10 );
+        if ( unlikely ( ! db_strtoll ( rsp->c_str (), & cur_score ) ) )
+        {
+            LOG_DEBUG ( "[hustdb][db_zrem]unable to operate on this data" );
+            return ENOMEM;
+        }
     }
 
     r = m_storage->del ( key, key_len, ver, is_dup, conn, ctxt );
@@ -3074,7 +3088,7 @@ int hustdb_t::hustdb_zrem (
         m_mdb->del ( mkey, mkey_len );
     }
 
-    sprintf ( val21, "%021lu", cur_score );
+    sprintf ( val21, "%021li", cur_score );
     m_storage->set_inner_table ( table, table_len, ZSET_TB, conn, val21 );
 
     cur_ver = 0;
@@ -3097,8 +3111,8 @@ int hustdb_t::hustdb_zrem (
 int hustdb_t::hustdb_zrange (
                               const char * table,
                               size_t table_len,
-                              uint64_t min,
-                              uint64_t max,
+                              int64_t min,
+                              int64_t max,
                               int offset,
                               int size,
                               int start,
@@ -3121,15 +3135,12 @@ int hustdb_t::hustdb_zrange (
     {
         async = false;
     }
-    else
-    {
-        min = max = 0;
-    }
 
     if ( unlikely ( ! tb_name_check ( table, table_len ) ||
                    offset < 0 || offset > MAX_EXPORT_OFFSET ||
                    size < 0 || size > MEM_EXPORT_SIZE ||
                    ! async && offset > SYNC_EXPORT_OFFSET ||
+                   byscore && min > max ||
                    start < 0 || end < 0 || start >= end || end > MAX_BUCKET_NUM
                    )
          )
@@ -3167,6 +3178,7 @@ int hustdb_t::hustdb_zrange (
     cb_pm.total             = 0;
     cb_pm.min               = min;
     cb_pm.max               = max;
+    cb_pm.byscore           = byscore;
 
     r = m_storage->export_db_mem ( conn, rsp, ctxt, NULL, & cb_pm );
     if ( 0 != r )

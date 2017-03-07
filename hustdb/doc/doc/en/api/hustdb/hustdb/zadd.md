@@ -26,14 +26,44 @@
 **Result A2:**
 
 	HTTP/1.1 200 OK
-	Version: 1
-	VerError: false
+	Content-Length: 3
+	Content-Type: text/plain
+
+    100
 
 **Sample B:**
 
-    curl -i -X GET "http://localhost:8085/hustdb/zadd?tb=test_table&score=101&key=test_key&ver=2"
+    curl -i -X GET "http://localhost:8085/hustdb/zadd?tb=test_table&score=10&key=test_key&opt=1"
 
 **Result B1:**
+
+	HTTP/1.1 200 OK
+	Version: 2
+	VerError: false
+    Content-Length: 3
+	Content-Type: text/plain
+
+    110 //if original value of test_key is 100, 100 + 10 = 110
+
+**Sample C:**
+
+    curl -i -X GET "http://localhost:8085/hustdb/zadd?tb=test_table&score=50&key=test_key&opt=-1"
+
+**Result C1:**
+
+	HTTP/1.1 200 OK
+	Version: 3
+	VerError: false
+    Content-Length: 3
+	Content-Type: text/plain
+
+    110 //if original value of test_key is 110, 110 - 50 = 60
+
+**Sample D:**
+
+    curl -i -X GET "http://localhost:8085/hustdb/zadd?tb=test_table&score=101&key=test_key&ver=2"
+
+**Result D1:**
 
 	HTTP/1.1 401 Unauthorized
 	Version: 1

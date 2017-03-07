@@ -533,6 +533,8 @@ public:
                       const char * key,
                       size_t key_len,
                       int64_t score,
+                      std::string * & rsp,
+                      int & rsp_len,
                       int opt,
                       uint32_t & ver,
                       uint32_t ttl,

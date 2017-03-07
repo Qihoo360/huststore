@@ -2722,6 +2722,8 @@ int hustdb_t::hustdb_zadd (
                             const char * key,
                             size_t key_len,
                             int64_t score,
+                            std::string * & rsp,
+                            int & rsp_len,
                             int opt,
                             uint32_t & ver,
                             uint32_t ttl,
@@ -2741,10 +2743,8 @@ int hustdb_t::hustdb_zadd (
     char            val21[ 32 ]  = { };
     uint32_t        cur_ver      = 0;
     int64_t         cur_score    = 0;
-    int             rsp_len      = 0;
     bool            has_been     = false;
     item_ctxt_t *   ctxt         = NULL;
-    std::string *   rsp          = NULL;
     is_version_error             = false;
 
     if ( unlikely ( ! tb_name_check ( table, table_len ) ||
@@ -2911,6 +2911,10 @@ int hustdb_t::hustdb_zadd (
         LOG_ERROR ( "[hustdb][db_zadd][key=%p][key_len=%d]zadd return %d", key, ( int ) key_len, r );
         return r;
     }
+    
+    rsp = m_mdb->buffer ( conn );
+    fast_memcpy ( ( char * ) & ( * rsp ) [ 0 ], val, val_len );
+    rsp_len = val_len;
 
     return 0;
 }

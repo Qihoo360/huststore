@@ -55,6 +55,21 @@ void post_read_handler(
     }
 }
 
+void post_write_handler(evhtp_res code, uint32_t ver, bool is_version_error, std::string * rsp, int rsp_len, evhtp_request_t * request)
+{
+    hustdb_network::add_version(ver, request);
+    hustdb_network::add_ver_err(is_version_error, request);
+
+    if (rsp && rsp_len > 0)
+    {
+        evhtp::send_reply(code, rsp->c_str(), rsp_len, request);
+    }
+    else
+    {
+        evhtp::send_nobody_reply(code, request);
+    }
+}
+
 void add_total_keys(uint32_t keys, uint32_t total, evhtp_request_t * request)
 {
     evhtp::add_numeric_kv("Keys", keys, request);
@@ -425,10 +440,12 @@ void hustdb_zscore_handler(hustdb_zscore_ctx_t& args, evhtp_request_t * request,
 void hustdb_zadd_handler(hustdb_zadd_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx)
 {
     PRE_WRITE;
+    std::string * rsp = NULL;
+    int rsp_len = 0;
     bool is_version_error = false;
     hustdb_network::unescape_key(true, request, args.key);
-    int r = ctx->db->hustdb_zadd(args.tb.data, args.tb.len, args.key.data, args.key.len, args.score, args.opt, ver, args.ttl, args.is_dup, conn, is_version_error);
-    hustdb_network::send_write_reply(ctx->db->errno_int_status(r), ver, is_version_error, request);
+    int r = ctx->db->hustdb_zadd(args.tb.data, args.tb.len, args.key.data, args.key.len, args.score, rsp, rsp_len, args.opt, ver, args.ttl, args.is_dup, conn, is_version_error);
+    hustdb_network::post_write_handler(ctx->db->errno_int_status(r), ver, is_version_error, rsp, rsp_len, request);
 }
 
 void hustdb_zrem_handler(hustdb_zrem_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx)

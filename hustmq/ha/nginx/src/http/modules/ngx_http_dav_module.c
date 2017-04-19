@@ -161,6 +161,12 @@ ngx_http_dav_handler(ngx_http_request_t *r)
             return NGX_HTTP_CONFLICT;
         }
 
+        if (r->headers_in.content_range) {
+            ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
+                          "PUT with range is unsupported");
+            return NGX_HTTP_NOT_IMPLEMENTED;
+        }
+
         r->request_body_in_file_only = 1;
         r->request_body_in_persistent_file = 1;
         r->request_body_in_clean_file = 1;
@@ -1061,7 +1067,7 @@ ngx_http_dav_location(ngx_http_request_t *r, u_char *path)
     u_char                    *location;
     ngx_http_core_loc_conf_t  *clcf;
 
-    r->headers_out.location = ngx_palloc(r->pool, sizeof(ngx_table_elt_t));
+    r->headers_out.location = ngx_list_push(&r->headers_out.headers);
     if (r->headers_out.location == NULL) {
         return NGX_ERROR;
     }
@@ -1080,11 +1086,8 @@ ngx_http_dav_location(ngx_http_request_t *r, u_char *path)
         ngx_memcpy(location, r->uri.data, r->uri.len);
     }
 
-    /*
-     * we do not need to set the r->headers_out.location->hash and
-     * r->headers_out.location->key fields
-     */
-
+    r->headers_out.location->hash = 1;
+    ngx_str_set(&r->headers_out.location->key, "Location");
     r->headers_out.location->value.len = r->uri.len;
     r->headers_out.location->value.data = location;
 

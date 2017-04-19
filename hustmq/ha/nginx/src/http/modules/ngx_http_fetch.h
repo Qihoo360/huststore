@@ -17,7 +17,6 @@ typedef struct
     ngx_msec_t connect_timeout;
     ngx_msec_t send_timeout;
     ngx_msec_t read_timeout;
-    ngx_msec_t timeout;
     size_t buffer_size;
     ngx_bufs_t bufs;
     size_t busy_buffers_size;

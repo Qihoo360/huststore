@@ -9,7 +9,7 @@ typedef struct
     ngx_queue_t queue;
     ngx_connection_t * connection;
     socklen_t socklen;
-    u_char sockaddr[NGX_SOCKADDRLEN];
+    ngx_sockaddr_t sockaddr;
 } ngx_http_fetch_keepalive_cache_t;
 
 ngx_int_t ngx_http_fetch_upstream_cache_init(

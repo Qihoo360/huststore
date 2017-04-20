@@ -830,12 +830,8 @@ ngx_worker_process_cycle(ngx_cycle_t *cycle, void *data)
     for ( ;; ) {
 
         if (ngx_exiting) {
-            ngx_event_cancel_timers();
-
-            if (ngx_event_timer_rbtree.root == ngx_event_timer_rbtree.sentinel)
-            {
+            if (ngx_event_no_timers_left() == NGX_OK) {
                 ngx_log_error(NGX_LOG_NOTICE, cycle->log, 0, "exiting");
-
                 ngx_worker_process_exit(cycle);
             }
         }
@@ -846,7 +842,6 @@ ngx_worker_process_cycle(ngx_cycle_t *cycle, void *data)
 
         if (ngx_terminate) {
             ngx_log_error(NGX_LOG_NOTICE, cycle->log, 0, "exiting");
-
             ngx_worker_process_exit(cycle);
         }
 
@@ -858,6 +853,7 @@ ngx_worker_process_cycle(ngx_cycle_t *cycle, void *data)
 
             if (!ngx_exiting) {
                 ngx_exiting = 1;
+                ngx_set_shutdown_timer(cycle);
                 ngx_close_listening_sockets(cycle);
                 ngx_close_idle_connections(cycle);
             }
@@ -877,6 +873,7 @@ ngx_worker_process_init(ngx_cycle_t *cycle, ngx_int_t worker)
 {
     sigset_t          set;
     ngx_int_t         n;
+    ngx_time_t       *tp;
     ngx_uint_t        i;
     ngx_cpuset_t     *cpu_affinity;
     struct rlimit     rlmt;
@@ -976,7 +973,8 @@ ngx_worker_process_init(ngx_cycle_t *cycle, ngx_int_t worker)
                       "sigprocmask() failed");
     }
 
-    srandom((ngx_pid << 16) ^ ngx_time());
+    tp = ngx_timeofday();
+    srandom(((unsigned) ngx_pid << 16) ^ tp->sec ^ tp->msec);
 
     /*
      * disable deleting previous events for the listening sockets because
@@ -1238,11 +1236,11 @@ ngx_cache_manager_process_cycle(ngx_cycle_t *cycle, void *data)
 static void
 ngx_cache_manager_process_handler(ngx_event_t *ev)
 {
-    time_t        next, n;
     ngx_uint_t    i;
+    ngx_msec_t    next, n;
     ngx_path_t  **path;
 
-    next = 60 * 60;
+    next = 60 * 60 * 1000;
 
     path = ngx_cycle->paths.elts;
     for (i = 0; i < ngx_cycle->paths.nelts; i++) {
@@ -1260,7 +1258,7 @@ ngx_cache_manager_process_handler(ngx_event_t *ev)
         next = 1;
     }
 
-    ngx_add_timer(ev, next * 1000);
+    ngx_add_timer(ev, next);
 }
 
 

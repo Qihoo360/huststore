@@ -25,6 +25,13 @@ static u_char ngx_http_error_full_tail[] =
 ;
 
 
+static u_char ngx_http_error_build_tail[] =
+"<hr><center>" NGINX_VER_BUILD "</center>" CRLF
+"</body>" CRLF
+"</html>" CRLF
+;
+
+
 static u_char ngx_http_error_tail[] =
 "<hr><center>nginx</center>" CRLF
 "</body>" CRLF
@@ -210,6 +217,22 @@ static char ngx_http_error_416_page[] =
 ;
 
 
+static char ngx_http_error_421_page[] =
+"<html>" CRLF
+"<head><title>421 Misdirected Request</title></head>" CRLF
+"<body bgcolor=\"white\">" CRLF
+"<center><h1>421 Misdirected Request</h1></center>" CRLF
+;
+
+
+static char ngx_http_error_429_page[] =
+"<html>" CRLF
+"<head><title>429 Too Many Requests</title></head>" CRLF
+"<body bgcolor=\"white\">" CRLF
+"<center><h1>429 Too Many Requests</h1></center>" CRLF
+;
+
+
 static char ngx_http_error_494_page[] =
 "<html>" CRLF
 "<head><title>400 Request Header Or Cookie Too Large</title></head>"
@@ -334,8 +357,21 @@ static ngx_str_t ngx_http_error_pages[] = {
     ngx_string(ngx_http_error_414_page),
     ngx_string(ngx_http_error_415_page),
     ngx_string(ngx_http_error_416_page),
+    ngx_null_string,                     /* 417 */
+    ngx_null_string,                     /* 418 */
+    ngx_null_string,                     /* 419 */
+    ngx_null_string,                     /* 420 */
+    ngx_string(ngx_http_error_421_page),
+    ngx_null_string,                     /* 422 */
+    ngx_null_string,                     /* 423 */
+    ngx_null_string,                     /* 424 */
+    ngx_null_string,                     /* 425 */
+    ngx_null_string,                     /* 426 */
+    ngx_null_string,                     /* 427 */
+    ngx_null_string,                     /* 428 */
+    ngx_string(ngx_http_error_429_page),
 
-#define NGX_HTTP_LAST_4XX  417
+#define NGX_HTTP_LAST_4XX  430
 #define NGX_HTTP_OFF_5XX   (NGX_HTTP_LAST_4XX - 400 + NGX_HTTP_OFF_4XX)
 
     ngx_string(ngx_http_error_494_page), /* 494, request header too large */
@@ -460,7 +496,6 @@ ngx_http_special_response_handler(ngx_http_request_t *r, ngx_int_t error)
             case NGX_HTTPS_NO_CERT:
             case NGX_HTTP_REQUEST_HEADER_TOO_LARGE:
                 r->err_status = NGX_HTTP_BAD_REQUEST;
-                break;
         }
 
     } else {
@@ -616,9 +651,13 @@ ngx_http_send_special_response(ngx_http_request_t *r,
     ngx_uint_t    msie_padding;
     ngx_chain_t   out[3];
 
-    if (clcf->server_tokens) {
+    if (clcf->server_tokens == NGX_HTTP_SERVER_TOKENS_ON) {
         len = sizeof(ngx_http_error_full_tail) - 1;
         tail = ngx_http_error_full_tail;
+
+    } else if (clcf->server_tokens == NGX_HTTP_SERVER_TOKENS_BUILD) {
+        len = sizeof(ngx_http_error_build_tail) - 1;
+        tail = ngx_http_error_build_tail;
 
     } else {
         len = sizeof(ngx_http_error_tail) - 1;
@@ -779,7 +818,7 @@ ngx_http_send_refresh(ngx_http_request_t *r)
     b->last = ngx_cpymem(p, ngx_http_msie_refresh_tail,
                          sizeof(ngx_http_msie_refresh_tail) - 1);
 
-    b->last_buf = 1;
+    b->last_buf = (r == r->main) ? 1 : 0;
     b->last_in_chain = 1;
 
     out.buf = b;

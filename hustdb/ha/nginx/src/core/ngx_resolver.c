@@ -56,8 +56,8 @@ typedef struct {
         ((u_char *) (n) - offsetof(ngx_resolver_node_t, node))
 
 
-ngx_int_t ngx_udp_connect(ngx_resolver_connection_t *rec);
-ngx_int_t ngx_tcp_connect(ngx_resolver_connection_t *rec);
+static ngx_int_t ngx_udp_connect(ngx_resolver_connection_t *rec);
+static ngx_int_t ngx_tcp_connect(ngx_resolver_connection_t *rec);
 
 
 static void ngx_resolver_cleanup(void *data);
@@ -300,6 +300,10 @@ ngx_resolver_cleanup(void *data)
 #endif
 
         if (r->event) {
+            if (r->event->timer_set) {
+                ngx_del_timer(r->event);
+            }
+
             ngx_free(r->event);
         }
 
@@ -347,6 +351,10 @@ ngx_resolver_cleanup_tree(ngx_resolver_t *r, ngx_rbtree_t *tree)
             next = ctx->next;
 
             if (ctx->event) {
+                if (ctx->event->timer_set) {
+                    ngx_del_timer(ctx->event);
+                }
+
                 ngx_resolver_free(r, ctx->event);
             }
 
@@ -772,7 +780,7 @@ ngx_resolve_name_locked(ngx_resolver_t *r, ngx_resolver_ctx_t *ctx,
 #endif
 
         if (rn->nsrvs) {
-            for (i = 0; i < rn->nsrvs; i++) {
+            for (i = 0; i < (ngx_uint_t) rn->nsrvs; i++) {
                 if (rn->u.srvs[i].name.data) {
                     ngx_resolver_free_locked(r, rn->u.srvs[i].name.data);
                 }
@@ -867,7 +875,7 @@ ngx_resolve_name_locked(ngx_resolver_t *r, ngx_resolver_ctx_t *ctx,
         ngx_add_timer(ctx->event, ctx->timeout);
     }
 
-    if (ngx_queue_empty(resend_queue)) {
+    if (ngx_resolver_resend_empty(r)) {
         ngx_add_timer(r->event, (ngx_msec_t) (r->resend_timeout * 1000));
     }
 
@@ -1090,7 +1098,7 @@ ngx_resolve_addr(ngx_resolver_ctx_t *ctx)
         ngx_add_timer(ctx->event, ctx->timeout);
     }
 
-    if (ngx_queue_empty(resend_queue)) {
+    if (ngx_resolver_resend_empty(r)) {
         ngx_add_timer(r->event, (ngx_msec_t) (r->resend_timeout * 1000));
     }
 
@@ -1548,6 +1556,7 @@ static ngx_uint_t
 ngx_resolver_resend_empty(ngx_resolver_t *r)
 {
     return ngx_queue_empty(&r->name_resend_queue)
+           && ngx_queue_empty(&r->srv_resend_queue)
 #if (NGX_HAVE_INET6)
            && ngx_queue_empty(&r->addr6_resend_queue)
 #endif
@@ -2946,7 +2955,11 @@ ngx_resolver_resolve_srv_names(ngx_resolver_ctx_t *ctx, ngx_resolver_node_t *rn)
     ctx->srvs = srvs;
     ctx->nsrvs = rn->nsrvs;
 
-    for (i = 0; i < rn->nsrvs; i++) {
+    if (ctx->event && ctx->event->timer_set) {
+        ngx_del_timer(ctx->event);
+    }
+
+    for (i = 0; i < (ngx_uint_t) rn->nsrvs; i++) {
         srvs[i].name.data = ngx_resolver_alloc(r, rn->u.srvs[i].name.len);
         if (srvs[i].name.data == NULL) {
             goto failed;
@@ -2965,7 +2978,7 @@ ngx_resolver_resolve_srv_names(ngx_resolver_ctx_t *ctx, ngx_resolver_node_t *rn)
         cctx->handler = ngx_resolver_srv_names_handler;
         cctx->data = ctx;
         cctx->srvs = &srvs[i];
-        cctx->timeout = 0;
+        cctx->timeout = ctx->timeout;
 
         srvs[i].priority = rn->u.srvs[i].priority;
         srvs[i].weight = rn->u.srvs[i].weight;
@@ -2992,16 +3005,12 @@ failed:
 static void
 ngx_resolver_srv_names_handler(ngx_resolver_ctx_t *cctx)
 {
-    ngx_uint_t                 i;
-    u_char                   (*sockaddr)[NGX_SOCKADDRLEN];
-    ngx_addr_t                *addrs;
-    ngx_resolver_t            *r;
-    struct sockaddr_in        *sin;
-    ngx_resolver_ctx_t        *ctx;
-    ngx_resolver_srv_name_t   *srv;
-#if (NGX_HAVE_INET6)
-    struct sockaddr_in6       *sin6;
-#endif
+    ngx_uint_t                i;
+    ngx_addr_t               *addrs;
+    ngx_resolver_t           *r;
+    ngx_sockaddr_t           *sockaddr;
+    ngx_resolver_ctx_t       *ctx;
+    ngx_resolver_srv_name_t  *srv;
 
     r = cctx->resolver;
     ctx = cctx->data;
@@ -3010,6 +3019,7 @@ ngx_resolver_srv_names_handler(ngx_resolver_ctx_t *cctx)
     ctx->count--;
 
     srv->ctx = NULL;
+    srv->state = cctx->state;
 
     if (cctx->naddrs) {
 
@@ -3026,7 +3036,7 @@ ngx_resolver_srv_names_handler(ngx_resolver_ctx_t *cctx)
             return;
         }
 
-        sockaddr = ngx_resolver_alloc(r, cctx->naddrs * NGX_SOCKADDRLEN);
+        sockaddr = ngx_resolver_alloc(r, cctx->naddrs * sizeof(ngx_sockaddr_t));
         if (sockaddr == NULL) {
             ngx_resolver_free(r, addrs);
             ngx_resolve_name_done(cctx);
@@ -3039,23 +3049,13 @@ ngx_resolver_srv_names_handler(ngx_resolver_ctx_t *cctx)
         }
 
         for (i = 0; i < cctx->naddrs; i++) {
-            addrs[i].sockaddr = (struct sockaddr *) sockaddr[i];
+            addrs[i].sockaddr = &sockaddr[i].sockaddr;
             addrs[i].socklen = cctx->addrs[i].socklen;
 
-            ngx_memcpy(sockaddr[i], cctx->addrs[i].sockaddr,
+            ngx_memcpy(&sockaddr[i], cctx->addrs[i].sockaddr,
                        addrs[i].socklen);
 
-            switch (addrs[i].sockaddr->sa_family) {
-#if (NGX_HAVE_INET6)
-            case AF_INET6:
-                sin6 = (struct sockaddr_in6 *) addrs[i].sockaddr;
-                sin6->sin6_port = htons(srv->port);
-                break;
-#endif
-            default: /* AF_INET */
-                sin = (struct sockaddr_in *) addrs[i].sockaddr;
-                sin->sin_port = htons(srv->port);
-            }
+            ngx_inet_set_port(addrs[i].sockaddr, srv->port);
         }
 
         srv->addrs = addrs;
@@ -4077,7 +4077,7 @@ ngx_resolver_free_node(ngx_resolver_t *r, ngx_resolver_node_t *rn)
 #endif
 
     if (rn->nsrvs) {
-        for (i = 0; i < rn->nsrvs; i++) {
+        for (i = 0; i < (ngx_uint_t) rn->nsrvs; i++) {
             if (rn->u.srvs[i].name.data) {
                 ngx_resolver_free_locked(r, rn->u.srvs[i].name.data);
             }
@@ -4161,14 +4161,14 @@ static ngx_resolver_addr_t *
 ngx_resolver_export(ngx_resolver_t *r, ngx_resolver_node_t *rn,
     ngx_uint_t rotate)
 {
-    ngx_uint_t             d, i, j, n;
-    u_char               (*sockaddr)[NGX_SOCKADDRLEN];
-    in_addr_t             *addr;
-    struct sockaddr_in    *sin;
-    ngx_resolver_addr_t   *dst;
+    ngx_uint_t            d, i, j, n;
+    in_addr_t            *addr;
+    ngx_sockaddr_t       *sockaddr;
+    struct sockaddr_in   *sin;
+    ngx_resolver_addr_t  *dst;
 #if (NGX_HAVE_INET6)
-    struct in6_addr       *addr6;
-    struct sockaddr_in6   *sin6;
+    struct in6_addr      *addr6;
+    struct sockaddr_in6  *sin6;
 #endif
 
     n = rn->naddrs;
@@ -4181,7 +4181,7 @@ ngx_resolver_export(ngx_resolver_t *r, ngx_resolver_node_t *rn,
         return NULL;
     }
 
-    sockaddr = ngx_resolver_calloc(r, n * NGX_SOCKADDRLEN);
+    sockaddr = ngx_resolver_calloc(r, n * sizeof(ngx_sockaddr_t));
     if (sockaddr == NULL) {
         ngx_resolver_free(r, dst);
         return NULL;
@@ -4196,7 +4196,7 @@ ngx_resolver_export(ngx_resolver_t *r, ngx_resolver_node_t *rn,
         addr = (rn->naddrs == 1) ? &rn->u.addr : rn->u.addrs;
 
         do {
-            sin = (struct sockaddr_in *) sockaddr[d];
+            sin = &sockaddr[d].sockaddr_in;
             sin->sin_family = AF_INET;
             sin->sin_addr.s_addr = addr[j++];
             dst[d].sockaddr = (struct sockaddr *) sin;
@@ -4206,10 +4206,10 @@ ngx_resolver_export(ngx_resolver_t *r, ngx_resolver_node_t *rn,
                 d = 0;
             }
 
-            if (j == rn->naddrs) {
+            if (j == (ngx_uint_t) rn->naddrs) {
                 j = 0;
             }
-        } while (++i < rn->naddrs);
+        } while (++i < (ngx_uint_t) rn->naddrs);
     }
 
 #if (NGX_HAVE_INET6)
@@ -4219,7 +4219,7 @@ ngx_resolver_export(ngx_resolver_t *r, ngx_resolver_node_t *rn,
         addr6 = (rn->naddrs6 == 1) ? &rn->u6.addr6 : rn->u6.addrs6;
 
         do {
-            sin6 = (struct sockaddr_in6 *) sockaddr[d];
+            sin6 = &sockaddr[d].sockaddr_in6;
             sin6->sin6_family = AF_INET6;
             ngx_memcpy(sin6->sin6_addr.s6_addr, addr6[j++].s6_addr, 16);
             dst[d].sockaddr = (struct sockaddr *) sin6;
@@ -4379,7 +4379,7 @@ ngx_resolver_log_error(ngx_log_t *log, u_char *buf, size_t len)
 }
 
 
-ngx_int_t
+static ngx_int_t
 ngx_udp_connect(ngx_resolver_connection_t *rec)
 {
     int                rc;
@@ -4463,7 +4463,7 @@ failed:
 }
 
 
-ngx_int_t
+static ngx_int_t
 ngx_tcp_connect(ngx_resolver_connection_t *rec)
 {
     int                rc;

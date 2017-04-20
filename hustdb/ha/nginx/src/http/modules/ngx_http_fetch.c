@@ -111,7 +111,6 @@ static void __init_upstream_conf(const ngx_http_fetch_upstream_conf_t * src, ngx
     dst->connect_timeout = (src && 0 != src->connect_timeout) ? src->connect_timeout : 60000;
     dst->send_timeout = (src && 0 != src->send_timeout) ? src->send_timeout : 60000;
     dst->read_timeout = (src && 0 != src->read_timeout) ? src->read_timeout : 60000;
-    dst->timeout = (src && 0 != src->timeout) ? src->timeout : 60000;
 
     dst->buffering = 1;
     dst->buffer_size = (src && 0 != src->buffer_size) ? src->buffer_size : ngx_pagesize;

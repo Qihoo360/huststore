@@ -753,7 +753,6 @@ static ngx_bool_t __init_addon(ngx_conf_t * cf, ngx_http_hustmq_ha_main_conf_t *
         mcf->fetch_connect_timeout,
         mcf->fetch_send_timeout,
         mcf->fetch_read_timeout,
-        mcf->fetch_timeout,
         mcf->fetch_buffer_size,
         { 0, 0 },
         0

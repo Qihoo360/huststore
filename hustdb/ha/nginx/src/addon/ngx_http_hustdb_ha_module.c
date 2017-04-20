@@ -27,7 +27,6 @@ static char * ngx_http_connection_cache_size(ngx_conf_t * cf, ngx_command_t * cm
 static char * ngx_http_fetch_connect_timeout(ngx_conf_t * cf, ngx_command_t * cmd, void * conf);
 static char * ngx_http_fetch_send_timeout(ngx_conf_t * cf, ngx_command_t * cmd, void * conf);
 static char * ngx_http_fetch_read_timeout(ngx_conf_t * cf, ngx_command_t * cmd, void * conf);
-static char * ngx_http_fetch_timeout(ngx_conf_t * cf, ngx_command_t * cmd, void * conf);
 static char * ngx_http_fetch_buffer_size(ngx_conf_t * cf, ngx_command_t * cmd, void * conf);
 static char * ngx_http_sync_port(ngx_conf_t * cf, ngx_command_t * cmd, void * conf);
 static char * ngx_http_sync_status_uri(ngx_conf_t * cf, ngx_command_t * cmd, void * conf);
@@ -350,7 +349,6 @@ static ngx_command_t ngx_http_hustdb_ha_commands[] =
     APPEND_MCF_ITEM("fetch_connect_timeout", ngx_http_fetch_connect_timeout),
     APPEND_MCF_ITEM("fetch_send_timeout", ngx_http_fetch_send_timeout),
     APPEND_MCF_ITEM("fetch_read_timeout", ngx_http_fetch_read_timeout),
-    APPEND_MCF_ITEM("fetch_timeout", ngx_http_fetch_timeout),
     APPEND_MCF_ITEM("fetch_buffer_size", ngx_http_fetch_buffer_size),
     APPEND_MCF_ITEM("sync_port", ngx_http_sync_port),
     APPEND_MCF_ITEM("sync_status_uri", ngx_http_sync_status_uri),
@@ -611,23 +609,6 @@ static char * ngx_http_fetch_read_timeout(ngx_conf_t * cf, ngx_command_t * cmd, 
     return NGX_CONF_OK;
 }
 
-static char * ngx_http_fetch_timeout(ngx_conf_t * cf, ngx_command_t * cmd, void * conf)
-{
-    ngx_http_hustdb_ha_main_conf_t * mcf = ngx_http_conf_get_module_main_conf(cf, ngx_http_hustdb_ha_module);
-    if (!mcf || 2 != cf->args->nelts)
-    {
-        return "ngx_http_fetch_timeout error";
-    }
-    ngx_str_t * value = cf->args->elts;
-    mcf->fetch_timeout = ngx_parse_time(&value[1], 0);
-    if (NGX_ERROR == mcf->fetch_timeout)
-    {
-        return "ngx_http_fetch_timeout error";
-    }
-    // TODO: you can modify the value here
-    return NGX_CONF_OK;
-}
-
 static char * ngx_http_fetch_buffer_size(ngx_conf_t * cf, ngx_command_t * cmd, void * conf)
 {
     ngx_http_hustdb_ha_main_conf_t * mcf = ngx_http_conf_get_module_main_conf(cf, ngx_http_hustdb_ha_module);
@@ -809,7 +790,6 @@ static ngx_bool_t __init_fetch(ngx_conf_t * cf, ngx_http_hustdb_ha_main_conf_t *
         mcf->fetch_connect_timeout,
         mcf->fetch_send_timeout,
         mcf->fetch_read_timeout,
-        mcf->fetch_timeout,
         mcf->fetch_buffer_size,
         { 0, 0 },
         0

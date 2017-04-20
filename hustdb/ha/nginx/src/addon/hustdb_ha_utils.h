@@ -53,7 +53,6 @@ typedef struct
     ngx_int_t fetch_connect_timeout;
     ngx_int_t fetch_send_timeout;
     ngx_int_t fetch_read_timeout;
-    ngx_int_t fetch_timeout;
     ssize_t fetch_buffer_size;
     ngx_int_t sync_port;
     ngx_str_t sync_status_uri;

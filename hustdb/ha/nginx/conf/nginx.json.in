@@ -22,7 +22,6 @@
         ["fetch_connect_timeout", "2s"],
         ["fetch_send_timeout", "60s"],
         ["fetch_read_timeout", "60s"],
-        ["fetch_timeout", "60s"],
         ["fetch_buffer_size", "64m"],
         ["sync_port", "8089"],
         ["sync_status_uri", "/sync_status"],

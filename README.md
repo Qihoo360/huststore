@@ -121,3 +121,7 @@ See more details in [here](benchmark/README.md)
 
 * XuRuibo（hustxrb, hustxrb@163.com)  
 * ChengZhuo（jobs, yao050421103@163.com)  
+
+## More ##
+
+- Nginx module development kit - [hustngx](https://github.com/jobs-github/hustngx)

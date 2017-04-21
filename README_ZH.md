@@ -115,3 +115,7 @@ C2000-V1024  |2000        |1024
 
 * XuRuibo（hustxrb，hustxrb@163.com)  
 * ChengZhuo（jobs，yao050421103@163.com)  
+
+## 更多 ##
+
+- Nginx 模块开发工具包 - [hustngx](https://github.com/jobs-github/hustngx)

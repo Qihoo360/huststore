@@ -2,6 +2,7 @@ Changes with huststore release 1.8                                        21 Apr
 
     A summary of what is in this release since 1.7:
     *) Upgrade nginx to stable version 1.12.0. Mainline version: 1.11.13. Previous mainline version: 1.9.15. You can get the details from official website: https://nginx.org/en/CHANGES-1.12  
+    *) Add `hustngx` (nginx module development kit) for hustmq HA & hustdb HA. See "More" in home page.  
     *) Add redis HA to be compatible with redis protocol. Now code is ready, waiting for the document.  
     *) Many other fixes and improvements, 20+ commits since 1.7.  
 

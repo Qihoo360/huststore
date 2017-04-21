@@ -448,8 +448,8 @@
 可以看到服务器返回如下内容：
 
     HTTP/1.1 200 OK
-    Server: nginx/1.10.0
-    Date: Fri, 16 Dec 2016 10:56:55 GMT
+    Server: nginx/1.12.0
+    Date: Tue, 18 Tue 2017 10:56:55 GMT
     Content-Type: text/plain
     Content-Length: 13
     Connection: keep-alive
@@ -523,8 +523,8 @@
 可以看到服务器返回如下内容：
 
     HTTP/1.1 200 OK
-    Server: nginx/1.10.0
-    Date: Fri, 16 Dec 2016 10:54:47 GMT
+    Server: nginx/1.12.0
+    Date: Tue, 18 Apr 2017 10:54:47 GMT
     Content-Type: text/plain
     Content-Length: 13
     Connection: keep-alive

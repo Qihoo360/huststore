@@ -18,8 +18,8 @@ This is proxy interface of `/hustmq/timeout`, please refer to [Here](../hustmq/t
 **Return Example:**
 
     HTTP/1.1 200 OK
-    Server: nginx/1.10.0
-    Date: Mon, 23 May 2016 10:37:27 GMT
+    Server: nginx/1.12.0
+    Date: Mon, 17 Apr 2017 10:37:27 GMT
     Content-Type: text/plain
     Content-Length: 0
     Connection: keep-alive

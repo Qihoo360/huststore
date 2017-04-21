@@ -15,8 +15,8 @@
 **返回值范例:**
 
 	HTTP/1.1 200 OK
-	Server: nginx/1.10.0
-	Date: Mon, 29 Feb 2016 07:22:25 GMT
+	Server: nginx/1.12.0
+	Date: Mon, 17 Apr 2017 07:22:25 GMT
 	Content-Type: text/plain
 	Content-Length: 624
 	Connection: keep-alive

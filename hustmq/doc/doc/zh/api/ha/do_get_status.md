@@ -17,8 +17,8 @@
 **返回样例:**
 
     HTTP/1.1 200 OK
-    Server: nginx/1.10.0
-    Date: Thu, 31 Mar 2016 03:14:49 GMT
+    Server: nginx/1.12.0
+    Date: Tue, 18 Apr 2017 03:14:49 GMT
     Content-Type: text/plain
     Content-Length: 72
     Connection: keep-alive

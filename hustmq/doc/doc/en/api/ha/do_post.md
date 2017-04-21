@@ -17,8 +17,8 @@ N/A
 **Return value:**
 
     HTTP/1.1 200 OK
-    Server: nginx/1.10.0
-    Date: Tue, 29 Mar 2016 08:44:31 GMT
+    Server: nginx/1.12.0
+    Date: Tue, 18 Apr 2017 08:44:31 GMT
     Content-Type: text/plain
     Content-Length: 2
     Connection: keep-alive
@@ -40,8 +40,8 @@ In the returned `http` header, `Queue` represents the name of the task, `Token` 
 **Return value:**
 
     HTTP/1.1 200 OK
-    Server: nginx/1.10.0
-    Date: Tue, 29 Mar 2016 08:53:48 GMT
+    Server: nginx/1.12.0
+    Date: Tue, 18 Apr 2017 08:53:48 GMT
     Content-Type: text/plain
     Content-Length: 0
     Connection: keep-alive

@@ -20,8 +20,8 @@
 **返回范例1（值一致，版本一致）:**
 
     HTTP/1.1 200 OK
-    Server: nginx/1.10.0
-    Date: Thu, 19 May 2016 10:31:13 GMT
+    Server: nginx/1.12.0
+    Date: Tue, 18 Apr 2017 10:31:13 GMT
     Content-Type: text/plain
     Content-Length: 2
     Connection: keep-alive
@@ -36,8 +36,8 @@
 **返回范例2（值一致，版本不一致）:**
 
     HTTP/1.1 200 OK
-    Server: nginx/1.10.0
-    Date: Thu, 19 May 2016 10:31:41 GMT
+    Server: nginx/1.12.0
+    Date: Tue, 18 Apr 2017 10:31:41 GMT
     Content-Type: text/plain
     Content-Length: 2
     Connection: keep-alive
@@ -54,8 +54,8 @@
 **返回范例3（值不一致，版本一致）:**
 
     HTTP/1.1 409 Conflict
-    Server: nginx/1.10.0
-    Date: Thu, 19 May 2016 10:32:11 GMT
+    Server: nginx/1.12.0
+    Date: Tue, 18 Apr 2017 10:32:11 GMT
     Content-Type: text/plain
     Content-Length: 5
     Connection: keep-alive
@@ -72,8 +72,8 @@
 **返回范例4（值不一致，版本不一致）:**
 
     HTTP/1.1 409 Conflict
-    Server: nginx/1.10.0
-    Date: Thu, 19 May 2016 10:33:09 GMT
+    Server: nginx/1.12.0
+    Date: Tue, 18 Apr 2017 10:33:09 GMT
     Content-Type: text/plain
     Content-Length: 5
     Connection: keep-alive

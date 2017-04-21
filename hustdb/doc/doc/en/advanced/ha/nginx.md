@@ -31,7 +31,6 @@ A complete example of configuration file:
             ["fetch_connect_timeout", "2s"],
             ["fetch_send_timeout", "60s"],
             ["fetch_read_timeout", "60s"],
-            ["fetch_timeout", "60s"],
             ["fetch_buffer_size", "64m"],
             ["sync_port", "8089"],
             ["sync_status_uri", "/sync_status"],
@@ -173,7 +172,6 @@ Below fields in `main_conf` are used in [`ngx_http_fetch`](../../../../../hustmq
 * `fetch_connect_timeout`: Connection timeout of `ngx_http_fetch`, set a suitable value to your specific network environment
 * `fetch_send_timeout`: Package send timeout of `ngx_http_fetch`, set a suitable value to your specific network environment
 * `fetch_read_timeout`: Package read timeout of `ngx_http_fetch`, set a suitable value to your specific network environment
-* `fetch_timeout`: Maximum timeout of network communication between `ngx_http_fetch` and `hustmq`, set a suitable value to your specific network environment
 * `fetch_buffer_size`: Buffer size for sending/receiving packages of `ngx_http_fetch`, default value recommended
 
 Below fields in `main_conf` are used in communication with `sync_server`: 
@@ -279,7 +277,6 @@ Content of the generated `nginx.conf`:
             fetch_connect_timeout     2s;
             fetch_send_timeout        60s;
             fetch_read_timeout        60s;
-            fetch_timeout             60s;
             fetch_buffer_size         64m;
             sync_port                 8089;
             sync_status_uri           /sync_status;

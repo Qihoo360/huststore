@@ -31,7 +31,6 @@ nginx 配置文件
             ["fetch_connect_timeout", "2s"],
             ["fetch_send_timeout", "60s"],
             ["fetch_read_timeout", "60s"],
-            ["fetch_timeout", "60s"],
             ["fetch_buffer_size", "64m"],
             ["sync_port", "8089"],
             ["sync_status_uri", "/sync_status"],
@@ -173,7 +172,6 @@ nginx 配置文件
 * `fetch_connect_timeout`：`ngx_http_fetch` 连接的超时时间，可根据网络环境配置合适的值
 * `fetch_send_timeout`：`ngx_http_fetch` 发送数据包的超时时间，可根据网络环境配置合适的值
 * `fetch_read_timeout`：`ngx_http_fetch` 接收数据包的超时时间，可根据网络环境配置合适的值
-* `fetch_timeout`：`ngx_http_fetch` 和 `hustmq` 进行网络通讯的最大超时时间，可根据网络环境配置合适的值
 * `fetch_buffer_size`：`ngx_http_fetch` 收发数据包的缓冲区大小，建议保持默认值
 
 `main_conf` 中的如下字段均用于和 `sync_server` 的通信：
@@ -277,7 +275,6 @@ nginx 配置文件
             fetch_connect_timeout     2s;
             fetch_send_timeout        60s;
             fetch_read_timeout        60s;
-            fetch_timeout             60s;
             fetch_buffer_size         64m;
             sync_port                 8089;
             sync_status_uri           /sync_status;

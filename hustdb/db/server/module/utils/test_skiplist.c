@@ -9,8 +9,6 @@
 #include <sys/time.h>
 #include "skiplist.h"
 
-#define get_current_time_ms() (get_current_time_us() / 1000)
-
 #define COUNT 1000000
 #define LEVEL_COUNT 16
 #define MIN_ALLOC_ONCE  32
@@ -19,16 +17,40 @@
 static int *numbers;
 static Skiplist sl;
 static SkiplistIterator iterator;
-static int skiplist_type = SKIPLIST_TYPE_FLAT;
+static int skiplist_type = SKIPLIST_TYPE_MULTI;
 
 static int instance_count = 0;
 
-int64_t get_current_time_us()
+__suseconds_t get_current_usec()
 {
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    return ((int64_t) tv.tv_sec * 1000 * 1000 + (int64_t) tv.tv_usec);
+    struct  timeval    tv;
+    struct  timezone   tz;
+    gettimeofday(&tv,&tz);
+
+    return tv.tv_usec;
 }
+
+__suseconds_t get_delta(struct  timeval * s, struct  timeval * e)
+{
+    time_t delta_sec = e->tv_sec - s->tv_sec;
+    __suseconds_t delta = delta_sec * 1000000;
+    delta += (e->tv_usec - s->tv_usec);
+    return delta;
+}
+
+typedef void (*executer)(int count);
+
+int64_t get_qps(executer execute, int count)
+{
+    struct  timeval    s, e;
+    struct  timezone   tz;
+    gettimeofday(&s, &tz);
+    execute(count);
+    gettimeofday(&e, &tz);
+    __suseconds_t delta = get_delta(&s, &e);
+    return (int64_t)((double) 1000000 * (double) count / (double) delta);
+}
+
 
 static void free_test_func(void *ptr)
 {
@@ -40,81 +62,84 @@ static int compare_func(const void *p1, const void *p2)
     return *((int *) p1) - *((int *) p2);
 }
 
-static int test_insert()
+static void batch_insert(int count)
 {
+    instance_count = 0;
     int i;
     int result;
-    int64_t start_time;
-    int64_t end_time;
-    void *value;
-
-    instance_count = 0;
-    start_time = get_current_time_ms();
-    for (i = 0; i < COUNT; i++)
+    for (i = 0; i < count; i++)
     {
         if ((result = skiplist_insert(&sl, numbers + i)) != 0)
         {
-            return result;
+            exit(1);
         }
         instance_count++;
     }
-    assert(instance_count == COUNT);
+    assert(instance_count == count);
+}
 
-    end_time = get_current_time_ms();
-    printf("insert time used: %"PRId64" ms\n", end_time - start_time);
-
-    start_time = get_current_time_ms();
-    for (i = 0; i < COUNT; i++)
+static void batch_search(int count)
+{
+    int i;
+    void *value;
+    for (i = 0; i < count; i++)
     {
         value = skiplist_find(&sl, numbers + i);
         assert(value != NULL && *((int *)value) == numbers[i]);
     }
-    end_time = get_current_time_ms();
-    printf("find time used: %"PRId64" ms\n", end_time - start_time);
+}
 
-    start_time = get_current_time_ms();
-    i = 0;
+static void traverse(int count)
+{
+    int i = 0;
+    void *value;
     skiplist_iterator(&sl, &iterator);
     while ((value = skiplist_next(&iterator)) != NULL)
     {
         i++;
         assert(i == *((int * )value));
     }
-    assert(i==COUNT);
+    assert(i==count);
+}
 
-    end_time = get_current_time_ms();
-    printf("iterator time used: %"PRId64" ms\n", end_time - start_time);
+static int test_insert()
+{
+    printf("insert QPS: %ld\n\n", get_qps(batch_insert, COUNT));
+    printf("search QPS: %ld\n\n", get_qps(batch_search, COUNT));
+    printf("traverse QPS: %ld\n\n", get_qps(traverse, COUNT));
+
     return 0;
 }
 
-static void test_delete()
+static void batch_delete(int count)
 {
-    int i;
-    int64_t start_time;
-    int64_t end_time;
-    void *value;
-
-    start_time = get_current_time_ms();
-    for (i = 0; i < COUNT; i++)
+    int i = 0;
+    for (i = 0; i < count; i++)
     {
         assert(skiplist_delete(&sl, numbers + i) == 0);
     }
     assert(instance_count == 0);
+}
 
-    end_time = get_current_time_ms();
-    printf("delete time used: %"PRId64" ms\n", end_time - start_time);
-
-    start_time = get_current_time_ms();
-    for (i = 0; i < COUNT; i++)
+static void batch_search_after_delete(int count)
+{
+    int i;
+    void *value;
+    for (i = 0; i < count; i++)
     {
         value = skiplist_find(&sl, numbers + i);
         assert(value == NULL);
     }
-    end_time = get_current_time_ms();
-    printf("find after delete time used: %"PRId64" ms\n",
-        end_time - start_time);
+}
 
-    i = 0;
+static void test_delete()
+{
+    printf("delete QPS: %ld\n\n", get_qps(batch_delete, COUNT));
+    printf("search after delete QPS: %ld\n\n",
+        get_qps(batch_search_after_delete, COUNT));
+
+    int i = 0;
+    void *value;
     skiplist_iterator(&sl, &iterator);
     while ((value = skiplist_next(&iterator)) != NULL)
     {
@@ -254,9 +279,9 @@ int test_skiplist(int argc, char * argv[])
 
     if (argc > 1)
     {
-        if (strcasecmp(argv[1], "multi") == 0 || strcmp(argv[1], "1") == 0)
+        if (strcasecmp(argv[1], "flat") == 0 || strcmp(argv[1], "1") == 0)
         {
-            skiplist_type = SKIPLIST_TYPE_MULTI;
+            skiplist_type = SKIPLIST_TYPE_FLAT;
         }
     }
     printf("skiplist type: %s\n",
@@ -293,7 +318,7 @@ int test_skiplist(int argc, char * argv[])
     test_insert();
     printf("\n");
 
-    fast_mblock_manager_stat_print(false);
+    // fast_mblock_manager_stat_print(false);
 
     test_delete();
     printf("\n");

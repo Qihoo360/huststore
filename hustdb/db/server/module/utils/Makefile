@@ -17,7 +17,8 @@ OBJECTS		= $(BIN)main.o \
 	$(BIN)flat_skiplist.o \
 	$(BIN)multi_skiplist.o \
 	$(BIN)fast_mblock.o \
-	$(BIN)pthread_func.o
+	$(BIN)pthread_func.o \
+	$(BIN)test_skiplist.o
 
 TARGET		= ./utils_test
 INCS		= $(INCLUDE)
@@ -45,6 +46,9 @@ $(BIN)fast_mblock.o:	$(CWD)fast_mblock.c
 	$(CC) $(FLAGS) $(INCS) -c -o $@ $<
 
 $(BIN)pthread_func.o:	$(CWD)pthread_func.c
+	$(CC) $(FLAGS) $(INCS) -c -o $@ $<
+
+$(BIN)test_skiplist.o:	$(CWD)test_skiplist.c
 	$(CC) $(FLAGS) $(INCS) -c -o $@ $<
 
 clean:

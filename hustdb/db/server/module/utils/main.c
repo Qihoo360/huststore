@@ -1,6 +1,6 @@
-#include "skiplist.h"
+#include "test_skiplist.h"
 
 int main(int argc, char * argv[])
 {
-    return 0;
+    return test_skiplist(argc, argv);
 }

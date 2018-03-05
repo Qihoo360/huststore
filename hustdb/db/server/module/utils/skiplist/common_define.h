@@ -1,5 +1,5 @@
-#ifndef __common_define_20180302155347_h__
-#define __common_define_20180302155347_h__
+#ifndef __common_define_h__
+#define __common_define_h__
 
 #include <stdbool.h>
 #include <inttypes.h>
@@ -22,4 +22,4 @@
 #define MEM_ALIGN(x)  (((x) + 7) & (~7))
 
 
-#endif // __common_define_20180302155347_h__
+#endif // __common_define_h__

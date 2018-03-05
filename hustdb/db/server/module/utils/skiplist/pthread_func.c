@@ -23,35 +23,35 @@ int init_pthread_lock(pthread_mutex_t *pthread_lock)
 
     if ((result=pthread_mutexattr_init(&mat)) != 0)
     {
-        logError("file: "__FILE__", line: %d, " \
+        /*logError("file: "__FILE__", line: %d, " \
             "call pthread_mutexattr_init fail, " \
             "errno: %d, error info: %s", \
-            __LINE__, result, STRERROR(result));
+            __LINE__, result, STRERROR(result));*/
         return result;
     }
     if ((result=pthread_mutexattr_settype(&mat, \
             PTHREAD_MUTEX_ERRORCHECK)) != 0)
     {
-        logError("file: "__FILE__", line: %d, " \
+        /*logError("file: "__FILE__", line: %d, " \
             "call pthread_mutexattr_settype fail, " \
             "errno: %d, error info: %s", \
-            __LINE__, result, STRERROR(result));
+            __LINE__, result, STRERROR(result));*/
         return result;
     }
     if ((result=pthread_mutex_init(pthread_lock, &mat)) != 0)
     {
-        logError("file: "__FILE__", line: %d, " \
+        /*logError("file: "__FILE__", line: %d, " \
             "call pthread_mutex_init fail, " \
             "errno: %d, error info: %s", \
-            __LINE__, result, STRERROR(result));
+            __LINE__, result, STRERROR(result));*/
         return result;
     }
     if ((result=pthread_mutexattr_destroy(&mat)) != 0)
     {
-        logError("file: "__FILE__", line: %d, " \
+        /*logError("file: "__FILE__", line: %d, " \
             "call thread_mutexattr_destroy fail, " \
             "errno: %d, error info: %s", \
-            __LINE__, result, STRERROR(result));
+            __LINE__, result, STRERROR(result));*/
         return result;
     }
 
@@ -66,19 +66,19 @@ int init_pthread_attr(pthread_attr_t *pattr, const int stack_size)
 
     if ((result=pthread_attr_init(pattr)) != 0)
     {
-        logError("file: "__FILE__", line: %d, " \
+        /*logError("file: "__FILE__", line: %d, " \
             "call pthread_attr_init fail, " \
             "errno: %d, error info: %s", \
-            __LINE__, result, STRERROR(result));
+            __LINE__, result, STRERROR(result));*/
         return result;
     }
 
     if ((result=pthread_attr_getstacksize(pattr, &old_stack_size)) != 0)
     {
-        logError("file: "__FILE__", line: %d, " \
+        /*logError("file: "__FILE__", line: %d, " \
             "call pthread_attr_getstacksize fail, " \
             "errno: %d, error info: %s", \
-            __LINE__, result, STRERROR(result));
+            __LINE__, result, STRERROR(result));*/
         return result;
     }
 
@@ -107,10 +107,10 @@ int init_pthread_attr(pthread_attr_t *pattr, const int stack_size)
         if ((result=pthread_attr_setstacksize(pattr, \
                 new_stack_size)) != 0)
         {
-            logError("file: "__FILE__", line: %d, " \
+            /*logError("file: "__FILE__", line: %d, " \
                 "call pthread_attr_setstacksize fail, " \
                 "errno: %d, error info: %s", \
-                __LINE__, result, STRERROR(result));
+                __LINE__, result, STRERROR(result));*/
             return result;
         }
     }
@@ -118,10 +118,10 @@ int init_pthread_attr(pthread_attr_t *pattr, const int stack_size)
     if ((result=pthread_attr_setdetachstate(pattr, \
             PTHREAD_CREATE_DETACHED)) != 0)
     {
-        logError("file: "__FILE__", line: %d, " \
+        /*logError("file: "__FILE__", line: %d, " \
             "call pthread_attr_setdetachstate fail, " \
             "errno: %d, error info: %s", \
-            __LINE__, result, STRERROR(result));
+            __LINE__, result, STRERROR(result));*/
         return result;
     }
 
@@ -149,11 +149,11 @@ int create_work_threads(int *count, void *(*start_func)(void *), \
             start_func, arg)) != 0)
         {
             *count = ptid - tids;
-            logError("file: "__FILE__", line: %d, " \
+            /*logError("file: "__FILE__", line: %d, " \
                 "create thread failed, startup threads: %d, " \
                 "errno: %d, error info: %s", \
                 __LINE__, *count, \
-                result, STRERROR(result));
+                result, STRERROR(result));*/
             break;
         }
     }
@@ -173,10 +173,10 @@ int kill_work_threads(pthread_t *tids, const int count)
     {
         if ((result=pthread_kill(*ptid, SIGINT)) != 0)
         {
-            logError("file: "__FILE__", line: %d, " \
+            /*logError("file: "__FILE__", line: %d, " \
                 "kill thread failed, " \
                 "errno: %d, error info: %s", \
-                __LINE__, result, STRERROR(result));
+                __LINE__, result, STRERROR(result));*/
         }
     }
 

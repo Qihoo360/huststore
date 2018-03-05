@@ -1,5 +1,5 @@
-#ifndef __skiplist_20180302154543_h__
-#define __skiplist_20180302154543_h__
+#ifndef __skiplist_h__
+#define __skiplist_h__
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -138,4 +138,4 @@ static inline void *skiplist_next(SkiplistIterator *iterator)
 }
 #endif
 
-#endif // __skiplist_20180302154543_h__
+#endif // __skiplist_h__

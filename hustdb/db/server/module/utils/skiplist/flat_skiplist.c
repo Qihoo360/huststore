@@ -18,25 +18,25 @@ int flat_skiplist_init_ex(FlatSkiplist *sl, const int level_count,
     struct fast_mblock_man *top_mblock;
 
     if (level_count <= 0) {
-        logError("file: "__FILE__", line: %d, "
+        /*logError("file: "__FILE__", line: %d, "
                 "invalid level count: %d",
-                __LINE__, level_count);
+                __LINE__, level_count);*/
         return EINVAL;
     }
 
     if (level_count > 20) {
-        logError("file: "__FILE__", line: %d, "
+        /*logError("file: "__FILE__", line: %d, "
                 "level count: %d is too large",
-                __LINE__, level_count);
+                __LINE__, level_count);*/
         return E2BIG;
     }
 
     bytes = sizeof(struct fast_mblock_man) * level_count;
     sl->mblocks = (struct fast_mblock_man *)malloc(bytes);
     if (sl->mblocks == NULL) {
-        logError("file: "__FILE__", line: %d, "
+        /*logError("file: "__FILE__", line: %d, "
                 "malloc %d bytes fail, errno: %d, error info: %s",
-                __LINE__, bytes, errno, STRERROR(errno));
+                __LINE__, bytes, errno, STRERROR(errno));*/
         return errno != 0 ? errno : ENOMEM;
     }
     memset(sl->mblocks, 0, bytes);

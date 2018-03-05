@@ -1,5 +1,5 @@
-#ifndef __fast_mblock_20180302160332_h__
-#define __fast_mblock_20180302160332_h__
+#ifndef __fast_mblock_h__
+#define __fast_mblock_h__
 
 
 #include <stdio.h>
@@ -307,4 +307,4 @@ int fast_mblock_reclaim(struct fast_mblock_man *mblock,
 #endif
 
 
-#endif // __fast_mblock_20180302160332_h__
+#endif // __fast_mblock_h__

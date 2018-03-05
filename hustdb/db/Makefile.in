@@ -35,6 +35,9 @@ $(BIN)tasks_%.o: $(SERVER)module/tasks/%.cpp
 $(BIN)base_%.o: $(SERVER)module/utils/%.cpp
 	$(CPPC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
 
+$(BIN)base_%.o: $(SERVER)module/utils/skiplist/%.c
+	$(CC) $(CFLAGS) $(INCLUDE) -c -o $@ $<	
+
 $(BIN)kv_%.o: $(SERVER)module/kv/%.cpp
 	$(CPPC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
 
@@ -81,6 +84,11 @@ MODULE_OBJECTS=  					        \
 	$(BIN)module_appini.o        		                \
 	$(BIN)base_md5.o   			                \
 	$(BIN)base_timer.o   			                \
+	$(BIN)base_fast_mblock.o                              \
+	$(BIN)base_flat_skiplist.o                           \
+	$(BIN)base_multi_skiplist.o                            \
+	$(BIN)base_pthread_func.o                            \
+	$(BIN)base_skiplist.o                                 \
 	$(BIN)tasks_slow_task_thread.o                          \
 	$(BIN)tasks_task_export.o                               \
 	$(BIN)tasks_task_ttl_scan.o                         \

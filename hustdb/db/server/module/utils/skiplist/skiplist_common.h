@@ -1,5 +1,5 @@
-#ifndef __skiplist_common_20180302155202_h__
-#define __skiplist_common_20180302155202_h__
+#ifndef __skiplist_common_h__
+#define __skiplist_common_h__
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,4 +19,4 @@ extern "C" {
 }
 #endif
 
-#endif // __skiplist_common_20180302155202_h__
+#endif // __skiplist_common_h__

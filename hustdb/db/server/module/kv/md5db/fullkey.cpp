@@ -255,7 +255,7 @@ namespace md5db
         if ( header->count > GET_MAX () )
         {
             LOG_ERROR ( "[md5db][fullkey]bad file" );
-            return false;
+            return NULL;
         }
 
         uint32_t item_max_per_file = ( uint32_t ) FILEKEY_BYTES_PER_FILE / ( uint32_t )sizeof ( data_t );
@@ -274,7 +274,7 @@ namespace md5db
                 if ( expand_count <= 0 )
                 {
                     LOG_ERROR ( "[md5db][fullkey]FILE SIZE LIMIT!" );
-                    return false;
+                    return NULL;
                 }
             }
 
@@ -285,7 +285,7 @@ namespace md5db
                 if ( t.size () != fwrite ( & t[ 0 ], 1, t.size (), m_file ) )
                 {
                     LOG_ERROR ( "[md5db][fullkey]write data %d bytes failed", ( int ) t.size () );
-                    return false;
+                    return NULL;
                 }
             }
             catch ( ... )
@@ -303,7 +303,7 @@ namespace md5db
                 if ( i < expand_count )
                 {
                     LOG_ERROR ( "[md5db][fullkey]expand failed: %d, %d", i, expand_count );
-                    return false;
+                    return NULL;
                 }
             }
 
@@ -314,7 +314,7 @@ namespace md5db
             if ( ! G_APPTOOL->fmap_open ( & m, m_path, 0, 0, read_write ) )
             {
                 LOG_ERROR ( "[md5db][fullkey]fmap_open failed" );
-                return false;
+                return NULL;
             }
 
             fmap_t      old_m;
@@ -327,7 +327,7 @@ namespace md5db
             if ( header->count >= GET_MAX () )
             {
                 LOG_ERROR ( "[md5db][fullkey]expand algorithm error" );
-                return false;
+                return NULL;
             }
         }
 

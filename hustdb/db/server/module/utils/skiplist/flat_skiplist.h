@@ -1,5 +1,5 @@
-#ifndef __flat_skiplist_20180302155847_h__
-#define __flat_skiplist_20180302155847_h__
+#ifndef __flat_skiplist_h__
+#define __flat_skiplist_h__
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -74,4 +74,4 @@ static inline void *flat_skiplist_next(FlatSkiplistIterator *iterator)
 }
 #endif
 
-#endif // __flat_skiplist_20180302155847_h__
+#endif // __flat_skiplist_h__

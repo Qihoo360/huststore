@@ -1,5 +1,5 @@
-#ifndef __pthread_func_20180302161414_h__
-#define __pthread_func_20180302161414_h__
+#ifndef __pthread_func_h__
+#define __pthread_func_h__
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,4 +24,4 @@ int kill_work_threads(pthread_t *tids, const int count);
 }
 #endif
 
-#endif // __pthread_func_20180302161414_h__
+#endif // __pthread_func_h__

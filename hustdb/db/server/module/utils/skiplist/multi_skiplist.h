@@ -1,5 +1,5 @@
-#ifndef __multi_skiplist_20180302160024_h__
-#define __multi_skiplist_20180302160024_h__
+#ifndef __multi_skiplist_h__
+#define __multi_skiplist_h__
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -95,4 +95,4 @@ static inline void *multi_skiplist_next(MultiSkiplistIterator *iterator)
 }
 #endif
 
-#endif // __multi_skiplist_20180302160024_h__
+#endif // __multi_skiplist_h__

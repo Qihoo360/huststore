@@ -2,7 +2,7 @@
 
 option=$1
 cwd=$(dirname $(readlink -f $0))
-export GOPATH=$(dirname $cwd)
+export GOPATH=$(dirname $(dirname $cwd))
 
 function clean()
 {
@@ -49,7 +49,7 @@ function build()
 {
     echo "build hustmeta ..."
     go build -gcflags "-N -l" -o "bin/hustmeta" "hustmeta"
-    post_build
+    #post_build
 }
 
 function main()

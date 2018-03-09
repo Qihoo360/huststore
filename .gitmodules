@@ -1,0 +1,18 @@
+[submodule "src/golang.org/x/sys"]
+	path = src/golang.org/x/sys
+	url = https://github.com/golang/sys
+[submodule "src/github.com/robfig/cron"]
+	path = src/github.com/robfig/cron
+	url = https://github.com/robfig/cron
+[submodule "src/github.com/fsnotify/fsnotify"]
+	path = src/github.com/fsnotify/fsnotify
+	url = https://github.com/fsnotify/fsnotify
+[submodule "src/github.com/cihub/seelog"]
+	path = src/github.com/cihub/seelog
+	url = https://github.com/cihub/seelog
+[submodule "src/github.com/golang/snappy"]
+	path = src/github.com/golang/snappy
+	url = https://github.com/golang/snappy
+[submodule "src/github.com/syndtr/goleveldb"]
+	path = src/github.com/syndtr/goleveldb
+	url = https://github.com/syndtr/goleveldb

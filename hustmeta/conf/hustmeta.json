@@ -1,0 +1,21 @@
+{
+    "Debugger": {
+        "WatchPerformance": true,
+        "EnableErrorTrace": true,
+        "DumpRequest": false,
+        "DumpResponse": false,
+        "DumpConfig": false
+    },
+    "Server": {
+        "IP": "",
+        "Port": 9090
+    },
+    "Http": {
+        "MaxIdleConnsPerHost": 5000,
+        "ResponseHeaderTimeout": 200,
+        "Timeout": 200,
+        "KeepAlive": 180,
+        "Debug": true
+    },
+    "Timefmt": "2006-01-02 15:04:05"
+}

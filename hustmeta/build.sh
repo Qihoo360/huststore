@@ -6,7 +6,11 @@ export GOPATH=$(dirname $(readlink -f $0))
 function clean()
 {
     declare -a dirs=(\
-        "bin/hustmeta")
+        "installation" \
+        "bin/data" \
+        "bin/logs" \
+        "bin/hustmeta" \
+        "bin/conf")
     for dir in "${dirs[@]}"
     do
         echo "rm -rf $dir"
@@ -14,10 +18,37 @@ function clean()
     done
 }
 
+function mkdirs()
+{
+    declare -a dirs=(\
+        "installation" \
+        "bin/data" \
+        "bin/logs")
+
+    for dir in "${dirs[@]}"
+    do
+        echo "mkdir $dir"
+        test -d $dir || (mkdir -p $dir && chmod 777 $dir)
+    done
+}
+
+function post_build()
+{
+    mkdirs
+    echo "make installation"
+    cp -r conf bin
+    cp -r bin installation
+    cd installation
+    mv bin hustmeta
+    tar -zcf hustmeta.tar.gz hustmeta
+    rm -rf hustmeta
+}
+
 function build()
 {
     echo "build hustmeta ..."
     go build -gcflags "-N -l" -o "bin/hustmeta"
+    post_build
 }
 
 function main()

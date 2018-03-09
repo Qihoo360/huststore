@@ -1,0 +1,6 @@
+[submodule "hustmeta/src/github.com/syndtr/goleveldb"]
+	path = hustmeta/src/github.com/syndtr/goleveldb
+	url = https://github.com/syndtr/goleveldb
+[submodule "hustmeta/src/github.com/golang/snappy"]
+	path = hustmeta/src/github.com/golang/snappy
+	url = https://github.com/golang/snappy

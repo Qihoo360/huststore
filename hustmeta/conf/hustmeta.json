@@ -17,5 +17,11 @@
         "KeepAlive": 180,
         "Debug": true
     },
-    "Timefmt": "2006-01-02 15:04:05"
+    "Timefmt": "2006-01-02 15:04:05",
+    "Crontabs": {
+        "WatchPerformance": {
+            "Cron": "0 0 * * * *",
+            "DumpFileTimeFmt": "2006-01-02-15.json"
+        }
+    }
 }

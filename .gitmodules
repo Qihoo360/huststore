@@ -7,3 +7,12 @@
 [submodule "hustmeta/src/github.com/cihub/seelog"]
 	path = hustmeta/src/github.com/cihub/seelog
 	url = https://github.com/cihub/seelog
+[submodule "hustmeta/src/github.com/fsnotify/fsnotify"]
+	path = hustmeta/src/github.com/fsnotify/fsnotify
+	url = https://github.com/fsnotify/fsnotify
+[submodule "hustmeta/src/github.com/robfig/cron"]
+	path = hustmeta/src/github.com/robfig/cron
+	url = https://github.com/robfig/cron
+[submodule "hustmeta/src/golang.org/x/sys"]
+	path = hustmeta/src/golang.org/x/sys
+	url = https://github.com/golang/sys

@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"hustmeta/utils"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -36,4 +37,8 @@ func main() {
 	defer seelog.Flush()
 
 	seelog.Debug("hustmeta start...")
+
+	if !utils.Initialize(root, conf) {
+		return
+	}
 }

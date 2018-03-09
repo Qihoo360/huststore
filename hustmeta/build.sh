@@ -1,7 +1,8 @@
 #!/bin/bash
 
 option=$1
-export GOPATH=$(dirname $(readlink -f $0))
+cwd=$(dirname $(readlink -f $0))
+export GOPATH=$(dirname $cwd)
 
 function clean()
 {
@@ -47,7 +48,7 @@ function post_build()
 function build()
 {
     echo "build hustmeta ..."
-    go build -gcflags "-N -l" -o "bin/hustmeta"
+    go build -gcflags "-N -l" -o "bin/hustmeta" "hustmeta"
     post_build
 }
 

@@ -4,3 +4,6 @@
 [submodule "hustmeta/src/github.com/golang/snappy"]
 	path = hustmeta/src/github.com/golang/snappy
 	url = https://github.com/golang/snappy
+[submodule "hustmeta/src/github.com/cihub/seelog"]
+	path = hustmeta/src/github.com/cihub/seelog
+	url = https://github.com/cihub/seelog

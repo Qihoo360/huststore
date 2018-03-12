@@ -98,7 +98,7 @@ func StartCron(ctx *CronCtx) {
 }
 
 // Initialize
-func Initialize(root, conf string) bool {
+func Initialize(conf, datadir string) bool {
 	if err := LoadGlobalConf(filepath.Join(conf, GlobalFile)); nil != err {
 		seelog.Critical(err.Error())
 		return false
@@ -110,7 +110,7 @@ func Initialize(root, conf string) bool {
 	httpman.Init(globalConf.Http)
 
 	go StartCron(&CronCtx{
-		DataDir: filepath.Join(root, "data"),
+		DataDir: datadir,
 		Conf:    &globalConf.Crontabs})
 	go NewWatcher([]string{
 		filepath.Join(conf, GlobalFile)})

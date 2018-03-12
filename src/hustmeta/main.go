@@ -26,6 +26,9 @@ func main() {
 		conf, _ = filepath.Abs(conf)
 	}
 
+	root = filepath.Dir(conf)
+	datadir := filepath.Join(root, "data")
+
 	logger, err := seelog.LoggerFromConfigAsFile(filepath.Join(conf, "seelog.xml"))
 
 	if err != nil {
@@ -38,7 +41,7 @@ func main() {
 
 	seelog.Debug("hustmeta start...")
 
-	if !utils.Initialize(root, conf) {
+	if !utils.Initialize(conf, datadir) {
 		return
 	}
 }

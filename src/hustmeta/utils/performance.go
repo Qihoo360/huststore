@@ -95,18 +95,3 @@ func NewCollector() *Collector {
 		Apis:          map[string]*MeterInfo{},
 		TotalMeter:    MeterInfo{0, 0}}}
 }
-
-type PerformanceCollector func(start time.Time)
-
-var performanceCollector PerformanceCollector
-
-func SetCollector(collector PerformanceCollector) {
-	performanceCollector = performanceCollector
-}
-
-func Collect(start time.Time) {
-	if nil == performanceCollector {
-		return
-	}
-	performanceCollector(start)
-}

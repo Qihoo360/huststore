@@ -14,6 +14,7 @@ import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/robfig/cron"
+	"github.com/syndtr/goleveldb/leveldb"
 )
 
 const (
@@ -172,7 +173,16 @@ type RegisterService func(e *echo.Echo)
 
 // StartService
 func StartService(register RegisterService, conf, datadir string) {
-	g := Globals{}
+	db, err := leveldb.OpenFile(filepath.Join(datadir, "hustmeta"), nil)
+	if nil != err {
+		seelog.Critical(err.Error())
+		os.Exit(1)
+	}
+	defer db.Close()
+
+	utils.SetDB(db)
+
+	g := &Globals{}
 	if err := g.Initialize(conf, datadir); nil != err {
 		seelog.Critical(err.Error())
 		os.Exit(1)

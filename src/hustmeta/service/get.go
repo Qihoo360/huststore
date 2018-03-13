@@ -15,14 +15,11 @@ func Get(c echo.Context) error {
 	collectTime := time.Now()
 	defer utils.Collect(collectTime)
 
-	type Request struct {
-		Key string `query:"key"`
+	key := c.QueryParam("key")
+	if len(key) < 1 {
+		return c.String(http.StatusBadRequest, "no key in param")
 	}
-	request := Request{}
-	if err := c.Bind(&request); err != nil {
-		return c.String(http.StatusBadRequest, utils.NewError(err).Error())
-	}
-	seelog.Trace(utils.MarshalJson(request))
+	seelog.Trace("key: ", key)
 
 	// TODO
 	return c.String(http.StatusOK, "")

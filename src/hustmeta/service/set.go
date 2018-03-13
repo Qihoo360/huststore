@@ -16,15 +16,17 @@ func Set(c echo.Context) error {
 	collectTime := time.Now()
 	defer utils.Collect(collectTime)
 
-	type Request struct {
-		Key string          `query:"key"`
-		Val json.RawMessage `query:"val"`
+	key := c.QueryParam("key")
+	if len(key) < 1 {
+		return c.String(http.StatusBadRequest, "no key in param")
 	}
-	request := Request{}
-	if err := c.Bind(&request); err != nil {
+	val := json.RawMessage{}
+	if err := c.Bind(&val); nil != err {
 		return c.String(http.StatusBadRequest, utils.NewError(err).Error())
 	}
-	seelog.Trace(utils.MarshalJson(request))
+
+	seelog.Trace("key: ", key)
+	seelog.Trace("val", utils.BytesToString(val))
 
 	// TODO
 	return c.String(http.StatusOK, "")

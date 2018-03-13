@@ -52,7 +52,7 @@ func initPerformance() {
 	collector = utils.NewCollector()
 }
 
-func Collect(start time.Time) {
+func collect(start time.Time) {
 
 	if !globalConf.Debugger.WatchPerformance || nil == collector {
 		return
@@ -158,9 +158,11 @@ func bodyDumpHandler(flags *utils.DebugFlags) middleware.BodyDumpHandler {
 	}
 }
 
-func startServer(info *utils.HttpServerInfo, flags *utils.DebugFlags) {
+type RegisterService func(e *echo.Echo)
+
+func startServer(register RegisterService, info *utils.HttpServerInfo, flags *utils.DebugFlags) {
 	serverInstance = echo.New()
-	// service.Register(serverInstance)
+	register(serverInstance)
 	serverInstance.GET("/status.html", func(c echo.Context) error {
 		return c.String(http.StatusOK, "ok\n")
 	})
@@ -184,13 +186,14 @@ func stopServer() {
 }
 
 // StartService
-func StartService(conf, datadir string) {
+func StartService(register RegisterService, conf, datadir string) {
 	if err := loadGlobalConf(filepath.Join(conf, GlobalFile)); nil != err {
 		seelog.Critical(err.Error())
 		os.Exit(1)
 	}
 
 	utils.EnableErrorTrace(globalConf.Debugger.EnableErrorTrace)
+	utils.SetCollector(collect)
 	initPerformance()
 
 	httpman.Init(globalConf.Http)
@@ -201,5 +204,5 @@ func StartService(conf, datadir string) {
 	go utils.NewWatcher(reloadConfig, []string{
 		filepath.Join(conf, GlobalFile)})
 
-	startServer(&globalConf.Server, &globalConf.Debugger)
+	startServer(register, &globalConf.Server, &globalConf.Debugger)
 }

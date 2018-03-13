@@ -8,7 +8,10 @@ import (
 	"os/exec"
 	"path/filepath"
 
+	"hustmeta/service"
+
 	"github.com/cihub/seelog"
+	"github.com/labstack/echo"
 )
 
 func main() {
@@ -40,5 +43,5 @@ func main() {
 	defer seelog.Flush()
 
 	seelog.Debug("hustmeta start...")
-	globals.StartService(conf, datadir)
+	globals.StartService(func(e *echo.Echo) { service.Register(e) }, conf, datadir)
 }

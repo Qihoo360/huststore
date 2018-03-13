@@ -2,6 +2,7 @@ package service
 
 import (
 	"encoding/json"
+	"hustmeta/metaapi"
 	"hustmeta/utils"
 	"net/http"
 	"time"
@@ -28,6 +29,8 @@ func Set(c echo.Context) error {
 	seelog.Trace("key: ", key)
 	seelog.Trace("val", utils.BytesToString(val))
 
-	// TODO
+	if err := metaapi.Set(key, val); nil != err {
+		return c.String(http.StatusPreconditionFailed, utils.NewError(err).Error())
+	}
 	return c.String(http.StatusOK, "")
 }

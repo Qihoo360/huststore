@@ -20,128 +20,138 @@ const (
 	GlobalFile = "hustmeta.json"
 )
 
-// Configuration
-var globalConf *utils.GlobalConf
-
-func loadGlobalConf(path string) error {
-	globalConf = new(utils.GlobalConf)
-	return utils.LoadConfigure(path, globalConf)
+type Globals struct {
+	sync.Mutex
+	conf           *utils.GlobalConf
+	collector      *utils.Collector
+	serverInstance *echo.Echo
 }
 
-func GetGlobalConf() *utils.GlobalConf {
-	return globalConf
+func (this *Globals) Initialize(conf, datadir string) error {
+	path := filepath.Join(conf, GlobalFile)
+	this.collector = utils.NewCollector()
+	this.conf = &utils.GlobalConf{}
+	if err := utils.LoadConfigure(path, this.conf); nil != err {
+		return err
+	}
+	utils.EnableErrorTrace(this.conf.Debugger.EnableErrorTrace)
+	httpman.Init(this.conf.Http)
+	utils.SetCollector(func(start time.Time) { this.collect(start) })
+
+	go this.startCron(datadir, &this.conf.Crontabs)
+	go utils.NewWatcher(func(path string) { this.reloadConfig(path) }, []string{path})
+
+	return nil
 }
 
-func reloadGlobalConf(path string) error {
+// configure
+func (this *Globals) reloadGlobalConf(path string) error {
 	cf := &utils.GlobalConf{}
 	if err := utils.LoadConfigure(path, cf); nil != err {
 		return err
 	}
-	globalConf.Reload(cf)
+	this.conf.Reload(cf)
 	return nil
 }
 
-func globalConfJson() string {
-	return utils.MarshalJson(globalConf)
-}
-
-// Performance
-var collector *utils.Collector
-
-func initPerformance() {
-	collector = utils.NewCollector()
-}
-
-func collect(start time.Time) {
-
-	if !globalConf.Debugger.WatchPerformance || nil == collector {
-		return
-	}
-
-	end := time.Now()
-	delta := end.Sub(start)
-	callstack := utils.GetCallStack(2, nil)
-	collector.Refresh(callstack.Func, delta.Seconds())
-}
-
-func getPerformanceData() string {
-	if !globalConf.Debugger.WatchPerformance || nil == collector {
-		return ""
-	}
-	return collector.GetData()
-}
-
-func dumpPerformanceData(path string) {
-	if !globalConf.Debugger.WatchPerformance || nil == collector {
-		return
-	}
-	collector.Dump(path)
-}
-
-// Crontabs
-type CronCtx struct {
-	DataDir string
-	Conf    *utils.CrontabConfig
-}
-
-func getWatchPerformanceHandler(datadir string) func() {
-	return func() {
-		now := time.Now()
-		outfile := filepath.Join(datadir, now.Format(globalConf.Crontabs.WatchPerformance.DumpFileTimeFmt))
-		dumpPerformanceData(outfile)
-	}
-}
-
-func startCron(ctx *CronCtx) {
-	c := cron.New()
-	if len(ctx.Conf.WatchPerformance.Cron) > 0 {
-		handler := getWatchPerformanceHandler(ctx.DataDir)
-		err := c.AddFunc(ctx.Conf.WatchPerformance.Cron, handler)
-		if nil != err {
-			c.AddFunc("0 0 * * * *", handler)
-		}
-	}
-	c.Start()
-	select {}
-}
-
-// reload configuration
-var mutex sync.Mutex
-
-func reload(path string) error {
-	mutex.Lock()
-	defer mutex.Unlock()
+func (this *Globals) reload(path string) error {
+	this.Lock()
+	defer this.Unlock()
 
 	filename := filepath.Base(path)
 
 	if GlobalFile == filename {
-		return reloadGlobalConf(path)
+		return this.reloadGlobalConf(path)
 	}
 	return fmt.Errorf("unknown file: %v", filename)
 }
 
-func getConfigJson(path string) string {
+func (this *Globals) getConfigJson(path string) string {
 	filename := filepath.Base(path)
 	if GlobalFile == filename {
-		return globalConfJson()
+		return utils.MarshalJson(this.conf)
 	}
 	return ""
 }
 
-func reloadConfig(path string) {
-	if err := reload(path); nil != err {
+func (this *Globals) reloadConfig(path string) {
+	if err := this.reload(path); nil != err {
 		seelog.Error(err.Error())
 	} else {
-		if GetGlobalConf().Debugger.DumpConfig {
-			seelog.Debugf("reload \"%v\" success. data: %v", path, getConfigJson(path))
+		if this.conf.Debugger.DumpConfig {
+			seelog.Debugf("reload \"%v\" success. data: %v", path, this.getConfigJson(path))
 		} else {
 			seelog.Debugf("reload \"%v\" success.", path)
 		}
 	}
 }
 
+// performance
+func (this *Globals) collect(start time.Time) {
+	if !this.conf.Debugger.WatchPerformance || nil == this.collector {
+		return
+	}
+
+	end := time.Now()
+	delta := end.Sub(start)
+	callstack := utils.GetCallStack(2, nil)
+	this.collector.Refresh(callstack.Func, delta.Seconds())
+}
+
+func (this *Globals) getPerformanceData() string {
+	if !this.conf.Debugger.WatchPerformance || nil == this.collector {
+		return ""
+	}
+	return this.collector.GetData()
+}
+
+func (this *Globals) dumpPerformanceData(datadir string) {
+	if !this.conf.Debugger.WatchPerformance || nil == this.collector {
+		return
+	}
+	now := time.Now()
+	outfile := filepath.Join(datadir, now.Format(this.conf.Crontabs.WatchPerformance.DumpFileTimeFmt))
+	this.collector.Dump(outfile)
+}
+
+// crontabs
+func (this *Globals) startCron(datadir string, conf *utils.CrontabConfig) {
+	c := cron.New()
+	if len(conf.WatchPerformance.Cron) > 0 {
+		c.AddFunc(conf.WatchPerformance.Cron, func() { this.dumpPerformanceData(datadir) })
+	}
+	c.Start()
+	select {}
+}
+
 // http server
-var serverInstance *echo.Echo
+func (this *Globals) StartServer(register RegisterService) {
+	info := &this.conf.Server
+	flags := &this.conf.Debugger
+
+	this.serverInstance = echo.New()
+	register(this.serverInstance)
+	this.serverInstance.GET("/status.html", func(c echo.Context) error {
+		return c.String(http.StatusOK, "ok\n")
+	})
+	this.serverInstance.GET("/performance", func(c echo.Context) error {
+		return c.String(http.StatusOK, this.getPerformanceData())
+	})
+	this.serverInstance.Use(middleware.BodyDump(bodyDumpHandler(flags)))
+	this.serverInstance.Logger.Fatal(this.serverInstance.Start(fmt.Sprintf("%v:%v", info.IP, info.Port)))
+}
+
+func (this *Globals) StopServer() {
+	if nil == this.serverInstance {
+		return
+	}
+	err := this.serverInstance.Close()
+	if nil != err {
+		seelog.Error(err.Error())
+	} else {
+		seelog.Debug("server stopped")
+	}
+}
 
 func bodyDumpHandler(flags *utils.DebugFlags) middleware.BodyDumpHandler {
 	return func(c echo.Context, reqBody, resBody []byte) {
@@ -160,49 +170,12 @@ func bodyDumpHandler(flags *utils.DebugFlags) middleware.BodyDumpHandler {
 
 type RegisterService func(e *echo.Echo)
 
-func startServer(register RegisterService, info *utils.HttpServerInfo, flags *utils.DebugFlags) {
-	serverInstance = echo.New()
-	register(serverInstance)
-	serverInstance.GET("/status.html", func(c echo.Context) error {
-		return c.String(http.StatusOK, "ok\n")
-	})
-	serverInstance.GET("/performance", func(c echo.Context) error {
-		return c.String(http.StatusOK, getPerformanceData())
-	})
-	serverInstance.Use(middleware.BodyDump(bodyDumpHandler(flags)))
-	serverInstance.Logger.Fatal(serverInstance.Start(fmt.Sprintf("%v:%v", info.IP, info.Port)))
-}
-
-func stopServer() {
-	if nil == serverInstance {
-		return
-	}
-	err := serverInstance.Close()
-	if nil != err {
-		seelog.Error(err.Error())
-	} else {
-		seelog.Debug("server stopped")
-	}
-}
-
 // StartService
 func StartService(register RegisterService, conf, datadir string) {
-	if err := loadGlobalConf(filepath.Join(conf, GlobalFile)); nil != err {
+	g := Globals{}
+	if err := g.Initialize(conf, datadir); nil != err {
 		seelog.Critical(err.Error())
 		os.Exit(1)
 	}
-
-	utils.EnableErrorTrace(globalConf.Debugger.EnableErrorTrace)
-	utils.SetCollector(collect)
-	initPerformance()
-
-	httpman.Init(globalConf.Http)
-
-	go startCron(&CronCtx{
-		DataDir: datadir,
-		Conf:    &globalConf.Crontabs})
-	go utils.NewWatcher(reloadConfig, []string{
-		filepath.Join(conf, GlobalFile)})
-
-	startServer(register, &globalConf.Server, &globalConf.Debugger)
+	g.StartServer(register)
 }

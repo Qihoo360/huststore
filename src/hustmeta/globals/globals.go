@@ -4,11 +4,14 @@ import (
 	"fmt"
 	"hustmeta/httpman"
 	"hustmeta/utils"
+	"net/http"
 	"path/filepath"
 	"sync"
 	"time"
 
 	"github.com/cihub/seelog"
+	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
 	"github.com/robfig/cron"
 )
 
@@ -133,6 +136,49 @@ func reloadConfig(path string) {
 		} else {
 			seelog.Debugf("reload \"%v\" success.", path)
 		}
+	}
+}
+
+// http server
+var serverInstance *echo.Echo
+
+func bodyDumpHandler(flags *utils.DebugFlags) middleware.BodyDumpHandler {
+	return func(c echo.Context, reqBody, resBody []byte) {
+		if flags.DumpRequest {
+			if len(reqBody) > 0 {
+				seelog.Debug(utils.BytesToString(reqBody))
+			}
+		}
+		if flags.DumpResponse {
+			if len(resBody) > 0 {
+				seelog.Debug(utils.BytesToString(resBody))
+			}
+		}
+	}
+}
+
+func StartServer(info *utils.HttpServerInfo, flags *utils.DebugFlags) {
+	serverInstance = echo.New()
+	// service.Register(serverInstance)
+	serverInstance.GET("/status.html", func(c echo.Context) error {
+		return c.String(http.StatusOK, "ok\n")
+	})
+	serverInstance.GET("/performance", func(c echo.Context) error {
+		return c.String(http.StatusOK, GetPerformanceData())
+	})
+	serverInstance.Use(middleware.BodyDump(bodyDumpHandler(flags)))
+	serverInstance.Logger.Fatal(serverInstance.Start(fmt.Sprintf("%v:%v", info.IP, info.Port)))
+}
+
+func StopServer() {
+	if nil == serverInstance {
+		return
+	}
+	err := serverInstance.Close()
+	if nil != err {
+		seelog.Error(err.Error())
+	} else {
+		seelog.Debug("server stopped")
 	}
 }
 

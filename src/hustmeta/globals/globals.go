@@ -74,6 +74,7 @@ func DumpPerformanceData(path string) {
 	collector.Dump(path)
 }
 
+// Crontabs
 type CronCtx struct {
 	DataDir string
 	Conf    *utils.CrontabConfig
@@ -100,7 +101,7 @@ func StartCron(ctx *CronCtx) {
 	select {}
 }
 
-// reload
+// reload configuration
 var mutex sync.Mutex
 
 func reload(path string) error {

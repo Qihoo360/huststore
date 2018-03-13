@@ -40,8 +40,5 @@ func main() {
 	defer seelog.Flush()
 
 	seelog.Debug("hustmeta start...")
-
-	if !globals.Initialize(conf, datadir) {
-		return
-	}
+	globals.StartService(conf, datadir)
 }

@@ -5,6 +5,7 @@ import (
 	"hustmeta/httpman"
 	"hustmeta/utils"
 	"net/http"
+	"os"
 	"path/filepath"
 	"sync"
 	"time"
@@ -22,7 +23,7 @@ const (
 // Configuration
 var globalConf *utils.GlobalConf
 
-func LoadGlobalConf(path string) error {
+func loadGlobalConf(path string) error {
 	globalConf = new(utils.GlobalConf)
 	return utils.LoadConfigure(path, globalConf)
 }
@@ -31,7 +32,7 @@ func GetGlobalConf() *utils.GlobalConf {
 	return globalConf
 }
 
-func ReloadGlobalConf(path string) error {
+func reloadGlobalConf(path string) error {
 	cf := &utils.GlobalConf{}
 	if err := utils.LoadConfigure(path, cf); nil != err {
 		return err
@@ -40,14 +41,14 @@ func ReloadGlobalConf(path string) error {
 	return nil
 }
 
-func GlobalConfJson() string {
+func globalConfJson() string {
 	return utils.MarshalJson(globalConf)
 }
 
 // Performance
 var collector *utils.Collector
 
-func InitPerformance() {
+func initPerformance() {
 	collector = utils.NewCollector()
 }
 
@@ -63,14 +64,14 @@ func Collect(start time.Time) {
 	collector.Refresh(callstack.Func, delta.Seconds())
 }
 
-func GetPerformanceData() string {
+func getPerformanceData() string {
 	if !globalConf.Debugger.WatchPerformance || nil == collector {
 		return ""
 	}
 	return collector.GetData()
 }
 
-func DumpPerformanceData(path string) {
+func dumpPerformanceData(path string) {
 	if !globalConf.Debugger.WatchPerformance || nil == collector {
 		return
 	}
@@ -87,11 +88,11 @@ func getWatchPerformanceHandler(datadir string) func() {
 	return func() {
 		now := time.Now()
 		outfile := filepath.Join(datadir, now.Format(globalConf.Crontabs.WatchPerformance.DumpFileTimeFmt))
-		DumpPerformanceData(outfile)
+		dumpPerformanceData(outfile)
 	}
 }
 
-func StartCron(ctx *CronCtx) {
+func startCron(ctx *CronCtx) {
 	c := cron.New()
 	if len(ctx.Conf.WatchPerformance.Cron) > 0 {
 		handler := getWatchPerformanceHandler(ctx.DataDir)
@@ -114,7 +115,7 @@ func reload(path string) error {
 	filename := filepath.Base(path)
 
 	if GlobalFile == filename {
-		return ReloadGlobalConf(path)
+		return reloadGlobalConf(path)
 	}
 	return fmt.Errorf("unknown file: %v", filename)
 }
@@ -122,7 +123,7 @@ func reload(path string) error {
 func getConfigJson(path string) string {
 	filename := filepath.Base(path)
 	if GlobalFile == filename {
-		return GlobalConfJson()
+		return globalConfJson()
 	}
 	return ""
 }
@@ -157,20 +158,20 @@ func bodyDumpHandler(flags *utils.DebugFlags) middleware.BodyDumpHandler {
 	}
 }
 
-func StartServer(info *utils.HttpServerInfo, flags *utils.DebugFlags) {
+func startServer(info *utils.HttpServerInfo, flags *utils.DebugFlags) {
 	serverInstance = echo.New()
 	// service.Register(serverInstance)
 	serverInstance.GET("/status.html", func(c echo.Context) error {
 		return c.String(http.StatusOK, "ok\n")
 	})
 	serverInstance.GET("/performance", func(c echo.Context) error {
-		return c.String(http.StatusOK, GetPerformanceData())
+		return c.String(http.StatusOK, getPerformanceData())
 	})
 	serverInstance.Use(middleware.BodyDump(bodyDumpHandler(flags)))
 	serverInstance.Logger.Fatal(serverInstance.Start(fmt.Sprintf("%v:%v", info.IP, info.Port)))
 }
 
-func StopServer() {
+func stopServer() {
 	if nil == serverInstance {
 		return
 	}
@@ -182,23 +183,23 @@ func StopServer() {
 	}
 }
 
-// Initialize
-func Initialize(conf, datadir string) bool {
-	if err := LoadGlobalConf(filepath.Join(conf, GlobalFile)); nil != err {
+// StartService
+func StartService(conf, datadir string) {
+	if err := loadGlobalConf(filepath.Join(conf, GlobalFile)); nil != err {
 		seelog.Critical(err.Error())
-		return false
+		os.Exit(1)
 	}
 
 	utils.EnableErrorTrace(globalConf.Debugger.EnableErrorTrace)
-	InitPerformance()
+	initPerformance()
 
 	httpman.Init(globalConf.Http)
 
-	go StartCron(&CronCtx{
+	go startCron(&CronCtx{
 		DataDir: datadir,
 		Conf:    &globalConf.Crontabs})
 	go utils.NewWatcher(reloadConfig, []string{
 		filepath.Join(conf, GlobalFile)})
 
-	return true
+	startServer(&globalConf.Server, &globalConf.Debugger)
 }

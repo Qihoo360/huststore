@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"hustmeta/utils"
+	"hustmeta/globals"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -41,7 +41,7 @@ func main() {
 
 	seelog.Debug("hustmeta start...")
 
-	if !utils.Initialize(conf, datadir) {
+	if !globals.Initialize(conf, datadir) {
 		return
 	}
 }

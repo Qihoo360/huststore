@@ -1,7 +1,5 @@
 package raft
 
-// reference: https://github.com/hashicorp/raft
-
 import (
 	"fmt"
 	"io"

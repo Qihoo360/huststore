@@ -1,6 +1,6 @@
 #include <math.h>
 
-#include "content.h"
+#include "content2.h"
 #include "../../perf_target.h"
 
 namespace md5db
@@ -48,21 +48,12 @@ namespace md5db
     content_t::content_t ( )
     : m_file_id ( - 1 )
     , m_file_size ( 0 )
-    , m_free_size ( 0 )
-    , m_cache_free_size ( 0 )
-    , m_parse_time ( 0.0 )
-    , m_cache_parse_time ( 0.0 )
-    , m_merge_valve ( 0 )
-    , m_cache_merge_valve ( 0 )
-    , m_cache_file_length ( 0 )
-    , m_cache_file_bitmap_length ( 0 )
-    , m_cache_file_bitmap_bit_length ( 0 )
+    , m_free_block_size ( 0 )
+    , m_free_block_file_size ( 0 )
     , m_data_file ( NULL )
     , m_lock ( )
     {
-        G_APPTOOL->fmap_init ( & m_bitmap );
-        G_APPTOOL->fmap_init ( & m_cache_bitmap );
-        G_APPTOOL->fmap_init ( & m_cache_file );
+        G_APPTOOL->fmap_init ( & m_free_block );
         memset ( m_tail, 0, PAGE );
     }
 
@@ -73,9 +64,7 @@ namespace md5db
 
     void content_t::close ( )
     {
-        G_APPTOOL->fmap_close ( & m_bitmap );
-        G_APPTOOL->fmap_close ( & m_cache_bitmap );
-        G_APPTOOL->fmap_close ( & m_cache_file );
+        G_APPTOOL->fmap_close ( & m_free_block );
 
         if ( m_data_file )
         {
@@ -84,7 +73,7 @@ namespace md5db
         }
     }
 
-    bool content_t::open ( const char * path, int file_id, int cache )
+    bool content_t::open ( const char * path, int file_id )
     {
         if ( file_id < 0 )
         {
@@ -97,10 +86,6 @@ namespace md5db
             LOG_ERROR ( "[md5db][content_db]error" );
             return false;
         }
-
-        m_cache_file_length = cache * 1024 * 1024;
-        m_cache_file_bitmap_bit_length = cache * 1024;
-        m_cache_file_bitmap_length = cache * 128;
 
         char ph[ 260 ] = { };
         strcpy ( ph, path );
@@ -144,7 +129,7 @@ namespace md5db
             return false;
         }
 
-        m_file_size = ( uint32_t ) ftell ( m_data_file );
+        m_file_size = ftell ( m_data_file );
         if ( m_file_size < 0 )
         {
             LOG_ERROR ( "[md5db][content_db]ftell failed" );
@@ -161,12 +146,11 @@ namespace md5db
             }
 
             m_file_size += tail;
-            fflush ( m_data_file );
         }
 
         memset ( ph, 0, sizeof ( ph ) );
         strcpy ( ph, path );
-        strcat ( ph, ".bitmap" );
+        strcat ( ph, ".free.block" );
         if ( ! G_APPTOOL->is_file ( ph ) )
         {
             FILE * fp = fopen ( ph, "wb" );
@@ -177,58 +161,14 @@ namespace md5db
             }
 
             bool ok = true;
-            char buf[ BITMAP ];
+            char buf[ FREE_BLOCK_INCR ];
             memset ( buf, 0, sizeof ( buf ) );
             if ( sizeof ( buf ) != fwrite ( buf, 1, sizeof ( buf ), fp ) )
             {
                 ok = false;
             }
 
-            fclose ( fp );
-            if ( ! ok )
-            {
-                remove ( ph );
-                return false;
-            }
-        }
-
-        if ( ! G_APPTOOL->fmap_open ( & m_bitmap, ph, 0, 0, true ) )
-        {
-            LOG_ERROR ( "[md5db][content_db]fmap_open failed" );
-            return false;
-        }
-
-        if ( m_bitmap.ptr_len != BITMAP )
-        {
-            LOG_ERROR ( "[md5db][content_db]error" );
-            return false;
-        }
-
-        memset ( ph, 0, sizeof ( ph ) );
-        strcpy ( ph, path );
-        strcat ( ph, ".cache.bitmap" );
-        if ( ! G_APPTOOL->is_file ( ph ) )
-        {
-            FILE * fp = fopen ( ph, "wb" );
-            if ( ! fp )
-            {
-                LOG_ERROR ( "[md5db][content_db]fopen %s failed", ph );
-                return false;
-            }
-
-            bool ok = true;
-            char buf[ PAGE ];
-            memset ( buf, 0, sizeof ( buf ) );
-            uint32_t cycle = m_cache_file_bitmap_length / PAGE;
-
-            for ( uint32_t i = 0; i < cycle; i ++ )
-            {
-                if ( sizeof ( buf ) != fwrite ( buf, 1, sizeof ( buf ), fp ) )
-                {
-                    ok = false;
-                    break;
-                }
-            }
+            fflush ();
 
             fclose ( fp );
             if ( ! ok )
@@ -238,148 +178,101 @@ namespace md5db
             }
         }
 
-        if ( ! G_APPTOOL->fmap_open ( & m_cache_bitmap, ph, 0, 0, true ) )
+        m_free_block_file_size = ( uint32_t ) get_file_size ( ph );
+        if ( m_free_block_size % FREE_BLOCK_INCR != 0 )
+        {
+            LOG_ERROR ( "[md5db][content_db]free block size error, size: %d", m_free_block_file_size );
+            return false;
+        }
+
+        if ( ! G_APPTOOL->fmap_open ( & m_free_block, ph, 0, 0, true ) )
         {
             LOG_ERROR ( "[md5db][content_db]fmap_open failed" );
             return false;
         }
 
-        if ( m_cache_bitmap.ptr_len != m_cache_file_bitmap_length )
+        if ( m_free_block.ptr_len != m_free_block_file_size )
         {
-            LOG_ERROR ( "[md5db][content_db]error" );
+            LOG_ERROR ( "[md5db][content_db]mmap file size error, size: %d", m_free_block.ptr_len );
             return false;
         }
-
-        memset ( ph, 0, sizeof ( ph ) );
-        strcpy ( ph, path );
-        strcat ( ph, ".cache.file" );
-        if ( ! G_APPTOOL->is_file ( ph ) )
-        {
-            FILE * fp = fopen ( ph, "wb" );
-            if ( ! fp )
-            {
-                LOG_ERROR ( "[md5db][content_db]fopen %s failed", ph );
-                return false;
-            }
-
-            bool ok = true;
-            char buf[ PAGE512 ];
-            memset ( buf, 0, sizeof ( buf ) );
-            uint32_t cycle = m_cache_file_length / PAGE512;
-
-            for ( uint32_t i = 0; i < cycle; i ++ )
-            {
-                if ( sizeof ( buf ) != fwrite ( buf, 1, sizeof ( buf ), fp ) )
-                {
-                    ok = false;
-                    break;
-                }
-            }
-
-            fclose ( fp );
-            if ( ! ok )
-            {
-                remove ( ph );
-                return false;
-            }
-        }
-
-        if ( ! G_APPTOOL->fmap_open ( & m_cache_file, ph, 0, 0, true ) )
-        {
-            LOG_ERROR ( "[md5db][content_db]fmap_open failed" );
-            return false;
-        }
-
-        if ( m_cache_file.ptr_len != m_cache_file_length )
-        {
-            LOG_ERROR ( "[md5db][content_db]error" );
-            return false;
-        }
-
-        parse_free_list ();
-        parse_cache_free_list ();
 
         m_file_id = file_id;
 
-        LOG_INFO ( "[md5db][content_db]create success, path: %s, file_id: %d, cache: %d", path, file_id, cache );
+        LOG_INFO ( "[md5db][content_db]create success, path: %s, file_id: %d", path, file_id );
 
         return true;
     }
 
-    void content_t::parse_free_list ( )
+    void content_t::parse_free_block ( )
     {
-        m_merge_valve = 0;
-        m_free_size = 0;
-        m_free_list.clear ();
+        uint32_t              i;
+        uint32_t              step;
+        uint32_t              prev_i;
+        struct free_block_t * head;
+        struct free_block_t * block;
+        struct free_block_t * prev;
+        struct free_block_t * curr;
 
-        BITSET1 ( 0 )
+        step = sizeof ( struct free_block_t );
+        i    = m_free_block_file_size - step;
+        head = ( struct free_block_t * ) m_free_block.ptr;
 
-        uint32_t i = 0;
-        uint32_t offset = BITMAP_MAX;
+        m_free_block_merge.clear();
 
-        while ( i < BITMAP_BIT )
+        while ( i > step )
         {
-            if ( BITGET ( i ) )
-            {
-                if ( offset != BITMAP_MAX )
-                {
-                    m_free_size += i - offset;
-                    m_free_list.insert ( std::pair < uint32_t, uint32_t >( i - offset, offset ) );
-                }
+            block = ( struct free_block_t * ) & m_free_block.ptr[ i ];
 
-                offset = BITMAP_MAX;
+            if ( block->offset > 0 && block->size > 0 )
+            {
+                m_free_block_size += block->size;
+                m_free_block_merge.insert ( std::pair < struct free_block_t *, uint32_t >( block, i ) );
             }
-            else if ( offset == BITMAP_MAX )
+            else if ( block->offset == 0 )
             {
-                offset = i;
+                block->offset = head->offset;
+                head->offset  = i;
             }
-
-            i ++;
-        }
-
-        if ( offset != BITMAP_MAX )
-        {
-            m_free_size += i - offset;
-            m_free_list.insert ( std::pair < uint32_t, uint32_t >( i - offset, offset ) );
-        }
-    }
-
-    void content_t::parse_cache_free_list ( )
-    {
-        m_cache_merge_valve = 0;
-        m_cache_free_size = 0;
-        m_cache_free_list.clear ();
-
-        CACHE_BITSET1 ( 0 )
-
-        uint32_t i = 0;
-        uint32_t offset = BITMAP_MAX;
-
-        while ( i < m_cache_file_bitmap_bit_length )
-        {
-            if ( CACHE_BITGET ( i ) )
+            else
             {
-                if ( offset != BITMAP_MAX )
-                {
-                    m_cache_free_size += i - offset;
-                    m_cache_free_list.insert ( std::pair < uint32_t, uint32_t >( i - offset, offset ) );
-                }
-
-                offset = BITMAP_MAX;
-            }
-            else if ( offset == BITMAP_MAX )
-            {
-                offset = i;
+                LOG_ERROR ( "[md5db][content_db]parse free block error, file_id: %d, block_id: %d", m_file_id, i );
             }
 
-            i ++;
+            i -= step;
         }
 
-        if ( offset != BITMAP_MAX )
+        prev = NULL;
+        m_free_block_list.clear();
+
+        for ( free_block_list_t::iterator it = m_free_block_merge.begin(); it != m_free_block_merge.end (); it ++ )
         {
-            m_cache_free_size += i - offset;
-            m_cache_free_list.insert ( std::pair < uint32_t, uint32_t >( i - offset, offset ) );
+            curr = it->first;
+
+            if ( unlikely ( ! prev ) )
+            {
+                prev   = curr;
+                prev_i = it->second;
+                continue;
+            }
+
+            if ( prev->offset + prev->size == curr->offset )
+            {
+                prev->size  += curr->size;
+
+                curr->offset = head->offset;
+                head->offset = it->second;
+            }
+            else
+            {
+                m_free_block_list.insert ( std::pair < struct free_block_t *, uint32_t >( prev, prev_i ) );
+
+                prev   = curr;
+                prev_i = it->second;
+            }
         }
+        
+        m_free_block_merge.clear();
     }
 
     bool content_t::find_free_block ( uint32_t block, uint32_t & offset )

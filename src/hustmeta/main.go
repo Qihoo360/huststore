@@ -29,7 +29,6 @@ func main() {
 		conf, _ = filepath.Abs(conf)
 	}
 
-	root = filepath.Dir(conf)
 	datadir := filepath.Join(root, "data")
 
 	logger, err := seelog.LoggerFromConfigAsFile(filepath.Join(conf, "seelog.xml"))

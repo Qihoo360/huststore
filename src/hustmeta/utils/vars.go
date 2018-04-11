@@ -28,3 +28,11 @@ func SetDB(db *leveldb.DB) {
 }
 
 func GetDB() *leveldb.DB { return ldb }
+
+var globalConf *GlobalConf
+
+func SetGlobalConf(cf *GlobalConf) {
+	globalConf = cf
+}
+
+func GetGlobalConf() *GlobalConf { return globalConf }

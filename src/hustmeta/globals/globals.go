@@ -35,6 +35,7 @@ func (this *Globals) Initialize(conf, datadir string) error {
 	if err := utils.LoadConfigure(path, this.conf); nil != err {
 		return err
 	}
+	utils.SetGlobalConf(this.conf)
 	utils.EnableErrorTrace(this.conf.Debugger.EnableErrorTrace)
 	httpman.Init(this.conf.Http)
 	utils.SetCollector(func(start time.Time) { this.collect(start) })

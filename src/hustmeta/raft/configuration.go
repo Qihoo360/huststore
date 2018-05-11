@@ -104,6 +104,18 @@ func (this *Configuration) Next(currentIndex uint64, request *configurationChang
 	return configuration, nil
 }
 
+func (this *Configuration) encode(trans Transport) []byte {
+	var encPeers [][]byte
+	for _, server := range this.Servers {
+		encPeers = append(encPeers, trans.EncodePeer(server.ID, server.Address))
+	}
+	buf, err := encodeMsgPack(encPeers)
+	if nil != err {
+		panic(fmt.Errorf("failed to encode peers: %v", err))
+	}
+	return buf.Bytes()
+}
+
 type ConfigurationChangeCommand uint8
 
 const (

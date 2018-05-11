@@ -40,3 +40,6 @@
 [submodule "src/golang.org/x/net"]
 	path = src/golang.org/x/net
 	url = https://github.com/golang/net
+[submodule "src/github.com/ugorji/go"]
+	path = src/github.com/ugorji/go
+	url = https://github.com/ugorji/go

@@ -1,12 +1,15 @@
 package raft
 
 import (
+	"bytes"
 	crand "crypto/rand"
 	"fmt"
 	"math"
 	"math/big"
 	"math/rand"
 	"time"
+
+	"github.com/ugorji/go/codec"
 )
 
 func newSeed() int64 {
@@ -101,3 +104,11 @@ type uint64Slice []uint64
 func (p uint64Slice) Len() int           { return len(p) }
 func (p uint64Slice) Less(i, j int) bool { return p[i] < p[j] }
 func (p uint64Slice) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+
+func encodeMsgPack(obj interface{}) (*bytes.Buffer, error) {
+	buf := bytes.NewBuffer(nil)
+	hd := codec.MsgpackHandle{}
+	enc := codec.NewEncoder(buf, &hd)
+	err := enc.Encode(obj)
+	return buf, err
+}

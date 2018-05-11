@@ -8,3 +8,4 @@ package raft
 // "commands.go": ["log.go"]
 // "future.go": ["commands.go"]
 // "transport.go": ["future.go"]
+// "file_snapshot.go": []

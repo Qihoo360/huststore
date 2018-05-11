@@ -32,8 +32,13 @@ const (
 type ProtocolVersion int
 
 const (
-	ProtocolVersionMin ProtocolVersion = 0
-	ProtocolVersionMax                 = 3
+	ProtocolVersionDeprecated   ProtocolVersion = 0
+	ProtocolVersionCompatible   ProtocolVersion = 1
+	ProtocolVersionTransitional ProtocolVersion = 2
+	ProtocolVersionLatest       ProtocolVersion = 3
+
+	ProtocolVersionMin ProtocolVersion = ProtocolVersionDeprecated
+	ProtocolVersionMax                 = ProtocolVersionLatest
 )
 
 // Version History
@@ -48,8 +53,11 @@ const (
 type SnapshotVersion int
 
 const (
-	SnapshotVersionMin SnapshotVersion = 0
-	SnapshotVersionMax                 = 1
+	SnapshotVersionTest  SnapshotVersion = 0
+	SnapshotVersionLegal SnapshotVersion = 1
+
+	SnapshotVersionMin SnapshotVersion = SnapshotVersionTest
+	SnapshotVersionMax SnapshotVersion = SnapshotVersionLegal
 )
 
 type Config struct {

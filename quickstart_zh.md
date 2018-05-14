@@ -178,24 +178,9 @@
 `remote_scp.py` 是 `scp` 命令的一个包装，用于支持 **批量执行 `scp`**。
 
     usage:
-        python remote_scp.py [option] [user] [host_file] [remote_folder] [local_file1] [local_file2] ...
-        
-        [option]
-            --silent                          run in silent mode
-
+        python remote_scp.py [port] [user] [ppk] [host_file] [remote_folder] [local_file1] [local_file2] ... 
     sample:
-        python remote_scp.py jobs host.txt /opt/huststore/hustdbha/conf nginx.conf hustdbtable.json
-        python remote_scp.py --silent jobs host.txt /opt/huststore/hustdbha/conf nginx.conf hustdbtable.json
-
-备注：如果带上参数 `--silent` ，`remote_scp.py` 将会先 `sudo` 至用户 `[user]`，然后以选项 `StrictHostKeyChecking=no` 执行 `scp` 命令。 
-
-出于便利，你可以将以下内容添加到远程机器的 `/etc/sudoers` 文件中：
-
-    # 范例
-    %jobs ALL=(jobs) ALL
-    User_Alias USERS = %jobs
-    USERS ALL= (jobs) NOPASSWD:ALL
-    USERS ALL= NOPASSWD: /bin/su - jobs 
+        python remote_scp.py 22 jobs jobs.ppk host.txt /tmp file1 file2
 
 [回顶部](#id_top)
 
@@ -204,24 +189,9 @@
 `remote_ssh.py` 是 `ssh` 命令的一个包装，用于支持 **批量执行 `ssh`**。
 
     usage:
-        python remote_ssh.py [option] [user] [host_file] [cmds_file]
-        
-        [option]
-            --silent                          run in silent mode
-            
+        python remote_ssh.py [port] [user] [ppk] [host_file] [cmds_file]
     sample:
-        python remote_ssh.py jobs host.txt cmds.txt
-        python remote_ssh.py --silent jobs host.txt cmds.txt
-
-备注：如果带上参数 `--silent` ，`remote_ssh.py` 将会先 `sudo` 至用户 `[user]`，然后以选项 `StrictHostKeyChecking=no` 执行 `ssh` 命令。  
-
-出于便利，你可以将以下内容添加到远程机器的 `/etc/sudoers` 文件中：
-
-    # 范例
-    %jobs ALL=(jobs) ALL
-    User_Alias USERS = %jobs
-    USERS ALL= (jobs) NOPASSWD:ALL
-    USERS ALL= NOPASSWD: /bin/su - jobs 
+        python remote_ssh.py 22 jobs jobs.ppk host.txt cmds.txt
 
 [回顶部](#id_top)
 
@@ -230,56 +200,46 @@
 `remote_prefix.py` 用于检查并设置远程机器的安装路径，用法：
 
     usage:
-        python remote_prefix.py [user] [host_file] [prefix] [owner]
+        python remote_prefix.py [port] [user] [ppk] [host_file] [prefix] [owner]
     sample:
-        python remote_prefix.py jobs host.txt /opt/huststore jobs
+        python remote_prefix.py 22 jobs jobs.ppk host.txt /opt/huststore jobs
 
 参数：
 
+* `port` : `ssh` 端口
 * `user` : `ssh` 命令使用的用户名
+* `ppk` : `ssh` 私钥文件
 * `host_file` : 记录远程机器列表的文件名
 * `prefix` : 安装目录
 * `owner` : **安装目录的所有者**
 
 例如，当执行以下命令：
 
-    python remote_prefix.py admin host.txt /opt/huststore jobs
+    python remote_prefix.py 22 admin admin.ppk host.txt /opt/huststore jobs
 
 `remote_prefix.py` 将以用户名 `admin` 逐台登陆 `host.txt` 所包含的远程机器列表，远程创建目录 `/opt/huststore`（如果该目录不存在） ，并将其所有者更换为用户 `jobs`。
 
-出于便利，你可以将以下内容添加到远程机器的 `/etc/sudoers` 文件中：
-
-    admin ALL = (ALL) ALL
-
-    %jobs ALL=(jobs) ALL
-    User_Alias USERS = %jobs
-    USERS ALL= (jobs) NOPASSWD:ALL
-    USERS ALL= NOPASSWD: /bin/su - jobs
-
 #### remote_deploy.py ####
 
-`remote_prefix.py` 用于将安装包一键部署至远程机器中，用法：
+`remote_deploy.py` 用于将安装包一键部署至远程机器中，用法：
 
     usage:
-        python remote_deploy.py [option] [user] [host_file] [prefix] [tar]
-        
-        [option]
-            --silent                          run in silent mode
-        
+        python remote_deploy.py [port] [user] [ppk] [host_file] [prefix] [tar]
     sample:
-        python remote_deploy.py jobs host.txt /opt/huststore elf_hustdb.tar.gz
-        python remote_deploy.py --silent jobs host.txt /opt/huststore elf_hustdb.tar.gz
+        python remote_deploy.py 22 jobs jobs.ppk host.txt /opt/huststore elf_hustdb.tar.gz
 
 参数：
 
+* `port` : `ssh` 端口
 * `user` : `ssh` & `scp` 命令用到的用户名
+* `ppk` : `ssh` 私钥文件
 * `host_file` : 记录远程机器列表的文件名
 * `prefix` : **远程机器**的安装目录
 * `tar` : **本地**的 `elf` 安装包
 
 例如，当执行以下命令：
 
-    python remote_deploy.py --silent jobs host.txt /opt/huststore elf_hustdb.tar.gz
+    python remote_deploy.py 22 jobs jobs.ppk host.txt /opt/huststore elf_hustdb.tar.gz
 
 `remote_deploy.py` 将以用户名 `jobs` 逐台登陆 `host.txt` 所包含的远程机器列表，将本地安装包 `elf_hustdb.tar.gz` 拷贝至远程机器上，并 **解压** 至目录 `/opt/huststore` 。
 
@@ -288,25 +248,21 @@
 `remote_service.py` 用于控制远程机器上安装的 `huststore` 的服务，用法：
 
     usage:
-        python remote_service.py [option] [user] [host_file] [bin_folder] [action]
-        
-        [option]
-            --silent                          run in silent mode
+        python remote_service.py [port] [user] [ppk] [host_file] [bin_folder] [action]
         
         [action]
             --start                           start remote service
             --stop                            stop remote service
             
     sample:
-        python remote_service.py jobs host.txt /opt/huststore/hustdb --start
-        python remote_service.py jobs host.txt /opt/huststore/hustdb --stop
-        
-        python remote_service.py --silent jobs host.txt /opt/huststore/hustdb --start
-        python remote_service.py --silent jobs host.txt /opt/huststore/hustdb --stop
+        python remote_service.py 22 jobs jobs.ppk host.txt /opt/huststore/hustdb --start
+        python remote_service.py 22 jobs jobs.ppk host.txt /opt/huststore/hustdb --stop
 
 参数：
 
+* `port` : `ssh` 端口
 * `user` : `ssh` 命令用到的用户名
+* `ppk` : `ssh` 私钥文件
 * `host_file` : 记录远程机器列表的文件名
 * `bin_folder` : 远程机器上安装的 `huststore` 相关服务的二进制文件所在的目录
 * `action` : 启动/停止服务
@@ -365,7 +321,7 @@
 
 运行 `remote_prefix.py` 批量设置远程机器的安装路径：
 
-    $ python remote_prefix.py jobs hosts /opt/huststore jobs
+    $ python remote_prefix.py 22 jobs jobs.ppk hosts /opt/huststore jobs
 
 [回顶部](#id_top)
 
@@ -379,7 +335,7 @@
 
 安装第三方依赖（将安装包拷贝至远程机器，并解压至目录 `/opt/huststore`）：
 
-    $ python remote_deploy.py --silent jobs hosts /opt/huststore elf_3rd.tar.gz
+    $ python remote_deploy.py 22 jobs jobs.ppk hosts /opt/huststore elf_3rd.tar.gz
 
 [回顶部](#id_top)
 
@@ -393,11 +349,11 @@
 
 部署 `hustdb`（将安装包拷贝至远程机器，并解压至目录 `/opt/huststore`）：
 
-    $ python remote_deploy.py --silent jobs hosts /opt/huststore elf_hustdb.tar.gz
+    $ python remote_deploy.py 22 jobs jobs.ppk hosts /opt/huststore elf_hustdb.tar.gz
 
 启动服务（`ssh` 到每台远程机器，运行脚本 `/opt/huststore/hustdb/start.sh`）：
 
-    $ python remote_service.py --silent jobs hosts /opt/huststore/hustdb --start
+    $ python remote_service.py 22 jobs jobs.ppk hosts /opt/huststore/hustdb --start
 
 输入如下测试命令：
 
@@ -430,15 +386,15 @@
 
 部署 `hustdb ha`（将安装包拷贝至远程机器，并解压至目录 `/opt/huststore`，然后替换配置文件）：
 
-    $ python remote_deploy.py --silent jobs hosts /opt/huststore elf_hustdbha.tar.gz
+    $ python remote_deploy.py 22 jobs jobs.ppk hosts /opt/huststore elf_hustdbha.tar.gz
     $ cp nginx.conf.db nginx.conf
-    $ python remote_scp.py --silent jobs hosts /opt/huststore/hustdbha/conf nginx.conf hustdbtable.json
+    $ python remote_scp.py 22 jobs jobs.ppk hosts /opt/huststore/hustdbha/conf nginx.conf hustdbtable.json
     $ rm -f nginx.conf
 
 启动服务（`ssh` 到每台远程机器，运行脚本 `/opt/huststore/hustdbha/sbin/start.sh` 和 `/opt/huststore/hustdbsync/start.sh`）：
 
-    $ python remote_service.py --silent jobs hosts /opt/huststore/hustdbha/sbin --start
-    $ python remote_service.py --silent jobs hosts /opt/huststore/hustdbsync --start
+    $ python remote_service.py 22 jobs jobs.ppk hosts /opt/huststore/hustdbha/sbin --start
+    $ python remote_service.py 22 jobs jobs.ppk hosts /opt/huststore/hustdbsync --start
 
 输入如下测试命令：
 
@@ -470,11 +426,11 @@
 
 部署 `hustmq`（将安装包拷贝至远程机器，并解压至目录 `/opt/huststore`）：
 
-    $ python remote_deploy.py --silent jobs hosts /opt/huststore elf_hustmq.tar.gz
+    $ python remote_deploy.py 22 jobs jobs.ppk hosts /opt/huststore elf_hustmq.tar.gz
 
 启动服务（`ssh` 到每台远程机器，运行脚本 `/opt/huststore/hustmq/start.sh`）：
 
-    $ python remote_service.py --silent jobs hosts /opt/huststore/hustmq --start
+    $ python remote_service.py 22 jobs jobs.ppk hosts /opt/huststore/hustmq --start
 
 输入如下测试命令：
 
@@ -506,14 +462,14 @@
 
 部署 `hustmq ha`（将安装包拷贝至远程机器，并解压至目录 `/opt/huststore`，然后替换配置文件）：
 
-    $ python remote_deploy.py --silent jobs hosts /opt/huststore elf_hustmqha.tar.gz
+    $ python remote_deploy.py 22 jobs jobs.ppk hosts /opt/huststore elf_hustmqha.tar.gz
     $ cp nginx.conf.mq nginx.conf
-    $ python remote_scp.py --silent jobs hosts /opt/huststore/hustmqha/conf nginx.conf
+    $ python remote_scp.py 22 jobs jobs.ppk hosts /opt/huststore/hustmqha/conf nginx.conf
     $ rm -f nginx.conf
 
 启动服务（`ssh` 到每台远程机器，运行脚本 `/opt/huststore/hustmqha/sbin/start.sh`）：
 
-    $ python remote_service.py --silent jobs hosts /opt/huststore/hustmqha/sbin --start
+    $ python remote_service.py 22 jobs jobs.ppk hosts /opt/huststore/hustmqha/sbin --start
 
 输入如下测试命令：
 
@@ -552,7 +508,7 @@
 
     # prebuild
     sh prebuild.sh --prefix=/opt/huststore
-    python remote_prefix.py jobs hosts /opt/huststore jobs
+    python remote_prefix.py 22 jobs jobs.ppk hosts /opt/huststore jobs
 
     # build & make installation packages
     sh build.sh
@@ -564,28 +520,28 @@
 
 
     # deploy 3rd
-    python remote_deploy.py --silent jobs hosts /opt/huststore elf_3rd.tar.gz
+    python remote_deploy.py 22 jobs jobs.ppk hosts /opt/huststore elf_3rd.tar.gz
 
     # deploy huststore
-    python remote_deploy.py --silent jobs hosts /opt/huststore elf_hustdb.tar.gz
-    python remote_deploy.py --silent jobs hosts /opt/huststore elf_hustmq.tar.gz
+    python remote_deploy.py 22 jobs jobs.ppk hosts /opt/huststore elf_hustdb.tar.gz
+    python remote_deploy.py 22 jobs jobs.ppk hosts /opt/huststore elf_hustmq.tar.gz
 
-    python remote_deploy.py --silent jobs hosts /opt/huststore elf_hustdbha.tar.gz
+    python remote_deploy.py 22 jobs jobs.ppk hosts /opt/huststore elf_hustdbha.tar.gz
     cp nginx.conf.db nginx.conf
-    python remote_scp.py --silent jobs hosts /opt/huststore/hustdbha/conf nginx.conf hustdbtable.json
+    python remote_scp.py 22 jobs jobs.ppk hosts /opt/huststore/hustdbha/conf nginx.conf hustdbtable.json
     rm -f nginx.conf
 
-    python remote_deploy.py --silent jobs hosts /opt/huststore elf_hustmqha.tar.gz
+    python remote_deploy.py 22 jobs jobs.ppk hosts /opt/huststore elf_hustmqha.tar.gz
     cp nginx.conf.mq nginx.conf
-    python remote_scp.py --silent jobs hosts /opt/huststore/hustmqha/conf nginx.conf
+    python remote_scp.py 22 jobs jobs.ppk hosts /opt/huststore/hustmqha/conf nginx.conf
     rm -f nginx.conf
 
     # start huststore service
-    python remote_service.py --silent jobs hosts /opt/huststore/hustdb --start
-    python remote_service.py --silent jobs hosts /opt/huststore/hustmq --start
-    python remote_service.py --silent jobs hosts /opt/huststore/hustdbha/sbin --start
-    python remote_service.py --silent jobs hosts /opt/huststore/hustdbsync --start
-    python remote_service.py --silent jobs hosts /opt/huststore/hustmqha/sbin --start
+    python remote_service.py 22 jobs jobs.ppk hosts /opt/huststore/hustdb --start
+    python remote_service.py 22 jobs jobs.ppk hosts /opt/huststore/hustmq --start
+    python remote_service.py 22 jobs jobs.ppk hosts /opt/huststore/hustdbha/sbin --start
+    python remote_service.py 22 jobs jobs.ppk hosts /opt/huststore/hustdbsync --start
+    python remote_service.py 22 jobs jobs.ppk hosts /opt/huststore/hustmqha/sbin --start
 
 [回顶部](#id_top)
 

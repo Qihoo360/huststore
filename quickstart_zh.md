@@ -18,9 +18,9 @@
     $ sudo yum groupinstall -y 'Development tools'
     $ sudo yum install -y pcre-devel libidn-devel openssl-devel
 
-    $ wget https://github.com/Qihoo360/huststore/archive/v1.7.tar.gz -O huststore-1.7.tar.gz
-    $ tar -zxf huststore-1.7.tar.gz
-    $ cd huststore-1.7
+    $ wget https://github.com/Qihoo360/huststore/archive/v1.9.tar.gz -O huststore-1.9.tar.gz
+    $ tar -zxf huststore-1.9.tar.gz
+    $ cd huststore-1.9
     $ sh prebuild.sh --prefix=/opt/huststore
     $ sudo mkdir /opt/huststore
     $ sudo chown -R $USER:$USER /opt/huststore
@@ -342,9 +342,9 @@
 登陆到 **构建机器** （`192.168.1.100`），下载 `huststore` 的源代码包，解压：
 
     $ ssh 192.168.1.100  # 请将ip替换为你的构建机器
-    $ wget https://github.com/Qihoo360/huststore/archive/v1.7.tar.gz -O huststore-1.7.tar.gz
-    $ tar -zxf huststore-1.7.tar.gz
-    $ cd huststore-1.7
+    $ wget https://github.com/Qihoo360/huststore/archive/v1.9.tar.gz -O huststore-1.9.tar.gz
+    $ tar -zxf huststore-1.9.tar.gz
+    $ cd huststore-1.9
 
 编辑 `hosts`：  
 
@@ -454,7 +454,7 @@
     Content-Length: 13
     Connection: keep-alive
 
-    hustdbha 1.7
+    hustdbha 1.9
 
 返回该结果说明服务器工作正常。
 
@@ -529,7 +529,7 @@
     Content-Length: 13
     Connection: keep-alive
 
-    hustmqha 1.7
+    hustmqha 1.9
 
 返回该结果说明服务器工作正常。
 
@@ -541,9 +541,9 @@
 
     # ssh to build machine
 
-    wget https://github.com/Qihoo360/huststore/archive/v1.7.tar.gz -O huststore-1.7.tar.gz
-    tar -zxf huststore-1.7.tar.gz
-    cd huststore-1.7
+    wget https://github.com/Qihoo360/huststore/archive/v1.9.tar.gz -O huststore-1.9.tar.gz
+    tar -zxf huststore-1.9.tar.gz
+    cd huststore-1.9
 
     # edit hosts
     # vi hosts
@@ -596,21 +596,21 @@
 `huststore` 的 [releases 页面](https://github.com/Qihoo360/huststore/releases) 提供了 RPM & 二进制安装包：
 
     # RPM 安装包
-    hust3rd-1.7-1.el6.x86_64.rpm
-    hust3rd-1.7-1.el6.x86_64.rpm.md5sum
-    hust3rd-1.7-1.el6.x86_64.rpm.sha1sum
-    hustdb-1.7-1.el6.x86_64.rpm
-    hustdb-1.7-1.el6.x86_64.rpm.md5sum
-    hustdb-1.7-1.el6.x86_64.rpm.sha1sum
-    hustdbha-1.7-1.el6.x86_64.rpm
-    hustdbha-1.7-1.el6.x86_64.rpm.md5sum
-    hustdbha-1.7-1.el6.x86_64.rpm.sha1sum
-    hustmq-1.7-1.el6.x86_64.rpm
-    hustmq-1.7-1.el6.x86_64.rpm.md5sum
-    hustmq-1.7-1.el6.x86_64.rpm.sha1sum
-    hustmqha-1.7-1.el6.x86_64.rpm
-    hustmqha-1.7-1.el6.x86_64.rpm.md5sum
-    hustmqha-1.7-1.el6.x86_64.rpm.sha1sum
+    hust3rd-1.9-1.el6.x86_64.rpm
+    hust3rd-1.9-1.el6.x86_64.rpm.md5sum
+    hust3rd-1.9-1.el6.x86_64.rpm.sha1sum
+    hustdb-1.9-1.el6.x86_64.rpm
+    hustdb-1.9-1.el6.x86_64.rpm.md5sum
+    hustdb-1.9-1.el6.x86_64.rpm.sha1sum
+    hustdbha-1.9-1.el6.x86_64.rpm
+    hustdbha-1.9-1.el6.x86_64.rpm.md5sum
+    hustdbha-1.9-1.el6.x86_64.rpm.sha1sum
+    hustmq-1.9-1.el6.x86_64.rpm
+    hustmq-1.9-1.el6.x86_64.rpm.md5sum
+    hustmq-1.9-1.el6.x86_64.rpm.sha1sum
+    hustmqha-1.9-1.el6.x86_64.rpm
+    hustmqha-1.9-1.el6.x86_64.rpm.md5sum
+    hustmqha-1.9-1.el6.x86_64.rpm.sha1sum
 
     # 二进制安装包
     elf_3rd.tar.gz
@@ -633,7 +633,7 @@
 
 * 别忘记校验下载的安装包的正确性（利用 `*.md5sum` 和 `*.sha1sum`）。  
 * RPM & 二进制安装包 **仅仅用于快速试用，安装路径为 `/opt/huststore` 且无法变更，因为它是在构建过程中设置的**。 如果您需要定制安装路径，请选择 **从源代码编译安装**，参考 [快速试用](#id_try) 和 [更多](#id_adv) 的相关内容。  
-* 如果您试用 **RPM 安装包** ，请不要忘记 **变更目录 `/opt/huststore` 的所有者**，参考 [快速试用](#id_try) 和 [更多](#id_adv) 的相关内容。另外，在安装其他模块之前， **请务必先安装 `hust3rd-1.7-1.el6.x86_64.rpm`** 。  
+* 如果您试用 **RPM 安装包** ，请不要忘记 **变更目录 `/opt/huststore` 的所有者**，参考 [快速试用](#id_try) 和 [更多](#id_adv) 的相关内容。另外，在安装其他模块之前， **请务必先安装 `hust3rd-1.9-1.el6.x86_64.rpm`** 。  
 * 如果您试用 **二进制安装包**，请不要忘记 **创建目录 `/opt/huststore` 并修改其所有者**，参考 [快速试用](#id_try) 和 [更多](#id_adv) 的相关内容。另外，在安装其他模块之前， **请务必先安装 `elf_3rd.tar.gz`** 。  
 
 [回顶部](#id_top)

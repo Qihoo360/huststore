@@ -18,9 +18,9 @@ This chapter shows the instructions of deployment for **single-machine**, not cl
     $ sudo yum groupinstall -y 'Development tools'
     $ sudo yum install -y pcre-devel libidn-devel openssl-devel
 
-    $ wget https://github.com/Qihoo360/huststore/archive/v1.7.tar.gz -O huststore-1.7.tar.gz
-    $ tar -zxf huststore-1.7.tar.gz
-    $ cd huststore-1.7
+    $ wget https://github.com/Qihoo360/huststore/archive/v1.9.tar.gz -O huststore-1.9.tar.gz
+    $ tar -zxf huststore-1.9.tar.gz
+    $ cd huststore-1.9
     $ sh prebuild.sh --prefix=/opt/huststore
     $ sudo mkdir /opt/huststore
     $ sudo chown -R $USER:$USER /opt/huststore
@@ -342,9 +342,9 @@ Arguments:
 Login to **build machine** (`192.168.1.100`), download huststore src and untar it:  
 
     $ ssh 192.168.1.100  # please replace the ip with your build machine
-    $ wget https://github.com/Qihoo360/huststore/archive/v1.7.tar.gz -O huststore-1.7.tar.gz
-    $ tar -zxf huststore-1.7.tar.gz
-    $ cd huststore-1.7
+    $ wget https://github.com/Qihoo360/huststore/archive/v1.9.tar.gz -O huststore-1.9.tar.gz
+    $ tar -zxf huststore-1.9.tar.gz
+    $ cd huststore-1.9
 
 Edit file `hosts`:  
 
@@ -454,7 +454,7 @@ We should be able to see the below infomation:
     Content-Length: 13
     Connection: keep-alive
 
-    hustdbha 1.7
+    hustdbha 1.9
 
 The result shows that the servers work as expected.
 
@@ -529,7 +529,7 @@ Then server will output the following information:
     Content-Length: 13
     Connection: keep-alive
 
-    hustmqha 1.7
+    hustmqha 1.9
 
 Server works just fine if the above result is returned.
 
@@ -541,9 +541,9 @@ All together:
 
     # ssh to build machine
 
-    wget https://github.com/Qihoo360/huststore/archive/v1.7.tar.gz -O huststore-1.7.tar.gz
-    tar -zxf huststore-1.7.tar.gz
-    cd huststore-1.7
+    wget https://github.com/Qihoo360/huststore/archive/v1.9.tar.gz -O huststore-1.9.tar.gz
+    tar -zxf huststore-1.9.tar.gz
+    cd huststore-1.9
 
     # edit hosts
     # vi hosts
@@ -596,21 +596,21 @@ We assume that **you've already read all contents of [Quickstart & Try](#id_try)
 The [releases page](https://github.com/Qihoo360/huststore/releases) of huststore provides RPM & binary installation packages  built from **CentOS 6.2**:  
 
     # RPM installation packages
-    hust3rd-1.7-1.el6.x86_64.rpm
-    hust3rd-1.7-1.el6.x86_64.rpm.md5sum
-    hust3rd-1.7-1.el6.x86_64.rpm.sha1sum
-    hustdb-1.7-1.el6.x86_64.rpm
-    hustdb-1.7-1.el6.x86_64.rpm.md5sum
-    hustdb-1.7-1.el6.x86_64.rpm.sha1sum
-    hustdbha-1.7-1.el6.x86_64.rpm
-    hustdbha-1.7-1.el6.x86_64.rpm.md5sum
-    hustdbha-1.7-1.el6.x86_64.rpm.sha1sum
-    hustmq-1.7-1.el6.x86_64.rpm
-    hustmq-1.7-1.el6.x86_64.rpm.md5sum
-    hustmq-1.7-1.el6.x86_64.rpm.sha1sum
-    hustmqha-1.7-1.el6.x86_64.rpm
-    hustmqha-1.7-1.el6.x86_64.rpm.md5sum
-    hustmqha-1.7-1.el6.x86_64.rpm.sha1sum
+    hust3rd-1.9-1.el6.x86_64.rpm
+    hust3rd-1.9-1.el6.x86_64.rpm.md5sum
+    hust3rd-1.9-1.el6.x86_64.rpm.sha1sum
+    hustdb-1.9-1.el6.x86_64.rpm
+    hustdb-1.9-1.el6.x86_64.rpm.md5sum
+    hustdb-1.9-1.el6.x86_64.rpm.sha1sum
+    hustdbha-1.9-1.el6.x86_64.rpm
+    hustdbha-1.9-1.el6.x86_64.rpm.md5sum
+    hustdbha-1.9-1.el6.x86_64.rpm.sha1sum
+    hustmq-1.9-1.el6.x86_64.rpm
+    hustmq-1.9-1.el6.x86_64.rpm.md5sum
+    hustmq-1.9-1.el6.x86_64.rpm.sha1sum
+    hustmqha-1.9-1.el6.x86_64.rpm
+    hustmqha-1.9-1.el6.x86_64.rpm.md5sum
+    hustmqha-1.9-1.el6.x86_64.rpm.sha1sum
 
     # binary installation packages
     elf_3rd.tar.gz
@@ -633,7 +633,7 @@ Note:
 
 * Do NOT forget to check the packages by `*.md5sum` and `*.sha1sum`.  
 * The RPM & binary installation packages is **just for quickstart, so `/opt/huststore` is used as installation folder and could not be changed any more as it is set in build process**. So if you need to customize the installation folder, please **compile and install from source** as what [Quickstart & Try](#id_try) and [More](#id_adv) shows.  
-* If you use **RPM installation packages** for test, please do not forget to **change the owner** of folder `/opt/huststore` as what [Quickstart & Try](#id_try) and [More](#id_adv) shows. Besides, **you need to install `hust3rd-1.7-1.el6.x86_64.rpm` first** before installing any other module.  
+* If you use **RPM installation packages** for test, please do not forget to **change the owner** of folder `/opt/huststore` as what [Quickstart & Try](#id_try) and [More](#id_adv) shows. Besides, **you need to install `hust3rd-1.9-1.el6.x86_64.rpm` first** before installing any other module.  
 * If you use **binary installation packages** for test, please do not forget to **create the folder `/opt/huststore` and change its owner** as what [Quickstart & Try](#id_try) and [More](#id_adv) shows. Besides, **you need to install `elf_3rd.tar.gz` first** before installing any other module.  
 
 [Back to top](#id_top)

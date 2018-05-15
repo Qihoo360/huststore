@@ -1,5 +1,5 @@
-#ifndef _search_doc_config_h_
-#define _search_doc_config_h_
+#ifndef _store_doc_config_h_
+#define _store_doc_config_h_
 
 #include "db_stdinc.h"
 #include "db_lib.h"
@@ -128,4 +128,4 @@ private:
     const config_t & operator= ( const config_t & );
 };
 
-#endif // #ifndef _search_doc_config_h_
+#endif // #ifndef _store_doc_config_h_

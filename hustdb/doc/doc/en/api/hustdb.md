@@ -63,7 +63,7 @@ time to live, (delete on expiration), use 0 for permenent storage
 version, passed-in var of write operation must be exactly the same as the var in record, use 0 for force write.
 
 #### `file` ####
-fastdb code number, range from 0 to N-1 ( N is the fastdb.count value in hustdb.conf)
+md5db code number, range from 0 to N-1 ( N is the md5db.count value in hustdb.conf)
 
 #### `start` ####
 starting node of consistant hash, 0 ~ 1024, default 0

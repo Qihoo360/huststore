@@ -20,22 +20,22 @@ static void * start_thread ( void * arg )
 }
 
 thread_pool_t::thread_pool_t ( )
-: _num_threads ( 4 )
-, _running ( false )
-, _max_queue_size ( 0 )
-, _mutex ( )
-, _not_empty ( _mutex )
-, _not_full ( _mutex )
+    : _num_threads ( 4 )
+    , _running ( false )
+    , _max_queue_size ( 0 )
+    , _mutex ( )
+    , _not_empty ( _mutex )
+    , _not_full ( _mutex )
 {
 }
 
 thread_pool_t::thread_pool_t ( int num_threads, size_t max_queue_size )
-: _num_threads ( num_threads )
-, _running ( false )
-, _max_queue_size ( max_queue_size )
-, _mutex ( )
-, _not_empty ( _mutex )
-, _not_full ( _mutex )
+    : _num_threads ( num_threads )
+    , _running ( false )
+    , _max_queue_size ( max_queue_size )
+    , _mutex ( )
+    , _not_empty ( _mutex )
+    , _not_full ( _mutex )
 {
 }
 

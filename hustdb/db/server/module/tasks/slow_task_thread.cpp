@@ -41,13 +41,13 @@ bool slow_task_thread_t::start ( )
 {
     if ( ! G_APPTOOL->event_create ( & m_event ) )
     {
-        LOG_ERROR ( "[slow_task]event_create faield" );
+        LOG_ERROR ( "[slow_task][start]event_create faield" );
         return false;
     }
 
     if ( ! TASK_THREAD::start ( ) )
     {
-        LOG_ERROR ( "[slow_task]thread_t::start faield" );
+        LOG_ERROR ( "[slow_task][start]thread_t::start faield" );
         return false;
     }
 
@@ -60,7 +60,7 @@ bool slow_task_thread_t::push (
 {
     if ( unlikely ( NULL == task ) )
     {
-        LOG_ERROR ( "[slow_task]task NULL or m_queue NULL" );
+        LOG_ERROR ( "[slow_task][push]task NULL or m_queue NULL" );
         return false;
     }
 
@@ -73,7 +73,7 @@ bool slow_task_thread_t::push (
     }
     catch ( ... )
     {
-        LOG_ERROR ( "[slow_task]bad_alloc" );
+        LOG_ERROR ( "[slow_task][push]bad_alloc" );
         task->release ();
     }
 

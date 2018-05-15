@@ -31,14 +31,16 @@ namespace md5db
         ini = G_APPINI->ini_create ( storage_conf );
         if ( NULL == ini )
         {
-            LOG_ERROR ( "[md5db][fast_conflict]open %s failed", storage_conf );
+            LOG_ERROR ( "[md5db][fast_conflict][open][file=%s]open config failed", 
+                        storage_conf );
             return false;
         }
 
         int conflict_count = G_APPINI->ini_get_int ( ini, "fast_conflictdb", "count", 4 );
         if ( conflict_count <= 0 || conflict_count > 10 )
         {
-            LOG_ERROR ( "[md5db][fast_conflict]open failed, conflict_count: %d", conflict_count );
+            LOG_ERROR ( "[md5db][fast_conflict][open][conflict_count=%d]open failed", 
+                        conflict_count );
             return false;
         }
 
@@ -52,17 +54,19 @@ namespace md5db
     {
         if ( NULL == path || '\0' == * path || NULL == buckets )
         {
-            LOG_ERROR ( "[md5db][fast_conflict]invalid path" );
+            LOG_ERROR ( "[md5db][fast_conflict][open]invalid path" );
             return false;
         }
         if ( conflict_count < 3 )
         {
             conflict_count = 3;
-            LOG_INFO ( "[md5db][fast_conflict]conflict_count adjust to %d", conflict_count );
+            LOG_INFO ( "[md5db][fast_conflict][open][conflict_count=%d]", 
+                        conflict_count );
         }
         else if ( conflict_count > 10 )
         {
-            LOG_ERROR ( "[md5db][fast_conflict]too large conflict_count %d! but ignore", conflict_count );
+            LOG_ERROR ( "[md5db][fast_conflict][open][conflict_count=%d]too large conflict_count", 
+                        conflict_count );
             return false;
         }
 
@@ -86,7 +90,8 @@ namespace md5db
 
             if ( ! m_fast_conflicts[ i ].open ( ph, i, conflict_count ) )
             {
-                LOG_ERROR ( "[md5db][fast_conflict]open( %s ) failed", ph );
+                LOG_ERROR ( "[md5db][fast_conflict][open][file=%s]open failed", 
+                            ph );
                 return false;
             }
         }
@@ -117,7 +122,8 @@ namespace md5db
                                                                  size_t          inner_key_len
                                                                  )
     {
-        assert ( inner_key_len >= 16 );
+        //assert ( inner_key_len >= 16 );
+        
         unsigned char c = * ( ( const unsigned char * ) inner_key );
         return m_fast_conflicts[ c ];
     }
@@ -144,17 +150,17 @@ namespace md5db
         bucket_data_item_t b1;
         bucket_data_item_t b2;
 
-        b1.type         = BUCKET_CONFLICT_DATA;
-        b1.version      = first_version;
-        b1.block_id     = first_block_id;
+        b1.set_type ( BUCKET_CONFLICT_DATA );
+        b1.set_version ( first_version );
+        b1.m_block_id = first_block_id;
 
-        b2.type         = BUCKET_CONFLICT_DATA;
-        b2.version      = second_version;
-        b2.block_id     = second_block_id;
+        b2.set_type ( BUCKET_CONFLICT_DATA );
+        b2.set_version ( second_version );
+        b2.m_block_id = second_block_id;
 
         if ( ! c.write ( b1, b2, addr ) )
         {
-            LOG_ERROR ( "[md5db][fast_conflict]write failed" );
+            LOG_ERROR ( "[md5db][fast_conflict][write]write failed" );
             return false;
         }
 
@@ -189,20 +195,21 @@ namespace md5db
         r = b.find ( inner_key, inner_key_len, bucket_item );
         if ( 0 != r )
         {
-            LOG_ERROR ( "[md5db][fast_conflict]find in bucket return %d", r );
+            LOG_ERROR ( "[md5db][fast_conflict][get][r=%d]find in bucket", 
+                        r );
             return - abs ( r );
         }
-        if ( NULL == bucket_item || BUCKET_CONFLICT_DATA != bucket_item->type )
+        if ( NULL == bucket_item || BUCKET_CONFLICT_DATA != bucket_item->type () )
         {
-            LOG_ERROR ( "[md5db][fast_conflict]invalid item in bucket" );
+            LOG_ERROR ( "[md5db][fast_conflict][get]invalid item in bucket" );
             return - EFAULT;
         }
 
-        bucket_data_item_t * fast_conflict_item = NULL;
+        bucket_data_item_t * fast_conflict_item       = NULL;
         size_t               fast_conflict_item_count = 0;
-        if ( ! c.get ( bucket_item->block_id, fast_conflict_item, & fast_conflict_item_count ) )
+        if ( ! c.get ( bucket_item->m_block_id, fast_conflict_item, & fast_conflict_item_count ) )
         {
-            LOG_ERROR ( "[md5db][fast_conflict]find fast_conflict item failed" );
+            LOG_ERROR ( "[md5db][fast_conflict][get]find fast_conflict item failed" );
             return - EFAULT;
         }
 
@@ -210,12 +217,12 @@ namespace md5db
         for ( size_t i = 0; i < fast_conflict_item_count; ++ i )
         {
             bucket_data_item_t * item = & fast_conflict_item[ i ];
-            if ( 0 == item->block_id.data_id () )
+            if ( 0 == item->m_block_id.data_id () )
             {
                 continue;
             }
 
-            bool v = b.get_fullkey ()->compare ( item->block_id, ( const char * ) inner_key, inner_key_len );
+            bool v = b.get_fullkey ()->compare ( item->m_block_id, ( const char * ) inner_key, inner_key_len );
             if ( ! v )
             {
                 ++ valid_conflict_count;
@@ -223,8 +230,9 @@ namespace md5db
             }
 
             // found
-            block_id = item->block_id;
-            version  = item->version;
+            block_id = item->m_block_id;
+            version  = item->version ();
+
             return 0;
         }
 
@@ -238,7 +246,9 @@ namespace md5db
             return - ENOENT;
         }
 
-        LOG_ERROR ( "[md5db][fast_conflict]%u < %u", conflict_count, valid_conflict_count );
+        LOG_ERROR ( "[md5db][fast_conflict][get][conflict_count=%u][valid_conflict_count=%u]", 
+                    conflict_count, valid_conflict_count );
+        
         return - EFAULT;
     }
 
@@ -258,21 +268,21 @@ namespace md5db
             return - EFAULT;
         }
 
-        int r;
-
-
+        int         r;
         block_id_t  bid;
         uint32_t    v;
+        
         r = get ( inner_key, inner_key_len, bid, v );
         r = abs ( r );
         if ( 0 == r )
         {
-            LOG_ERROR ( "[md5db][fast_conflict]already exist, MD5 conflict?" );
+            LOG_ERROR ( "[md5db][fast_conflict][add]already exist, MD5 conflict" );
             return EEXIST;
         }
         else if ( ENOENT != r )
         {
-            LOG_ERROR ( "[md5db][fast_conflict]get return %d", r );
+            LOG_ERROR ( "[md5db][fast_conflict][add][r=%d]get return", 
+                        r );
             return - EFAULT;
         }
 
@@ -284,31 +294,32 @@ namespace md5db
         r = b.find ( inner_key, inner_key_len, bucket_item );
         if ( 0 != r )
         {
-            LOG_ERROR ( "[md5db][fast_conflict]find in bucket return %d", r );
+            LOG_ERROR ( "[md5db][fast_conflict][add][r=%d]find in bucket", 
+                        r );
             return - abs ( r );
         }
-        if ( NULL == bucket_item || BUCKET_CONFLICT_DATA != bucket_item->type )
+        if ( NULL == bucket_item || BUCKET_CONFLICT_DATA != bucket_item->type () )
         {
-            LOG_ERROR ( "[md5db][fast_conflict]invalid item in bucket" );
+            LOG_ERROR ( "[md5db][fast_conflict][add]invalid item in bucket" );
             return - EFAULT;
         }
 
         bucket_data_item_t * fast_conflict_item = NULL;
         size_t               fast_conflict_item_count = 0;
-        if ( ! c.get ( bucket_item->block_id, fast_conflict_item, & fast_conflict_item_count ) )
+        if ( ! c.get ( bucket_item->m_block_id, fast_conflict_item, & fast_conflict_item_count ) )
         {
-            LOG_ERROR ( "[md5db][fast_conflict]find fast_conflict item failed" );
+            LOG_ERROR ( "[md5db][fast_conflict][add]find fast_conflict item failed" );
             return - EFAULT;
         }
 
         for ( size_t i = 0; i < fast_conflict_item_count; ++ i )
         {
             bucket_data_item_t * item = & fast_conflict_item[ i ];
-            if ( 0 == item->block_id.data_id () )
+            if ( 0 == item->m_block_id.data_id () )
             {
-                item->type      = BUCKET_CONFLICT_DATA;
-                item->version   = version;
-                item->block_id  = block_id;
+                item->set_type ( BUCKET_CONFLICT_DATA );
+                item->set_version ( version );
+                item->m_block_id = block_id;
                 return 0;
             }
         }
@@ -341,20 +352,21 @@ namespace md5db
         r = b.find ( inner_key, inner_key_len, bucket_item );
         if ( 0 != r )
         {
-            LOG_ERROR ( "[md5db][fast_conflict]find in bucket return %d", r );
+            LOG_ERROR ( "[md5db][fast_conflict][update][r=%d]find in bucket", 
+                        r );
             return - abs ( r );
         }
-        if ( NULL == bucket_item || BUCKET_CONFLICT_DATA != bucket_item->type )
+        if ( NULL == bucket_item || BUCKET_CONFLICT_DATA != bucket_item->type () )
         {
-            LOG_ERROR ( "[md5db][fast_conflict]invalid item in bucket" );
+            LOG_ERROR ( "[md5db][fast_conflict][update]invalid item in bucket" );
             return - EFAULT;
         }
 
-        bucket_data_item_t * fast_conflict_item = NULL;
+        bucket_data_item_t * fast_conflict_item       = NULL;
         size_t               fast_conflict_item_count = 0;
-        if ( ! c.get ( bucket_item->block_id, fast_conflict_item, & fast_conflict_item_count ) )
+        if ( ! c.get ( bucket_item->m_block_id, fast_conflict_item, & fast_conflict_item_count ) )
         {
-            LOG_ERROR ( "[md5db][fast_conflict]find fast_conflict item failed" );
+            LOG_ERROR ( "[md5db][fast_conflict][update]find fast_conflict item failed" );
             return - EFAULT;
         }
 
@@ -362,13 +374,13 @@ namespace md5db
         for ( size_t i = 0; i < fast_conflict_item_count; ++ i )
         {
             bucket_data_item_t * item = & fast_conflict_item[ i ];
-            if ( 0 == item->block_id.data_id () )
+            if ( 0 == item->m_block_id.data_id () )
             {
                 continue;
             }
 
             bool v;
-            v = b.get_fullkey ()->compare ( item->block_id, ( const char * ) inner_key, inner_key_len );
+            v = b.get_fullkey ()->compare ( item->m_block_id, ( const char * ) inner_key, inner_key_len );
             if ( ! v )
             {
                 ++ valid_conflict_count;
@@ -376,15 +388,15 @@ namespace md5db
             }
 
             // found
-            if ( item->block_id != block_id )
+            if ( item->m_block_id != block_id )
             {
-                LOG_ERROR ( "[md5db][fast_conflict]block_id not match" );
+                LOG_ERROR ( "[md5db][fast_conflict][update]block_id not match" );
                 return EINVAL;
             }
 
-            if ( item->version != version )
+            if ( item->version () != version )
             {
-                item->version = version;
+                item->set_version ( version );
             }
 
             return 0;
@@ -400,7 +412,9 @@ namespace md5db
             return - ENOENT;
         }
 
-        LOG_ERROR ( "[md5db][fast_conflict]%u < %u", conflict_count, valid_conflict_count );
+        LOG_ERROR ( "[md5db][fast_conflict][update][conflict_count=%u][valid_conflict_count=%u]", 
+                    conflict_count, valid_conflict_count );
+
         return - EFAULT;
     }
 
@@ -423,20 +437,21 @@ namespace md5db
         r = b.find ( inner_key, inner_key_len, bucket_item );
         if ( 0 != r )
         {
-            LOG_ERROR ( "[md5db][fast_conflict]find in bucket return %d", r );
+            LOG_ERROR ( "[md5db][fast_conflict][del][r=%d]find in bucket", 
+                        r );
             return - abs ( r );
         }
-        if ( NULL == bucket_item || BUCKET_CONFLICT_DATA != bucket_item->type )
+        if ( NULL == bucket_item || BUCKET_CONFLICT_DATA != bucket_item->type () )
         {
-            LOG_ERROR ( "[md5db][fast_conflict]invalid item in bucket" );
+            LOG_ERROR ( "[md5db][fast_conflict][del]invalid item in bucket" );
             return - EFAULT;
         }
 
         bucket_data_item_t * fast_conflict_item = NULL;
         size_t               fast_conflict_item_count = 0;
-        if ( ! c.get ( bucket_item->block_id, fast_conflict_item, & fast_conflict_item_count ) )
+        if ( ! c.get ( bucket_item->m_block_id, fast_conflict_item, & fast_conflict_item_count ) )
         {
-            LOG_ERROR ( "[md5db][fast_conflict]find fast_conflict item failed" );
+            LOG_ERROR ( "[md5db][fast_conflict][del]find fast_conflict item failed" );
             return - EFAULT;
         }
 
@@ -444,13 +459,13 @@ namespace md5db
         for ( size_t i = 0; i < fast_conflict_item_count; ++ i )
         {
             bucket_data_item_t * item = & fast_conflict_item[ i ];
-            if ( 0 == item->block_id.data_id () )
+            if ( 0 == item->m_block_id.data_id () )
             {
                 continue;
             }
 
             bool v;
-            v = b.get_fullkey ()->compare ( item->block_id, ( const char * ) inner_key, inner_key_len );
+            v = b.get_fullkey ()->compare ( item->m_block_id, ( const char * ) inner_key, inner_key_len );
             if ( ! v )
             {
                 ++ valid_conflict_count;
@@ -458,6 +473,7 @@ namespace md5db
             }
 
             memset ( item, 0, sizeof ( bucket_data_item_t ) );
+            
             return 0;
         }
 
@@ -471,7 +487,8 @@ namespace md5db
             return - ENOENT;
         }
 
-        LOG_ERROR ( "[md5db][fast_conflict]%u < %u", conflict_count, valid_conflict_count );
+        LOG_ERROR ( "[md5db][fast_conflict][del][conflict_count=%u][valid_conflict_count=%u]", 
+                    conflict_count, valid_conflict_count );
         return - EFAULT;
     }
 

@@ -22,7 +22,7 @@ namespace md5db
 
     size_t bucket_t::bucket_item_count ( ) const
     {
-        return 256 * 256 * 16;
+        return 1048576;
     }
 
     size_t bucket_t::bucket_bytes ( ) const
@@ -46,22 +46,27 @@ namespace md5db
         }
         catch ( ... )
         {
-            LOG_ERROR ( "[md5db][bucket]bad_alloc" );
+            LOG_ERROR ( "[md5db][bucket][create]bad_alloc" );
             return false;
         }
+
         fp = fopen ( path, "wb" );
         if ( NULL == fp )
         {
-            LOG_ERROR ( "[md5db][bucket]fopen( %s ) failed", path );
+            LOG_ERROR ( "[md5db][bucket][create][file=%s]fopen failed", 
+                        path );
             return false;
         }
+        
         if ( t.size () != fwrite ( t.c_str (), 1, t.size (), fp ) )
         {
-            LOG_ERROR ( "[md5db][bucket]fwrite( %s ) failed", path );
+            LOG_ERROR ( "[md5db][bucket][create][file=%s]fwrite failed", 
+                        path );
             fclose ( fp );
             return false;
         }
         fclose ( fp );
+
         return true;
     }
 
@@ -69,12 +74,14 @@ namespace md5db
     {
         if ( BLOCK_ID_BYTES != sizeof ( block_id_t ) )
         {
-            LOG_ERROR ( "[md5db][bucket]sizoef( block_id_t ) %d", ( int ) sizeof ( block_id_t ) );
+            LOG_ERROR ( "[md5db][bucket][open_exist][sizoef( block_id_t )=%d]", 
+                        ( int ) sizeof ( block_id_t ) );
             return false;
         }
         if ( BUCKET_DATA_ITEM_BYTES != sizeof ( bucket_data_item_t ) )
         {
-            LOG_ERROR ( "[md5db][bucket]sizeof( bucket_data_item_t ) %d", ( int ) sizeof ( bucket_data_item_t ) );
+            LOG_ERROR ( "[md5db][bucket][open_exist][sizeof( bucket_data_item_t )=%d]", 
+                        ( int ) sizeof ( bucket_data_item_t ) );
             return false;
         }
 
@@ -90,7 +97,7 @@ namespace md5db
             if ( 0x56 != p[ 0 ] || 0x34 != p[ 1 ] || 0x02 != p[ 2 ] || 0x00 != p[ 3 ] )
             {
                 LOG_ERROR ( "[md5db][bucket]invalid CPU, we can not support: %X %X %X %X %08X",
-                           p[ 0 ], p[ 1 ], p[ 2 ], p[ 3 ], bit_id );
+                            p[ 0 ], p[ 1 ], p[ 2 ], p[ 3 ], bit_id );
                 return false;
             }
 
@@ -102,7 +109,7 @@ namespace md5db
             if ( 0x56 != p2[ 0 ] || 0x34 != p2[ 1 ] || 0x02 != p2[ 2 ] || 0 != p2[ 3 ] )
             {
                 LOG_ERROR ( "[md5db][bucket]invalid CPU, we can not support: %X %X %X %X %08X",
-                           p2[ 0 ], p2[ 1 ], p2[ 2 ], p2[ 3 ], bit_id );
+                            p2[ 0 ], p2[ 1 ], p2[ 2 ], p2[ 3 ], bit_id );
                 return false;
             }
         }
@@ -110,13 +117,13 @@ namespace md5db
 
         if ( ! G_APPTOOL->fmap_open ( & m_data, path, 0, 0, read_write ) )
         {
-            LOG_ERROR ( "[md5db][bucket]fmap_open(%s) failed", path );
+            LOG_ERROR ( "[md5db][bucket][open_exist][file=%s]fmap_open failed", path );
             return false;
         }
         if ( m_data.ptr_len != bucket_bytes () )
         {
-            LOG_ERROR ( "[md5db][bucket]m_data.ptr_len=%d, bucket_bytes=%d",
-                       ( int ) m_data.ptr_len, ( int ) bucket_bytes () );
+            LOG_ERROR ( "[md5db][bucket][open_exist][data.ptr_len=%d][bucket_bytes=%d]",
+                        ( int ) m_data.ptr_len, ( int ) bucket_bytes () );
             return false;
         }
 
@@ -129,7 +136,7 @@ namespace md5db
                                    unsigned char   rsp[ 3 ]
                                    )
     {
-        assert ( inner_key_len >= 16 );
+        //assert ( inner_key_len >= 16 );
 
         const unsigned char * md5 = ( const unsigned char * ) inner_key;
 
@@ -147,7 +154,7 @@ namespace md5db
                                    size_t          inner_key_len
                                    )
     {
-        assert ( inner_key_len >= 16 );
+        //assert ( inner_key_len >= 16 );
 
         const unsigned char * md5 = ( const unsigned char * ) inner_key;
 
@@ -164,20 +171,19 @@ namespace md5db
         return r;
     }
 
-    int
-    bucket_t::find (
-                     const void *            inner_key,
-                     size_t                  inner_key_len,
-                     bucket_data_item_t * &  result
-                     )
+    int bucket_t::find (
+                        const void *            inner_key,
+                        size_t                  inner_key_len,
+                        bucket_data_item_t * &  result
+                        )
     {
-        assert ( inner_key_len >= 16 );
+        //assert ( inner_key_len >= 16 );
 
         size_t index = key_to_item ( inner_key, inner_key_len );
         if ( index >= bucket_item_count () )
         {
-            LOG_ERROR ( "[md5db][bucket]key_to_item return %d, bic=%d",
-                       index, ( int ) bucket_item_count () );
+            LOG_ERROR ( "[md5db][bucket][find][bucket_item_count=%d][index=%d]key_to_item", 
+                        ( int ) bucket_item_count (), index );
             result = NULL;
             return EFAULT;
         }
@@ -185,26 +191,26 @@ namespace md5db
         result = ( bucket_data_item_t * ) (
                                             m_data.ptr + index * sizeof ( bucket_data_item_t )
                                             );
-        switch ( result->type )
+        switch ( result->type () )
         {
             case BUCKET_DIRECT_DATA:
                 LOG_DEBUG ( "[md5db][bucket][find][type=BUCKET_DIRECT_DATA][bucket_id=%u][version=%u]",
-                           result->block_id.bucket_id (), result->version );
+                            result->block_id.bucket_id (), result->version () );
                 return 0;
 
             case BUCKET_CONFLICT_DATA:
                 LOG_DEBUG ( "[md5db][bucket][find][type=BUCKET_CONFLICT_DATA][count=%u][unused.version=%u]",
-                           result->block_id.bucket_id (), result->version );
+                            result->block_id.bucket_id (), result->version () );
                 return 0;
 
             case BUCKET_NO_DATA:
                 LOG_DEBUG ( "[md5db][bucket][find][type=BUCKET_NO_DATA][block_id=%u][version=%u]",
-                           result->block_id.bucket_id (), result->version );
+                            result->block_id.bucket_id (), result->version () );
                 return 0;
 
             default:
                 LOG_DEBUG ( "[md5db][bucket][find][type=%d][bucket=%u][version=%u]",
-                           ( int ) result->type, result->block_id.bucket_id (), result->version );
+                            ( int ) result->type (), result->block_id.bucket_id (), result->version () );
                 return EFAULT;
         }
     }

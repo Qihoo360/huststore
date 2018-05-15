@@ -50,7 +50,8 @@ void task_binlog_scan_t::process_binlog_scan ( )
         int r = db->binlog_scan ( NULL, NULL, & alive_cb_pm, NULL, & export_cb_pm );
         if ( 0 != r )
         {
-            LOG_ERROR ( "[slow_task][binlog_scan]task failed: %d", r );
+            LOG_ERROR ( "[slow_task][binlog_scan][r=%d]task failed", 
+                        r );
             return;
         }
     }

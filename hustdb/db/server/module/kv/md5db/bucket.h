@@ -10,14 +10,15 @@ namespace md5db
 
     enum bucket_type_t
     {
-        BUCKET_NO_DATA = 0,
-        BUCKET_DIRECT_DATA = 1,
+        BUCKET_NO_DATA       = 0,
+        BUCKET_DIRECT_DATA   = 1,
         BUCKET_CONFLICT_DATA = 2
     };
 
 #pragma pack( push, 1 )
 
-#define BLOCK_ID_BYTES  5
+#define BLOCK_ID_BYTES     5
+#define BLOCK_FILE_COUNT   256
 
     class block_id_t
     {
@@ -31,13 +32,13 @@ namespace md5db
         void reset ( )
         {
             m_bucket_id = 0;
-            m_data_id = 0;
+            m_data_id   = 0;
         }
 
         void set ( byte_t bucket_id, uint32_t data_id )
         {
             m_bucket_id = bucket_id;
-            m_data_id = htonl ( data_id );
+            m_data_id   = data_id;
         }
 
         byte_t bucket_id ( ) const
@@ -47,12 +48,12 @@ namespace md5db
 
         uint32_t data_id ( ) const
         {
-            return ntohl ( m_data_id );
+            return m_data_id;
         }
 
     private:
 
-        byte_t m_bucket_id;
+        byte_t   m_bucket_id;
         uint32_t m_data_id;
     };
 
@@ -66,59 +67,157 @@ namespace md5db
         return lhd.bucket_id ( ) != rhd.bucket_id ( ) || lhd.data_id ( ) != rhd.data_id ( );
     }
 
-#define BUCKET_DATA_ITEM_BYTES  9
+#define BUCKET_DATA_ITEM_BYTES  8
+#define BUCKET_DATA_MAX_VERSION 4194304
 
     class bucket_data_item_t
     {
     public:
-#define BUCKET_DATA_MAX_VERSION 0x3FFFFFFF
 
-        // block id type
-        // BUCKET_DIRECT_DATA, BUCKET_CONFLICT_DATA, BUCKET_NO_DATA
-        uint32_t type : 2;
+        bucket_data_item_t ( )
+        {
+            reset ( );
+        }
 
-        // user version, if type is BUCKET_DIRECT_DATA
-        // conflict count, if type is BUCKET_CONFLICT_DATA
-        uint32_t version : 30;
+        void reset ( )
+        {
+            m_type  = 0;
+            m_ver_h = 0;
+            m_ver_l = 0;
+            m_block_id.reset ();
+        }
 
-        // block id
-        block_id_t block_id;
+        void set_type ( byte_t type )
+        {
+            m_type = type;
+        }
 
-        // conflict count helper function
+        byte_t type ( ) const
+        {
+            return m_type;
+        }
+
+        void set_version ( uint32_t version )
+        {
+            m_ver_h = version / 64;
+            m_ver_l = version % 65536;
+        }
+
+        uint32_t version ( ) const
+        {
+            return m_ver_h * 16 + m_ver_l;
+        }
 
         uint32_t get_conflict_count ( ) const
         {
-            return version;
+            return m_ver_h * 16 + m_ver_l;
         }
 
         void set_conflict_count ( uint32_t v )
         {
             if ( v <= BUCKET_DATA_MAX_VERSION )
             {
-                version = v;
+                set_version ( v );
             }
         }
 
         bool add_conflict_count ( )
         {
+            uint32_t version = m_ver_h * 16 + m_ver_l;
+
             if ( version == BUCKET_DATA_MAX_VERSION )
             {
                 return false;
             }
-            ++version;
+
+            set_version ( version + 1 );
+
             return true;
         }
 
         uint32_t dec_conflict_count ( )
         {
+            uint32_t version = m_ver_h * 16 + m_ver_l;
+
             if ( version > 0 )
             {
-                --version;
+                version --;
             }
+
+            set_version ( version );
+
             return version;
         }
 
+    public:
+        
+        block_id_t m_block_id;
+    
+    private:
+
+        byte_t m_type  : 2;
+        byte_t m_ver_h : 6;
+        uint16_t m_ver_l;
     };
+
+    class content_id_t
+    {
+    public:
+
+        content_id_t ( )
+        {
+            reset ( );
+        }
+
+        void reset ( )
+        {
+            m_file_id_h = 0;
+            m_data_id   = 0;
+            m_file_id_l = 0;
+            m_data_len  = 0;
+        }
+
+        void set ( byte_t file_id, uint32_t data_id, uint32_t data_len )
+        {
+            m_file_id_h = file_id / 16;
+            m_data_id   = data_id;
+
+            m_file_id_l = file_id % 16;
+            m_data_len  = data_len;
+        }
+
+        byte_t file_id ( ) const
+        {
+            return m_file_id_h * 16 + m_file_id_l;
+        }
+
+        uint32_t data_id ( ) const
+        {
+            return m_data_id;
+        }
+
+        uint32_t data_len ( ) const
+        {
+            return m_data_len;
+        }
+
+    private:
+
+        uint32_t m_file_id_h : 4;
+        uint32_t m_data_id   : 28;
+        uint32_t m_file_id_l : 4;
+        uint32_t m_data_len  : 28;
+    };
+
+    inline bool operator== ( const content_id_t & lhd, const content_id_t & rhd )
+    {
+        return lhd.file_id ( ) == rhd.file_id ( ) && lhd.data_id ( ) == rhd.data_id ( ) && lhd.data_len ( ) == rhd.data_len ( );
+    }
+
+    inline bool operator!= ( const content_id_t & lhd, const content_id_t & rhd )
+    {
+        return lhd.file_id ( ) != rhd.file_id ( ) || lhd.data_id ( ) != rhd.data_id ( ) || lhd.data_len ( ) != rhd.data_len ( );
+    }
 
 #pragma pack( pop )
 
@@ -130,8 +229,15 @@ namespace md5db
         bucket_t ( );
         ~bucket_t ( );
 
-        bool create ( const char * path );
-        bool open_exist ( const char * path, bool read_write );
+        bool create ( 
+                        const char * path 
+                       );
+
+        bool open_exist ( 
+                            const char * path, 
+                            bool read_write 
+                            );
+
         void close ( );
 
         int find (
@@ -146,7 +252,9 @@ namespace md5db
                                     unsigned char rsp[ 3 ]
                                     );
 
-        void set_fullkey ( fullkey_t * p )
+        void set_fullkey ( 
+                            fullkey_t * p 
+                            )
         {
             m_fullkey = p;
         }
@@ -164,7 +272,9 @@ namespace md5db
     private:
 
         size_t bucket_bytes ( ) const;
+
         size_t bucket_item_count ( ) const;
+
         size_t bucket_item_bytes ( ) const;
 
         size_t key_to_item (
@@ -174,8 +284,8 @@ namespace md5db
 
     private:
 
-        fmap_t m_data;
-        fullkey_t * m_fullkey;
+        fmap_t       m_data;
+        fullkey_t *  m_fullkey;
         rwlockable_t m_lock;
 
     private:

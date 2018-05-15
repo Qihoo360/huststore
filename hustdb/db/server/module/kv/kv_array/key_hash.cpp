@@ -6,26 +6,26 @@
 const int hash_plan_t::HASH_COUNT = 10000;
 
 hash_plan_t::hash_plan_t ( )
-: m_data ( )
-, m_data_file_count ( 0 )
-, m_user_file_count ( 0 )
-, m_server_2_user_file ( )
-, m_server_2_inner_file ( )
-, m_file_2_server ( )
-, m_copy_count ( 0 )
-, m_server_id ( - 1 )
+    : m_data ( )
+    , m_data_file_count ( 0 )
+    , m_user_file_count ( 0 )
+    , m_server_2_user_file ( )
+    , m_server_2_inner_file ( )
+    , m_file_2_server ( )
+    , m_copy_count ( 0 )
+    , m_server_id ( - 1 )
 {
 }
 
 hash_plan_t::hash_plan_t ( const hash_plan_t & rhd )
-: m_data ( rhd.m_data )
-, m_data_file_count ( rhd.m_data_file_count )
-, m_user_file_count ( rhd.m_user_file_count )
-, m_server_2_user_file ( rhd.m_server_2_user_file )
-, m_server_2_inner_file ( rhd.m_server_2_inner_file )
-, m_file_2_server ( rhd.m_file_2_server )
-, m_copy_count ( rhd.m_copy_count )
-, m_server_id ( rhd.m_server_id )
+    : m_data ( rhd.m_data )
+    , m_data_file_count ( rhd.m_data_file_count )
+    , m_user_file_count ( rhd.m_user_file_count )
+    , m_server_2_user_file ( rhd.m_server_2_user_file )
+    , m_server_2_inner_file ( rhd.m_server_2_inner_file )
+    , m_file_2_server ( rhd.m_file_2_server )
+    , m_copy_count ( rhd.m_copy_count )
+    , m_server_id ( rhd.m_server_id )
 {
 }
 
@@ -86,7 +86,8 @@ int hash_plan_t::hash_with_cluster (
     int v = hash_no_md5db ( key, key_len );
     if ( v < 0 || v >= ( int ) m_file_2_server.size () )
     {
-        LOG_ERROR ( "[hash]invalid public_hash %d,%d", v, ( int ) m_file_2_server.size () );
+        LOG_ERROR ( "[hash][%d,%d]invalid public_hash", 
+                    v, ( int ) m_file_2_server.size () );
         return - 1;
     }
     server_ids_t & servers = m_file_2_server[ v ];
@@ -120,12 +121,14 @@ int hash_plan_t::hash_with_cluster (
                 }
                 else
                 {
-                    LOG_ERROR ( "[hash]public hash=%d, ids=%d", v, ( int ) ids.size () );
+                    LOG_ERROR ( "[hash][hash=%d][ids=%d]", 
+                                v, ( int ) ids.size () );
                 }
             }
             else
             {
-                LOG_ERROR ( "[hash]server_id %d, server_2_file %d", m_server_id, ( int ) m_server_2_user_file.size () );
+                LOG_ERROR ( "[hash][server_id=%d][server_2_file=%d]", 
+                            m_server_id, ( int ) m_server_2_user_file.size () );
             }
 
         }
@@ -143,7 +146,7 @@ int hash_plan_t::hash_md5db (
                               int                 key_len
                               )
 {
-    assert ( key && key_len == 16 );
+    //assert ( key && key_len == 16 );
     unsigned int hash = * ( ( const uint32_t * ) ( & key[ 4 ] ) );
     return m_data[ hash % HASH_COUNT ];
 }
@@ -161,14 +164,15 @@ int hash_plan_t::hash_with_md5db (
     int v = hash_md5db ( key, key_len );
     if ( v < 0 || v >= ( int ) m_file_2_server.size () )
     {
-        LOG_ERROR ( "[hash]invalid public_hash %d,%d", v, ( int ) m_file_2_server.size () );
+        LOG_ERROR ( "[hash][%d,%d]invalid public_hash", 
+                    v, ( int ) m_file_2_server.size () );
         return - 1;
     }
 
     server_ids_t & servers = m_file_2_server[ v ];
 
-    LOG_DEBUG ( "[hash]hash_md5db return %d, servers=%d, server_id=%d",
-               v, ( int ) servers.size (), m_server_id );
+    LOG_DEBUG ( "[hash][r=%d][servers=%d][server_id=%d]hash_md5db",
+                v, ( int ) servers.size (), m_server_id );
 
     if ( other_servers.capacity () < servers.size () )
     {
@@ -199,12 +203,14 @@ int hash_plan_t::hash_with_md5db (
                 }
                 else
                 {
-                    LOG_ERROR ( "[hash]public hash=%d, ids=%d", v, ( int ) ids.size () );
+                    LOG_ERROR ( "[hash][hash=%d][ids=%d]", 
+                                v, ( int ) ids.size () );
                 }
             }
             else
             {
-                LOG_ERROR ( "[hash]server_id %d, server_2_file %d", m_server_id, ( int ) m_server_2_inner_file.size () );
+                LOG_ERROR ( "[hash][server_id=%d][server_2_file=%d]", 
+                            m_server_id, ( int ) m_server_2_inner_file.size () );
             }
 
         }
@@ -229,7 +235,8 @@ int hash_plan_t::hash_with_user_file_id (
     int v = user_file_id;
     if ( v < 0 || v >= ( int ) m_file_2_server.size () )
     {
-        LOG_ERROR ( "[hash]invalid user_file_id %d,%d", v, ( int ) m_file_2_server.size () );
+        LOG_ERROR ( "[hash][%d,%d]invalid user_file_id", 
+                    v, ( int ) m_file_2_server.size () );
         return - 1;
     }
     server_ids_t & servers = m_file_2_server[ v ];
@@ -263,12 +270,14 @@ int hash_plan_t::hash_with_user_file_id (
                 }
                 else
                 {
-                    LOG_ERROR ( "[hash]public hash=%d, ids=%d", v, ( int ) ids.size () );
+                    LOG_ERROR ( "[hash][hash=%d][ids=%d]", 
+                                v, ( int ) ids.size () );
                 }
             }
             else
             {
-                LOG_ERROR ( "[hash]server_id %d, server_2_file %d", m_server_id, ( int ) m_server_2_user_file.size () );
+                LOG_ERROR ( "[hash][server_id=%d][server_2_file=%d]", 
+                            m_server_id, ( int ) m_server_2_user_file.size () );
             }
 
         }
@@ -344,7 +353,8 @@ bool hash_plan_t::create ( int user_file_count, int server_count, int copy_count
 
     if ( m_data_file_count <= 0 )
     {
-        LOG_ERROR ( "[hash]m_data_file_count = %d", m_data_file_count );
+        LOG_ERROR ( "[hash][data_file_count=%d]", 
+                    m_data_file_count );
         return false;
     }
 
@@ -449,7 +459,8 @@ bool hash_plan_t::open_memory ( int server_id, const char * s, size_t s_len )
 
     if ( ! b )
     {
-        LOG_ERROR ( "[hash]open failed, content=%s", s );
+        LOG_ERROR ( "[hash][content=%s]open failed", 
+                    s );
     }
 
     return b;
@@ -474,7 +485,8 @@ bool hash_plan_t::open ( int server_id, const char * hash_conf )
 
     if ( ! b )
     {
-        LOG_ERROR ( "[hash]open failed, path=%s", hash_conf );
+        LOG_ERROR ( "[hash][file=%s]open failed", 
+                    hash_conf );
     }
 
     return b;
@@ -512,7 +524,7 @@ bool hash_plan_t::open ( int server_id, ini_t & ini )
     }
     catch ( ... )
     {
-        LOG_ERROR ( "[hash]m_data.resize exception" );
+        LOG_ERROR ( "[hash]data.resize exception" );
         return false;
     }
 
@@ -542,29 +554,34 @@ bool hash_plan_t::open ( int server_id, ini_t & ini )
     m_copy_count = G_APPINI->ini_get_int ( & ini, "server", "copy_count", 0 );
     if ( m_copy_count <= 0 )
     {
-        LOG_ERROR ( "[hash]invalid [server]copy_count %d", m_copy_count );
+        LOG_ERROR ( "[hash][copy_count=%d]invalid copy_count", 
+                    m_copy_count );
         return false;
     }
 
     int server_count = G_APPINI->ini_get_int ( & ini, "server", "server_count", 0 );
     if ( server_count <= 0 )
     {
-        LOG_ERROR ( "[hash]invalid [server]server_count %d", server_count );
+        LOG_ERROR ( "[hash][server_count=%d]invalid server_count", 
+                    server_count );
         return false;
     }
     if ( server_count < m_copy_count )
     {
-        LOG_ERROR ( "[hash]server_count %d < copy_count %d", server_count, m_copy_count );
+        LOG_ERROR ( "[hash][server_count=%d < copy_count=%d]", 
+                    server_count, m_copy_count );
         return false;
     }
     if ( m_copy_count > 3 )
     {
-        LOG_ERROR ( "[hash]copy_count %d > 3", m_copy_count );
+        LOG_ERROR ( "[hash][copy_count=%d > 3]", 
+                    m_copy_count );
         return false;
     }
     if ( m_server_id < 0 || m_server_id >= server_count )
     {
-        LOG_ERROR ( "[hash]invalid server_count %d or server_id %d", server_count, m_server_id );
+        LOG_ERROR ( "[hash][server_count=%d[server_id=%d]]invalid server_count or server_id", 
+                    server_count, m_server_id );
         return false;
 
     }
@@ -600,7 +617,8 @@ bool hash_plan_t::open ( int server_id, ini_t & ini )
         const char * s = G_APPINI->ini_get_string ( & ini, "server", key, NULL );
         if ( NULL == s || '\0' == * s )
         {
-            LOG_ERROR ( "[hash]invalid [server]%s", key );
+            LOG_ERROR ( "[hash][key=%s]invalid", 
+                        key );
             return false;
         }
 
@@ -608,7 +626,8 @@ bool hash_plan_t::open ( int server_id, ini_t & ini )
         to_vector ( s, ",", a );
         if ( a.empty () )
         {
-            LOG_ERROR ( "[hash]invalid [server]%s", key );
+            LOG_ERROR ( "[hash][key=%s]invalid", 
+                        key );
             return false;
         }
         an.resize ( 0 );
@@ -638,7 +657,8 @@ bool hash_plan_t::open ( int server_id, ini_t & ini )
             {
                 if ( item.empty () || item[ 0 ] <= 0 || ! isdigit ( item[ 0 ] ) )
                 {
-                    LOG_ERROR ( "[hash]invalid [server]%s: '%s'", key, item.c_str () );
+                    LOG_ERROR ( "[hash][%s,%s]invalid", 
+                                key, item.c_str () );
                     return false;
                 }
                 user_file_id    = atoi ( item.c_str () );
@@ -693,12 +713,14 @@ bool hash_plan_t::open ( int server_id, ini_t & ini )
                         LOG_ERROR ( "[hash]bad_alloc" );
                         return false;
                     }
-                    LOG_DEBUG ( "[hash][verify][s=%s][item=%s]: %d=1", s, item.c_str (), user_file_id );
+                    LOG_DEBUG ( "[hash][verify][s=%s][item=%s][user_file_id=%d]", 
+                                s, item.c_str (), user_file_id );
                 }
                 else
                 {
                     ++ ( *f ).second;
-                    LOG_DEBUG ( "[hash][verify][s=%s][item=%s]: %d=%d", s, item.c_str (), user_file_id, ( *f ).second );
+                    LOG_DEBUG ( "[hash][verify][s=%s][item=%s][%d=%d]", 
+                                s, item.c_str (), user_file_id, ( *f ).second );
                 }
             }
         }
@@ -747,7 +769,8 @@ bool hash_plan_t::open ( int server_id, ini_t & ini )
             {
                 if ( n >= ( int ) dst.size () )
                 {
-                    LOG_ERROR ( "[hash]user file %d too large", n );
+                    LOG_ERROR ( "[hash][user_file_id=%d]user file too large", 
+                                n );
                     return false;
                 }
                 dst[ n ] = j;
@@ -777,14 +800,13 @@ bool hash_plan_t::open ( int server_id, ini_t & ini )
                 ss << "        " << ( int ) j << "=" << ids[ j ] << S_CRLF;
             }
         }
-        LOG_INFO ( "[hash][debug]%s", ss.str ().c_str () );
     }
 #endif
 
     // verify step 2
     if ( m_server_2_user_file.size () != server_count )
     {
-        LOG_ERROR ( "[hash]invalid [server] section, size not match: %d, %d, %d, %d",
+        LOG_ERROR ( "[hash][%d,%d,%d,%d]invalid section, size not match",
                    ( int ) verify.size (), m_data_file_count, server_count, ( int ) m_server_2_user_file.size () );
         return false;
     }
@@ -793,13 +815,14 @@ bool hash_plan_t::open ( int server_id, ini_t & ini )
         std::map< int, int >::iterator f = verify.find ( i );
         if ( f == verify.end () )
         {
-            LOG_ERROR ( "[hash]invalid [server] section, file %d not found", i );
+            LOG_ERROR ( "[hash][file_id=%d]invalid section, file not found", 
+                        i );
             return false;
         }
         if ( m_copy_count != ( *f ).second )
         {
-            LOG_ERROR ( "[hash]invalid [server] section, file %d copy count is %d, need %d",
-                       i, ( *f ).second, m_copy_count );
+            LOG_ERROR ( "[hash][file_id=%d][copy_count=%d][need=%d]invalid section",
+                        i, ( *f ).second, m_copy_count );
             return false;
         }
     }
@@ -820,7 +843,8 @@ bool hash_plan_t::open ( int server_id, ini_t & ini )
     }
     if ( user_file_2_server.size () != m_user_file_count )
     {
-        LOG_ERROR ( "[hash]user_file_2_server %d != %d", ( int ) user_file_2_server.size (), m_user_file_count );
+        LOG_ERROR ( "[hash][%d != %d]user_file_2_server", 
+                    ( int ) user_file_2_server.size (), m_user_file_count );
         return false;
     }
     for ( int i = 0; i < m_user_file_count; ++ i )
@@ -830,17 +854,20 @@ bool hash_plan_t::open ( int server_id, ini_t & ini )
         f = user_file_2_server.find ( i );
         if ( f == user_file_2_server.end () )
         {
-            LOG_ERROR ( "[hash] %d not found in user_file_2_server", i );
+            LOG_ERROR ( "[hash][file_id=%d]not found in user_file_2_server", 
+                        i );
             return false;
         }
         if ( ( int ) m_file_2_server.size () != i )
         {
-            LOG_ERROR ( "[hash]crazy ! %d != %d", ( int ) m_file_2_server.size (), i );
+            LOG_ERROR ( "[hash][%d != %d]", 
+                        ( int ) m_file_2_server.size (), i );
             return false;
         }
         if ( ( *f ).second.size () != m_copy_count )
         {
-            LOG_ERROR ( "[hash]crazy copy_count ! %d != %d", ( int ) ( *f ).second.size (), m_copy_count );
+            LOG_ERROR ( "[hash][%d != %d]", 
+                        ( int ) ( *f ).second.size (), m_copy_count );
             return false;
         }
         try
@@ -860,13 +887,15 @@ bool hash_plan_t::open ( int server_id, ini_t & ini )
         // 对每个 user_file_id，找到所有的 server_id
         if ( i >= ( int ) m_file_2_server.size () )
         {
-            LOG_ERROR ( "[hash]invalid m_file_2_server.size() %d", ( int ) m_file_2_server.size () );
+            LOG_ERROR ( "[hash][size=%d]invalid file_2_server.size", 
+                        ( int ) m_file_2_server.size () );
             return false;
         }
         server_ids_t & ids = m_file_2_server[ i ];
         if ( ids.size () != m_copy_count )
         {
-            LOG_ERROR ( "[hash]invalid server ids %d", ( int ) ids.size () );
+            LOG_ERROR ( "[hash][size=%d]invalid server ids", 
+                        ( int ) ids.size () );
             return false;
         }
 
@@ -881,7 +910,8 @@ bool hash_plan_t::open ( int server_id, ini_t & ini )
                  || server_id >= ( int ) m_server_2_inner_file.size ()
                  )
             {
-                LOG_ERROR ( "[hash]invalid server id %d", server_id );
+                LOG_ERROR ( "[hash][server_id=%d]invalid server id", 
+                            server_id );
                 return false;
             }
 
@@ -889,14 +919,16 @@ bool hash_plan_t::open ( int server_id, ini_t & ini )
             file_ids_t & pfids = m_server_2_user_file[ server_id ];
             if ( i >= ( int ) pfids.size () )
             {
-                LOG_ERROR ( "[hash]invalid server_2_user_file for server id %d", server_id );
+                LOG_ERROR ( "[hash][server_id=%d]invalid server_2_user_file for server id", 
+                            server_id );
                 return false;
             }
 
             int inner_file = pfids[ i ];
             if ( inner_file < 0 )
             {
-                LOG_ERROR ( "[hash]invalid server_2_user_file for server id %d, public file %d", server_id, i );
+                LOG_ERROR ( "[hash][server_id=%d][public_file=%d]invalid server_2_user_file", 
+                            server_id, i );
                 return false;
             }
 
@@ -904,13 +936,15 @@ bool hash_plan_t::open ( int server_id, ini_t & ini )
             file_ids_t & ifids = m_server_2_inner_file[ server_id ];
             if ( inner_file >= ( int ) ifids.size () )
             {
-                LOG_ERROR ( "[hash]invalid server_2_inner_file for server id %d", server_id );
+                LOG_ERROR ( "[hash][server_id=%d]invalid server_2_inner_file", 
+                            server_id );
                 return false;
             }
 
             if ( ifids[ inner_file ] != i )
             {
-                LOG_ERROR ( "[hash]invalid server_2_inner_file for server id %d, inner file %d", server_id, inner_file );
+                LOG_ERROR ( "[hash][server_id=%d][inner_file=%d]invalid server_2_inner_file", 
+                            server_id, inner_file );
                 return false;
             }
         }
@@ -924,15 +958,15 @@ bool hash_plan_t::save_memory ( std::string & s )
 {
     s.resize ( 0 );
 
-    if (   m_data_file_count <= 0
-         || m_user_file_count <= 0
-         || m_data.empty ()
-         || m_server_2_user_file.empty ()
-         || m_copy_count <= 0 || m_copy_count > 3 )
+    if ( m_data_file_count <= 0 || 
+         m_user_file_count <= 0 || 
+         m_data.empty () || 
+         m_server_2_user_file.empty () || 
+         m_copy_count <= 0 || 
+         m_copy_count > 3 )
     {
-        LOG_ERROR ( "[hash]error:%d,%d,%d,%d,%d",
-                   m_data_file_count, m_user_file_count, ( int ) m_data.size (),
-                   ( int ) m_server_2_user_file.size (), m_copy_count );
+        LOG_ERROR ( "[hash][%d,%d,%d,%d,%d]error",
+                   m_data_file_count, m_user_file_count, ( int ) m_data.size (), ( int ) m_server_2_user_file.size (), m_copy_count );
         return false;
     }
 
@@ -1151,14 +1185,15 @@ bool hash_plan_t::add_server (
 
     if ( m_server_2_inner_file.size () != m_server_2_user_file.size () )
     {
-        LOG_ERROR ( "[hash][add_server]what fucken mean?" );
+        LOG_ERROR ( "[hash][add_server]error" );
         return false;
     }
 
     new_server_id = ( int ) m_server_2_user_file.size ();
 
     int migration_count = m_user_file_count * m_copy_count / ( int ) ( m_server_2_inner_file.size () + 1 );
-    LOG_DEBUG ( "[hash][add_server][migration_count=%d]", migration_count );
+    LOG_DEBUG ( "[hash][add_server][migration_count=%d]", 
+                migration_count );
 
     try
     {
@@ -1166,7 +1201,8 @@ bool hash_plan_t::add_server (
     }
     catch ( ... )
     {
-        LOG_ERROR ( "[hash][add_server][migration_count=%d]bad_alloc", migration_count );
+        LOG_ERROR ( "[hash][add_server][migration_count=%d]bad_alloc",
+                    migration_count );
         return false;
     }
 
@@ -1191,7 +1227,8 @@ bool hash_plan_t::add_server (
     }
     if ( plan.empty () )
     {
-        LOG_ERROR ( "[hash][add_server][migration_count=%d]find migration piece failed", migration_count );
+        LOG_ERROR ( "[hash][add_server][migration_count=%d]find migration piece failed", 
+                    migration_count );
         return false;
     }
 
@@ -1203,7 +1240,8 @@ bool hash_plan_t::add_server (
     }
     catch ( ... )
     {
-        LOG_ERROR ( "[hash][add_server][migration_count=%d]bad_alloc", migration_count );
+        LOG_ERROR ( "[hash][add_server][migration_count=%d]bad_alloc", 
+                    migration_count );
         return false;
     }
     for ( int i = 0; i < ( int ) plan.size (); ++ i )
@@ -1217,7 +1255,8 @@ bool hash_plan_t::add_server (
     }
     catch ( ... )
     {
-        LOG_ERROR ( "[hash][add_server][migration_count=%d]bad_alloc", migration_count );
+        LOG_ERROR ( "[hash][add_server][migration_count=%d]bad_alloc", 
+                    migration_count );
         return false;
     }
 
@@ -1230,7 +1269,8 @@ bool hash_plan_t::add_server (
     }
     catch ( ... )
     {
-        LOG_ERROR ( "[hash][add_server][migration_count=%d]bad_alloc", migration_count );
+        LOG_ERROR ( "[hash][add_server][migration_count=%d]bad_alloc", 
+                    migration_count );
         return false;
     }
     for ( int i = 0; i < ( int ) plan.size (); ++ i )
@@ -1244,7 +1284,8 @@ bool hash_plan_t::add_server (
     }
     catch ( ... )
     {
-        LOG_ERROR ( "[hash][add_server][migration_count=%d]bad_alloc", migration_count );
+        LOG_ERROR ( "[hash][add_server][migration_count=%d]bad_alloc", 
+                    migration_count );
         return false;
     }
 
@@ -1304,16 +1345,16 @@ bool key_hash_t::create ( const char * conf_path, int max_file_count, int server
     hash_plan_t hp;
     if ( ! hp.create ( max_file_count, server_count, copy_count ) )
     {
-        LOG_ERROR ( "[hash]create() failed" );
+        LOG_ERROR ( "[hash]create failed" );
         return false;
     }
     if ( ! hp.save ( conf_path ) )
     {
-        LOG_ERROR ( "[hash]%s generate failed", conf_path );
+        LOG_ERROR ( "[hash][file=%s]generate failed", conf_path );
         return false;
     }
 
-    LOG_INFO ( "[hash]%s generated", conf_path );
+    LOG_INFO ( "[hash][file=%s]generated", conf_path );
     return true;
 }
 
@@ -1323,13 +1364,13 @@ bool key_hash_t::open ( const char * conf_path, int server_id, config_t & config
 
     if ( ! G_APPTOOL->is_file ( conf_path ) )
     {
-        LOG_ERROR ( "[hash]%s not exist", conf_path );
+        LOG_ERROR ( "[hash][file=%s]not exist", conf_path );
         return false;
     }
 
     if ( ! hp.open ( server_id, conf_path ) )
     {
-        LOG_ERROR ( "[hash]%s open failed", conf_path );
+        LOG_ERROR ( "[hash][file=%s]open failed", conf_path );
         return false;
     }
 

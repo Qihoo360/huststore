@@ -27,7 +27,7 @@ namespace md5db
     {
         if ( NULL == path || '\0' == * path )
         {
-            LOG_ERROR ( "[md5db][fullkey]invalid path" );
+            LOG_ERROR ( "[md5db][fullkey][open]invalid path" );
             return false;
         }
 
@@ -51,7 +51,8 @@ namespace md5db
 
             if ( ! m_fullkeys[ i ].open ( ph, i ) )
             {
-                LOG_ERROR ( "[md5db][fullkey]open( %s ) failed", ph );
+                LOG_ERROR ( "[md5db][fullkey][open][file=%s]open failed", 
+                            ph );
                 return false;
             }
         }
@@ -64,7 +65,8 @@ namespace md5db
                                                size_t inner_key_len
                                                )
     {
-        assert ( inner_key_len >= 16 );
+        //assert ( inner_key_len >= 16 );
+        
         unsigned char c = * ( ( const unsigned char * ) inner_key );
         return m_fullkeys[ c ];
     }

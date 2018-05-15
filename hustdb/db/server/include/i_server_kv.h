@@ -91,7 +91,8 @@ typedef void ( * export_record_callback_t )(
 
 struct export_cb_param_t
 {
-    void * db;
+    void *   db;
+    void *   block_id;
     uint16_t start;
     uint16_t end;
     uint32_t offset;
@@ -99,10 +100,10 @@ struct export_cb_param_t
     uint32_t total;
     int64_t  min;
     int64_t  max;
-    int file_id;
-    bool noval;
-    bool async;
-    bool byscore;
+    int      file_id;
+    bool     noval;
+    bool     async;
+    bool     byscore;
 
 } __attribute__ ( ( aligned ( 64 ) ) );
 

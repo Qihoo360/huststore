@@ -4,11 +4,11 @@
 #include <cstdlib>
 
 thread_t::thread_t ( thread_func_t thread_func )
-: _running ( false )
-, _tid ( 0 )
-, _thread_func ( thread_func )
-, _data ( NULL )
-, _stop_pipe ( NULL )
+    : _running ( false )
+    , _tid ( 0 )
+    , _thread_func ( thread_func )
+    , _data ( NULL )
+    , _stop_pipe ( NULL )
 {
 }
 

@@ -15,6 +15,10 @@
 
 #define SIZEOF_UINT32                 4
 #define SIZEOF_UINT64                 8
+
+#define MAX_KEY_LEN                   16777216
+#define MAX_VAL_LEN                   267386880
+
 #define MAX_QUEUE_NAME_LEN            64
 #define MAX_QKEY_LEN                  80
 #define QUEUE_STAT_LEN                sizeof ( queue_stat_t )
@@ -61,10 +65,10 @@ enum table_type_t
 
 typedef struct invariant_s
 {
-    uint64_t    fastdb;
-    uint64_t    conflictdb;
-    uint64_t    contentdb;
-    uint64_t    fast_conflictdb;
+    uint32_t    md5db;
+    uint32_t    conflictdb;
+    uint32_t    contentdb;
+    uint32_t    fast_conflictdb;
 
 } invariant_t;
 

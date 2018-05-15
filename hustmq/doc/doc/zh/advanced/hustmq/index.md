@@ -80,48 +80,42 @@ hustmq
     db.ttl.scan_count               = 1000          //DB，每次ttl扫描的item数量
 
     [cachedb]
-    # UNIT MB, default 512
-    cache                           = 8192          //CACHE，独立于DB，仅用于缓存
+    # UNIT MB, default 2048
+    cache                           = 2048          //CACHE，独立于DB，仅用于缓存
 
-    [fastdb]
+    [md5db]
     # 1 ~ 20, default 10
     count                           = 10            //hustdb重要模块（没有之一），db实例数（首次初始化后，禁止修改）
     # UNIT MB, default 256
-    l1_cache                        = 512           //fastdb一级缓存
-    # UNIT MB, default 512
-    l2_cache                        = 8192          //fastdb二级缓存
-    # UNIT MB, default 512
-    write_buffer                    = 1024          //fastdb写操作缓存
+    l1_cache                        = 256           //md5db一级缓存
+    # UNIT MB, default 1024
+    l2_cache                        = 1024          //md5db二级缓存
+    # UNIT MB, default 1024
+    write_buffer                    = 1024          //md5db写操作缓存
     # default 0
     bloom_filter_bits               = 0
-    # default none
-    md5_bloom_filter                = none
-    # default false
-    disable_compression             = false
+    # default true
+    disable_compression             = true
+
+    [contentdb]
+    # enable if count large than 0, default 256
+    count                           = 256
 
     [conflictdb]
     # 1 ~ 10, default 2
-    count                           = 2             //fastdb重要模块，db实例数（首次初始化后，禁止修改）
+    count                           = 2             //md5db重要模块，db实例数（首次初始化后，禁止修改）
     # UNIT MB, default 128
     cache                           = 128           //conflictdb缓存
     # UNIT MB, default 128
     write_buffer                    = 128           //conflictdb写操作缓存
-    # default 0
-    bloom_filter_bits               = 0
-    # default large
-    md5_bloom_filter                = large
+    # default 10
+    bloom_filter_bits               = 10
     # default true
     disable_compression             = true
 
     [fast_conflictdb]
     # 1 ~ 10, default 4
-    count                           = 4             //fastdb重要模块，单块缓存大小（首次初始化后，禁止修改）
-
-    [contentdb]
-    # enable if count large than 0
-    count                           = 256           //fastdb重要模块，db实例数，为0表示禁用；建议：仅用于MQ集群搭建（首次初始化后，禁止修改）
-    # UNIT MB, 16 ~ 128, default 64
-    cache                           = 64            //contentdb缓存
+    count                           = 4             //md5db重要模块，单块缓存大小（首次初始化后，禁止修改）
 
 [上一页](../index.md)
 

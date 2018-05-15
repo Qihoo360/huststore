@@ -8,15 +8,14 @@
 enum md5_bloom_mode_t
 {
     MD5_BLOOM_DISABLED  = 0,
-
     MD5_BLOOM_LARGE     = 1,
-
     MD5_BLOOM_SMALL     = 2
 };
 
 class md5_bloom_filter_t
 {
 public:
+
     md5_bloom_filter_t();
     ~md5_bloom_filter_t();
 
@@ -31,6 +30,7 @@ private:
     fmap_t              m_fmap;
     unsigned char *     m_data;
     md5_bloom_mode_t    m_type;
+
 private:
     // disable
     md5_bloom_filter_t(const md5_bloom_filter_t &);

@@ -34,7 +34,7 @@ namespace md5db
     {
         if ( NULL == path || '\0' == * path )
         {
-            LOG_ERROR ( "[md5db][bucket]path is empty" );
+            LOG_ERROR ( "[md5db][bucket_array][create_buckets]path is empty" );
             return false;
         }
 
@@ -58,7 +58,8 @@ namespace md5db
 
             if ( ! m_buckets[ i ].create ( ph ) )
             {
-                LOG_ERROR ( "[md5db][bucket]create( %s ) failed, i = %d", ph, i );
+                LOG_ERROR ( "[md5db][bucket_array][create_buckets][file=%s][i=%d]create failed", 
+                            ph, i );
                 return false;
             }
         }
@@ -70,7 +71,7 @@ namespace md5db
     {
         if ( NULL == path || '\0' == * path )
         {
-            LOG_ERROR ( "[md5db][bucket]invalid path" );
+            LOG_ERROR ( "[md5db][bucket_array][open_exist_buckets]invalid path" );
             return false;
         }
 
@@ -96,7 +97,8 @@ namespace md5db
             }
             if ( ! m_buckets[ i ].open_exist ( ph, read_write ) )
             {
-                LOG_ERROR ( "[md5db][bucket]open_exist( %s ) failed, i = %d", ph, i );
+                LOG_ERROR ( "[md5db][bucket_array][open_exist_buckets][file=%s][i=%d]open_exist failed", 
+                            ph, i );
                 return false;
             }
         }
@@ -112,12 +114,12 @@ namespace md5db
         {
             if ( ! create_buckets ( path ) )
             {
-                LOG_ERROR ( "[md5db]bucket]create failed" );
+                LOG_ERROR ( "[md5db]bucket_array][open]create failed" );
                 return false;
             }
             if ( ! open_exist_buckets ( path, read_write ) )
             {
-                LOG_ERROR ( "[md5db][bucket]open_exist failed" );
+                LOG_ERROR ( "[md5db][bucket_array][open]open_exist failed" );
                 return false;
             }
         }
@@ -127,7 +129,7 @@ namespace md5db
 
     bucket_t & bucket_array_t::get_bucket ( const void * inner_key, size_t inner_key_len )
     {
-        assert ( inner_key_len == 16 );
+        //assert ( inner_key_len == 16 );
         unsigned char c = * ( ( const unsigned char * ) inner_key );
         return m_buckets[ c ];
     }

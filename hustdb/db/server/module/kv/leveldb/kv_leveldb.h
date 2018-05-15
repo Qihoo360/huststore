@@ -184,10 +184,10 @@ private:
 
     struct inner;
 
-    int m_file_id;
+    int         m_file_id;
     std::string m_path;
     kv_config_t m_config;
-    inner * m_inner;
+    inner *     m_inner;
 
     perf_target_t m_perf_bloom_add;
     perf_target_t m_perf_bloom_hit;

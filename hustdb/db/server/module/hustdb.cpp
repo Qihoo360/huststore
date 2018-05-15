@@ -45,7 +45,7 @@ void hustdb_t::destroy ( )
     if ( m_ini )
     {
         m_appini->ini_destroy ( m_ini );
-        LOG_INFO ( "[hustdb][destroy]hustdb.conf closed" );
+        LOG_INFO ( "[hustdb][destroy]hustdb_config closed" );
     }
 
     LOG_INFO ( "[hustdb][destroy]slow task thread closing" );
@@ -145,13 +145,13 @@ bool hustdb_t::open ( )
     m_ini = m_appini->ini_create ( HUSTDB_CONFIG );
     if ( NULL == m_ini )
     {
-        LOG_ERROR ( "[hustdb][open]hustdb.conf load failed" );
+        LOG_ERROR ( "[hustdb][open]ini_create failed" );
         return false;
     }
 
     if ( ! init_server_config () )
     {
-        LOG_ERROR ( "[hustdb][open]init_server_config() failed" );
+        LOG_ERROR ( "[hustdb][open]init_server_config failed" );
         return false;
     }
 
@@ -171,13 +171,13 @@ bool hustdb_t::open ( )
     
     if ( ! check_invariant_config () )
     {
-        LOG_ERROR ( "[hustdb][open]check_invariant_config() failed" );
+        LOG_ERROR ( "[hustdb][open]check_invariant_config failed" );
         return false;
     }
 
     if ( ! init_hash_config () )
     {
-        LOG_ERROR ( "[hustdb][open]init_config failed" );
+        LOG_ERROR ( "[hustdb][open]init_hash_config failed" );
         return false;
     }
 
@@ -190,19 +190,19 @@ bool hustdb_t::open ( )
 
     if ( ! init_data_engine () )
     {
-        LOG_ERROR ( "[hustdb][open]init_data_engine() failed" );
+        LOG_ERROR ( "[hustdb][open]init_data_engine failed" );
         return false;
     }
 
     if ( ! init_queue_index () )
     {
-        LOG_ERROR ( "[hustdb][open]init_queue_index() failed" );
+        LOG_ERROR ( "[hustdb][open]init_queue_index failed" );
         return false;
     }
 
     if ( ! init_table_index () )
     {
-        LOG_ERROR ( "[hustdb][open]init_table_index() failed" );
+        LOG_ERROR ( "[hustdb][open]init_table_index failed" );
         return false;
     }
     
@@ -254,14 +254,16 @@ bool hustdb_t::init_server_config ( )
     m_server_conf.tcp_port = m_appini->ini_get_int ( m_ini, "server", "tcp.port", - 1 );
     if ( m_server_conf.tcp_port <= 0 || m_server_conf.tcp_port >= 65535 )
     {
-        LOG_ERROR ( "[hustdb][init_server_config]server tcp.port invalid, port: %d", m_server_conf.tcp_port );
+        LOG_ERROR ( "[hustdb][init_server_config][port=%d]server tcp.port invalid", 
+                    m_server_conf.tcp_port );
         return false;
     }
 
     m_server_conf.tcp_backlog = m_appini->ini_get_int ( m_ini, "server", "tcp.backlog", 512 );
     if ( m_server_conf.tcp_backlog <= 0 )
     {
-        LOG_ERROR ( "[hustdb][init_server_config]server tcp.backlog invalid, backlog: %d", m_server_conf.tcp_backlog );
+        LOG_ERROR ( "[hustdb][init_server_config][backlog=%d]server tcp.backlog invalid", 
+                    m_server_conf.tcp_backlog );
         return false;
     }
 
@@ -274,35 +276,40 @@ bool hustdb_t::init_server_config ( )
     m_server_conf.tcp_max_body_size = m_appini->ini_get_int ( m_ini, "server", "tcp.max_body_size", 16 * 1024 * 1024 );
     if ( m_server_conf.tcp_max_body_size <= 0 )
     {
-        LOG_ERROR ( "[hustdb][init_server_config]server tcp.max_body_size invalid, max_body_size: %d", m_server_conf.tcp_max_body_size );
+        LOG_ERROR ( "[hustdb][init_server_config][max_body_size=%d]server tcp.max_body_size invalid", 
+                    m_server_conf.tcp_max_body_size );
         return false;
     }
 
     m_server_conf.tcp_max_keepalive_requests = m_appini->ini_get_int ( m_ini, "server", "tcp.max_keepalive_requests", 1024 );
     if ( m_server_conf.tcp_max_keepalive_requests <= 0 )
     {
-        LOG_ERROR ( "[hustdb][init_server_config]server tcp.max_keepalive_requests invalid, max_keepalive_requests: %d", m_server_conf.tcp_max_keepalive_requests );
+        LOG_ERROR ( "[hustdb][init_server_config][max_keepalive_requests=%d]server tcp.max_keepalive_requests invalid", 
+                    m_server_conf.tcp_max_keepalive_requests );
         return false;
     }
 
     m_server_conf.tcp_recv_timeout = m_appini->ini_get_int ( m_ini, "server", "tcp.recv_timeout", 300 );
     if ( m_server_conf.tcp_recv_timeout <= 0 )
     {
-        LOG_ERROR ( "[hustdb][init_server_config]server tcp.recv_timeout invalid, recv_timeout: %d", m_server_conf.tcp_recv_timeout );
+        LOG_ERROR ( "[hustdb][init_server_config][recv_timeout=%d]server tcp.recv_timeout invalid", 
+                    m_server_conf.tcp_recv_timeout );
         return false;
     }
 
     m_server_conf.tcp_send_timeout = m_appini->ini_get_int ( m_ini, "server", "tcp.send_timeout", 300 );
     if ( m_server_conf.tcp_send_timeout <= 0 )
     {
-        LOG_ERROR ( "[hustdb][init_server_config]server tcp.send_timeout invalid, send_timeout: %d", m_server_conf.tcp_send_timeout );
+        LOG_ERROR ( "[hustdb][init_server_config][send_timeout=%d]server tcp.send_timeout invalid", 
+                    m_server_conf.tcp_send_timeout );
         return false;
     }
 
     m_server_conf.tcp_worker_count  = m_appini->ini_get_int ( m_ini, "server", "tcp.worker_count", - 1 );
     if ( m_server_conf.tcp_worker_count <= 0 || m_server_conf.tcp_worker_count >= 100 )
     {
-        LOG_ERROR ( "[hustdb][init_server_config]server tcp.worker_count invalid, worker_count: %d", m_server_conf.tcp_worker_count );
+        LOG_ERROR ( "[hustdb][init_server_config][worker_count=%d]server tcp.worker_count invalid", 
+                    m_server_conf.tcp_worker_count );
         return false;
     }
 
@@ -320,91 +327,104 @@ bool hustdb_t::init_server_config ( )
     m_server_conf.memory_process_threshold  = m_appini->ini_get_int ( m_ini, "server", "memory.process.threshold", 70 );
     if ( m_server_conf.memory_process_threshold < 0 || m_server_conf.memory_process_threshold >= 100 )
     {
-        LOG_ERROR ( "[hustdb][init_server_config]server memory.process.threshold invalid, process.threshold: %d", m_server_conf.memory_process_threshold );
+        LOG_ERROR ( "[hustdb][init_server_config][process.threshold=%d]server memory.process.threshold invalid", 
+                    m_server_conf.memory_process_threshold );
         return false;
     }
 
     m_server_conf.memory_system_threshold  = m_appini->ini_get_int ( m_ini, "server", "memory.system.threshold", 90 );
     if ( m_server_conf.memory_system_threshold < 0 || m_server_conf.memory_system_threshold >= 100 )
     {
-        LOG_ERROR ( "[hustdb][init_server_config]server memory.system.threshold invalid, system.threshold: %d", m_server_conf.memory_system_threshold );
+        LOG_ERROR ( "[hustdb][init_server_config][system.threshold=%d]server memory.system.threshold invalid", 
+                    m_server_conf.memory_system_threshold );
         return false;
     }
 
     m_store_conf.mq_redelivery_timeout = m_appini->ini_get_int ( m_ini, "store", "mq.redelivery.timeout", 5 );
     if ( m_store_conf.mq_redelivery_timeout <= 0 || m_store_conf.mq_redelivery_timeout > 255 )
     {
-        LOG_ERROR ( "[hustdb][init_server_config]store mq.redelivery.timeout invalid, redelivery.timeout: %d", m_store_conf.mq_redelivery_timeout );
+        LOG_ERROR ( "[hustdb][init_server_config][redelivery.timeout=%d]store mq.redelivery.timeout invalid", 
+                    m_store_conf.mq_redelivery_timeout );
         return false;
     }
 
     m_store_conf.mq_ttl_maximum = m_appini->ini_get_int ( m_ini, "store", "mq.ttl.maximum", 7200 );
     if ( m_store_conf.mq_ttl_maximum <= 0 )
     {
-        LOG_ERROR ( "[hustdb][init_server_config]store mq.ttl.maximum invalid, ttl.maximum: %d", m_store_conf.mq_ttl_maximum );
+        LOG_ERROR ( "[hustdb][init_server_config][ttl.maximum=%d]store mq.ttl.maximum invalid", 
+                    m_store_conf.mq_ttl_maximum );
         return false;
     }
 
     m_store_conf.db_ttl_maximum = m_appini->ini_get_int ( m_ini, "store", "db.ttl.maximum", 2592000 );
     if ( m_store_conf.db_ttl_maximum <= 0 )
     {
-        LOG_ERROR ( "[hustdb][init_server_config]store db.ttl.maximum invalid, ttl.maximum: %d", m_store_conf.db_ttl_maximum );
+        LOG_ERROR ( "[hustdb][init_server_config][ttl.maximum=%d]store db.ttl.maximum invalid", 
+                    m_store_conf.db_ttl_maximum );
         return false;
     }
 
     m_store_conf.db_ttl_scan_interval = m_appini->ini_get_int ( m_ini, "store", "db.ttl.scan_interval", 30 );
     if ( m_store_conf.db_ttl_scan_interval <= 0 )
     {
-        LOG_ERROR ( "[hustdb][init_server_config]store db.ttl.scan_interval invalid, ttl.scan_interval: %d", m_store_conf.db_ttl_scan_interval );
+        LOG_ERROR ( "[hustdb][init_server_config][ttl.scan_interval=%d]store db.ttl.scan_interval invalid", 
+                    m_store_conf.db_ttl_scan_interval );
         return false;
     }
     
     m_store_conf.db_binlog_scan_interval = m_appini->ini_get_int ( m_ini, "store", "db.binlog.scan_interval", 20 );
     if ( m_store_conf.db_binlog_scan_interval <= 0 )
     {
-        LOG_ERROR ( "[hustdb][init_server_config]store db.binlog.scan_interval invalid, binlog.scan_interval: %d", m_store_conf.db_binlog_scan_interval );
+        LOG_ERROR ( "[hustdb][init_server_config][binlog.scan_interval=%d]store db.binlog.scan_interval invalid", 
+                    m_store_conf.db_binlog_scan_interval );
         return false;
     }
     
     m_store_conf.db_binlog_thread_count = m_appini->ini_get_int ( m_ini, "store", "db.binlog.thread_count", 4 );
     if ( m_store_conf.db_binlog_thread_count <= 0 )
     {
-        LOG_ERROR ( "[hustdb][init_server_config]store db.binlog.thread_count invalid, binlog.thread_count: %d", m_store_conf.db_binlog_thread_count );
+        LOG_ERROR ( "[hustdb][init_server_config][binlog.thread_count=%d]store db.binlog.thread_count invalid", 
+                    m_store_conf.db_binlog_thread_count );
         return false;
     }
     
     m_store_conf.db_binlog_queue_capacity = m_appini->ini_get_int ( m_ini, "store", "db.binlog.queue_capacity", 4000 );
     if ( m_store_conf.db_binlog_queue_capacity <= 0 )
     {
-        LOG_ERROR ( "[hustdb][init_server_config]store db.binlog.queue_capacity invalid, binlog.queue_capacity: %d", m_store_conf.db_binlog_queue_capacity );
+        LOG_ERROR ( "[hustdb][init_server_config][binlog.queue_capacity=%d]store db.binlog.queue_capacity invalid", 
+                    m_store_conf.db_binlog_queue_capacity );
         return false;
     }
     
     m_store_conf.db_binlog_task_timeout = m_appini->ini_get_int ( m_ini, "store", "db.binlog.task_timeout", 950400 );
     if ( m_store_conf.db_binlog_task_timeout <= 0 )
     {
-        LOG_ERROR ( "[hustdb][init_server_config]store db.binlog.task_timeout invalid, binlog.task_timeout: %d", m_store_conf.db_binlog_task_timeout );
+        LOG_ERROR ( "[hustdb][init_server_config][binlog.task_timeout=%d]store db.binlog.task_timeout invalid", 
+                    m_store_conf.db_binlog_task_timeout );
         return false;
     }
 
     m_store_conf.mq_queue_maximum = m_appini->ini_get_int ( m_ini, "store", "mq.queue.maximum", 8192 );
     if ( m_store_conf.mq_queue_maximum <= 0 )
     {
-        LOG_ERROR ( "[hustdb][init_server_config]store mq.queue.maximum invalid, queue.maximum: %d", m_store_conf.mq_queue_maximum );
+        LOG_ERROR ( "[hustdb][init_server_config][queue.maximum=%d]store mq.queue.maximum invalid", 
+                    m_store_conf.mq_queue_maximum );
         return false;
     }
 
     m_store_conf.db_table_maximum = m_appini->ini_get_int ( m_ini, "store", "db.table.maximum", 8192 );
     if ( m_store_conf.db_table_maximum <= 0 )
     {
-        LOG_ERROR ( "[hustdb][init_server_config]store db.table.maximum invalid, table.maximum: %d", m_store_conf.db_table_maximum );
+        LOG_ERROR ( "[hustdb][init_server_config][table.maximum=%d]store db.table.maximum invalid", 
+                    m_store_conf.db_table_maximum );
         return false;
     }
 
     m_store_conf.db_ttl_scan_count = m_appini->ini_get_int ( m_ini, "store", "db.ttl.scan_count", 1000 );
     if ( m_store_conf.db_ttl_scan_count <= 0 || m_store_conf.db_ttl_scan_count > 10000 )
     {
-        LOG_ERROR ( "[hustdb][init_server_config]store db.ttl.scan_count invalid, ttl.scan_count: %d", m_store_conf.db_ttl_scan_count );
+        LOG_ERROR ( "[hustdb][init_server_config][ttl.scan_count=%d]store db.ttl.scan_count invalid", 
+                    m_store_conf.db_ttl_scan_count );
         return false;
     }
 
@@ -424,7 +444,8 @@ bool hustdb_t::check_invariant_config ( )
         FILE * fp = fopen ( ph, "wb" );
         if ( ! fp )
         {
-            LOG_ERROR ( "[hustdb][check_invariant_config]invariant fopen %s failed", ph );
+            LOG_ERROR ( "[hustdb][check_invariant_config][file=%s]fopen failed", 
+                        ph );
             return false;
         }
 
@@ -433,7 +454,7 @@ bool hustdb_t::check_invariant_config ( )
         memset ( buf, 0, sizeof ( buf ) );
         if ( sizeof ( buf ) != fwrite ( buf, 1, sizeof ( buf ), fp ) )
         {
-            LOG_ERROR ( "[hustdb][check_invariant_config]invariant fwrite[%d] failed", sizeof ( buf ) );
+            LOG_ERROR ( "[hustdb][check_invariant_config]fwrite failed" );
             ok = false;
         }
 
@@ -453,28 +474,29 @@ bool hustdb_t::check_invariant_config ( )
         if ( ! G_APPTOOL->fmap_open ( & m_invariant, ph, 0, 0, true ) )
         {
             r = EINVAL;
-            LOG_ERROR ( "[hustdb][check_invariant_config]invariant fmap_open failed" );
+            LOG_ERROR ( "[hustdb][check_invariant_config]fmap_open failed" );
             break;
         }
 
         if ( m_invariant.ptr_len != sizeof ( invariant_t ) )
         {
             r = EINVAL;
-            LOG_ERROR ( "[hustdb][check_invariant_config]invariant ptr_len: %d, != must_len: %d, error", m_invariant.ptr_len, sizeof ( invariant_t ) );
+            LOG_ERROR ( "[hustdb][check_invariant_config][ptr_len=%d][must_len=%d]", 
+                        m_invariant.ptr_len, sizeof ( invariant_t ) );
             break;
         }
 
         invariant_t * invar = NULL;
         invar = ( invariant_t * ) m_invariant.ptr;
 
-        int fastdb_count             = m_appini->ini_get_int ( m_ini, "fastdb", "count", 0 );
+        int md5db_count              = m_appini->ini_get_int ( m_ini, "md5db", "count", 0 );
         int conflictdb_count         = m_appini->ini_get_int ( m_ini, "conflictdb", "count", 0 );
         int contentdb_count          = m_appini->ini_get_int ( m_ini, "contentdb", "count", 0 );
         int fast_conflictdb_count    = m_appini->ini_get_int ( m_ini, "fast_conflictdb", "count", 0 );
 
         if ( ! first &&
              (
-               invar->fastdb != fastdb_count ||
+               invar->md5db != md5db_count ||
                invar->conflictdb != conflictdb_count ||
                invar->contentdb != contentdb_count ||
                invar->fast_conflictdb != fast_conflictdb_count
@@ -482,16 +504,15 @@ bool hustdb_t::check_invariant_config ( )
              )
         {
             r = EINVAL;
-            LOG_ERROR ( "[hustdb][check_invariant_config]invariant error, fastdb:[%d,%d], conflictdb:[%d,%d], contentdb:[%d,%d], fast_conflictdb:[%d,%d]",
-                       invar->fastdb, fastdb_count,
-                       invar->conflictdb, conflictdb_count,
-                       invar->contentdb, contentdb_count,
-                       invar->fast_conflictdb, fast_conflictdb_count
-                       );
+            LOG_ERROR ( "[hustdb][check_invariant_config][md5db=%d,%d][conflictdb=%d,%d][contentdb=%d,%d][fast_conflictdb=%d,%d]",
+                        invar->md5db, md5db_count,
+                        invar->conflictdb, conflictdb_count,
+                        invar->contentdb, contentdb_count,
+                        invar->fast_conflictdb, fast_conflictdb_count );
             break;
         }
         
-        invar->fastdb             = fastdb_count;
+        invar->md5db              = md5db_count;
         invar->conflictdb         = conflictdb_count;
         invar->contentdb          = contentdb_count;
         invar->fast_conflictdb    = fast_conflictdb_count;
@@ -506,43 +527,43 @@ bool hustdb_t::check_invariant_config ( )
 
 bool hustdb_t::init_hash_config ( )
 {
-    int            fastdb_count;
+    int            md5db_count;
     std::string    hash_conf_content;
     FILE *         fp_hash_conf;
 
-    if ( m_apptool->is_file ( DB_HASH_CONFIG )
-         && m_apptool->is_file ( HUSTMQ_INDEX )
-         && m_apptool->is_file ( HUSTTABLE_INDEX )
-         && m_apptool->is_dir ( DB_FULLKEY_DIR )
-         && m_apptool->is_dir ( DB_BUCKETS_DIR )
-         && m_apptool->is_dir ( DB_CONFLICT_DIR )
-         && m_apptool->is_dir ( DB_FAST_CONFLICT_DIR ) )
+    if ( m_apptool->is_file ( DB_HASH_CONFIG ) && 
+         m_apptool->is_file ( HUSTMQ_INDEX ) && 
+         m_apptool->is_file ( HUSTTABLE_INDEX ) && 
+         m_apptool->is_dir ( DB_FULLKEY_DIR ) &&
+         m_apptool->is_dir ( DB_BUCKETS_DIR ) && 
+         m_apptool->is_dir ( DB_CONFLICT_DIR ) && 
+         m_apptool->is_dir ( DB_FAST_CONFLICT_DIR ) )
     {
         LOG_INFO ( "[hustdb][init_hash_config]data config has been created" );
         return true;
     }
 
-    fastdb_count = m_appini->ini_get_int ( m_ini, "fastdb", "count", 10 );
-    if ( fastdb_count <= 0 || fastdb_count > 20 )
+    md5db_count = m_appini->ini_get_int ( m_ini, "md5db", "count", 10 );
+    if ( md5db_count <= 0 || md5db_count > 20 )
     {
-        LOG_ERROR ( "[hustdb][init_hash_config]storage fastdb count invalid" );
+        LOG_ERROR ( "[hustdb][init_hash_config]storage md5db count invalid" );
         return false;
     }
 
     do
     {
         {
-            bool b = generate_hash_conf ( fastdb_count, 1, hash_conf_content );
+            bool b = generate_hash_conf ( md5db_count, 1, hash_conf_content );
             if ( ! b )
             {
-                LOG_ERROR ( "[hustdb][init_hash_config]generate_hash_conf() failed" );
+                LOG_ERROR ( "[hustdb][init_hash_config]generate_hash_conf failed" );
                 break;
             }
 
             fp_hash_conf = fopen ( DB_HASH_CONFIG, "wb" );
             if ( NULL == fp_hash_conf )
             {
-                LOG_ERROR ( "[hustdb][init_hash_config]fopen( %s ) failed", DB_HASH_CONFIG );
+                LOG_ERROR ( "[hustdb][init_hash_config][file=%s]fopen failed", DB_HASH_CONFIG );
                 break;
             }
         }
@@ -586,7 +607,7 @@ bool hustdb_t::init_data_engine ( )
 
         if ( ! m_storage->open () )
         {
-            LOG_ERROR ( "[hustdb][init_data_engine]m_storage->open failed" );
+            LOG_ERROR ( "[hustdb][init_data_engine]m_storage.open failed" );
             m_storage->kill_me ();
             m_storage = NULL;
             return false;
@@ -596,7 +617,7 @@ bool hustdb_t::init_data_engine ( )
 
     if ( NULL == m_mdb )
     {
-        int mdb_cache_size = m_appini->ini_get_int ( m_ini, "fastdb", "l2_cache", 512 );
+        int mdb_cache_size = m_appini->ini_get_int ( m_ini, "md5db", "l2_cache", 1024 );
 
         m_mdb = new mdb_t ();
 
@@ -606,7 +627,7 @@ bool hustdb_t::init_data_engine ( )
                             )
              )
         {
-            LOG_ERROR ( "[hustdb][init_data_engine]mdb->open failed" );
+            LOG_ERROR ( "[hustdb][init_data_engine]mdb.open failed" );
             m_mdb->kill_me ();
             m_mdb = NULL;
             return false;
@@ -617,7 +638,7 @@ bool hustdb_t::init_data_engine ( )
 
     if ( NULL == m_rdb )
     {
-        int rdb_cache_size = m_appini->ini_get_int ( m_ini, "cachedb", "cache", 512 );
+        int rdb_cache_size = m_appini->ini_get_int ( m_ini, "cachedb", "cache", 2048 );
 
         m_rdb = new rdb_t ();
 
@@ -627,7 +648,7 @@ bool hustdb_t::init_data_engine ( )
                             )
              )
         {
-            LOG_ERROR ( "[hustdb][init_data_engine]rdb->open failed" );
+            LOG_ERROR ( "[hustdb][init_data_engine]rdb.open failed" );
             m_rdb->kill_me ();
             m_rdb = NULL;
             return false;
@@ -649,7 +670,8 @@ bool hustdb_t::init_queue_index ( )
         FILE * fp = fopen ( ph, "wb" );
         if ( ! fp )
         {
-            LOG_ERROR ( "[hustdb][init_queue_index]queue index fopen %s failed", ph );
+            LOG_ERROR ( "[hustdb][init_queue_index][file=%s]queue index fopen failed", 
+                        ph );
             return false;
         }
 
@@ -658,7 +680,7 @@ bool hustdb_t::init_queue_index ( )
         memset ( buf, 0, sizeof ( buf ) );
         if ( sizeof ( buf ) != fwrite ( buf, 1, sizeof ( buf ), fp ) )
         {
-            LOG_ERROR ( "[hustdb][init_queue_index]queue index fwrite[%d] failed", sizeof ( buf ) );
+            LOG_ERROR ( "[hustdb][init_queue_index]queue index fwrite failed" );
             ok = false;
         }
 
@@ -674,7 +696,8 @@ bool hustdb_t::init_queue_index ( )
         FILE * fp = fopen ( ph, "rb+" );
         if ( ! fp )
         {
-            LOG_ERROR ( "[hustdb][init_queue_index]queue index fopen %s failed", ph );
+            LOG_ERROR ( "[hustdb][init_queue_index][file=%s]queue index fopen failed", 
+                        ph );
             return false;
         }
 
@@ -688,7 +711,7 @@ bool hustdb_t::init_queue_index ( )
 
             if ( sizeof ( add_buf ) != fwrite ( add_buf, 1, sizeof ( add_buf ), fp ) )
             {
-                LOG_ERROR ( "[hustdb][init_queue_index]queue index fwrite[%d] failed", sizeof ( add_buf ) );
+                LOG_ERROR ( "[hustdb][init_queue_index]queue index fwrite failed" );
                 fclose ( fp );
                 return false;
             }
@@ -707,7 +730,8 @@ bool hustdb_t::init_queue_index ( )
          m_queue_index.ptr_len % QUEUE_STAT_LEN != 0
          )
     {
-        LOG_ERROR ( "[hustdb][init_queue_index]queue index ptr_len: %d, lt %d or mod %d != 0, error", m_queue_index.ptr_len, QUEUE_INDEX_FILE_LEN, QUEUE_STAT_LEN );
+        LOG_ERROR ( "[hustdb][init_queue_index][ptr_len=%d lt %d, or mod %d != 0]queue index", 
+                    m_queue_index.ptr_len, QUEUE_INDEX_FILE_LEN, QUEUE_STAT_LEN );
         return false;
     }
 
@@ -742,7 +766,8 @@ bool hustdb_t::init_table_index ( )
         FILE * fp = fopen ( ph, "wb" );
         if ( ! fp )
         {
-            LOG_ERROR ( "[hustdb][init_table_index]table index fopen %s failed", ph );
+            LOG_ERROR ( "[hustdb][init_table_index][file=%s]table index fopen failed", 
+                        ph );
             return false;
         }
 
@@ -766,7 +791,8 @@ bool hustdb_t::init_table_index ( )
         FILE * fp = fopen ( ph, "rb+" );
         if ( ! fp )
         {
-            LOG_ERROR ( "[hustdb][init_table_index]table index fopen %s failed", ph );
+            LOG_ERROR ( "[hustdb][init_table_index][file=%s]table index fopen failed", 
+                        ph );
             return false;
         }
 
@@ -780,7 +806,7 @@ bool hustdb_t::init_table_index ( )
 
             if ( sizeof ( add_buf ) != fwrite ( add_buf, 1, sizeof ( add_buf ), fp ) )
             {
-                LOG_ERROR ( "[hustdb][init_queue_index]table index fwrite[%d] failed", sizeof ( add_buf ) );
+                LOG_ERROR ( "[hustdb][init_queue_index]table index fwrite failed" );
                 fclose ( fp );
                 return false;
             }
@@ -799,7 +825,8 @@ bool hustdb_t::init_table_index ( )
          m_table_index.ptr_len % TABLE_STAT_LEN != 0
          )
     {
-        LOG_ERROR ( "[hustdb][init_table_index]table index ptr_len: %d, lt %d or mod %d != 0, error", m_table_index.ptr_len, TABLE_INDEX_FILE_LEN, TABLE_STAT_LEN );
+        LOG_ERROR ( "[hustdb][init_table_index][ptr_len=%d lt %d, or mod %d != 0]table index", 
+                    m_table_index.ptr_len, TABLE_INDEX_FILE_LEN, TABLE_STAT_LEN );
         return false;
     }
 
@@ -904,7 +931,8 @@ bool hustdb_t::generate_hash_conf (
 
     if ( file_count < 1 || copy_count != 1 )
     {
-        LOG_ERROR ( "[hustdb][generate_hash_conf]file_count: %d, copy_count: %d", file_count, copy_count );
+        LOG_ERROR ( "[hustdb][generate_hash_conf][file_count=%d][copy_count=%d]", 
+                    file_count, copy_count );
         return false;
     }
 
@@ -921,7 +949,8 @@ bool hustdb_t::generate_hash_conf (
     b = hp.save_memory ( hash_conf );
     if ( ! b )
     {
-        LOG_ERROR ( "[hustdb][generate_hash_conf]hp.save_memory failed, file_count: %d, copy_count: %d", file_count, copy_count );
+        LOG_ERROR ( "[hustdb][generate_hash_conf][file_count=%d][copy_count=%d]hp.save_memory failed", 
+                    file_count, copy_count );
         return false;
     }
 
@@ -1054,7 +1083,7 @@ void hustdb_t::set_table_size (
                                 int atomic
                                 )
 {
-    table_stat_t *           tstat        = NULL;
+    table_stat_t * tstat = NULL;
 
     tstat = ( table_stat_t * ) ( m_table_index.ptr + offset );
     atomic_fetch_add ( atomic, & tstat->size );
@@ -1250,8 +1279,8 @@ void hustdb_t::hustdb_memory_threshold ( )
     }
     fclose (meminfo_fp);
 
-    unsigned long freeram = ( mem[1] + mem[2] + mem[3] ) * 1024;
-    unsigned long totalram = mem[0] * 1024;
+    uint64_t freeram  = ( mem[1] + mem[2] + mem[3] ) * 1024;
+    uint64_t totalram = mem[0] * 1024;
 
     if ( m_server_conf.memory_system_threshold > 0 &&
          ( 100 * freeram / totalram ) < ( 100 - m_server_conf.memory_system_threshold )
@@ -1380,7 +1409,8 @@ int hustdb_t::hustdb_get (
         {
             if ( ENOENT != r )
             {
-                LOG_ERROR ( "[hustdb][db_get]get return %d", r );
+                LOG_ERROR ( "[hustdb][db_get][r=%d]", 
+                            r );
             }
 
             return r;
@@ -1399,11 +1429,12 @@ int hustdb_t::hustdb_get (
                 {
                     if ( ENOENT == r )
                     {
-                        LOG_DEBUG ( "[hustdb][db_get]get ttl-del return ENOENT" );
+                        LOG_DEBUG ( "[hustdb][db_get][r=ENOENT]get ttl-del" );
                     }
                     else
                     {
-                        LOG_ERROR ( "[hustdb][db_get]get ttl-del return %d", r );
+                        LOG_ERROR ( "[hustdb][db_get][r=%d]get ttl-del", 
+                                    r );
                     }
 
                     return ENOENT;
@@ -1446,8 +1477,8 @@ int hustdb_t::hustdb_put (
     uint32_t        user_ver    = ver;
 
     if ( unlikely ( CHECK_STRING ( key ) ||
-                   CHECK_STRING ( val ) ||
-                   CHECK_VERSION
+                    CHECK_STRING ( val ) ||
+                    CHECK_VERSION
                    )
          )
     {
@@ -1481,16 +1512,19 @@ int hustdb_t::hustdb_put (
         {
             if ( ! is_dup )
             {
-                LOG_ERROR ( "[hustdb][db_put][user_ver=%u][ver=%u]put return EINVAL", user_ver, ver );
+                LOG_ERROR ( "[hustdb][db_put][user_ver=%u][ver=%u][r=EINVAL]", 
+                            user_ver, ver );
             }
             else
             {
-                LOG_INFO ( "[hustdb][db_put][user_ver=%u][ver=%u]put return EINVAL", user_ver, ver );
+                LOG_INFO ( "[hustdb][db_put][user_ver=%u][ver=%u][r=EINVAL]", 
+                            user_ver, ver );
             }
         }
         else
         {
-            LOG_ERROR ( "[hustdb][db_put][key=%p][key_len=%d]put return %d", key, ( int ) key_len, r );
+            LOG_ERROR ( "[hustdb][db_put][key=%p][key_len=%d][r=%d]", 
+                        key, ( int ) key_len, r );
         }
 
         return r;
@@ -1549,11 +1583,12 @@ int hustdb_t::hustdb_del (
     {
         if ( ENOENT == r )
         {
-            LOG_DEBUG ( "[hustdb][db_del]del return ENOENT" );
+            LOG_DEBUG ( "[hustdb][db_del][r=ENOENT]" );
         }
         else
         {
-            LOG_ERROR ( "[hustdb][db_del]del return %d", r );
+            LOG_ERROR ( "[hustdb][db_del][r=%d]", 
+                        r );
         }
 
         return r;
@@ -1593,10 +1628,10 @@ int hustdb_t::hustdb_keys (
     file_count = m_storage->get_user_file_count ();
 
     if ( unlikely ( offset < 0 || offset > MAX_EXPORT_OFFSET ||
-                   size < 0 || size > MEM_EXPORT_SIZE ||
-                   file_id < 0 || file_id >= file_count ||
-                   ! async && offset > SYNC_EXPORT_OFFSET ||
-                   start < 0 || end < 0 || start >= end || end > MAX_BUCKET_NUM
+                    size < 0 || size > MEM_EXPORT_SIZE ||
+                    file_id < 0 || file_id >= file_count ||
+                    ! async && offset > SYNC_EXPORT_OFFSET ||
+                    start < 0 || end < 0 || start >= end || end > MAX_BUCKET_NUM
                    )
          )
     {
@@ -1622,7 +1657,8 @@ int hustdb_t::hustdb_keys (
     r = m_storage->export_db_mem ( conn, rsp, ctxt, NULL, & cb_pm );
     if ( 0 != r )
     {
-        LOG_ERROR ( "[hustdb][db_keys]keys return %d", r );
+        LOG_ERROR ( "[hustdb][db_keys][r=%d]", 
+                    r );
     }
 
     hits                    = cb_pm.size;
@@ -1774,7 +1810,8 @@ int hustdb_t::hustdb_export (
                    )
          )
     {
-        LOG_ERROR ( "[hustdb][db_export]an error directory or result already exist: %s, %s", i_ph, d_ph );
+        LOG_ERROR ( "[hustdb][db_export][file=%s, %s]an error directory or result already exists", 
+                    i_ph, d_ph );
         return ENOENT;
     }
 
@@ -1787,7 +1824,7 @@ int hustdb_t::hustdb_export (
     task_export_t * task = task_export_t::create ( inner_file_id, path, offset, size, start, end, noval, cover );
     if ( NULL == task )
     {
-        LOG_ERROR ( "[hustdb][db_export]task_export_t::create failed" );
+        LOG_ERROR ( "[hustdb][db_export]task create failed" );
         return EPERM;
     }
 
@@ -1795,7 +1832,7 @@ int hustdb_t::hustdb_export (
     {
         task->release ();
 
-        LOG_ERROR ( "[hustdb][db_export]push task_export_t failed" );
+        LOG_ERROR ( "[hustdb][db_export]push task failed" );
         return EPERM;
     }
 
@@ -1815,7 +1852,7 @@ int hustdb_t::hustdb_ttl_scan ( )
     task_ttl_scan_t * task = task_ttl_scan_t::create ( m_store_conf.db_ttl_scan_count );
     if ( NULL == task )
     {
-        LOG_ERROR ( "[hustdb][db_ttl_scan]task_ttl_scan_t::create failed" );
+        LOG_ERROR ( "[hustdb][db_ttl_scan]task create failed" );
         return EPERM;
     }
 
@@ -1823,7 +1860,7 @@ int hustdb_t::hustdb_ttl_scan ( )
     {
         task->release ();
 
-        LOG_ERROR ( "[hustdb][db_ttl_scan]push task_ttl_scan_t failed" );
+        LOG_ERROR ( "[hustdb][db_ttl_scan]push task failed" );
         return EPERM;
     }
 
@@ -1841,7 +1878,7 @@ int hustdb_t::hustdb_binlog_scan ( )
     task_binlog_scan_t * task = task_binlog_scan_t::create ( );
     if ( NULL == task )
     {
-        LOG_ERROR ( "[hustdb][db_binlog_scan]task_binlog_scan_t::create failed" );
+        LOG_ERROR ( "[hustdb][db_binlog_scan]task create failed" );
         return EPERM;
     }
 
@@ -1849,7 +1886,7 @@ int hustdb_t::hustdb_binlog_scan ( )
     {
         task->release ();
 
-        LOG_ERROR ( "[hustdb][db_binlog_scan]push task_binlog_scan_t failed" );
+        LOG_ERROR ( "[hustdb][db_binlog_scan]push task failed" );
         return EPERM;
     }
 
@@ -1894,7 +1931,8 @@ int hustdb_t::hustdb_hexist (
     {
         if ( ENOENT != r )
         {
-            LOG_ERROR ( "[hustdb][db_hexist]exists return %d", r );
+            LOG_ERROR ( "[hustdb][db_hexist][r=%d]", 
+                        r );
         }
     }
 
@@ -1964,7 +2002,8 @@ int hustdb_t::hustdb_hget (
         {
             if ( ENOENT != r )
             {
-                LOG_ERROR ( "[hustdb][db_hget]hget return %d", r );
+                LOG_ERROR ( "[hustdb][db_hget][r=%d]", 
+                            r );
             }
 
             return r;
@@ -1983,11 +2022,12 @@ int hustdb_t::hustdb_hget (
                 {
                     if ( ENOENT == r )
                     {
-                        LOG_DEBUG ( "[hustdb][db_hget]hget ttl-del return ENOENT" );
+                        LOG_DEBUG ( "[hustdb][db_hget][r=ENOENT]hget ttl-del" );
                     }
                     else
                     {
-                        LOG_ERROR ( "[hustdb][db_hget]hget ttl-del return %d", r );
+                        LOG_ERROR ( "[hustdb][db_hget][r=%d]hget ttl-del", 
+                                    r );
                     }
 
                     return ENOENT;
@@ -2080,16 +2120,19 @@ int hustdb_t::hustdb_hset (
         {
             if ( ! is_dup )
             {
-                LOG_ERROR ( "[hustdb][db_hset][user_ver=%u][ver=%u]hset return EINVAL", user_ver, ver );
+                LOG_ERROR ( "[hustdb][db_hset][user_ver=%u][ver=%u][r=EINVAL]", 
+                            user_ver, ver );
             }
             else
             {
-                LOG_INFO ( "[hustdb][db_hset][user_ver=%u][ver=%u]hset return EINVAL", user_ver, ver );
+                LOG_INFO ( "[hustdb][db_hset][user_ver=%u][ver=%u][r=EINVAL]", 
+                            user_ver, ver );
             }
         }
         else
         {
-            LOG_ERROR ( "[hustdb][db_hset][key=%p][key_len=%d]hset return %d", key, ( int ) key_len, r );
+            LOG_ERROR ( "[hustdb][db_hset][key=%p][key_len=%d][r=%d]", 
+                        key, ( int ) key_len, r );
         }
 
         return r;
@@ -2227,16 +2270,19 @@ int hustdb_t::hustdb_hincrby (
         {
             if ( ! is_dup )
             {
-                LOG_ERROR ( "[hustdb][db_hincrby][user_ver=%u][ver=%u]hset return EINVAL", user_ver, ver );
+                LOG_ERROR ( "[hustdb][db_hincrby][user_ver=%u][ver=%u][r=EINVAL]", 
+                            user_ver, ver );
             }
             else
             {
-                LOG_INFO ( "[hustdb][db_hincrby][user_ver=%u][ver=%u]hset return EINVAL", user_ver, ver );
+                LOG_INFO ( "[hustdb][db_hincrby][user_ver=%u][ver=%u][r=EINVAL]", 
+                            user_ver, ver );
             }
         }
         else
         {
-            LOG_ERROR ( "[hustdb][db_hincrby][key=%p][key_len=%d]hset return %d", key, ( int ) key_len, r );
+            LOG_ERROR ( "[hustdb][db_hincrby][key=%p][key_len=%d][r=EINVAL]", 
+                        key, ( int ) key_len, r );
         }
 
         return r;
@@ -2326,11 +2372,12 @@ int hustdb_t::hustdb_hdel (
     {
         if ( ENOENT == r )
         {
-            LOG_DEBUG ( "[hustdb][db_hdel]hdel return ENOENT" );
+            LOG_DEBUG ( "[hustdb][db_hdel][r=ENOENT]" );
         }
         else
         {
-            LOG_ERROR ( "[hustdb][db_hdel]hdel return %d", r );
+            LOG_ERROR ( "[hustdb][db_hdel][r=%d]", 
+                        r );
         }
 
         return r;
@@ -2410,7 +2457,8 @@ int hustdb_t::hustdb_hkeys (
     r = m_storage->export_db_mem ( conn, rsp, ctxt, NULL, & cb_pm );
     if ( 0 != r )
     {
-        LOG_ERROR ( "[hustdb][db_hkeys]hkeys return %d", r );
+        LOG_ERROR ( "[hustdb][db_hkeys][r=%d]", 
+                    r );
     }
 
     hits                    = cb_pm.size;
@@ -2457,7 +2505,8 @@ int hustdb_t::hustdb_sismember (
     {
         if ( ENOENT != r )
         {
-            LOG_ERROR ( "[hustdb][db_sismember]exists return %d", r );
+            LOG_ERROR ( "[hustdb][db_sismember][r=%d]", 
+                        r );
         }
     }
 
@@ -2523,16 +2572,19 @@ int hustdb_t::hustdb_sadd (
         {
             if ( ! is_dup )
             {
-                LOG_ERROR ( "[hustdb][db_sadd][user_ver=%u][ver=%u]sadd return EINVAL", user_ver, ver );
+                LOG_ERROR ( "[hustdb][db_sadd][user_ver=%u][ver=%u][r=EINVAL]", 
+                            user_ver, ver );
             }
             else
             {
-                LOG_INFO ( "[hustdb][db_sadd][user_ver=%u][ver=%u]sadd return EINVAL", user_ver, ver );
+                LOG_INFO ( "[hustdb][db_sadd][user_ver=%u][ver=%u][r=EINVAL]", 
+                            user_ver, ver );
             }
         }
         else
         {
-            LOG_ERROR ( "[hustdb][db_sadd][key=%p][key_len=%d]sadd return %d", key, ( int ) key_len, r );
+            LOG_ERROR ( "[hustdb][db_sadd][key=%p][key_len=%d][r=%d]", 
+                        key, ( int ) key_len, r );
         }
 
         return r;
@@ -2586,11 +2638,12 @@ int hustdb_t::hustdb_srem (
     {
         if ( ENOENT == r )
         {
-            LOG_DEBUG ( "[hustdb][db_srem]del return ENOENT" );
+            LOG_DEBUG ( "[hustdb][db_srem][r=ENOENT]" );
         }
         else
         {
-            LOG_ERROR ( "[hustdb][db_srem]del return %d", r );
+            LOG_ERROR ( "[hustdb][db_srem][r=%d]", 
+                        r );
         }
 
         return r;
@@ -2624,10 +2677,10 @@ int hustdb_t::hustdb_smembers (
     int             _offset      = - 1;
 
     if ( unlikely ( ! tb_name_check ( table, table_len ) ||
-                   offset < 0 || offset > MAX_EXPORT_OFFSET ||
-                   size < 0 || size > MEM_EXPORT_SIZE ||
-                   ! async && offset > SYNC_EXPORT_OFFSET ||
-                   start < 0 || end < 0 || start >= end || end > MAX_BUCKET_NUM
+                    offset < 0 || offset > MAX_EXPORT_OFFSET ||
+                    size < 0 || size > MEM_EXPORT_SIZE ||
+                    ! async && offset > SYNC_EXPORT_OFFSET ||
+                    start < 0 || end < 0 || start >= end || end > MAX_BUCKET_NUM
                    )
          )
     {
@@ -2662,7 +2715,8 @@ int hustdb_t::hustdb_smembers (
     r = m_storage->export_db_mem ( conn, rsp, ctxt, NULL, & cb_pm );
     if ( 0 != r )
     {
-        LOG_ERROR ( "[hustdb][db_smembers]smembers return %d", r );
+        LOG_ERROR ( "[hustdb][db_smembers][r=%d]", 
+                    r );
     }
 
     hits                    = cb_pm.size;
@@ -2709,7 +2763,8 @@ int hustdb_t::hustdb_zismember (
     {
         if ( ENOENT != r )
         {
-            LOG_ERROR ( "[hustdb][db_zismember]exists return %d", r );
+            LOG_ERROR ( "[hustdb][db_zismember][r=%d]", 
+                        r );
         }
     }
 
@@ -2844,16 +2899,19 @@ int hustdb_t::hustdb_zadd (
         {
             if ( ! is_dup )
             {
-                LOG_ERROR ( "[hustdb][db_zadd][user_ver=%u][ver=%u]zadd return EINVAL", user_ver, ver );
+                LOG_ERROR ( "[hustdb][db_zadd][user_ver=%u][ver=%u][r=EINVAL]", 
+                            user_ver, ver );
             }
             else
             {
-                LOG_INFO ( "[hustdb][db_zadd][user_ver=%u][ver=%u]zadd return EINVAL", user_ver, ver );
+                LOG_INFO ( "[hustdb][db_zadd][user_ver=%u][ver=%u][r=EINVAL]", 
+                            user_ver, ver );
             }
         }
         else
         {
-            LOG_ERROR ( "[hustdb][db_zadd][key=%p][key_len=%d]zadd return %d", key, ( int ) key_len, r );
+            LOG_ERROR ( "[hustdb][db_zadd][key=%p][key_len=%d][r=%d]", 
+                        key, ( int ) key_len, r );
         }
 
         return r;
@@ -2892,11 +2950,12 @@ int hustdb_t::hustdb_zadd (
         {
             if ( ENOENT == r )
             {
-                LOG_DEBUG ( "[hustdb][db_zadd]del return ENOENT" );
+                LOG_DEBUG ( "[hustdb][db_zadd][r=ENOENT]" );
             }
             else
             {
-                LOG_ERROR ( "[hustdb][db_zadd]del return %d", r );
+                LOG_ERROR ( "[hustdb][db_zadd][r=%d]", 
+                            r );
             }
         }
     }
@@ -2908,7 +2967,8 @@ int hustdb_t::hustdb_zadd (
     r = m_storage->put ( key, key_len, val, val_len, user_ver, true, conn, ctxt );
     if ( 0 != r )
     {
-        LOG_ERROR ( "[hustdb][db_zadd][key=%p][key_len=%d]zadd return %d", key, ( int ) key_len, r );
+        LOG_ERROR ( "[hustdb][db_zadd][key=%p][key_len=%d][r=%d]", 
+                    key, ( int ) key_len, r );
         return r;
     }
     
@@ -2982,7 +3042,8 @@ int hustdb_t::hustdb_zscore (
         {
             if ( ENOENT != r )
             {
-                LOG_ERROR ( "[hustdb][db_zscore]zscore return %d", r );
+                LOG_ERROR ( "[hustdb][db_zscore][r=%d]", 
+                            r );
             }
 
             return r;
@@ -3069,11 +3130,12 @@ int hustdb_t::hustdb_zrem (
     {
         if ( ENOENT == r )
         {
-            LOG_DEBUG ( "[hustdb][db_zrem]del return ENOENT" );
+            LOG_DEBUG ( "[hustdb][db_zrem][r=ENOENT]" );
         }
         else
         {
-            LOG_ERROR ( "[hustdb][db_zrem]del return %d", r );
+            LOG_ERROR ( "[hustdb][db_zrem][r=%d]", 
+                        r );
         }
 
         return r;
@@ -3101,11 +3163,12 @@ int hustdb_t::hustdb_zrem (
     {
         if ( ENOENT == r )
         {
-            LOG_DEBUG ( "[hustdb][db_zrem]del return ENOENT" );
+            LOG_DEBUG ( "[hustdb][db_zrem][r=ENOENT]" );
         }
         else
         {
-            LOG_ERROR ( "[hustdb][db_zrem]del return %d", r );
+            LOG_ERROR ( "[hustdb][db_zrem][r=%d]", 
+                        r );
         }
     }
 
@@ -3149,7 +3212,8 @@ int hustdb_t::hustdb_zrange (
                    )
          )
     {
-        LOG_DEBUG ( "[hustdb][db_zrange][byscore=%d]params error", byscore );
+        LOG_DEBUG ( "[hustdb][db_zrange][byscore=%d]params error", 
+                    byscore );
         return EKEYREJECTED;
     }
 
@@ -3165,7 +3229,8 @@ int hustdb_t::hustdb_zrange (
     hash = m_apptool->bucket_hash ( table, table_len );
     if ( hash < start || hash >= end )
     {
-        LOG_ERROR ( "[hustdb][db_zrange][byscore=%d]bucket_hash [table=%s] out of range[%d-%d]", byscore, inner_table.c_str (), start, end );
+        LOG_ERROR ( "[hustdb][db_zrange][byscore=%d][table=%s][%d-%d]bucket_hash out of range", 
+                    byscore, inner_table.c_str (), start, end );
         return EPERM;
     }
 
@@ -3187,7 +3252,8 @@ int hustdb_t::hustdb_zrange (
     r = m_storage->export_db_mem ( conn, rsp, ctxt, NULL, & cb_pm );
     if ( 0 != r )
     {
-        LOG_ERROR ( "[hustdb][db_zrange][byscore=%d]zrange return %d", byscore, r );
+        LOG_ERROR ( "[hustdb][db_zrange][byscore=%d][r=%d]", 
+                    byscore, r );
     }
 
     hits                    = cb_pm.size;
@@ -3255,7 +3321,8 @@ int hustdb_t::hustdb_binlog (
     r = m_storage->binlog ( key, key_len, host, host_len, m_current_timestamp, cmd_type, is_rem, conn );
     if ( 0 != r )
     {
-        LOG_ERROR ( "[hustdb][db_binlog]binlog return %d", r );
+        LOG_ERROR ( "[hustdb][db_binlog][r=%d]", 
+                    r );
     }
 
     return r;
@@ -3305,7 +3372,8 @@ int hustdb_t::hustmq_put (
     offset = find_queue_offset ( inner_queue, true, QUEUE_TB, queue_info );
     if ( unlikely ( offset < 0 ) )
     {
-        LOG_ERROR ( "[hustdb][mq_put][queue=%s]find queue failed ", inner_queue.c_str () );
+        LOG_ERROR ( "[hustdb][mq_put][queue=%s]find queue failed", 
+                    inner_queue.c_str () );
         return EPERM;
     }
 
@@ -3331,7 +3399,8 @@ int hustdb_t::hustmq_put (
     r = m_storage->put ( qkey, qkey_len, item, item_len, ver, false, conn, ctxt );
     if ( unlikely ( 0 != r ) )
     {
-        LOG_ERROR ( "[hustdb][mq_put]put failed, return:%d, key:%s, item_len:%d", r, qkey, item_len );
+        LOG_ERROR ( "[hustdb][mq_put][key=%s][item_len=%d][r=%d]put failed",
+                    qkey, item_len, r );
         return r;
     }
 
@@ -3381,7 +3450,8 @@ int hustdb_t::hustmq_get (
     offset = find_queue_offset ( inner_queue, false, QUEUE_TB, queue_info, worker, worker_len );
     if ( unlikely ( offset < 0 ) )
     {
-        LOG_ERROR ( "[hustdb][mq_get][queue=%s]find queue failed ", inner_queue.c_str () );
+        LOG_ERROR ( "[hustdb][mq_get][queue=%s]find queue failed", 
+                    inner_queue.c_str () );
         return EPERM;
     }
 
@@ -3434,7 +3504,8 @@ int hustdb_t::hustmq_get (
     r = m_storage->get ( qkey, qkey_len, ver, conn, rsp, ctxt );
     if ( unlikely ( 0 != r ) )
     {
-        LOG_ERROR ( "[hustdb][mq_get]get failed, return:%d, key:%s", r, qkey );
+        LOG_ERROR ( "[hustdb][mq_get][key=%s][r=%d]get failed", 
+                    qkey, r );
         return r;
     }
 
@@ -3495,7 +3566,8 @@ int hustdb_t::hustmq_ack (
         offset = find_queue_offset ( inner_queue, false, QUEUE_TB, queue_info );
         if ( unlikely ( offset < 0 ) )
         {
-            LOG_ERROR ( "[hustdb][mq_ack][queue=%s]find queue failed ", inner_queue.c_str () );
+            LOG_ERROR ( "[hustdb][mq_ack][queue=%s]find queue failed ", 
+                        inner_queue.c_str () );
             return EPERM;
         }
 
@@ -3504,7 +3576,8 @@ int hustdb_t::hustmq_ack (
         unacked_t::iterator ait = queue_info->unacked->find ( inner_ack );
         if ( ait == queue_info->unacked->end () )
         {
-            LOG_ERROR ( "[hustdb][mq_ack][queue=%s][ack=%s]find queue failed ", inner_queue.c_str (), inner_ack.c_str () );
+            LOG_ERROR ( "[hustdb][mq_ack][queue=%s][ack=%s]find queue failed", 
+                        inner_queue.c_str (), inner_ack.c_str () );
             return EPERM;
         }
 
@@ -3561,7 +3634,8 @@ int hustdb_t::hustmq_worker (
     offset = find_queue_offset ( inner_queue, false, QUEUE_TB, queue_info );
     if ( unlikely ( offset < 0 ) )
     {
-        LOG_ERROR ( "[hustdb][mq_worker][queue=%s]find queue failed ", inner_queue.c_str () );
+        LOG_ERROR ( "[hustdb][mq_worker][queue=%s]find queue failed", 
+                    inner_queue.c_str () );
         return EPERM;
     }
     wmap = queue_info->worker;
@@ -3626,7 +3700,8 @@ int hustdb_t::hustmq_stat (
     offset = find_queue_offset ( inner_queue, false, COMMON_TB, queue_info );
     if ( unlikely ( offset < 0 ) )
     {
-        LOG_ERROR ( "[hustdb][mq_stat][queue=%s]find queue failed ", inner_queue.c_str () );
+        LOG_ERROR ( "[hustdb][mq_stat][queue=%s]find queue failed", 
+                    inner_queue.c_str () );
         return EPERM;
     }
 
@@ -3725,7 +3800,8 @@ int hustdb_t::hustmq_max (
     offset = find_queue_offset ( inner_queue, false, QUEUE_TB, queue_info );
     if ( unlikely ( offset < 0 ) )
     {
-        LOG_ERROR ( "[hustdb][mq_max][queue=%s]find queue failed ", inner_queue.c_str () );
+        LOG_ERROR ( "[hustdb][mq_max][queue=%s]find queue failed", 
+                    inner_queue.c_str () );
         return EPERM;
     }
 
@@ -3761,7 +3837,8 @@ int hustdb_t::hustmq_lock (
     offset = find_queue_offset ( inner_queue, false, QUEUE_TB, queue_info );
     if ( unlikely ( offset < 0 ) )
     {
-        LOG_ERROR ( "[hustdb][mq_lock][queue=%s]find queue failed ", inner_queue.c_str () );
+        LOG_ERROR ( "[hustdb][mq_lock][queue=%s]find queue failed", 
+                    inner_queue.c_str () );
         return EPERM;
     }
 
@@ -3798,7 +3875,8 @@ int hustdb_t::hustmq_timeout (
     offset = find_queue_offset ( inner_queue, false, QUEUE_TB, queue_info );
     if ( unlikely ( offset < 0 ) )
     {
-        LOG_ERROR ( "[hustdb][mq_timeout][queue=%s]find queue failed ", inner_queue.c_str () );
+        LOG_ERROR ( "[hustdb][mq_timeout][queue=%s]find queue failed", 
+                    inner_queue.c_str () );
         return EPERM;
     }
 
@@ -3845,7 +3923,8 @@ int hustdb_t::hustmq_purge (
     offset = find_queue_offset ( inner_queue, false, QUEUE_TB, queue_info );
     if ( unlikely ( offset < 0 ) )
     {
-        LOG_ERROR ( "[hustdb][mq_purge][queue=%s]find queue failed ", inner_queue.c_str () );
+        LOG_ERROR ( "[hustdb][mq_purge][queue=%s]find queue failed", 
+                    inner_queue.c_str () );
         return EPERM;
     }
 
@@ -3959,7 +4038,8 @@ int hustdb_t::hustmq_pub (
     offset = find_queue_offset ( inner_queue, true, PUSHQ_TB, queue_info );
     if ( unlikely ( offset < 0 ) )
     {
-        LOG_ERROR ( "[hustdb][mq_pub][queue=%s]find queue failed ", inner_queue.c_str () );
+        LOG_ERROR ( "[hustdb][mq_pub][queue=%s]find queue failed", 
+                    inner_queue.c_str () );
         return EPERM;
     }
 
@@ -4035,7 +4115,8 @@ int hustdb_t::hustmq_pub (
     r = m_storage->put ( qkey, qkey_len, item, item_len, ver, false, conn, ctxt );
     if ( unlikely ( 0 != r ) )
     {
-        LOG_ERROR ( "[hustdb][mq_pub]put failed, return:%d, key:%s, item_len:%d", r, qkey, item_len );
+        LOG_ERROR ( "[hustdb][mq_pub][key=%s][item_len=%d][r=%d]put failed", 
+                    qkey, item_len, r );
         return r;
     }
 
@@ -4083,7 +4164,8 @@ int hustdb_t::hustmq_sub (
     offset = find_queue_offset ( inner_queue, false, PUSHQ_TB, queue_info );
     if ( unlikely ( offset < 0 ) )
     {
-        LOG_ERROR ( "[hustdb][mq_sub][queue=%s]find queue failed ", inner_queue.c_str () );
+        LOG_ERROR ( "[hustdb][mq_sub][queue=%s]find queue failed", 
+                    inner_queue.c_str () );
         return EPERM;
     }
 
@@ -4112,7 +4194,7 @@ int hustdb_t::hustmq_sub (
     r = m_storage->get ( qkey, qkey_len, ver, conn, rsp, ctxt );
     if ( unlikely ( 0 != r ) )
     {
-        LOG_ERROR ( "[hustdb][mq_sub]get failed, return:%d, key:%s", r, qkey );
+        LOG_ERROR ( "[hustdb][mq_sub][key=%s][r=%d]get failed", qkey, r );
         return r;
     }
 

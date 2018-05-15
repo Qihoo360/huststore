@@ -14,9 +14,21 @@ namespace md5db
 
     struct fast_conflict_header_t
     {
-        uint32_t file_version;
-        uint32_t count;
-        uint32_t free_list_id;
+        fast_conflict_header_t ( )
+        {
+            reset ( );
+        }
+
+        void reset ( )
+        {
+            file_version = 0;
+            count        = 0;
+            free_list_id = 0;
+        }
+
+        uint32_t    file_version;
+        uint32_t    count;
+        uint32_t    free_list_id;
     };
 
 #pragma pack( pop )
@@ -78,9 +90,9 @@ namespace md5db
 
     private:
 
-        int m_conflict_count;
-        int m_file_id;
-        char m_path[ 260 ];
+        int    m_conflict_count;
+        int    m_file_id;
+        char   m_path[ 260 ];
         fmap_t m_data;
         FILE * m_file;
 

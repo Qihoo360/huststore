@@ -1,8 +1,9 @@
 #ifndef _md5db_content_array_h_
 #define _md5db_content_array_h_
 
-#include "content.h"
 #include "bucket.h"
+#include "content2.h"
+#include "atomic.h"
 #include <vector>
 #include <string>
 #include <sstream>
@@ -14,14 +15,16 @@ namespace md5db
     {
     public:
 
-        static bool enable ( const char * storage_conf );
+        static bool enable ( 
+                            const char * storage_conf 
+                            );
 
         content_array_t ( );
         ~content_array_t ( );
 
         bool is_open ( )
         {
-            return !m_contents.empty ( );
+            return m_ok;
         }
 
         bool open (
@@ -36,8 +39,7 @@ namespace md5db
 
         bool open (
                     const char * path,
-                    int count,
-                    int cache
+                    int count
                     );
 
         void close ( );
@@ -76,10 +78,11 @@ namespace md5db
 
     private:
 
-        typedef std::vector< content_t * > container_t;
+        typedef std::vector< content2_t * > container_t;
 
+        bool        m_ok;
+        atomic_t    m_token;
         container_t m_contents;
-        size_t m_token;
 
     private:
         // disable

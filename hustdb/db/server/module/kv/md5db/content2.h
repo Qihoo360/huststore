@@ -8,23 +8,35 @@
 #include <sstream>
 #include <iostream>
 
-#define PAGE                     1024
-#define FREE_BLOCK_INCR          16777216
+#define PAGE                         1024
+#define FREE_BLOCK_PAGE              8192
+#define FREE_BLOCK_INCR              8388608
+#define FREE_BLOCK_FILE_MAX_SIZE     2147483648
+#define DATA_FILE_MAX_SIZE           274876858368
 
 namespace md5db
 {
 
+#pragma pack( push, 1 )
+
     struct free_block_t
     {
+        free_block_t ( )
+        {
+            reset ( );
+        }
+
+        void reset ( )
+        {
+            offset = 0;
+            size   = 0;
+        }
+
         uint32_t offset;
         uint32_t size;
+    };
 
-        free_block_t ( )
-        : offset ( 0 )
-        , size ( 0 )
-        {
-        }
-    }
+#pragma pack( pop )
 
     struct block_cmp_t
     {
@@ -125,7 +137,7 @@ namespace md5db
         uint64_t m_free_block_file_size;
 
         fmap_t m_free_block_cache;
-        uint32_t m_free_block_size;
+        uint32_t m_free_block_max;
 
         free_block_list_t m_free_block_list;
         free_block_merge_t m_free_block_merge;

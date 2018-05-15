@@ -76,44 +76,39 @@ hustmq
     mq.queue.maximum                = 8192          //MQ, max capacity of queue; If it's value is reduced, the tail index will become invalid, change it to the original value to restore.
     db.table.maximum                = 8192          //DB, max capacity of table; If it's value is reduced, the tail index will become invalid, change it to the original value to restore.
 
-    [fastdb]
+    [md5db]
     # 1 ~ 20, default 10
     count                           = 10            //The most important module of hustdb, number of instance of db (Modification is forbidden after initialization).
     # UNIT MB, default 256
-    l1_cache                        = 512           //L1 cache of fastdb
-    # UNIT MB, default 512
-    l2_cache                        = 8192          //L2 cache of fastdb
-    # UNIT MB, default 512
-    write_buffer                    = 1024          //Write cache of fastdb
+    l1_cache                        = 256           //L1 cache of md5db
+    # UNIT MB, default 1024
+    l2_cache                        = 1024          //L2 cache of md5db
+    # UNIT MB, default 1024
+    write_buffer                    = 1024          //Write cache of md5db
     # default 0
     bloom_filter_bits               = 0
-    # default none
-    md5_bloom_filter                = none
-    # default false
-    disable_compression             = false
+    # default true
+    disable_compression             = true
+
+    [contentdb]
+    # enable if count large than 0, default 256
+    count                           = 256
 
     [conflictdb]
     # 1 ~ 10, default 2
-    count                           = 2             //An important module of fastdb, number of instance of db (Modification is forbidden after initialization).
+    count                           = 2             //An important module of md5db, number of instance of db (Modification is forbidden after initialization).
     # UNIT MB, default 128
     cache                           = 128           //Cache of conflictdb
     # UNIT MB, default 128
     write_buffer                    = 128           //Write cache of conflictdb
-    # default 0
-    bloom_filter_bits               = 0
-    # default large
-    md5_bloom_filter                = large
+    # default 10
+    bloom_filter_bits               = 10
     # default true
     disable_compression             = true
 
     [fast_conflictdb]
     # 1 ~ 10, default 4
-    count                           = 4             //An important module of fastdb, size of single chunk of cache (Modification is forbidden after initialization).
-    [contentdb]
-    # enable if count large than 0
-    count                           = 256             //An important module of fastdb, number of instance of db. 0 means not allowed. Recommendation: use it only for building MQ cluster (Modification is forbidden after initialization).
-    # UNIT MB, 16 ~ 128, default 64
-    cache                           = 64            //Cache of contentdb
+    count                           = 4             //An important module of md5db, size of single chunk of cache (Modification is forbidden after initialization).
 
 [Previous](../index.md)
 

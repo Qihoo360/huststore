@@ -63,7 +63,7 @@ time to live，存活时间（过期删除），0表示永久存储
 version，版本号，写操作传入ver必须与存储ver一致，0表示强制写
 
 #### `file` ####
-fastdb编号，0~N-1（N为hustdb.conf中fastdb.count值）
+md5db编号，0~N-1（N为hustdb.conf中md5db.count值）
 
 #### `start` ####
 一致性hash起点，0~1024，默认0

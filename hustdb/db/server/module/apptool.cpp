@@ -7,6 +7,8 @@ apptool_t::apptool_t ( )
 {
     m_hustdb = NULL;
     m_apptool = NULL;
+
+    m_little_endian = check_endian ();
 }
 
 apptool_t::~ apptool_t ( )
@@ -1632,4 +1634,11 @@ void apptool_t::md5 (
     MD5Init ( & ctx );
     MD5Update ( & ctx, ( const unsigned char * ) data, ( unsigned int ) data_len );
     MD5Final ( & ctx, ( unsigned char * ) digest );
+}
+
+bool apptool_t::check_endian ()
+{
+  	int i = 1;
+	i = * ( char * ) & i;
+	return i == 1;
 }

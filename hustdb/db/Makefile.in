@@ -62,7 +62,7 @@ MODULE_OBJECTS=  					        \
 	$(BIN)kv_create_kv.o 				        \
 	$(BIN)kv_md5db_bucket.o			                \
 	$(BIN)kv_md5db_bucket_array.o		                \
-	$(BIN)kv_md5db_content.o			                \
+	$(BIN)kv_md5db_content2.o			                \
 	$(BIN)kv_md5db_content_array.o	                        \
 	$(BIN)kv_md5db_fast_conflict.o	                        \
 	$(BIN)kv_md5db_fast_conflict_array.o	                \
@@ -316,11 +316,10 @@ clean:
 	rm -fr $(TDB_OBJECTS) $(MDB_OBJECTS) $(RDB_OBJECTS) $(MODULE_OBJECTS) $(SVR_OBJECTS) $(BINLOG_OBJECTS)
 	rm -fr $(TARGET)
 
-install: $(TARGET) $(SERVER)module/hustdb.conf.db $(SERVER)module/hustdb.conf.mq
+install: $(TARGET) $(SERVER)module/hustdb.conf
 	#	$(INSTALL_PROGRAM) $(TARGET)									 $(DESTDIR)$(prefix)/
 	#	$(INSTALL_DATA)    $(SERVER)module/hustdb.conf $(DESTDIR)$(prefix)/
 	test -d $(DESTDIR)$(prefix) || mkdir -p		$(DESTDIR)$(prefix)
 	install -v -m 0755 $(TARGET)										$(DESTDIR)$(prefix)
-	install -v -m 0644 $(SERVER)module/hustdb.conf.db  $(DESTDIR)$(prefix)
-	install -v -m 0644 $(SERVER)module/hustdb.conf.mq  $(DESTDIR)$(prefix)
+	install -v -m 0644 $(SERVER)module/hustdb.conf $(DESTDIR)$(prefix)
 

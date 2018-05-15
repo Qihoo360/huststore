@@ -42,7 +42,8 @@ namespace md5db
         ini = G_APPINI->ini_create ( storage_conf );
         if ( NULL == ini )
         {
-            LOG_ERROR ( "[conflict]open %s failed", storage_conf );
+            LOG_ERROR ( "[md5db][conflict_array][open][file=%s]open failed", 
+                        storage_conf );
             return false;
         }
 
@@ -51,7 +52,7 @@ namespace md5db
 
         if ( ! b )
         {
-            LOG_ERROR ( "[conflict]open failed" );
+            LOG_ERROR ( "[md5db][conflict_array][open]open failed" );
             return false;
         }
 
@@ -66,18 +67,19 @@ namespace md5db
         int count                = G_APPINI->ini_get_int ( & ini, "conflictdb", "count", 2 );
         if ( count <= 0 || count > 10 )
         {
-            LOG_ERROR ( "[conflict]invalid count: %d", count );
+            LOG_ERROR ( "[md5db][conflict_array][open][count=%d]invalid count", 
+                        count );
             return false;
         }
 
         int cache_size_m         = G_APPINI->ini_get_int ( & ini, "conflictdb", "cache", 128 );
         int write_buffer_m       = G_APPINI->ini_get_int ( & ini, "conflictdb", "write_buffer", 128 );
-        int bloom_filter_bits    = G_APPINI->ini_get_int ( & ini, "conflictdb", "bloom_filter_bits", 0 );
+        int bloom_filter_bits    = G_APPINI->ini_get_int ( & ini, "conflictdb", "bloom_filter_bits", 10 );
         bool disable_compression = G_APPINI->ini_get_bool ( & ini, "conflictdb", "disable_compression", true );
-        const char * s           = G_APPINI->ini_get_string ( & ini, "conflictdb", "md5_bloom_filter", "large" );
+        const char * s           = G_APPINI->ini_get_string ( & ini, "conflictdb", "md5_bloom_filter", "none" );
         if ( NULL == s )
         {
-            LOG_ERROR ( "[conflict]invalid [conflict]md5_bloom_filter" );
+            LOG_ERROR ( "[md5db][conflict_array][open]invalid md5_bloom_filter" );
             return false;
         }
 
@@ -96,7 +98,8 @@ namespace md5db
         }
         else
         {
-            LOG_ERROR ( "[conflict]invalid [conflict]md5_bloom_filter '%s'", s );
+            LOG_ERROR ( "[md5db][conflict_array][open][filter=%s]invalid md5_bloom_filter", 
+                        s );
             return false;
         }
 
@@ -115,17 +118,18 @@ namespace md5db
     {
         if ( ! m_conflicts.empty () )
         {
-            LOG_ERROR ( "[md5db][conflict]m_conflicts not empty" );
+            LOG_ERROR ( "[md5db][conflict_array][open]conflicts not empty" );
             return false;
         }
         if ( NULL == path || '\0' == * path )
         {
-            LOG_ERROR ( "[md5db][conflict]path empty" );
+            LOG_ERROR ( "[md5db][conflict_array][open]path empty" );
             return false;
         }
         if ( count <= 0 )
         {
-            LOG_ERROR ( "[md5db][conflict]invalid count %d", count );
+            LOG_ERROR ( "[md5db][conflict_array][open][count=%d]invalid count", 
+                        count );
             return false;
         }
         if ( cache_m < 0 )
@@ -153,7 +157,7 @@ namespace md5db
             }
             catch ( ... )
             {
-                LOG_ERROR ( "[md5db][conflict]bad_alloc" );
+                LOG_ERROR ( "[md5db][conflict_array][open]bad_alloc" );
                 return false;
             }
         }
@@ -178,7 +182,7 @@ namespace md5db
             }
             catch ( ... )
             {
-                LOG_ERROR ( "[md5db][conflict]bad_alloc" );
+                LOG_ERROR ( "[md5db][conflict_array][open]bad_alloc" );
                 return false;
             }
 
@@ -192,7 +196,8 @@ namespace md5db
             config.disable_compression     = disable_compression;
             if ( ! o->open ( ph, config, i ) )
             {
-                LOG_ERROR ( "[md5db][conflict]open %s failed", ph );
+                LOG_ERROR ( "[md5db][conflict_array][open][file=%s]open failed", 
+                            ph );
                 return false;
             }
 
@@ -204,8 +209,9 @@ namespace md5db
 
     conflict_t & conflict_array_t::get_conflict ( const void * inner_key, size_t inner_key_len )
     {
-        assert ( inner_key_len == 16 );
-        assert ( ! m_conflicts.empty () );
+        //assert ( inner_key_len == 16 );
+        //assert ( ! m_conflicts.empty () );
+        
         uint32_t hash_id = * ( ( const uint32_t * ) inner_key );
         return * m_conflicts[ hash_id % m_conflicts.size () ];
     }

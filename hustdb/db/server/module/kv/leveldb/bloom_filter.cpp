@@ -110,7 +110,7 @@ bool md5_bloom_filter_t::open ( const char * path, md5_bloom_mode_t type )
 
     if ( NULL == path || '\0' == * path )
     {
-        LOG_ERROR ( "[bloom]error" );
+        LOG_ERROR ( "[bloom][open]error" );
         return false;
     }
 
@@ -123,7 +123,7 @@ bool md5_bloom_filter_t::open ( const char * path, md5_bloom_mode_t type )
 
         if ( strlen ( path ) >= sizeof ( ph ) )
         {
-            LOG_ERROR ( "[bloom]error" );
+            LOG_ERROR ( "[bloom][open]error" );
             return false;
         }
         strcpy ( ph, path );
@@ -141,26 +141,27 @@ bool md5_bloom_filter_t::open ( const char * path, md5_bloom_mode_t type )
             }
             else
             {
-                LOG_ERROR ( "[bloom]invalid bloom_filter type %d", ( int ) type );
+                LOG_ERROR ( "[bloom][open][type=%d]invalid bloom_filter type", 
+                            ( int ) type );
                 return false;
             }
         }
         catch ( ... )
         {
-            LOG_ERROR ( "[bloom]error" );
+            LOG_ERROR ( "[bloom][open]error" );
             return false;
         }
 
         fp = fopen ( ph, "wb" );
         if ( NULL == fp )
         {
-            LOG_ERROR ( "[bloom]error" );
+            LOG_ERROR ( "[bloom][open]error" );
             return false;
         }
 
         if ( buf.size () != fwrite ( buf.c_str (), 1, buf.size (), fp ) )
         {
-            LOG_ERROR ( "[bloom]error" );
+            LOG_ERROR ( "[bloom][open]error" );
             fclose ( fp );
             return false;
         }
@@ -170,14 +171,15 @@ bool md5_bloom_filter_t::open ( const char * path, md5_bloom_mode_t type )
 
     if ( ! G_APPTOOL->fmap_open ( & m_fmap, path, 0, 0, true ) )
     {
-        LOG_ERROR ( "[bloom]fmap_open( %s ) failed", path );
+        LOG_ERROR ( "[bloom][open][file=%s]fmap_open failed", 
+                    path );
         return false;
     }
     if ( MD5_BLOOM_LARGE == type )
     {
         if ( LARGE_BYTES + 1 != m_fmap.ptr_len )
         {
-            LOG_ERROR ( "[bloom]error" );
+            LOG_ERROR ( "[bloom][open]error" );
             G_APPTOOL->fmap_close ( & m_fmap );
             return false;
         }
@@ -186,7 +188,7 @@ bool md5_bloom_filter_t::open ( const char * path, md5_bloom_mode_t type )
     {
         if ( SMALL_BYTES + 1 != m_fmap.ptr_len )
         {
-            LOG_ERROR ( "[bloom]error" );
+            LOG_ERROR ( "[bloom][open]error" );
             G_APPTOOL->fmap_close ( & m_fmap );
             return false;
         }
@@ -222,7 +224,7 @@ bool md5_bloom_filter_t::not_found ( const char * md5 )
 #endif
         if ( unlikely ( bit_id > LARGE_BITS ) )
         {
-            LOG_ERROR ( "[bloom]algorithm for large bloom filter error!!!!!!!!!!!!!!!" );
+            LOG_ERROR ( "[bloom][not_found]algorithm for large bloom filter error" );
             return false;
         }
 
@@ -247,7 +249,7 @@ bool md5_bloom_filter_t::not_found ( const char * md5 )
 #endif
         if ( unlikely ( bit_id > SMALL_BITS ) )
         {
-            LOG_ERROR ( "[bloom]algorithm for small bloom filter error!!!!!!!!!!!!!!!" );
+            LOG_ERROR ( "[bloom][not_found]algorithm for small bloom filter error" );
             return false;
         }
 
@@ -279,7 +281,7 @@ void md5_bloom_filter_t::add_key ( const char * md5 )
 #endif
         if ( unlikely ( bit_id > LARGE_BITS ) )
         {
-            LOG_ERROR ( "[bloom]algorithm for large bloom filter error!!!!!!!!!!!!!!!" );
+            LOG_ERROR ( "[bloom][add_key]algorithm for large bloom filter error" );
             return;
         }
 
@@ -301,7 +303,7 @@ void md5_bloom_filter_t::add_key ( const char * md5 )
 #endif
         if ( unlikely ( bit_id > SMALL_BITS ) )
         {
-            LOG_ERROR ( "[bloom]algorithm for small bloom filter error!!!!!!!!!!!!!!!" );
+            LOG_ERROR ( "[bloom][add_key]algorithm for small bloom filter error" );
             return;
         }
 

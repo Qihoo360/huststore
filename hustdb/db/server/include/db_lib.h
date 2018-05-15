@@ -31,6 +31,10 @@
 #endif
 #else
 #include <unistd.h>
+#include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
 #include <fcntl.h>
 #include <sys/socket.h>
 #include <sys/poll.h>

@@ -9,6 +9,7 @@ namespace md5db
     class bucket_data_item_t;
     class bucket_t;
     class block_id_t;
+    class content_id_t;
 }
 
 using md5db::bucket_t;
@@ -199,7 +200,7 @@ public:
 
     void destroy ( );
 
-    static void * operator new(
+    static void * operator new (
                                 size_t size
                                 )
     {
@@ -211,7 +212,7 @@ public:
         return p;
     }
 
-    static void operator delete(
+    static void operator delete (
                                  void * p
                                  )
     {
@@ -237,14 +238,14 @@ private:
                            );
 
     int delete_direct_data (
-                             bucket_t & bucket,
+                             md5db::bucket_t & bucket,
                              const md5db::block_id_t & block_id,
                              conn_ctxt_t conn,
                              item_ctxt_t * & ctxt
                              );
 
     int delete_conflict_data (
-                               bucket_t & bucket,
+                               md5db::bucket_t & bucket,
                                md5db::bucket_data_item_t * item,
                                const void * inner_key,
                                size_t inner_key_len,
@@ -255,17 +256,19 @@ private:
                                );
 
     int del_conflict_block_id (
-                                bucket_t & bucket,
+                                md5db::bucket_t & bucket,
                                 md5db::bucket_data_item_t * item,
                                 const void * inner_key,
                                 size_t inner_key_len,
                                 item_ctxt_t * & ctxt,
                                 md5db::block_id_t & deleted_block_id,
+                                md5db::content_id_t & deleted_content_id,
                                 uint32_t & deleted_version,
                                 bool from_binlog
                                 );
 
     int get_data (
+                   md5db::bucket_t & bucket,
                    const md5db::block_id_t & block_id,
                    const char * user_key,
                    size_t user_key_len,
@@ -274,16 +277,17 @@ private:
                    item_ctxt_t * & ctxt
                    );
 
-    int get_data_without_content_db (
-                                      const md5db::block_id_t & block_id,
-                                      const char * user_key,
-                                      size_t user_key_len,
-                                      conn_ctxt_t conn,
-                                      std::string * & rsp,
-                                      item_ctxt_t * & ctxt
-                                      );
+    int get_data_from_kv_array (
+                                const md5db::block_id_t & block_id,
+                                const char * user_key,
+                                size_t user_key_len,
+                                conn_ctxt_t conn,
+                                std::string * & rsp,
+                                item_ctxt_t * & ctxt
+                                 );
 
-    int get_data_with_content_db (
+    int get_data_from_content_db (
+                                   md5db::bucket_t & bucket,
                                    const md5db::block_id_t & block_id,
                                    const char * user_key,
                                    size_t user_key_len,
@@ -300,7 +304,7 @@ private:
                                 );
 
     int add_conflict_data (
-                            bucket_t & bucket,
+                            md5db::bucket_t & bucket,
                             md5db::bucket_data_item_t * item,
                             const char * inner_key,
                             size_t inner_key_len,
@@ -315,7 +319,7 @@ private:
                             );
 
     int set_conflict_data (
-                            bucket_t & bucket,
+                            md5db::bucket_t & bucket,
                             md5db::bucket_data_item_t * item,
                             const char * inner_key,
                             size_t inner_key_len,
@@ -331,6 +335,7 @@ private:
                             );
 
     int set_data (
+                   md5db::bucket_t & bucket,
                    const md5db::block_id_t & block_id,
                    const char * user_key,
                    size_t user_key_len,
@@ -340,7 +345,18 @@ private:
                    item_ctxt_t * & ctxt
                    );
 
-    int set_data_with_kv_array (
+    int set_data_to_kv_array (
+                               const md5db::block_id_t & block_id,
+                               const char * user_key,
+                               size_t user_key_len,
+                               const char * val,
+                               size_t val_len,
+                               conn_ctxt_t conn,
+                               item_ctxt_t * & ctxt
+                               );
+
+    int set_data_to_content_db (
+                                 md5db::bucket_t & bucket,
                                  const md5db::block_id_t & block_id,
                                  const char * user_key,
                                  size_t user_key_len,
@@ -350,28 +366,19 @@ private:
                                  item_ctxt_t * & ctxt
                                  );
 
-    int set_data_with_content_db (
-                                   const md5db::block_id_t & block_id,
-                                   const char * user_key,
-                                   size_t user_key_len,
-                                   const char * val,
-                                   size_t val_len,
-                                   conn_ctxt_t conn,
-                                   item_ctxt_t * & ctxt
-                                   );
-
-    int add_data_with_content_db (
-                                   const md5db::block_id_t & block_id,
-                                   const char * user_key,
-                                   size_t user_key_len,
-                                   const char * val,
-                                   size_t val_len,
-                                   conn_ctxt_t conn,
-                                   item_ctxt_t * & ctxt
-                                   );
+    int add_data_to_content_db (
+                                 md5db::bucket_t & bucket,
+                                 const md5db::block_id_t & block_id,
+                                 const char * user_key,
+                                 size_t user_key_len,
+                                 const char * val,
+                                 size_t val_len,
+                                 conn_ctxt_t conn,
+                                 item_ctxt_t * & ctxt
+                                 );
 
     int new_data (
-                   bucket_t & bucket,
+                   md5db::bucket_t & bucket,
                    md5db::bucket_data_item_t * item,
                    const char * inner_key,
                    size_t inner_key_len,
@@ -386,12 +393,10 @@ private:
                    );
 
     int check_same_key (
-                         bucket_t & bucket,
+                         md5db::bucket_t & bucket,
                          const md5db::block_id_t & block_id,
                          const char * inner_key,
-                         size_t inner_key_len,
-                         const char * user_key,
-                         size_t user_key_len
+                         size_t inner_key_len
                          );
 
     int put_inner (

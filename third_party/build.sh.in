@@ -15,3 +15,4 @@ bash -e ./build_libevhtp.sh     || { echo "Build libevhtp failed." ; false; }
 bash -e ./build_tcmalloc.sh     || { echo "Build tcmalloc failed." ; false; }
 bash -e ./build_libcurl.sh      || { echo "Build libcurl  failed." ; false; }
 bash -e ./build_libzlog.sh      || { echo "Build libzlog  failed." ; false; }
+bash -e ./build_zlib.sh         || { echo "Build libz     failed." ; false; }

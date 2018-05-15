@@ -6,6 +6,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <errno.h>
+#include <zlib.h>
 
 #define c_make_str(s) { sizeof(s) - 1, (char *) s }
 #define c_base64_encoded_length(len)  (((len + 2) / 3) * 4)
@@ -19,5 +20,8 @@ struct c_str_t
 
 void hustdb_base64_encode(const c_str_t *src, c_str_t *dst);
 size_t hustdb_unescape_str(char * str, size_t size);
+
+int hustdb_gzcompress(Bytef * src, uLong src_len, Bytef * dst, uLong dst_len);
+int hustdb_gzdecompress(Byte * src, uLong src_len, Byte * dst, uLong dst_len);
 
 #endif // __hustdb_utils_20160414141755_h__

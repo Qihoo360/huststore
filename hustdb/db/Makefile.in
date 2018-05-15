@@ -137,7 +137,7 @@ BINLOG_OBJECTS =               \
 
 TARGET = ./hustdb
 INCS = $(INCLUDE)
-LIBS =	$(LIB) -levent -levent_pthreads -levent_openssl -levhtp -ldl -lz -ltcmalloc -lidn
+LIBS =	$(LIB) -levent -levent_pthreads -levent_openssl -levhtp -ldl -lz -ltcmalloc -lidn -lz
 
 all: $(MDB_OBJECTS) $(RDB_OBJECTS) $(BINLOG_OBJECTS) $(MODULE_OBJECTS) $(SVR_OBJECTS)
 

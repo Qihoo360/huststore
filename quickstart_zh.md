@@ -457,7 +457,7 @@
 
 生成 `hustmq ha` 的配置： 
 
-    $ python make_conf.py hosts hustdbha 8080 8086
+    $ python make_conf.py hosts hustmqha 8080 8086
     $ cp hustmq/ha/nginx/conf/nginx.conf nginx.conf.mq
 
 部署 `hustmq ha`（将安装包拷贝至远程机器，并解压至目录 `/opt/huststore`，然后替换配置文件）：

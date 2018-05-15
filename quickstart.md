@@ -457,7 +457,7 @@ Build and make installation package of `hustmq ha`:
 
 Generate configuration of `hustmq ha`: 
 
-    $ python make_conf.py hosts hustdbha 8080 8086
+    $ python make_conf.py hosts hustmqha 8080 8086
     $ cp hustmq/ha/nginx/conf/nginx.conf nginx.conf.mq
 
 Deploy `hustmq ha` (copy installation package to remote machines and untar to `/opt/huststore`, then replace the configuration):

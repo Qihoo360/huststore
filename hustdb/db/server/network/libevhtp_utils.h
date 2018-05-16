@@ -50,6 +50,14 @@ private:
     mutex_t& locker;
 };
 
+struct buf_t
+{
+    uint32_t id;
+    char * buf;
+    buf_t(uint32_t _id, size_t max_body_size);
+    ~buf_t();
+};
+
 struct thread_dict_t
 {
     thread_dict_t(mutex_t& m);
@@ -58,25 +66,8 @@ struct thread_dict_t
     uint32_t get_id(evthr_t * key);
     char * get_buf(evthr_t * key);
 private:
-    struct item_t
-    {
-        uint32_t id;
-        char * buf;
-        item_t(uint32_t _id, size_t max_body_size) : id(_id), buf(0)
-        {
-            buf = new char[max_body_size];
-        }
-        ~item_t()
-        {
-            if (buf)
-            {
-                delete [] buf;
-                buf = 0;
-            }
-        }
-    };
     mutex_t& mutex;
-    std::map<evthr_t *, item_t *> dict;
+    std::map<evthr_t *, buf_t *> dict;
     uint32_t id;
 };
 

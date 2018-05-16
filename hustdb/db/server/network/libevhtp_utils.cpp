@@ -197,13 +197,27 @@ bool mutex_t::unlock()
     return __unlock(&mutex);
 }
 
+buf_t::buf_t(uint32_t _id, size_t max_body_size) : id(_id), buf(0)
+{
+    buf = new char[max_body_size];
+}
+
+buf_t::~buf_t()
+{
+    if (buf)
+    {
+        delete [] buf;
+        buf = 0;
+    }
+}
+
 thread_dict_t::thread_dict_t(mutex_t& m) : mutex(m), id(0)
 {
 }
 
 thread_dict_t::~thread_dict_t()
 {
-    for (std::map<evthr_t *, item_t *>::iterator it = dict.begin(); it != dict.end(); ++it)
+    for (std::map<evthr_t *, buf_t *>::iterator it = dict.begin(); it != dict.end(); ++it)
     {
         if (it->second)
         {
@@ -220,7 +234,7 @@ void thread_dict_t::append(evthr_t * key, size_t max_body_size)
         return;
     }
     locker_t locker(mutex);
-    dict[key] = new item_t(id, max_body_size);
+    dict[key] = new buf_t(id, max_body_size);
     ++id;
 }
 

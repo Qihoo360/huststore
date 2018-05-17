@@ -38,6 +38,9 @@ void send_write_reply(evhtp_res code, uint32_t ver, bool is_version_error, evhtp
 bool get_ip_allow_map(const char * ip_allow_string, unsigned int ip_allow_string_length, ip_allow_t * ip_allow_map);
 bool can_access (struct sockaddr_in * addr, ip_allow_t * ip_allow_map);
 
+int compress(evhtp::c_str_t src, evhtp::c_str_t * dst);
+int decompress(evhtp::c_str_t src, evhtp::c_str_t * dst);
+
 }
 
 #endif // __hustdb_network_utils_20160314135056_h__

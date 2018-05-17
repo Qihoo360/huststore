@@ -81,6 +81,7 @@ MODULE_OBJECTS=  					        \
 	$(BIN)module_appini.o        		                \
 	$(BIN)base_md5.o   			                \
 	$(BIN)base_timer.o   			                \
+	$(BIN)base_compression.o   			                \
 	$(BIN)tasks_slow_task_thread.o                          \
 	$(BIN)tasks_task_export.o                               \
 	$(BIN)tasks_task_ttl_scan.o                         \

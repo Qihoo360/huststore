@@ -1785,8 +1785,8 @@ int hustdb_t::hustdb_export (
     }
 
     if ( unlikely ( offset > MAX_EXPORT_OFFSET || size > DISK_EXPORT_SIZE || ( offset > 0 && size == 0 ) ||
-                   inner_file_id < 0 || inner_file_id >= file_count ||
-                   start < 0 || end < 0 || start >= end || end > MAX_BUCKET_NUM
+                    inner_file_id < 0 || inner_file_id >= file_count ||
+                    start < 0 || end < 0 || start >= end || end > MAX_BUCKET_NUM
                    )
          )
     {

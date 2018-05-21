@@ -240,7 +240,8 @@ int kv_array_t::get_from_md5db (
 
     if ( unlikely ( file_id >= m_file_count ) )
     {
-        LOG_ERROR ( "[kv_array][get_from_md5db][local=%d][files=%d]invalid local_id", ( int ) file_id, m_file_count );
+        LOG_ERROR ( "[kv_array][get_from_md5db][local=%d][files=%d]invalid local_id", 
+                    ( int ) file_id, m_file_count );
         return EINVAL;
     }
 
@@ -397,7 +398,7 @@ int kv_array_t::hash_with_md5db (
     ctxt = & m_get_buffers[ conn.worker_id ];
     ctxt->reset ();
 
-    ctxt->user_file_id = G_APPTOOL->hust_hash_key ( key, key_len ) % m_hash->get_user_file_count () ;
+    ctxt->user_file_id = G_APPTOOL->hust_hash_key ( key, key_len ) % m_file_count;
     ctxt->inner_file_id = ctxt->user_file_id;
 
     return 0;
@@ -489,16 +490,6 @@ int kv_array_t::del_from_binlog (
     }
 
     return 0;
-}
-
-void kv_array_t::hash ( const char * key, size_t key_len, conn_ctxt_t conn, item_ctxt_t * & ctxt )
-{
-    ctxt = & m_get_buffers[ conn.worker_id ];
-    ctxt->value.resize ( 0 );
-    ctxt->user_file_id = m_hash->hash_with_cluster ( key,
-                                                    ( int ) key_len,
-                                                    ctxt->hash_other_servers,
-                                                    ctxt->inner_file_id );
 }
 
 void kv_array_t::info ( std::stringstream & ss )

@@ -62,9 +62,9 @@ int hash_plan_t::hash_no_md5db (
                                  int                 key_len
                                  )
 {
-    unsigned int hash;
+    unsigned int hash = 0;
     unsigned int seed = 131;
-    hash = 0;
+
     for ( int i = 0; i < key_len; ++ i )
     {
         hash = hash * seed + ( unsigned char ) key[ i ];

@@ -3,6 +3,7 @@
 
 #include "../../../include/i_server_kv.h"
 #include "../../perf_target.h"
+#include "../../hustdb.h"
 
 namespace md5db
 {
@@ -432,15 +433,16 @@ private:
 
     struct inner;
 
-    inner * m_inner;
-    bool m_ok;
+    inner *       m_inner;
+    hustdb_t *    m_db;
+    bool          m_ok;
 
     perf_target_t m_perf_put_ok;
     perf_target_t m_perf_put_fail;
     perf_target_t m_perf_binlog_put_ok;
     perf_target_t m_perf_binlog_put_fail;
-    size_t m_count_put_wrong_version;
-    size_t m_count_binlog_put_wrong_version;
+    size_t        m_count_put_wrong_version;
+    size_t        m_count_binlog_put_wrong_version;
 
     perf_target_t m_perf_del_ok;
     perf_target_t m_perf_del_not_found;
@@ -448,8 +450,8 @@ private:
     perf_target_t m_perf_binlog_del_ok;
     perf_target_t m_perf_binlog_del_not_found;
     perf_target_t m_perf_binlog_del_fail;
-    size_t m_count_del_wrong_version;
-    size_t m_count_binlog_del_wrong_version;
+    size_t        m_count_del_wrong_version;
+    size_t        m_count_binlog_del_wrong_version;
 
     perf_target_t m_perf_get_ok;
     perf_target_t m_perf_get_not_found;

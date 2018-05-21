@@ -16,8 +16,10 @@
 #define SIZEOF_UINT32                 4
 #define SIZEOF_UINT64                 8
 
-#define MAX_KEY_LEN                   16777216
+#define MAX_KEY_LEN                   16777215
 #define MAX_VAL_LEN                   267386880
+
+#define COMPRESS_THRESHOLD            1012
 
 #define MAX_QUEUE_NAME_LEN            64
 #define MAX_QKEY_LEN                  80

@@ -8,7 +8,6 @@
 #include "fast_conflict_array.h"
 #include "../kv_array/kv_array.h"
 #include "../../binlog/binlog.h"
-#include "../../hustdb.h"
 
 using namespace md5db;
 
@@ -77,7 +76,7 @@ public:
     query_ctxts_t           m_query_ctxts;
     kv_array_t              m_data;
     binlog_t                m_binlog;
-} ;
+};
 
 void kv_md5db_t::kill_me ( )
 {
@@ -86,6 +85,7 @@ void kv_md5db_t::kill_me ( )
 
 kv_md5db_t::kv_md5db_t ( )
 : m_inner ( NULL )
+, m_db ( NULL )
 , m_ok ( false )
 
 , m_perf_put_ok ( )
@@ -254,12 +254,12 @@ bool kv_md5db_t::open ( )
         }
     }
 
-    hustdb_t * hustdb = ( hustdb_t * ) G_APPTOOL->get_hustdb ();
+    m_db = ( hustdb_t * ) G_APPTOOL->get_hustdb ();
 
     m_inner->m_query_ctxts.resize ( 0 );
     try
     {
-        m_inner->m_query_ctxts.resize ( hustdb->get_worker_count () + 2 );
+        m_inner->m_query_ctxts.resize ( m_db->get_worker_count () + 2 );
     }
     catch ( ... )
     {
@@ -325,12 +325,12 @@ bool kv_md5db_t::open ( )
     LOG_INFO ( "[md5db][db][open]conflicts opened OK" );
 
     // binlog
-    if ( ! m_inner->m_binlog.init ( hustdb->get_store_conf ().db_binlog_thread_count,
-                                    hustdb->get_store_conf ().db_binlog_queue_capacity,
-                                    hustdb->get_store_conf ().db_binlog_queue_capacity,
-                                    hustdb->get_store_conf ().db_binlog_task_timeout,
-                                    hustdb->get_server_conf ().http_security_user.c_str (),
-                                    hustdb->get_server_conf ().http_security_passwd.c_str ()
+    if ( ! m_inner->m_binlog.init ( m_db->get_store_conf ().db_binlog_thread_count,
+                                    m_db->get_store_conf ().db_binlog_queue_capacity,
+                                    m_db->get_store_conf ().db_binlog_queue_capacity,
+                                    m_db->get_store_conf ().db_binlog_task_timeout,
+                                    m_db->get_server_conf ().http_security_user.c_str (),
+                                    m_db->get_server_conf ().http_security_passwd.c_str ()
                                    )
          )
     {
@@ -470,9 +470,6 @@ int kv_md5db_t::add_data_to_content_db (
 
     tmp_ctxt = & m_inner->m_query_ctxts[ conn.worker_id ];
 
-    uint32_t ttl      = tmp_ctxt->wttl;
-    uint32_t ukey_len = ( uint32_t ) user_key_len;
-
     size_t need = val_len + user_key_len + sizeof ( uint32_t ) * 2;
     tmp_ctxt->value.resize ( 0 );
     if ( tmp_ctxt->value.capacity () < need )
@@ -488,18 +485,17 @@ int kv_md5db_t::add_data_to_content_db (
         }
     }
 
-    // value
-    tmp_ctxt->value.assign ( val, val + val_len );
-    // key
-    tmp_ctxt->value.append ( user_key, user_key + user_key_len );
-    // key_len
-    tmp_ctxt->value.append ( ( const char * ) & ukey_len, ( ( const char * ) & ukey_len ) + sizeof ( uint32_t ) );
-    // ttl
-    tmp_ctxt->value.append ( ( const char * ) & ttl, ( ( const char * ) & ttl ) + sizeof ( uint32_t ) );
+    ctxt->kv_data.user_key_len  = ( uint32_t ) user_key_len;
+    ctxt->kv_data.compress_type = conn.compress_type;
+    ctxt->kv_data.ttl           = tmp_ctxt->wttl;
+    ctxt->kv_data.timestamp     = m_db->get_current_timestamp ();
 
-    // add to content_db
-    uint32_t    content_file_id = 0;
-    uint32_t    content_data_id = 0;
+    tmp_ctxt->value.assign ( val, val + val_len );
+    tmp_ctxt->value.append ( user_key, user_key + user_key_len );
+    tmp_ctxt->value.append ( ( const char * ) & ctxt->kv_data, ( ( const char * ) & ctxt->kv_data ) + sizeof ( kv_data_item_t ) );
+
+    uint32_t content_file_id = 0;
+    uint32_t content_data_id = 0;
     {
         scope_perf_target_t perf ( m_perf_content_write );
         b = m_inner->m_contents.write ( tmp_ctxt->value.c_str (),
@@ -511,7 +507,7 @@ int kv_md5db_t::add_data_to_content_db (
     if ( unlikely ( ! b || 0 == content_data_id ) )
     {
         LOG_ERROR ( "[md5db][db][add_data_to_content_db][content_file_id=%d][content_data_id=%d][size=%d]contents.write failed",
-                   content_file_id, content_data_id, ( uint32_t ) tmp_ctxt->value.size () );
+                    content_file_id, content_data_id, ( uint32_t ) tmp_ctxt->value.size () );
         return EFAULT;
     }
 
@@ -534,7 +530,7 @@ int kv_md5db_t::add_data_to_content_db (
                                              tmp_ctxt->table_len,
                                              "",
                                              0,
-                                             ttl,
+                                             tmp_ctxt->wttl,
                                              ctxt );
     }
 
@@ -565,12 +561,7 @@ int kv_md5db_t::set_data_to_content_db (
 
     tmp_ctxt = & m_inner->m_query_ctxts[ conn.worker_id ];
 
-    uint32_t ttl      = tmp_ctxt->wttl;
-    uint32_t ukey_len = ( uint32_t ) user_key_len;
-
     content_id_t content_id;
-    memset ( & content_id, 0, sizeof ( content_id_t ) );
-
     b = bucket.get_fullkey ()->get_content_id ( block_id, content_id );
     if ( ! b || content_id.data_len () == 0 )
     {
@@ -593,14 +584,14 @@ int kv_md5db_t::set_data_to_content_db (
         }
     }
 
-    // value
+    ctxt->kv_data.user_key_len  = ( uint32_t ) user_key_len;
+    ctxt->kv_data.compress_type = conn.compress_type;
+    ctxt->kv_data.ttl           = tmp_ctxt->wttl;
+    ctxt->kv_data.timestamp     = m_db->get_current_timestamp ();
+
     tmp_ctxt->value.assign ( val, val + val_len );
-    // key
     tmp_ctxt->value.append ( user_key, user_key + user_key_len );
-    // key_len
-    tmp_ctxt->value.append ( ( const char * ) & ukey_len, ( ( const char * ) & ukey_len ) + sizeof (uint32_t ) );
-    // ttl
-    tmp_ctxt->value.append ( ( const char * ) & ttl, ( ( const char * ) & ttl ) + sizeof (uint32_t ) );
+    tmp_ctxt->value.append ( ( const char * ) & ctxt->kv_data, ( ( const char * ) & ctxt->kv_data ) + sizeof ( kv_data_item_t ) );
 
     uint32_t new_content_file_id = content_id.file_id ();
     uint32_t new_content_data_id = content_id.data_id ();
@@ -623,7 +614,7 @@ int kv_md5db_t::set_data_to_content_db (
     if ( ! b )
     {
         LOG_ERROR ( "[md5db][db][set_data_to_content_db][user_file=%d][inner_file=%d][block_id=%d.%u]fullkey.set_content_id",
-                   ctxt->user_file_id, ctxt->inner_file_id, ( int ) block_id.bucket_id (), block_id.data_id () );
+                    ctxt->user_file_id, ctxt->inner_file_id, ( int ) block_id.bucket_id (), block_id.data_id () );
         return EFAULT;
     }
 
@@ -645,9 +636,6 @@ int kv_md5db_t::set_data_to_kv_array (
 
     tmp_ctxt = & m_inner->m_query_ctxts[ conn.worker_id ];
 
-    uint32_t ttl      = tmp_ctxt->wttl;
-    uint32_t ukey_len = ( uint32_t ) user_key_len;
-
     size_t need = val_len + user_key_len + sizeof (uint32_t ) * 2;
     tmp_ctxt->value.resize ( 0 );
     if ( tmp_ctxt->value.capacity () < need )
@@ -663,14 +651,14 @@ int kv_md5db_t::set_data_to_kv_array (
         }
     }
 
-    // value
+    ctxt->kv_data.user_key_len  = ( uint32_t ) user_key_len;
+    ctxt->kv_data.compress_type = conn.compress_type;
+    ctxt->kv_data.ttl           = tmp_ctxt->wttl;
+    ctxt->kv_data.timestamp     = m_db->get_current_timestamp ();
+
     tmp_ctxt->value.assign ( val, val + val_len );
-    // key
     tmp_ctxt->value.append ( user_key, user_key + user_key_len );
-    // key_len
-    tmp_ctxt->value.append ( ( const char * ) & ukey_len, ( ( const char * ) & ukey_len ) + sizeof (uint32_t ) );
-    // ttl
-    tmp_ctxt->value.append ( ( const char * ) & ttl, ( ( const char * ) & ttl ) + sizeof (uint32_t ) );
+    tmp_ctxt->value.append ( ( const char * ) & ctxt->kv_data, ( ( const char * ) & ctxt->kv_data ) + sizeof ( kv_data_item_t ) );
 
     {
         scope_perf_target_t perf ( m_perf_data_put );
@@ -680,14 +668,14 @@ int kv_md5db_t::set_data_to_kv_array (
                                             tmp_ctxt->table_len,
                                             tmp_ctxt->value.c_str (),
                                             tmp_ctxt->value.size (),
-                                            ttl,
+                                            tmp_ctxt->wttl,
                                             ctxt );
     }
 
     if ( 0 != r )
     {
         LOG_ERROR ( "[md5db][db][set_data_to_kv_array][user_file=%d][inner_file=%d][block_id=%d.%u][r=%d]data.put_from_md5db",
-                   ctxt->user_file_id, ctxt->inner_file_id, ( int ) block_id.bucket_id (), block_id.data_id (), r );
+                    ctxt->user_file_id, ctxt->inner_file_id, ( int ) block_id.bucket_id (), block_id.data_id (), r );
         return r;
     }
 
@@ -1256,7 +1244,7 @@ int kv_md5db_t::get_data_from_kv_array (
                                             rsp,
                                             ctxt );
     }
-    if ( 0 != r )
+    if ( unlikely ( 0 != r ) )
     {
         if ( ENOENT != r )
         {
@@ -1266,54 +1254,38 @@ int kv_md5db_t::get_data_from_kv_array (
         return r;
     }
 
-    if ( NULL == rsp )
+    if ( unlikely ( NULL == rsp ||
+                    rsp->size () <= sizeof ( kv_data_item_t ) 
+                    ) 
+        )
     {
         LOG_ERROR ( "[md5db][db][get_data_from_kv_array]error" );
         return EFAULT;
     }
 
-    std::string & s = * rsp;
+    memcpy ( & ctxt->kv_data, & ( * rsp )[ rsp->size () - sizeof ( kv_data_item_t ) ], sizeof ( kv_data_item_t ) );
 
-    uint8_t idx_len = sizeof ( uint32_t ) * 2;
-    if ( s.size () <= idx_len )
+    tmp_ctxt->rttl = ctxt->kv_data.ttl;
+
+    if ( unlikely ( ctxt->kv_data.user_key_len == 0 || 
+                    user_key_len != ctxt->kv_data.user_key_len ||
+                    rsp->size () < sizeof ( kv_data_item_t ) + user_key_len
+                    )
+        )
     {
-        LOG_ERROR ( "[md5db][db][get_data_from_kv_array]error" );
+        LOG_ERROR ( "[md5db][db][get_data_from_kv_array][user_key_len=%d][ukey_len=%d][data_len=%d]invalid data", 
+                    ( int ) user_key_len, ( int ) ctxt->kv_data.user_key_len, ( int ) rsp->size () );
         return EFAULT;
     }
 
-    uint32_t ttl;
-    fast_memcpy ( & ttl, & s[ s.size () - sizeof (uint32_t ) ], sizeof (uint32_t ) );
-    tmp_ctxt->rttl = ttl;
-
-    uint32_t ukey_len;
-    fast_memcpy ( & ukey_len, & s[ s.size () - idx_len ], sizeof (uint32_t ) );
-    if ( 0 == ukey_len )
-    {
-        LOG_ERROR ( "[md5db][db][get_data_from_kv_array]invalid user key len" );
-        return EFAULT;
-    }
-    if ( ( int ) user_key_len != ( int ) ukey_len )
-    {
-        LOG_ERROR ( "[md5db][db][get_data_from_kv_array][user_key_len=%d][ukey_len=%d]invalid user key len", 
-                    ( int ) user_key_len, ( int ) ukey_len );
-        return EFAULT;
-    }
-
-    if ( s.size () < idx_len + ukey_len )
-    {
-        LOG_ERROR ( "[md5db][db][get_data_from_kv_array][data_len=%d][ukey_len=%d]invalid data len", 
-                    ( int ) s.size (), ( int ) ukey_len );
-        return EFAULT;
-    }
-
-    const char * ukey;
-    ukey = ( const char * ) & s[ s.size () - idx_len - ukey_len ];
-    if ( ! mem_equal ( ukey, user_key, user_key_len ) )
+    const char * ukey = ( const char * ) & ( * rsp )[ rsp->size () - sizeof ( kv_data_item_t ) - user_key_len ];
+    if ( unlikely ( ! mem_equal ( ukey, user_key, user_key_len ) ) )
     {
         LOG_ERROR ( "[md5db][db][get_data_from_kv_array]user key not match" );
         return EFAULT;
     }
-    s.resize ( s.size () - idx_len - ukey_len );
+
+    rsp->resize ( rsp->size () - sizeof ( kv_data_item_t ) - user_key_len );
 
     return 0;
 }
@@ -1369,47 +1341,35 @@ int kv_md5db_t::get_data_from_content_db (
 
     }
 
-    uint8_t idx_len = sizeof ( uint32_t ) * 2;
-    if ( rsp->size () <= idx_len )
+    if ( unlikely ( rsp->size () <= sizeof ( kv_data_item_t ) ) )
     {
         LOG_ERROR ( "[md5db][db][get_data_from_content_db]error" );
         return EFAULT;
     }
 
-    uint32_t ttl;
-    fast_memcpy ( & ttl, & ( * rsp )[ rsp->size () - sizeof ( uint32_t ) ], sizeof ( uint32_t ) );
+    memcpy ( & ctxt->kv_data, & ( * rsp )[ rsp->size () - sizeof ( kv_data_item_t ) ], sizeof ( kv_data_item_t ) );
 
-    tmp_ctxt->rttl = ttl;
+    tmp_ctxt->rttl = ctxt->kv_data.ttl;
 
-    uint32_t ukey_len;
-    fast_memcpy ( & ukey_len, & ( * rsp )[ rsp->size () - idx_len ], sizeof (uint32_t ) );
-    if ( 0 == ukey_len )
+    if ( unlikely ( ctxt->kv_data.user_key_len == 0 || 
+                    user_key_len != ctxt->kv_data.user_key_len ||
+                    rsp->size () < sizeof ( kv_data_item_t ) + user_key_len
+                    )
+        )
     {
-        LOG_ERROR ( "[md5db][db][get_data_from_content_db]invalid user key len" );
+        LOG_ERROR ( "[md5db][db][get_data_from_content_db][user_key_len=%d][ukey_len=%d][data_len=%d]invalid data", 
+                    ( int ) user_key_len, ( int ) ctxt->kv_data.user_key_len, ( int ) rsp->size () );
         return EFAULT;
     }
 
-    if ( ( int ) user_key_len != ( int ) ukey_len )
-    {
-        LOG_ERROR ( "[md5db][db][get_data_from_content_db][user_key_len=%d][ukey_len=%d]invalid user key len", 
-                    ( int ) user_key_len, ( int ) ukey_len );
-        return EFAULT;
-    }
-
-    if ( rsp->size () < idx_len + ukey_len )
-    {
-        LOG_ERROR ( "[md5db][db][get_data_from_content_db][data_len %d][ukey_len=%d]invalid data len", 
-                    ( int ) rsp->size (), ( int ) ukey_len );
-        return EFAULT;
-    }
-
-    const char * ukey = ( const char * ) & ( * rsp )[ rsp->size () - idx_len - ukey_len ];
-    if ( ! mem_equal ( ukey, user_key, user_key_len ) )
+    const char * ukey = ( const char * ) & ( * rsp )[ rsp->size () - sizeof ( kv_data_item_t ) - user_key_len ];
+    if ( unlikely ( ! mem_equal ( ukey, user_key, user_key_len ) ) )
     {
         LOG_ERROR ( "[md5db][db][get_data_from_content_db]user key not match" );
         return EFAULT;
     }
-    rsp->resize ( rsp->size () - idx_len - ukey_len );
+
+    rsp->resize ( rsp->size () - sizeof ( kv_data_item_t ) - user_key_len );
 
     return 0;
 }
@@ -3397,33 +3357,32 @@ static void export_md5db_record_callback (
         val_len = content.size ();
     }
 
-    uint8_t idx_len = sizeof ( uint32_t ) * 2;
-    if ( NULL == val || val_len <= idx_len )
+    if ( unlikely ( NULL == val ||
+                    val_len <= sizeof ( kv_data_item_t ) 
+                    ) 
+        )
     {
         LOG_ERROR ( "[md5db][db][export_md5db_record_callback]invalid user key len" );
         * ignore_this_record = true;
         return;
     }
 
-    fast_memcpy ( & ttl, & val[ val_len - sizeof (uint32_t ) ], sizeof (uint32_t ) );
+    kv_data_item_t kv_data;
+    memcpy ( & kv_data, & val[ val_len - sizeof ( kv_data_item_t ) ], sizeof ( kv_data_item_t ) );
 
-    uint32_t kl;
-    fast_memcpy ( & kl, & val[ val_len - idx_len ], sizeof (uint32_t ) );
-    if ( 0 == kl )
+    if ( unlikely ( kv_data.user_key_len == 0 ||
+                    val_len < sizeof ( kv_data_item_t ) + kv_data.user_key_len 
+                    )
+        )
     {
-        LOG_ERROR ( "[md5db][db][export_md5db_record_callback]invalid user key len" );
+        LOG_ERROR ( "[md5db][db][export_md5db_record_callback][data_len=%d][ukey_len=%d]invalid data",
+                    ( int ) val_len, ( int ) kv_data.user_key_len );
         * ignore_this_record = true;
         return;
     }
 
-    if ( val_len < idx_len + kl )
-    {
-        LOG_ERROR ( "[md5db][db][export_md5db_record_callback][data_len=%d][ukey_len=%d][value=%s]invalid data", 
-                    ( int ) val_len, ( int ) kl, val );
-        * ignore_this_record = true;
-        return;
-    }
-    const char * uk = ( const char * ) & val[ val_len - idx_len - kl ];
+    uint32_t     kl = kv_data.user_key_len;
+    const char * uk = ( const char * ) & val[ val_len - sizeof ( kv_data_item_t ) - kl ];
 
     uint16_t hash = G_APPTOOL->bucket_hash ( uk, kl );
     if ( hash < start || hash >= end )
@@ -3434,7 +3393,7 @@ static void export_md5db_record_callback (
 
     * ignore_this_record = false;
 
-    uint32_t vl = val_len - idx_len - kl;
+    uint32_t vl = val_len - sizeof ( kv_data_item_t ) - kl;
 
     key         = uk;
     key_len     = kl;

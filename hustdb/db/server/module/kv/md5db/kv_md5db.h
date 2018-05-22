@@ -107,6 +107,11 @@ public:
                         item_ctxt_t * & ctxt
                         );
 
+    virtual void get_item_buffer (
+                                    conn_ctxt_t conn,
+                                    item_ctxt_t * & ctxt
+                                    );
+
     virtual int export_db (
                             int file_id,
                             const char * path,

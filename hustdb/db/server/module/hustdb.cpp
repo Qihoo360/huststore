@@ -852,6 +852,43 @@ bool hustdb_t::init_table_index ( )
     return true;
 }
 
+bool hustdb_t::worth_to_compress ( 
+                                    uint32_t key_len, 
+                                    uint32_t val_len 
+                                    )
+{
+    uint32_t page     = 1024;
+    uint32_t data_len = key_len + val_len + sizeof ( kv_data_item_t );
+
+    if ( data_len <= page )
+    {
+        return false;
+    }
+
+    uint32_t org_size = data_len / page + ( data_len % page > 0 ? 1 : 0 );
+    val_len           = val_len * m_store_conf.db_post_compression_ratio / 100;        
+    data_len          = key_len + val_len + sizeof ( kv_data_item_t );
+    uint32_t new_size = data_len / page + ( data_len % page > 0 ? 1 : 0 );
+
+    return org_size - new_size >= 1;
+}
+
+bool hustdb_t::check_from_compress (
+                                        uint32_t key_len,
+                                        uint32_t val_len,
+                                        uint32_t compressed_len
+                                    )
+{
+    uint32_t page     = 1024;
+    uint32_t data_len = key_len + val_len + sizeof ( kv_data_item_t );
+    
+    uint32_t org_size = data_len / page + ( data_len % page > 0 ? 1 : 0 );
+    data_len          = key_len + compressed_len + sizeof ( kv_data_item_t );
+    uint32_t new_size = data_len / page + ( data_len % page > 0 ? 1 : 0 );
+
+    return org_size - new_size >= 1;
+}
+
 const char * hustdb_t::errno_string_status ( int r )
 {
     switch ( r )
@@ -930,8 +967,8 @@ char hustdb_t::real_table_type (
 }
 
 bool hustdb_t::generate_hash_conf (
-                                    int file_count,
-                                    int copy_count,
+                                    int           file_count,
+                                    int           copy_count,
                                     std::string & hash_conf
                                     )
 {
@@ -977,7 +1014,7 @@ bool hustdb_t::generate_hash_conf (
 
 bool hustdb_t::tb_name_check (
                                const char * name,
-                               const int name_len
+                               const int    name_len
                                )
 {
     if ( ! name || name_len <= 0 || name_len > MAX_QUEUE_NAME_LEN )
@@ -1000,7 +1037,7 @@ bool hustdb_t::tb_name_check (
 
 int hustdb_t::find_table_type (
                                 std::string & table,
-                                uint8_t & type
+                                uint8_t &     type
                                 )
 {
     table_stat_t *           tstat        = NULL;
@@ -1022,8 +1059,8 @@ int hustdb_t::find_table_type (
 
 int hustdb_t::find_table_offset (
                                   std::string & table,
-                                  bool create,
-                                  uint8_t type
+                                  bool          create,
+                                  uint8_t       type
                                   )
 {
     uint32_t                 i            = 0;
@@ -1112,10 +1149,10 @@ void hustdb_t::set_table_size (
 
 int hustdb_t::get_table_size (
                                const char * table,
-                               size_t table_len
+                               size_t       table_len
                                )
 {
-    table_stat_t *           tstat        = NULL;
+    table_stat_t * tstat = NULL;
 
     if ( ! table )
     {
@@ -1159,12 +1196,12 @@ uint32_t hustdb_t::clac_real_item (
 }
 
 int hustdb_t::find_queue_offset (
-                                  std::string & queue,
-                                  bool create,
-                                  uint8_t type,
+                                  std::string &    queue,
+                                  bool             create,
+                                  uint8_t          type,
                                   queue_info_t * & queue_info,
-                                  const char * worker,
-                                  size_t worker_len
+                                  const char *     worker,
+                                  size_t           worker_len
                                   )
 {
     uint32_t                 i            = 0;
@@ -1356,10 +1393,10 @@ int hustdb_t::hustdb_file_count ( )
 }
 
 int hustdb_t::hustdb_exist (
-                             const char * key,
-                             size_t key_len,
-                             uint32_t & ver,
-                             conn_ctxt_t conn,
+                             const char *    key,
+                             size_t          key_len,
+                             uint32_t &      ver,
+                             conn_ctxt_t     conn,
                              item_ctxt_t * & ctxt
                              )
 {
@@ -1402,10 +1439,19 @@ int hustdb_t::hustdb_get (
     if ( m_mdb_ok && key_len < MDB_KEY_LEN )
     {
         r = m_mdb->get ( key, key_len, conn, rsp, & rsp_len );
-        if ( r == 0 )
+        if ( r == 0 &&
+             rsp_len > sizeof ( mdb_data_item_t )
+            )
         {
-            fast_memcpy ( & ver, rsp->c_str () + rsp_len - SIZEOF_UINT32, SIZEOF_UINT32 );
-            rsp_len -= SIZEOF_UINT32;
+            m_storage->get_item_buffer ( conn, ctxt );
+            
+            mdb_data_item_t mdb_idx;
+            fast_memcpy ( & mdb_idx, rsp->c_str () + rsp_len - sizeof ( mdb_data_item_t ), sizeof ( mdb_data_item_t ) );
+            
+            ver = mdb_idx.version;
+            ctxt->kv_data.compress_type = mdb_idx.compress_type;
+
+            rsp_len -= sizeof ( mdb_data_item_t );
             get_ok = true;
         }
     }
@@ -1461,8 +1507,12 @@ int hustdb_t::hustdb_get (
 
         if ( m_mdb_ok && alive >= 0 && key_len < MDB_KEY_LEN && rsp_len < MDB_VAL_LEN )
         {
-            rsp->append ( ( const char * ) & ver, SIZEOF_UINT32 );
-            m_mdb->put ( key, key_len, rsp->c_str (), rsp_len + SIZEOF_UINT32, alive );
+            mdb_data_item_t mdb_idx;
+            mdb_idx.version       = ver;
+            mdb_idx.compress_type = ctxt->kv_data.compress_type;
+
+            rsp->append ( ( const char * ) & mdb_idx, sizeof ( mdb_data_item_t ) );
+            m_mdb->put ( key, key_len, rsp->c_str (), rsp_len + sizeof ( mdb_data_item_t ), alive );
         }
     }
 
@@ -1470,14 +1520,14 @@ int hustdb_t::hustdb_get (
 }
 
 int hustdb_t::hustdb_put (
-                           const char * key,
-                           size_t key_len,
-                           const char * val,
-                           size_t val_len,
-                           uint32_t & ver,
-                           uint32_t ttl,
-                           bool is_dup,
-                           conn_ctxt_t conn,
+                           const char *    key,
+                           size_t          key_len,
+                           const char *    val,
+                           size_t          val_len,
+                           uint32_t &      ver,
+                           uint32_t        ttl,
+                           bool            is_dup,
+                           conn_ctxt_t     conn,
                            item_ctxt_t * & ctxt
                            )
 {
@@ -1547,11 +1597,15 @@ int hustdb_t::hustdb_put (
     {
         if ( val_len < MDB_VAL_LEN )
         {
+            mdb_data_item_t mdb_idx;
+            mdb_idx.version       = ver;
+            mdb_idx.compress_type = conn.compress_type;
+
             std::string * buf = m_mdb->buffer ( conn );
             fast_memcpy ( ( char * ) & ( * buf ) [ 0 ], val, val_len );
-            fast_memcpy ( ( char * ) & ( * buf ) [ 0 ] + val_len, & ver, SIZEOF_UINT32 );
+            fast_memcpy ( ( char * ) & ( * buf ) [ 0 ] + val_len, & mdb_idx, sizeof ( mdb_data_item_t ) );
 
-            m_mdb->put ( key, key_len, buf->c_str (), val_len + SIZEOF_UINT32, ttl );
+            m_mdb->put ( key, key_len, buf->c_str (), val_len + sizeof ( mdb_data_item_t ), ttl );
         }
         else
         {
@@ -1563,11 +1617,11 @@ int hustdb_t::hustdb_put (
 }
 
 int hustdb_t::hustdb_del (
-                           const char * key,
-                           size_t key_len,
-                           uint32_t & ver,
-                           bool is_dup,
-                           conn_ctxt_t conn,
+                           const char *    key,
+                           size_t          key_len,
+                           uint32_t &      ver,
+                           bool            is_dup,
+                           conn_ctxt_t     conn,
                            item_ctxt_t * & ctxt
                            )
 {
@@ -1616,17 +1670,17 @@ int hustdb_t::hustdb_del (
 }
 
 int hustdb_t::hustdb_keys (
-                            int offset,
-                            int size,
-                            int file_id,
-                            int start,
-                            int end,
-                            bool async,
-                            bool noval,
-                            uint32_t & hits,
-                            uint32_t & total,
+                            int             offset,
+                            int             size,
+                            int             file_id,
+                            int             start,
+                            int             end,
+                            bool            async,
+                            bool            noval,
+                            uint32_t &      hits,
+                            uint32_t &      total,
                             std::string * & rsp,
-                            conn_ctxt_t conn,
+                            conn_ctxt_t     conn,
                             item_ctxt_t * & ctxt
                             )
 {
@@ -1677,13 +1731,13 @@ int hustdb_t::hustdb_keys (
 
 int hustdb_t::hustdb_stat (
                             const char * table,
-                            size_t table_len,
-                            int & count
+                            size_t       table_len,
+                            int &        count
                             )
 {
     if ( unlikely ( table &&
-                   table_len > 0 &&
-                   ! tb_name_check ( table, table_len )
+                    table_len > 0 &&
+                    ! tb_name_check ( table, table_len )
                    )
          )
     {
@@ -1746,15 +1800,15 @@ void hustdb_t::hustdb_stat_all (
 
 int hustdb_t::hustdb_export (
                               const char * table,
-                              size_t table_len,
-                              int offset,
-                              int size,
-                              int file_id,
-                              int start,
-                              int end,
-                              bool cover,
-                              bool noval,
-                              void * & token
+                              size_t       table_len,
+                              int          offset,
+                              int          size,
+                              int          file_id,
+                              int          start,
+                              int          end,
+                              bool         cover,
+                              bool         noval,
+                              void * &     token
                               )
 {
     int             inner_file_id   = - 1;
@@ -1902,12 +1956,12 @@ int hustdb_t::hustdb_binlog_scan ( )
 }
 
 int hustdb_t::hustdb_hexist (
-                              const char * table,
-                              size_t table_len,
-                              const char * key,
-                              size_t key_len,
-                              uint32_t & ver,
-                              conn_ctxt_t conn,
+                              const char *    table,
+                              size_t          table_len,
+                              const char *    key,
+                              size_t          key_len,
+                              uint32_t &      ver,
+                              conn_ctxt_t     conn,
                               item_ctxt_t * & ctxt
                               )
 {
@@ -1915,7 +1969,7 @@ int hustdb_t::hustdb_hexist (
     int             offset       = - 1;
 
     if ( unlikely ( ! tb_name_check ( table, table_len ) ||
-                   CHECK_STRING ( key )
+                    CHECK_STRING ( key )
                    )
          )
     {
@@ -1948,14 +2002,14 @@ int hustdb_t::hustdb_hexist (
 }
 
 int hustdb_t::hustdb_hget (
-                            const char * table,
-                            size_t table_len,
-                            const char * key,
-                            size_t key_len,
+                            const char *    table,
+                            size_t          table_len,
+                            const char *    key,
+                            size_t          key_len,
                             std::string * & rsp,
-                            int & rsp_len,
-                            uint32_t & ver,
-                            conn_ctxt_t conn,
+                            int &           rsp_len,
+                            uint32_t &      ver,
+                            conn_ctxt_t     conn,
                             item_ctxt_t * & ctxt
                             )
 {
@@ -1968,7 +2022,7 @@ int hustdb_t::hustdb_hget (
     int             offset       = - 1;
 
     if ( unlikely ( ! tb_name_check ( table, table_len ) ||
-                   CHECK_STRING ( key )
+                    CHECK_STRING ( key )
                    )
          )
     {
@@ -1995,10 +2049,19 @@ int hustdb_t::hustdb_hget (
         mkey = m_storage->get_inner_tbkey ( key, mkey_len, conn );
 
         r = m_mdb->get ( mkey, mkey_len, conn, rsp, & rsp_len );
-        if ( r == 0 )
+        if ( r == 0 &&
+             rsp_len > sizeof ( mdb_data_item_t )
+            )
         {
-            fast_memcpy ( & ver, rsp->c_str () + rsp_len - SIZEOF_UINT32, SIZEOF_UINT32 );
-            rsp_len -= SIZEOF_UINT32;
+            m_storage->get_item_buffer ( conn, ctxt );
+            
+            mdb_data_item_t mdb_idx;
+            fast_memcpy ( & mdb_idx, rsp->c_str () + rsp_len - sizeof ( mdb_data_item_t ), sizeof ( mdb_data_item_t ) );
+            
+            ver = mdb_idx.version;
+            ctxt->kv_data.compress_type = mdb_idx.compress_type;
+
+            rsp_len -= sizeof ( mdb_data_item_t );
             get_ok = true;
         }
     }
@@ -2054,8 +2117,12 @@ int hustdb_t::hustdb_hget (
 
         if ( m_mdb_ok && alive >= 0 && table_len + key_len + 2 < MDB_KEY_LEN && rsp_len < MDB_VAL_LEN )
         {
-            rsp->append ( ( const char * ) & ver, SIZEOF_UINT32 );
-            m_mdb->put ( mkey, mkey_len, rsp->c_str (), rsp_len + SIZEOF_UINT32, alive );
+            mdb_data_item_t mdb_idx;
+            mdb_idx.version       = ver;
+            mdb_idx.compress_type = ctxt->kv_data.compress_type;
+
+            rsp->append ( ( const char * ) & mdb_idx, sizeof ( mdb_data_item_t ) );
+            m_mdb->put ( mkey, mkey_len, rsp->c_str (), rsp_len + sizeof ( mdb_data_item_t ), alive );
         }
     }
 
@@ -2063,16 +2130,16 @@ int hustdb_t::hustdb_hget (
 }
 
 int hustdb_t::hustdb_hset (
-                            const char * table,
-                            size_t table_len,
-                            const char * key,
-                            size_t key_len,
-                            const char * val,
-                            size_t val_len,
-                            uint32_t & ver,
-                            uint32_t ttl,
-                            bool is_dup,
-                            conn_ctxt_t conn,
+                            const char *    table,
+                            size_t          table_len,
+                            const char *    key,
+                            size_t          key_len,
+                            const char *    val,
+                            size_t          val_len,
+                            uint32_t &      ver,
+                            uint32_t        ttl,
+                            bool            is_dup,
+                            conn_ctxt_t     conn,
                             item_ctxt_t * & ctxt
                             )
 {
@@ -2083,9 +2150,9 @@ int hustdb_t::hustdb_hset (
     int             offset       = - 1;
 
     if ( unlikely ( ! tb_name_check ( table, table_len ) ||
-                   CHECK_VERSION ||
-                   CHECK_STRING ( key ) ||
-                   CHECK_STRING ( val )
+                    CHECK_VERSION ||
+                    CHECK_STRING ( key ) ||
+                    CHECK_STRING ( val )
                    )
          )
     {
@@ -2158,10 +2225,15 @@ int hustdb_t::hustdb_hset (
 
         if ( val_len < MDB_VAL_LEN )
         {
+            mdb_data_item_t mdb_idx;
+            mdb_idx.version       = ver;
+            mdb_idx.compress_type = conn.compress_type;
+
             std::string * buf = m_mdb->buffer ( conn );
             fast_memcpy ( ( char * ) & ( * buf ) [ 0 ], val, val_len );
-            fast_memcpy ( ( char * ) & ( * buf ) [ 0 ] + val_len, & ver, SIZEOF_UINT32 );
-            m_mdb->put ( mkey, mkey_len, buf->c_str (), val_len + SIZEOF_UINT32, ttl );
+            fast_memcpy ( ( char * ) & ( * buf ) [ 0 ] + val_len, & mdb_idx, sizeof ( mdb_data_item_t ) );
+
+            m_mdb->put ( mkey, mkey_len, buf->c_str (), val_len + sizeof ( mdb_data_item_t ), ttl );
         }
         else
         {
@@ -2173,19 +2245,19 @@ int hustdb_t::hustdb_hset (
 }
 
 int hustdb_t::hustdb_hincrby (
-                               const char * table,
-                               size_t table_len,
-                               const char * key,
-                               size_t key_len,
-                               int64_t score,
-                               const char * host,
-                               size_t host_len,
+                               const char *    table,
+                               size_t          table_len,
+                               const char *    key,
+                               size_t          key_len,
+                               int64_t         score,
+                               const char *    host,
+                               size_t          host_len,
                                std::string * & rsp,
-                               int & rsp_len,
-                               uint32_t & ver,
-                               uint32_t ttl,
-                               bool is_dup,
-                               conn_ctxt_t conn,
+                               int &           rsp_len,
+                               uint32_t &      ver,
+                               uint32_t        ttl,
+                               bool            is_dup,
+                               conn_ctxt_t     conn,
                                item_ctxt_t * & ctxt
                                )
 {
@@ -2201,8 +2273,8 @@ int hustdb_t::hustdb_hincrby (
     int             offset       = - 1;
 
     if ( unlikely ( ! tb_name_check ( table, table_len ) ||
-                   CHECK_VERSION ||
-                   CHECK_STRING ( key )
+                    CHECK_VERSION ||
+                    CHECK_STRING ( key )
                    )
          )
     {
@@ -2235,9 +2307,11 @@ int hustdb_t::hustdb_hincrby (
         mkey = m_storage->get_inner_tbkey ( key, mkey_len, conn );
         
         r = m_mdb->get ( mkey, mkey_len, conn, rsp, & rsp_len );
-        if ( r == 0 )
+        if ( r == 0 &&
+             rsp_len > sizeof ( mdb_data_item_t )
+            )
         {
-            rsp_len -= SIZEOF_UINT32;
+            rsp_len -= sizeof ( mdb_data_item_t );
             ( * rsp ) [ rsp_len ] = '\0';
             get_ok = true;
         }
@@ -2305,10 +2379,15 @@ int hustdb_t::hustdb_hincrby (
     {
         if ( val_len < MDB_VAL_LEN )
         {
+            mdb_data_item_t mdb_idx;
+            mdb_idx.version       = ver;
+            mdb_idx.compress_type = NOCOMPRESS;
+
             std::string * buf = m_mdb->buffer ( conn );
             fast_memcpy ( ( char * ) & ( * buf ) [ 0 ], val, val_len );
-            fast_memcpy ( ( char * ) & ( * buf ) [ 0 ] + val_len, & ver, SIZEOF_UINT32 );
-            m_mdb->put ( mkey, mkey_len, buf->c_str (), val_len + SIZEOF_UINT32, ttl );
+            fast_memcpy ( ( char * ) & ( * buf ) [ 0 ] + val_len, & mdb_idx, sizeof ( mdb_data_item_t ) );
+
+            m_mdb->put ( mkey, mkey_len, buf->c_str (), val_len + sizeof ( mdb_data_item_t ), ttl );
         }
         else
         {
@@ -2337,13 +2416,13 @@ int hustdb_t::hustdb_hincrby (
 }
 
 int hustdb_t::hustdb_hdel (
-                            const char * table,
-                            size_t table_len,
-                            const char * key,
-                            size_t key_len,
-                            uint32_t & ver,
-                            bool is_dup,
-                            conn_ctxt_t conn,
+                            const char *    table,
+                            size_t          table_len,
+                            const char *    key,
+                            size_t          key_len,
+                            uint32_t &      ver,
+                            bool            is_dup,
+                            conn_ctxt_t     conn,
                             item_ctxt_t * & ctxt
                             )
 {
@@ -2353,8 +2432,8 @@ int hustdb_t::hustdb_hdel (
     int             offset       = - 1;
 
     if ( unlikely ( ! tb_name_check ( table, table_len ) ||
-                   CHECK_VERSION ||
-                   CHECK_STRING ( key )
+                    CHECK_VERSION ||
+                    CHECK_STRING ( key )
                    )
          )
     {
@@ -2408,18 +2487,18 @@ int hustdb_t::hustdb_hdel (
 }
 
 int hustdb_t::hustdb_hkeys (
-                             const char * table,
-                             size_t table_len,
-                             int offset,
-                             int size,
-                             int start,
-                             int end,
-                             bool async,
-                             bool noval,
-                             uint32_t & hits,
-                             uint32_t & total,
+                             const char *    table,
+                             size_t          table_len,
+                             int             offset,
+                             int             size,
+                             int             start,
+                             int             end,
+                             bool            async,
+                             bool            noval,
+                             uint32_t &      hits,
+                             uint32_t &      total,
                              std::string * & rsp,
-                             conn_ctxt_t conn,
+                             conn_ctxt_t     conn,
                              item_ctxt_t * & ctxt
                              )
 {
@@ -2427,10 +2506,10 @@ int hustdb_t::hustdb_hkeys (
     int             _offset      = - 1;
 
     if ( unlikely ( ! tb_name_check ( table, table_len ) ||
-                   offset < 0 || offset > MAX_EXPORT_OFFSET ||
-                   size < 0 || size > MEM_EXPORT_SIZE ||
-                   ! async && offset > SYNC_EXPORT_OFFSET ||
-                   start < 0 || end < 0 || start >= end || end > MAX_BUCKET_NUM
+                    offset < 0 || offset > MAX_EXPORT_OFFSET ||
+                    size < 0 || size > MEM_EXPORT_SIZE ||
+                    ! async && offset > SYNC_EXPORT_OFFSET ||
+                    start < 0 || end < 0 || start >= end || end > MAX_BUCKET_NUM
                    )
          )
     {
@@ -2476,12 +2555,12 @@ int hustdb_t::hustdb_hkeys (
 }
 
 int hustdb_t::hustdb_sismember (
-                                 const char * table,
-                                 size_t table_len,
-                                 const char * key,
-                                 size_t key_len,
-                                 uint32_t & ver,
-                                 conn_ctxt_t conn,
+                                 const char *    table,
+                                 size_t          table_len,
+                                 const char *    key,
+                                 size_t          key_len,
+                                 uint32_t &      ver,
+                                 conn_ctxt_t     conn,
                                  item_ctxt_t * & ctxt
                                  )
 {
@@ -2489,7 +2568,7 @@ int hustdb_t::hustdb_sismember (
     int             offset       = - 1;
 
     if ( unlikely ( ! tb_name_check ( table, table_len ) ||
-                   CHECK_STRING ( key )
+                    CHECK_STRING ( key )
                    )
          )
     {
@@ -2522,14 +2601,14 @@ int hustdb_t::hustdb_sismember (
 }
 
 int hustdb_t::hustdb_sadd (
-                            const char * table,
-                            size_t table_len,
-                            const char * key,
-                            size_t key_len,
-                            uint32_t & ver,
-                            uint32_t ttl,
-                            bool is_dup,
-                            conn_ctxt_t conn,
+                            const char *    table,
+                            size_t          table_len,
+                            const char *    key,
+                            size_t          key_len,
+                            uint32_t &      ver,
+                            uint32_t        ttl,
+                            bool            is_dup,
+                            conn_ctxt_t     conn,
                             item_ctxt_t * & ctxt
                             )
 {
@@ -2538,8 +2617,8 @@ int hustdb_t::hustdb_sadd (
     int             offset       = - 1;
 
     if ( unlikely ( ! tb_name_check ( table, table_len ) ||
-                   CHECK_VERSION ||
-                   CHECK_STRING ( key )
+                    CHECK_VERSION ||
+                    CHECK_STRING ( key )
                    )
          )
     {
@@ -2607,13 +2686,13 @@ int hustdb_t::hustdb_sadd (
 }
 
 int hustdb_t::hustdb_srem (
-                            const char * table,
-                            size_t table_len,
-                            const char * key,
-                            size_t key_len,
-                            uint32_t & ver,
-                            bool is_dup,
-                            conn_ctxt_t conn,
+                            const char *    table,
+                            size_t          table_len,
+                            const char *    key,
+                            size_t          key_len,
+                            uint32_t &      ver,
+                            bool            is_dup,
+                            conn_ctxt_t     conn,
                             item_ctxt_t * & ctxt
                             )
 {
@@ -2621,8 +2700,8 @@ int hustdb_t::hustdb_srem (
     int             offset       = - 1;
 
     if ( unlikely ( ! tb_name_check ( table, table_len ) ||
-                   CHECK_VERSION ||
-                   CHECK_STRING ( key )
+                    CHECK_VERSION ||
+                    CHECK_STRING ( key )
                    )
          )
     {
@@ -2666,18 +2745,18 @@ int hustdb_t::hustdb_srem (
 }
 
 int hustdb_t::hustdb_smembers (
-                                const char * table,
-                                size_t table_len,
-                                int offset,
-                                int size,
-                                int start,
-                                int end,
-                                bool async,
-                                bool noval,
-                                uint32_t & hits,
-                                uint32_t & total,
+                                const char *    table,
+                                size_t          table_len,
+                                int             offset,
+                                int             size,
+                                int             start,
+                                int             end,
+                                bool            async,
+                                bool            noval,
+                                uint32_t &      hits,
+                                uint32_t &      total,
                                 std::string * & rsp,
-                                conn_ctxt_t conn,
+                                conn_ctxt_t     conn,
                                 item_ctxt_t * & ctxt
                                 )
 {
@@ -2734,12 +2813,12 @@ int hustdb_t::hustdb_smembers (
 }
 
 int hustdb_t::hustdb_zismember (
-                                 const char * table,
-                                 size_t table_len,
-                                 const char * key,
-                                 size_t key_len,
-                                 uint32_t & ver,
-                                 conn_ctxt_t conn,
+                                 const char *    table,
+                                 size_t          table_len,
+                                 const char *    key,
+                                 size_t          key_len,
+                                 uint32_t &      ver,
+                                 conn_ctxt_t     conn,
                                  item_ctxt_t * & ctxt
                                  )
 {
@@ -2747,7 +2826,7 @@ int hustdb_t::hustdb_zismember (
     int             offset       = - 1;
 
     if ( unlikely ( ! tb_name_check ( table, table_len ) ||
-                   CHECK_STRING ( key )
+                    CHECK_STRING ( key )
                    )
          )
     {
@@ -2780,19 +2859,19 @@ int hustdb_t::hustdb_zismember (
 }
 
 int hustdb_t::hustdb_zadd (
-                            const char * table,
-                            size_t table_len,
-                            const char * key,
-                            size_t key_len,
-                            int64_t score,
+                            const char *    table,
+                            size_t          table_len,
+                            const char *    key,
+                            size_t          key_len,
+                            int64_t         score,
                             std::string * & rsp,
-                            int & rsp_len,
-                            int opt,
-                            uint32_t & ver,
-                            uint32_t ttl,
-                            bool is_dup,
-                            conn_ctxt_t conn,
-                            bool & is_version_error
+                            int &           rsp_len,
+                            int             opt,
+                            uint32_t &      ver,
+                            uint32_t        ttl,
+                            bool            is_dup,
+                            conn_ctxt_t     conn,
+                            bool &          is_version_error
                             )
 {
     int             r            = 0;
@@ -2811,8 +2890,8 @@ int hustdb_t::hustdb_zadd (
     is_version_error             = false;
 
     if ( unlikely ( ! tb_name_check ( table, table_len ) ||
-                   CHECK_VERSION ||
-                   CHECK_STRING ( key )
+                    CHECK_VERSION ||
+                    CHECK_STRING ( key )
                    )
          )
     {
@@ -2846,10 +2925,15 @@ int hustdb_t::hustdb_zadd (
         mkey = m_storage->get_inner_tbkey ( key, mkey_len, conn );
         
         r = m_mdb->get ( mkey, mkey_len, conn, rsp, & rsp_len );
-        if ( r == 0 )
+        if ( r == 0 &&
+             rsp_len > sizeof ( mdb_data_item_t )
+            )
         {
-            fast_memcpy ( & cur_ver, rsp->c_str () + rsp_len - SIZEOF_UINT32, SIZEOF_UINT32 );
-            rsp_len -= SIZEOF_UINT32;
+            mdb_data_item_t mdb_idx;
+            fast_memcpy ( & mdb_idx, rsp->c_str () + rsp_len - sizeof ( mdb_data_item_t ), sizeof ( mdb_data_item_t ) );
+
+            cur_ver = mdb_idx.version;
+            rsp_len -= sizeof ( mdb_data_item_t );
             ( * rsp ) [ rsp_len ] = '\0';
             get_ok = true;
         }
@@ -2934,10 +3018,15 @@ int hustdb_t::hustdb_zadd (
     {
         if ( val_len < MDB_VAL_LEN )
         {
+            mdb_data_item_t mdb_idx;
+            mdb_idx.version       = ver;
+            mdb_idx.compress_type = NOCOMPRESS;
+
             std::string * buf = m_mdb->buffer ( conn );
             fast_memcpy ( ( char * ) & ( * buf ) [ 0 ], val, val_len );
-            fast_memcpy ( ( char * ) & ( * buf ) [ 0 ] + val_len, & ver, SIZEOF_UINT32 );
-            m_mdb->put ( mkey, mkey_len, buf->c_str (), val_len + SIZEOF_UINT32, ttl );
+            fast_memcpy ( ( char * ) & ( * buf ) [ 0 ] + val_len, & mdb_idx, sizeof ( mdb_data_item_t ) );
+
+            m_mdb->put ( mkey, mkey_len, buf->c_str (), val_len + sizeof ( mdb_data_item_t ), ttl );
         }
         else
         {
@@ -2988,14 +3077,14 @@ int hustdb_t::hustdb_zadd (
 }
 
 int hustdb_t::hustdb_zscore (
-                              const char * table,
-                              size_t table_len,
-                              const char * key,
-                              size_t key_len,
+                              const char *    table,
+                              size_t          table_len,
+                              const char *    key,
+                              size_t          key_len,
                               std::string * & rsp,
-                              int & rsp_len,
-                              uint32_t & ver,
-                              conn_ctxt_t conn,
+                              int &           rsp_len,
+                              uint32_t &      ver,
+                              conn_ctxt_t     conn,
                               item_ctxt_t * & ctxt
                               )
 {
@@ -3008,7 +3097,7 @@ int hustdb_t::hustdb_zscore (
     int             offset       = - 1;
 
     if ( unlikely ( ! tb_name_check ( table, table_len ) ||
-                   CHECK_STRING ( key )
+                    CHECK_STRING ( key )
                    )
          )
     {
@@ -3035,10 +3124,16 @@ int hustdb_t::hustdb_zscore (
         mkey = m_storage->get_inner_tbkey ( key, mkey_len, conn );
         
         r = m_mdb->get ( mkey, mkey_len, conn, rsp, & rsp_len );
-        if ( r == 0 )
+        if ( r == 0 &&
+             rsp_len > sizeof ( mdb_data_item_t )
+            )
         {
-            fast_memcpy ( & ver, rsp->c_str () + rsp_len - SIZEOF_UINT32, SIZEOF_UINT32 );
-            rsp_len -= SIZEOF_UINT32;
+            mdb_data_item_t mdb_idx;
+            fast_memcpy ( & mdb_idx, rsp->c_str () + rsp_len - sizeof ( mdb_data_item_t ), sizeof ( mdb_data_item_t ) );
+
+            ver = mdb_idx.version;
+
+            rsp_len -= sizeof ( mdb_data_item_t );
             get_ok = true;
         }
     }
@@ -3072,8 +3167,12 @@ int hustdb_t::hustdb_zscore (
         
         if ( m_mdb_ok && alive >= 0 && table_len + key_len + 2 < MDB_KEY_LEN && rsp_len < MDB_VAL_LEN )
         {
-            rsp->append ( ( const char * ) & ver, SIZEOF_UINT32 );
-            m_mdb->put ( mkey, mkey_len, rsp->c_str (), rsp_len + SIZEOF_UINT32, alive );
+            mdb_data_item_t mdb_idx;
+            mdb_idx.version       = ver;
+            mdb_idx.compress_type = NOCOMPRESS;
+
+            rsp->append ( ( const char * ) & mdb_idx, sizeof ( mdb_data_item_t ) );
+            m_mdb->put ( mkey, mkey_len, rsp->c_str (), rsp_len + sizeof ( mdb_data_item_t ), alive );
         }
     }
 
@@ -3081,13 +3180,13 @@ int hustdb_t::hustdb_zscore (
 }
 
 int hustdb_t::hustdb_zrem (
-                            const char * table,
-                            size_t table_len,
-                            const char * key,
-                            size_t key_len,
-                            uint32_t & ver,
-                            bool is_dup,
-                            conn_ctxt_t conn,
+                            const char *    table,
+                            size_t          table_len,
+                            const char *    key,
+                            size_t          key_len,
+                            uint32_t &      ver,
+                            bool            is_dup,
+                            conn_ctxt_t     conn,
                             item_ctxt_t * & ctxt
                             )
 {
@@ -3101,8 +3200,8 @@ int hustdb_t::hustdb_zrem (
     std::string *   rsp          = NULL;
 
     if ( unlikely ( ! tb_name_check ( table, table_len ) ||
-                   CHECK_VERSION ||
-                   CHECK_STRING ( key )
+                    CHECK_VERSION ||
+                    CHECK_STRING ( key )
                    )
          )
     {
@@ -3184,21 +3283,21 @@ int hustdb_t::hustdb_zrem (
 }
 
 int hustdb_t::hustdb_zrange (
-                              const char * table,
-                              size_t table_len,
-                              int64_t min,
-                              int64_t max,
-                              int offset,
-                              int size,
-                              int start,
-                              int end,
-                              bool async,
-                              bool noval,
-                              bool byscore,
-                              uint32_t & hits,
-                              uint32_t & total,
+                              const char *    table,
+                              size_t          table_len,
+                              int64_t         min,
+                              int64_t         max,
+                              int             offset,
+                              int             size,
+                              int             start,
+                              int             end,
+                              bool            async,
+                              bool            noval,
+                              bool            byscore,
+                              uint32_t &      hits,
+                              uint32_t &      total,
                               std::string * & rsp,
-                              conn_ctxt_t conn,
+                              conn_ctxt_t     conn,
                               item_ctxt_t * & ctxt
                               )
 {
@@ -3212,11 +3311,11 @@ int hustdb_t::hustdb_zrange (
     }
 
     if ( unlikely ( ! tb_name_check ( table, table_len ) ||
-                   offset < 0 || offset > MAX_EXPORT_OFFSET ||
-                   size < 0 || size > MEM_EXPORT_SIZE ||
-                   ! async && offset > SYNC_EXPORT_OFFSET ||
-                   byscore && min > max ||
-                   start < 0 || end < 0 || start >= end || end > MAX_BUCKET_NUM
+                    offset < 0 || offset > MAX_EXPORT_OFFSET ||
+                    size < 0 || size > MEM_EXPORT_SIZE ||
+                    ! async && offset > SYNC_EXPORT_OFFSET ||
+                    byscore && min > max ||
+                    start < 0 || end < 0 || start >= end || end > MAX_BUCKET_NUM
                    )
          )
     {
@@ -3272,22 +3371,22 @@ int hustdb_t::hustdb_zrange (
 
 int hustdb_t::hustdb_binlog (
                               const char * table,
-                              size_t table_len,
+                              size_t       table_len,
                               const char * key,
-                              size_t key_len,
+                              size_t       key_len,
                               const char * host,
-                              size_t host_len,
-                              uint8_t cmd_type,
-                              conn_ctxt_t conn
+                              size_t       host_len,
+                              uint8_t      cmd_type,
+                              conn_ctxt_t  conn
                               )
 {
     int                  r            = 0;
     bool                 is_rem       = false;
 
     if ( unlikely ( ( table && table_len > 0 && ! tb_name_check ( table, table_len ) ) ||
-                   CHECK_STRING ( key ) ||
-                   CHECK_STRING ( host ) ||
-                   host_len > 32
+                    CHECK_STRING ( key ) ||
+                    CHECK_STRING ( host ) ||
+                    host_len > 32
                    )
          )
     {
@@ -3338,11 +3437,11 @@ int hustdb_t::hustdb_binlog (
 
 int hustdb_t::hustmq_put (
                            const char * queue,
-                           size_t queue_len,
+                           size_t       queue_len,
                            const char * item,
-                           size_t item_len,
-                           uint32_t priori,
-                           conn_ctxt_t conn
+                           size_t       item_len,
+                           uint32_t     priori,
+                           conn_ctxt_t  conn
                            )
 {
     int             r                       = 0;
@@ -3358,8 +3457,8 @@ int hustdb_t::hustmq_put (
     item_ctxt_t *   ctxt                    = NULL;
 
     if ( unlikely ( ! tb_name_check ( queue, queue_len ) ||
-                   CHECK_STRING ( item ) ||
-                   priori < 0 || priori > 2
+                    CHECK_STRING ( item ) ||
+                    priori < 0 || priori > 2
                    )
          )
     {
@@ -3418,15 +3517,15 @@ int hustdb_t::hustmq_put (
 }
 
 int hustdb_t::hustmq_get (
-                           const char * queue,
-                           size_t queue_len,
-                           const char * worker,
-                           size_t worker_len,
-                           bool is_ack,
-                           std::string & ack,
-                           std::string & unacked,
+                           const char *    queue,
+                           size_t          queue_len,
+                           const char *    worker,
+                           size_t          worker_len,
+                           bool            is_ack,
+                           std::string &   ack,
+                           std::string &   unacked,
                            std::string * & rsp,
-                           conn_ctxt_t conn
+                           conn_ctxt_t     conn
                            )
 {
     int             r                       = 0;
@@ -3442,8 +3541,8 @@ int hustdb_t::hustmq_get (
     item_ctxt_t *   ctxt                    = NULL;
 
     if ( unlikely ( ! tb_name_check ( queue, queue_len ) ||
-                   worker_len <= MIN_WORKER_LEN ||
-                   worker_len > MAX_WORKER_LEN
+                    worker_len <= MIN_WORKER_LEN ||
+                    worker_len > MAX_WORKER_LEN
                    )
          )
     {
@@ -3530,7 +3629,7 @@ int hustdb_t::hustmq_get (
 
 int hustdb_t::hustmq_ack_inner (
                                  std::string & ack,
-                                 conn_ctxt_t conn
+                                 conn_ctxt_t   conn
                                  )
 {
     uint32_t        ver                     = 0;
@@ -3543,10 +3642,10 @@ int hustdb_t::hustmq_ack_inner (
 
 int hustdb_t::hustmq_ack (
                            const char * queue,
-                           size_t queue_len,
+                           size_t       queue_len,
                            const char * ack,
-                           size_t ack_len,
-                           conn_ctxt_t conn
+                           size_t       ack_len,
+                           conn_ctxt_t  conn
                            )
 {
     int             offset                  = - 1;
@@ -3557,7 +3656,7 @@ int hustdb_t::hustmq_ack (
     item_ctxt_t *   ctxt                    = NULL;
 
     if ( unlikely ( ! tb_name_check ( queue, queue_len ) ||
-                   ! tb_name_check ( ack, ack_len )
+                    ! tb_name_check ( ack, ack_len )
                    )
          )
     {
@@ -3619,8 +3718,8 @@ int hustdb_t::hustmq_ack (
 }
 
 int hustdb_t::hustmq_worker (
-                              const char * queue,
-                              size_t queue_len,
+                              const char *  queue,
+                              size_t        queue_len,
                               std::string & workers
                               )
 {
@@ -3685,8 +3784,8 @@ int hustdb_t::hustmq_worker (
 }
 
 int hustdb_t::hustmq_stat (
-                            const char * queue,
-                            size_t queue_len,
+                            const char *  queue,
+                            size_t        queue_len,
                             std::string & stat
                             )
 {
@@ -3784,8 +3883,8 @@ void hustdb_t::hustmq_stat_all (
 
 int hustdb_t::hustmq_max (
                            const char * queue,
-                           size_t queue_len,
-                           uint32_t max
+                           size_t       queue_len,
+                           uint32_t     max
                            )
 {
     int             offset                  = - 1;
@@ -3793,7 +3892,7 @@ int hustdb_t::hustmq_max (
     queue_info_t *  queue_info              = NULL;
 
     if ( unlikely ( ! tb_name_check ( queue, queue_len ) ||
-                   max < 0 || max > MAX_QUEUE_ITEM_NUM
+                    max < 0 || max > MAX_QUEUE_ITEM_NUM
                    )
          )
     {
@@ -3822,8 +3921,8 @@ int hustdb_t::hustmq_max (
 
 int hustdb_t::hustmq_lock (
                             const char * queue,
-                            size_t queue_len,
-                            uint8_t lock
+                            size_t       queue_len,
+                            uint8_t      lock
                             )
 {
     int             offset                  = - 1;
@@ -3831,7 +3930,7 @@ int hustdb_t::hustmq_lock (
     queue_info_t *  queue_info              = NULL;
 
     if ( unlikely ( ! tb_name_check ( queue, queue_len ) ||
-                   lock != 0 && lock != 1 )
+                    lock != 0 && lock != 1 )
          )
     {
         LOG_DEBUG ( "[hustdb][mq_lock]params error" );
@@ -3859,8 +3958,8 @@ int hustdb_t::hustmq_lock (
 
 int hustdb_t::hustmq_timeout (
                                const char * queue,
-                               size_t queue_len,
-                               uint8_t timeout
+                               size_t       queue_len,
+                               uint8_t      timeout
                                )
 {
     int             offset                  = - 1;
@@ -3868,7 +3967,7 @@ int hustdb_t::hustmq_timeout (
     queue_info_t *  queue_info              = NULL;
 
     if ( unlikely ( ! tb_name_check ( queue, queue_len ) ||
-                   timeout <= 0 || timeout > 255
+                    timeout <= 0 || timeout > 255
                    )
          )
     {
@@ -3897,9 +3996,9 @@ int hustdb_t::hustmq_timeout (
 
 int hustdb_t::hustmq_purge (
                              const char * queue,
-                             size_t queue_len,
-                             uint32_t priori,
-                             conn_ctxt_t conn
+                             size_t       queue_len,
+                             uint32_t     priori,
+                             conn_ctxt_t  conn
                              )
 {
     int             r                       = 0;
@@ -3916,7 +4015,7 @@ int hustdb_t::hustmq_purge (
     item_ctxt_t *   ctxt                    = NULL;
 
     if ( unlikely ( ! tb_name_check ( queue, queue_len ) ||
-                   priori < 0 || priori > 2
+                    priori < 0 || priori > 2
                    )
          )
     {
@@ -3999,12 +4098,12 @@ int hustdb_t::hustmq_purge (
 
 int hustdb_t::hustmq_pub (
                            const char * queue,
-                           size_t queue_len,
+                           size_t       queue_len,
                            const char * item,
-                           size_t item_len,
-                           uint32_t idx,
-                           uint32_t wttl,
-                           conn_ctxt_t conn
+                           size_t       item_len,
+                           uint32_t     idx,
+                           uint32_t     wttl,
+                           conn_ctxt_t  conn
                            )
 {
     int             r                       = 0;
@@ -4024,8 +4123,8 @@ int hustdb_t::hustmq_pub (
     std::string *   rsp                     = NULL;
 
     if ( unlikely ( ! tb_name_check ( queue, queue_len ) ||
-                   CHECK_STRING ( item ) ||
-                   wttl <= 0 || wttl > m_store_conf.mq_ttl_maximum
+                    CHECK_STRING ( item ) ||
+                    wttl <= 0 || wttl > m_store_conf.mq_ttl_maximum
                    )
          )
     {
@@ -4136,13 +4235,13 @@ int hustdb_t::hustmq_pub (
 }
 
 int hustdb_t::hustmq_sub (
-                           const char * queue,
-                           size_t queue_len,
-                           uint32_t idx,
-                           uint32_t & sp,
-                           uint32_t & ep,
+                           const char *    queue,
+                           size_t          queue_len,
+                           uint32_t        idx,
+                           uint32_t &      sp,
+                           uint32_t &      ep,
                            std::string * & rsp,
-                           conn_ctxt_t conn
+                           conn_ctxt_t     conn
                            )
 {
     int             r                       = 0;
@@ -4157,7 +4256,7 @@ int hustdb_t::hustmq_sub (
     item_ctxt_t *   ctxt                    = NULL;
 
     if ( unlikely ( ! tb_name_check ( queue, queue_len ) ||
-                   idx >= CYCLE_QUEUE_ITEM_NUM
+                    idx >= CYCLE_QUEUE_ITEM_NUM
                    )
          )
     {

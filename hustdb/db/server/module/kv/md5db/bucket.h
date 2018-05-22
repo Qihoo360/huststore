@@ -68,7 +68,7 @@ namespace md5db
     }
 
 #define BUCKET_DATA_ITEM_BYTES  8
-#define BUCKET_DATA_MAX_VERSION 4194304
+#define BUCKET_DATA_MAX_VERSION 4194303
 
     class bucket_data_item_t
     {
@@ -155,8 +155,8 @@ namespace md5db
     
     private:
 
-        byte_t m_type  : 2;
-        byte_t m_ver_h : 6;
+        byte_t   m_type  : 2;
+        byte_t   m_ver_h : 6;
         uint16_t m_ver_l;
     };
 

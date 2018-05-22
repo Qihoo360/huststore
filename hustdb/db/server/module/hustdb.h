@@ -268,23 +268,13 @@ public:
     bool worth_to_compress ( 
                              uint32_t key_len, 
                              uint32_t val_len 
-                            )
-    {
-        uint32_t page     = 1024;
-        uint32_t data_len = key_len + val_len + sizeof ( kv_data_item_t );
+                            );
 
-        if ( data_len <= page )
-        {
-            return false;
-        }
-
-        uint32_t org_size = data_len / page + ( data_len % page > 0 ? 1 : 0 );
-        val_len           = val_len * m_store_conf.db_post_compression_ratio / 100;        
-        data_len          = key_len + val_len + sizeof ( kv_data_item_t );
-        uint32_t com_size = data_len / page + ( data_len % page > 0 ? 1 : 0 );
-
-        return org_size - com_size >= 1;
-    }
+    bool check_from_compress (
+                                uint32_t key_len,
+                                uint32_t val_len,
+                                uint32_t compressed_len
+                            );
 
 public:
 

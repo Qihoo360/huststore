@@ -190,6 +190,7 @@ uint32_t kv_md5db_t::add_version ( uint32_t & version )
     {
         version = 1;
     }
+
     return version;
 }
 
@@ -2707,7 +2708,7 @@ void kv_md5db_t::hash (
                         item_ctxt_t * &     ctxt
                         )
 {
-    char inner_key[ 16 ];
+    char   inner_key[ 16 ];
     size_t inner_key_len = 16;
 
     if ( unlikely ( ! check_user_key ( user_key, user_key_len ) ) )
@@ -2719,6 +2720,14 @@ void kv_md5db_t::hash (
     user_key_to_inner ( inner_key, user_key, user_key_len );
 
     m_inner->m_data.hash ( inner_key, inner_key_len, conn, ctxt );
+}
+
+void kv_md5db_t::get_item_buffer (
+                                    conn_ctxt_t     conn,
+                                    item_ctxt_t * & ctxt
+                                    )
+{
+    m_inner->m_data.get_item_buffer ( conn, ctxt );
 }
 
 void kv_md5db_t::info (

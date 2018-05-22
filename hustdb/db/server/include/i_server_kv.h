@@ -33,21 +33,21 @@ enum compress_type_t
     COMPREESED  = 1
 };
 
-struct conn_ctxt_t
-{
-    uint32_t worker_id     : 8;
-    uint32_t compress_type : 2;
-    uint32_t _reserved     : 22;
-
-    conn_ctxt_t ( )
-    : worker_id ( 0 )
-    , compress_type ( NOCOMPRESS )
-    , _reserved ( 0 )
-    {
-    }
-};
-
 #pragma pack( push, 1 )
+
+    struct conn_ctxt_t
+    {
+        uint32_t worker_id     : 8;
+        uint32_t compress_type : 2;
+        uint32_t _reserved     : 22;
+
+        conn_ctxt_t ( )
+        : worker_id ( 0 )
+        , compress_type ( NOCOMPRESS )
+        , _reserved ( 0 )
+        {
+        }
+    };
 
     struct kv_data_item_t
     {
@@ -72,6 +72,25 @@ struct conn_ctxt_t
 
         uint32_t    ttl;
         uint32_t    timestamp;
+    };
+
+    struct mdb_data_item_t
+    {
+        mdb_data_item_t ( )
+        {
+            reset ();
+        }
+
+        void reset ( )
+        {
+            version       = 0;
+            compress_type = 0;
+            _reserved     = 0;
+        }
+
+        uint32_t version       : 22;
+        uint32_t compress_type : 2;
+        uint32_t _reserved     : 8;
     };
 
 #pragma pack( pop )
@@ -245,6 +264,11 @@ public:
                         conn_ctxt_t conn,
                         item_ctxt_t * & ctxt
                         ) = 0;
+
+    virtual void get_item_buffer (
+                                    conn_ctxt_t conn,
+                                    item_ctxt_t * & ctxt
+                                    ) = 0;
 
     virtual int export_db (
                             int file_id,

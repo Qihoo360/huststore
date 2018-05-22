@@ -218,6 +218,15 @@ unsigned int kv_array_t::file_count ( )
     return m_file_count;
 }
 
+void kv_array_t::get_item_buffer (
+                                    conn_ctxt_t conn,
+                                    item_ctxt_t * & ctxt
+                                    )
+{
+    ctxt = & m_get_buffers[ conn.worker_id ];
+    ctxt->reset ();
+}
+
 int kv_array_t::get_from_md5db (
                                  const md5db::block_id_t &   block_id,
                                  uint32_t                    file_id,

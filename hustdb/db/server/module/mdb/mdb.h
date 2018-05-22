@@ -7,7 +7,7 @@
 #include <string>
 
 #define MDB_KEY_LEN 255
-#define MDB_VAL_LEN 1048572
+#define MDB_VAL_LEN 1048571
 
 class mdb_t
 {

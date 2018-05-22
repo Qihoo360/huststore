@@ -404,6 +404,14 @@ bool hustdb_t::init_server_config ( )
         return false;
     }
 
+    m_store_conf.db_post_compression_ratio  = m_appini->ini_get_int ( m_ini, "store", "db.post_compression.ratio", 80 );
+    if ( m_store_conf.db_post_compression_ratio < 0 || m_store_conf.db_post_compression_ratio >= 100 )
+    {
+        LOG_ERROR ( "[hustdb][init_server_config][post_compression.ratio=%d]store db.post_compression.ratio invalid", 
+                    m_store_conf.db_post_compression_ratio );
+        return false;
+    }
+
     m_store_conf.mq_queue_maximum = m_appini->ini_get_int ( m_ini, "store", "mq.queue.maximum", 8192 );
     if ( m_store_conf.mq_queue_maximum <= 0 )
     {

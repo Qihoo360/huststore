@@ -19,8 +19,6 @@
 #define MAX_KEY_LEN                   16777215
 #define MAX_VAL_LEN                   267386880
 
-#define COMPRESS_THRESHOLD            1012
-
 #define MAX_QUEUE_NAME_LEN            64
 #define MAX_QKEY_LEN                  80
 #define QUEUE_STAT_LEN                sizeof ( queue_stat_t )
@@ -174,6 +172,7 @@ typedef struct store_conf_s
     int32_t db_binlog_thread_count;
     int32_t db_binlog_queue_capacity;
     int32_t db_binlog_task_timeout;
+    int32_t db_post_compression_ratio;
     int32_t mq_queue_maximum;
     int32_t db_table_maximum;
     int32_t db_ttl_scan_count;
@@ -187,6 +186,7 @@ typedef struct store_conf_s
     , db_binlog_thread_count ( 0 )
     , db_binlog_queue_capacity ( 0 )
     , db_binlog_task_timeout ( 0 )
+    , db_post_compression_ratio ( 0 )
     , mq_queue_maximum ( 0 )
     , db_table_maximum ( 0 )
     , db_ttl_scan_count ( 0 )
@@ -258,9 +258,32 @@ public:
         return ( uint32_t ) m_current_timestamp;
     }
     
-    void set_current_timestamp ( time_t timestamp )
+    void set_current_timestamp ( 
+                                time_t timestamp 
+                                )
     {
         m_current_timestamp = timestamp;
+    }
+
+    bool worth_to_compress ( 
+                             uint32_t key_len, 
+                             uint32_t val_len 
+                            )
+    {
+        uint32_t page     = 1024;
+        uint32_t data_len = key_len + val_len + sizeof ( kv_data_item_t );
+
+        if ( data_len <= page )
+        {
+            return false;
+        }
+
+        uint32_t org_size = data_len / page + ( data_len % page > 0 ? 1 : 0 );
+        val_len           = val_len * m_store_conf.db_post_compression_ratio / 100;        
+        data_len          = key_len + val_len + sizeof ( kv_data_item_t );
+        uint32_t com_size = data_len / page + ( data_len % page > 0 ? 1 : 0 );
+
+        return org_size - com_size >= 1;
     }
 
 public:
@@ -270,7 +293,7 @@ public:
 
     void destroy ( );
 
-    static void * operator new(
+    static void * operator new (
                                 size_t size
                                 )
     {

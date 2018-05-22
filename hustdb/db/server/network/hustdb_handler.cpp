@@ -56,6 +56,83 @@ void post_exist_handler(
     evhtp::send_nobody_reply(ctx->db->errno_int_status(r), request);
 }
 
+evhtp::c_str_t to_hustdb_data(
+    evhtp_request_t * request,
+    hustdb_network_ctx_t * ctx,
+    size_t key_len,
+    evhtp::c_str_t& val,
+    conn_ctxt_t& conn)
+{
+    if (!ctx->db->worth_to_compress(key_len, val.len))
+    {
+        conn.compress_type = NOCOMPRESS;
+        return val;
+    }
+
+    evhtp::c_str_t dst = ctx->base.get_compress_buf(request);
+    dst.len = hustdb_network::compress(val, &dst);
+    if (dst.len < 1)
+    {
+        evhtp::send_reply(EVHTP_RES_400, request);
+        return dst;
+    }
+
+    if (!ctx->db->check_from_compress(key_len, val.len, dst.len))
+    {
+        conn.compress_type = NOCOMPRESS;
+        return val;
+    }
+
+    conn.compress_type = COMPREESED;
+    return dst;
+}
+
+namespace plain {
+
+bool require_compression(evhtp_request_t * request)
+{
+    evhtp::c_str_t val = hustdb_network::evhtp_find_key(request->headers_in, KEY_ACCEPT_ENCODING);
+    if (!val.data)
+    {
+        // no header "Accept-Encoding"
+        return false;
+    }
+    if (!(val.len == ENCODING_VAL.len && 0 == strncmp(ENCODING_VAL.data, val.data, val.len)))
+    {
+        // "Accept-Encoding" is not "deflate"
+        return false;
+    }
+    // "Accept-Encoding": "deflate"
+    return true;
+}
+
+void from_hustdb_data(int r, std::string * rsp, int rsp_len, evhtp_request_t * request, hustdb_network_ctx_t * ctx)
+{
+    if (require_compression(request)) // compatible with client
+    {
+        evhtp::add_kv(KEY_CONTENT_ENCODING.data, ENCODING_VAL.data, request);
+
+        evhtp::c_str_t src = {rsp_len, (char *)rsp->c_str()};
+        // do not use compress buf here !!!
+        evhtp::c_str_t dst = ctx->base.get_decompress_buf(request);
+        dst.len = hustdb_network::compress(src, &dst);
+        if (dst.len < 1)
+        {
+            evhtp::send_reply(EVHTP_RES_400, request);
+            return;
+        }
+        evhtp::send_reply(ctx->db->errno_int_status(r), dst.data, dst.len, request);
+    }
+    else
+    {
+        evhtp::send_reply(ctx->db->errno_int_status(r), rsp->c_str(), rsp_len, request);
+    }
+}
+
+}
+
+namespace cipher {
+
 bool decompress_now(evhtp_request_t * request)
 {
     evhtp::c_str_t val = hustdb_network::evhtp_find_key(request->headers_in, KEY_ACCEPT_ENCODING);
@@ -73,44 +150,48 @@ bool decompress_now(evhtp_request_t * request)
     return false;
 }
 
-evhtp::c_str_t compress_data(evhtp_request_t * request, hustdb_network_ctx_t * ctx, evhtp::c_str_t& src)
+void from_hustdb_data(int r, std::string * rsp, int rsp_len, evhtp_request_t * request, hustdb_network_ctx_t * ctx)
 {
-    evhtp::c_str_t dst = ctx->base.get_compress_buf(request);
-    dst.len = hustdb_network::compress(src, &dst);
-    if (dst.len < 1)
+    if (decompress_now(request))
     {
-        evhtp::send_reply(EVHTP_RES_400, request);
+        evhtp::c_str_t src = { rsp_len, (char *)rsp->c_str() };
+        evhtp::c_str_t dst = ctx->base.get_decompress_buf(request);
+        size_t len = hustdb_network::decompress(src, &dst);
+        if (len < 1)
+        {
+            evhtp::send_reply(EVHTP_RES_400, request);
+            return;
+        }
+        evhtp::send_reply(ctx->db->errno_int_status(r), dst.data, len, request);
     }
-    return dst;
+    else
+    {
+        evhtp::add_kv(KEY_CONTENT_ENCODING.data, ENCODING_VAL.data, request);
+        evhtp::send_reply(ctx->db->errno_int_status(r), rsp->c_str(), rsp_len, request);
+    }
 }
 
-void post_read_compressed_data_handler(
+}
+
+void from_hustdb_data(
     uint32_t ver,
     int r,
     std::string * rsp,
     int rsp_len,
     evhtp_request_t * request,
-    hustdb_network_ctx_t * ctx)
+    hustdb_network_ctx_t * ctx,
+    item_ctxt_t * ctxt)
 {
     hustdb_network::add_version(ver, request);
-    if (!r && rsp && rsp_len > 0)
+    if (!r && rsp && rsp_len > 0 && ctxt)
     {
-        if (decompress_now(request))
+        if (NOCOMPRESS == ctxt->kv_data.compress_type)
         {
-            evhtp::c_str_t src = { rsp_len, (char *)rsp->c_str() };
-            evhtp::c_str_t dst = ctx->base.get_decompress_buf(request);
-            size_t len = hustdb_network::decompress(src, &dst);
-            if (len < 1)
-            {
-                evhtp::send_reply(EVHTP_RES_400, request);
-                return;
-            }
-            evhtp::send_reply(ctx->db->errno_int_status(r), dst.data, len, request);
+            plain::from_hustdb_data(r, rsp, rsp_len, request, ctx);
         }
         else
         {
-            evhtp::add_kv(KEY_CONTENT_ENCODING.data, ENCODING_VAL.data, request);
-            evhtp::send_reply(ctx->db->errno_int_status(r), rsp->c_str(), rsp_len, request);
+            cipher::from_hustdb_data(r, rsp, rsp_len, request, ctx);
         }
     }
     else
@@ -224,7 +305,7 @@ void hustdb_get_handler(hustdb_get_ctx_t& args, evhtp_request_t * request, hustd
     PRE_READ;
     hustdb_network::unescape_key(false, request, args.key);
     int r = ctx->db->hustdb_get(args.key.data, args.key.len, rsp, rsp_len, ver, conn, ctxt);
-    hustdb_network::post_read_compressed_data_handler(ver, r, rsp, rsp_len, request, ctx);
+    hustdb_network::from_hustdb_data(ver, r, rsp, rsp_len, request, ctx, ctxt);
 }
 
 void hustdb_put_handler(hustdb_put_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx)
@@ -232,14 +313,14 @@ void hustdb_put_handler(hustdb_put_ctx_t& args, evhtp_request_t * request, hustd
     PRE_WRITE;
     hustdb_network::unescape_key(false, request, args.key);
 
-    evhtp::c_str_t buf = hustdb_network::compress_data(request, ctx, args.val);
-    if (buf.len < 1 || !buf.data)
+    evhtp::c_str_t val = hustdb_network::to_hustdb_data(request, ctx, args.key.len, args.val, conn);
+    if (val.len < 1 || !val.data)
     {
         return;
     }
 
     int r = ctx->db->hustdb_put(
-        args.key.data, args.key.len, buf.data, buf.len, ver, args.ttl, args.is_dup, conn, ctxt);
+        args.key.data, args.key.len, val.data, val.len, ver, args.ttl, args.is_dup, conn, ctxt);
     hustdb_network::send_write_reply(ctx->db->errno_int_status(r), ver, ctxt, request);
 }
 

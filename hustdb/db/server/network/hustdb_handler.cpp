@@ -368,14 +368,21 @@ void hustdb_hget_handler(hustdb_hget_ctx_t& args, evhtp_request_t * request, hus
     PRE_READ;
     hustdb_network::unescape_key(false, request, args.key);
     int r = ctx->db->hustdb_hget(args.tb.data, args.tb.len, args.key.data, args.key.len, rsp, rsp_len, ver, conn, ctxt);
-    hustdb_network::post_read_handler(ver, r, rsp, rsp_len, request, ctx);
+    hustdb_network::from_hustdb_data(ver, r, rsp, rsp_len, request, ctx, ctxt);
 }
 
 void hustdb_hset_handler(hustdb_hset_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx)
 {
     PRE_WRITE;
     hustdb_network::unescape_key(false, request, args.key);
-    int r = ctx->db->hustdb_hset(args.tb.data, args.tb.len, args.key.data, args.key.len, args.val.data, args.val.len,
+
+    evhtp::c_str_t val = hustdb_network::to_hustdb_data(request, ctx, args.key.len, args.val, conn);
+    if (val.len < 1 || !val.data)
+    {
+        return;
+    }
+
+    int r = ctx->db->hustdb_hset(args.tb.data, args.tb.len, args.key.data, args.key.len, val.data, val.len,
         ver, args.ttl, args.is_dup, conn, ctxt);
     hustdb_network::send_write_reply(ctx->db->errno_int_status(r), ver, ctxt, request);
 }

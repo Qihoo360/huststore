@@ -16,18 +16,19 @@ namespace md5db
 using md5db::bucket_t;
 
 static void export_md5db_record_callback (
-                                           void * param,
+                                           void *         param,
                                            const char * & key,
-                                           size_t & key_len,
+                                           size_t &       key_len,
                                            const char * & val,
-                                           size_t & val_len,
-                                           const char * table,
-                                           size_t table_len,
-                                           uint32_t & version,
-                                           uint32_t & ttl,
-                                           std::string & content,
-                                           bool * ignore_this_record,
-                                           bool * break_the_loop
+                                           size_t &       val_len,
+                                           const char *   table,
+                                           size_t         table_len,
+                                           uint32_t &     version,
+                                           uint32_t &     ttl,
+                                           uint32_t &     compress_type,
+                                           std::string &  content,
+                                           bool *         ignore_this_record,
+                                           bool *         break_the_loop
                                            );
 
 static void check_alive_callback (

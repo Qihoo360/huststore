@@ -3308,6 +3308,7 @@ static void export_md5db_record_callback (
                                            size_t                        table_len,
                                            uint32_t &                    version,
                                            uint32_t &                    ttl,
+                                           uint32_t &                    compress_type,
                                            std::string &                 content,
                                            bool *                        ignore_this_record,
                                            bool *                        break_the_loop
@@ -3362,7 +3363,7 @@ static void export_md5db_record_callback (
 
         }
 
-        val = content.c_str ();
+        val     = content.c_str ();
         val_len = content.size ();
     }
 
@@ -3389,6 +3390,8 @@ static void export_md5db_record_callback (
         * ignore_this_record = true;
         return;
     }
+
+    compress_type  = kv_data.compress_type;
 
     uint32_t     kl = kv_data.user_key_len;
     const char * uk = ( const char * ) & val[ val_len - sizeof ( kv_data_item_t ) - kl ];

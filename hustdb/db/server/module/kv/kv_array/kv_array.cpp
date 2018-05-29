@@ -545,6 +545,7 @@ int kv_array_t::export_db (
     uint16_t            end                   = 0;
     uint32_t            version               = 0;
     uint32_t            ttl                   = 0;
+    uint32_t            compress_type         = 0;
     size_t              key_len               = 0;
     const char *        key                   = NULL;
     size_t              val_len               = 0;
@@ -736,6 +737,7 @@ int kv_array_t::export_db (
                            prefix_tl,
                            version,
                            ttl,
+                           compress_type,
                            content,
                            & ignore_this_record,
                            & break_the_loop );
@@ -754,12 +756,13 @@ int kv_array_t::export_db (
             }
 
             export_item_t items[] = {
-                { "key",        key,        key_len,      0,          true     },
-                { "val",        val,        val_len,      0,          val_b64  },
-                { "ver",        NULL,       0,            version,    false    },
-                { "ttl",        NULL,       0,            ttl,        false    },
-                { "tb",         table,      table_len,    0,          false    },
-                { "ty",         type,       type_len,     0,          false    }
+                { "key",        key,        key_len,      0,                    true     },
+                { "val",        val,        val_len,      0,                    val_b64  },
+                { "ver",        NULL,       0,            version,              false    },
+                { "ttl",        NULL,       0,            ttl,                  false    },
+                { "gz",         NULL,       0,            compress_type,        false    },
+                { "tb",         table,      table_len,    0,                    false    },
+                { "ty",         type,       type_len,     0,                    false    }
             };
             size_t size = sizeof (items ) / sizeof (export_item_t );
 
@@ -1084,6 +1087,7 @@ int kv_array_t::export_db_mem (
 
         uint32_t            version               = 0;
         uint32_t            ttl                   = 0;
+        uint32_t            compress_type         = 0;
         uint32_t            total                 = offset + size;
         i_iterator_t *      it                    = NULL;
 
@@ -1210,6 +1214,7 @@ int kv_array_t::export_db_mem (
                                prefix_tl,
                                version,
                                ttl,
+                               compress_type,
                                content,
                                & ignore_this_record,
                                & break_the_loop );
@@ -1221,14 +1226,15 @@ int kv_array_t::export_db_mem (
                 }
 
                 export_item_t items[] = {
-                    { "key",        key,        key_len,      0,          true     },
-                    { "val",        val,        val_len,      0,          val_b64  },
-                    { "ver",        NULL,       0,            version,    false    },
-                    { "ttl",        NULL,       0,            ttl,        false    },
-                    { "tb",         table,      table_len,    0,          false    },
-                    { "ty",         type,       type_len,     0,          false    }
+                    { "key",        key,        key_len,      0,                    true     },
+                    { "val",        val,        val_len,      0,                    val_b64  },
+                    { "ver",        NULL,       0,            version,              false    },
+                    { "ttl",        NULL,       0,            ttl,                  false    },
+                    { "gz",         NULL,       0,            compress_type,        false    },
+                    { "tb",         table,      table_len,    0,                    false    },
+                    { "ty",         type,       type_len,     0,                    false    }
                 };
-                size_t size = sizeof (items ) / sizeof (export_item_t );
+                size_t size = sizeof ( items ) / sizeof ( export_item_t );
 
                 json_item.resize ( 0 );
                 json_item += "{";
@@ -1332,6 +1338,7 @@ int kv_array_t::ttl_scan (
     uint32_t            version               = 0;
     uint32_t            timestamp             = 0;
     uint32_t            ttl                   = 0;
+    uint32_t            compress_type         = 0;
     uint32_t            file_id               = 0;
     uint32_t            die_success           = 0;
     uint32_t            die_fail              = 0;
@@ -1487,6 +1494,7 @@ int kv_array_t::ttl_scan (
                            table_len,
                            version,
                            ttl,
+                           compress_type,
                            content,
                            & ignore_this_record,
                            & break_the_loop );
@@ -1580,6 +1588,7 @@ int kv_array_t::binlog_scan (
     uint32_t                bl_timestamp          = 0;
     uint32_t                bl_task_timeout       = 0;
     uint32_t                ttl                   = 0;
+    uint32_t                compress_type         = 0;
     uint32_t                file_id               = 0;
     uint32_t                binlog_success        = 0;
     uint32_t                binlog_fail           = 0;
@@ -1866,6 +1875,7 @@ int kv_array_t::binlog_scan (
                                     table_len,
                                     version,
                                     ttl,
+                                    compress_type,
                                     content,
                                     & ignore_this_record,
                                     & break_the_loop );

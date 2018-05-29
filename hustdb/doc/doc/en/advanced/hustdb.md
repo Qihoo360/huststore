@@ -43,14 +43,14 @@ hustdb
     tcp.recv_timeout                = 300           //Max live time for for a single connection
     tcp.send_timeout                = 300           //Timeout for a single connection
 
-    tcp.worker_count                = 16            //Number of worker thread
+    tcp.worker_count                = 24            //Number of worker thread
 
     http.security.user              = huststore     //Authority verification: user
     http.security.passwd            = huststore     //Authority verrification: password
 
     http.access.allow               = W.X.Y.Z       //IP restrictions. e.g. (1) X.Y.Z.1-X.Y.Z.10;(2) X.Y.Z.1-X.Y.Z.10,X.Y.Z.22;(3) X.Y.Z.1-X.Y.Z.10,X.Y.Z.17,A.B.C.1-A.B.C.10
 
-    # UNIT Percentage
+    # UNIT Percentage(%)
     memory.process.threshold        = 0             //Process memory limit (%) for hustdb , if exceeded, all write operations, except del, will be disabled.
     memory.system.threshold         = 0             //System memory limit, if exceed, all write operations, except del, will be disabled.
 
@@ -72,6 +72,9 @@ hustdb
     # UNIT Second
     db.binlog.scan_interval         = 20            //DB，scan interval for binlog, time synchronization binlog item
     db.binlog.task_timeout          = 950400        //DB，task timeout time for binlog
+
+    # UNIT Percentage(%), default 100
+    db.post_compression.ratio       = 100           //DB, (post compression ratio) = (compressed data size / raw data size), default equal to 100, it means disabling compression
 
     mq.queue.maximum                = 8192          //MQ, max capacity of queue; If it's value is reduced, the tail index will become invalid, change it to the original value to restore.
     db.table.maximum                = 8192          //DB, max capacity of table; If it's value is reduced, the tail index will become invalid, change it to the original value to restore.
@@ -96,7 +99,7 @@ hustdb
 
     [contentdb]
     # enable if count large than 0, default 256
-    count                           = 256
+    count                           = 256           //CONTENTDB, advise to enable, especially to large value, number of instance of db (Modification is forbidden after initialization).
 
     [conflictdb]
     # 1 ~ 10, default 2

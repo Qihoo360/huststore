@@ -404,8 +404,8 @@ bool hustdb_t::init_server_config ( )
         return false;
     }
 
-    m_store_conf.db_post_compression_ratio  = m_appini->ini_get_int ( m_ini, "store", "db.post_compression.ratio", 80 );
-    if ( m_store_conf.db_post_compression_ratio < 0 || m_store_conf.db_post_compression_ratio >= 100 )
+    m_store_conf.db_post_compression_ratio  = m_appini->ini_get_int ( m_ini, "store", "db.post_compression.ratio", 100 );
+    if ( m_store_conf.db_post_compression_ratio < 0 || m_store_conf.db_post_compression_ratio > 100 )
     {
         LOG_ERROR ( "[hustdb][init_server_config][post_compression.ratio=%d]store db.post_compression.ratio invalid", 
                     m_store_conf.db_post_compression_ratio );
@@ -860,7 +860,9 @@ bool hustdb_t::worth_to_compress (
     uint32_t page     = 1024;
     uint32_t data_len = key_len + val_len + sizeof ( kv_data_item_t );
 
-    if ( data_len <= page )
+    if ( data_len <= page || 
+         m_store_conf.db_post_compression_ratio == 100 
+        )
     {
         return false;
     }

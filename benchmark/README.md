@@ -289,17 +289,17 @@ The configuration of Huststore Benchmark:
     {
         "wrk":
         {
-            "threads": 16,
+            "threads": 24,
             "connections": 2000,
-            "duration": "10s",
+            "duration": "30s",
             "timeout": "10s",
             "loop": 10
         },
         "data":
         {
-            "256B": 256,
-            "512B": 512,
-            "1KB": 1024
+            "1KB": 976,
+            "4KB": 4048,
+            "16KB": 16336
         },
         "srv":
         {
@@ -330,19 +330,12 @@ Please configure the "srv" tag by your specific test environment.
 redis-benchmark arguments as following:
 
     # For "redis", please replace "0.0.0.0" & "6379" by the specific IP & Port
-    redis-benchmark -e -h 0.0.0.0 -p 6379 -c 1000 -n 10000000 -r 100000000 -d 256 -t set,get
-    redis-benchmark -e -h 0.0.0.0 -p 6379 -c 1000 -n 10000000 -r 100000000 -d 512 -t set,get
-    redis-benchmark -e -h 0.0.0.0 -p 6379 -c 1000 -n 10000000 -r 100000000 -d 1024 -t set,get
-    redis-benchmark -e -h 0.0.0.0 -p 6379 -c 2000 -n 10000000 -r 100000000 -d 256 -t set,get
-    redis-benchmark -e -h 0.0.0.0 -p 6379 -c 2000 -n 10000000 -r 100000000 -d 512 -t set,get
-    redis-benchmark -e -h 0.0.0.0 -p 6379 -c 2000 -n 10000000 -r 100000000 -d 1024 -t set,get
-    # For "ssdb", please replace "0.0.0.0" & "8888" by the specific IP & Port
-    redis-benchmark -e -h 0.0.0.0 -p 8888 -c 1000 -n 10000000 -r 100000000 -d 256 -t set,get
-    redis-benchmark -e -h 0.0.0.0 -p 8888 -c 1000 -n 10000000 -r 100000000 -d 512 -t set,get
-    redis-benchmark -e -h 0.0.0.0 -p 8888 -c 1000 -n 10000000 -r 100000000 -d 1024 -t set,get
-    redis-benchmark -e -h 0.0.0.0 -p 8888 -c 2000 -n 10000000 -r 100000000 -d 256 -t set,get
-    redis-benchmark -e -h 0.0.0.0 -p 8888 -c 2000 -n 10000000 -r 100000000 -d 512 -t set,get
-    redis-benchmark -e -h 0.0.0.0 -p 8888 -c 2000 -n 10000000 -r 100000000 -d 1024 -t set,get
+    redis-benchmark -e -h 0.0.0.0 -p 6379 -c 1000 -n 10000000 -r 100000000 -d 976 -t set,get
+    redis-benchmark -e -h 0.0.0.0 -p 6379 -c 1000 -n 10000000 -r 100000000 -d 4048 -t set,get
+    redis-benchmark -e -h 0.0.0.0 -p 6379 -c 1000 -n 10000000 -r 100000000 -d 16336 -t set,get
+    redis-benchmark -e -h 0.0.0.0 -p 6379 -c 2000 -n 10000000 -r 100000000 -d 976 -t set,get
+    redis-benchmark -e -h 0.0.0.0 -p 6379 -c 2000 -n 10000000 -r 100000000 -d 4048 -t set,get
+    redis-benchmark -e -h 0.0.0.0 -p 6379 -c 2000 -n 10000000 -r 100000000 -d 16336 -t set,get
 
 [Back to top](#id_top)
 

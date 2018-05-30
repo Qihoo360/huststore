@@ -3,7 +3,7 @@
 # huststore - High-performance Distributed Storage #
 ![huststore logo](res/logo.png)
 
-`huststore` is a open source high performance distributed database system. It not only provides key-value storage service with extremely high performance, up to 100 thousand QPS, but also supports data structures like `hash`, `set`, `sorted set`, etc. Also, it can store **binary** data as value from a key-value pair, and thus can be used as an alternative of Redis.
+`huststore` is a open source high performance distributed database system. It not only provides key-value storage service with extremely high performance, up to **100 thousand QPS**, but also supports data structures like `hash`, `set`, `sorted set`, etc. Also, it can store **binary** data as value from a key-value pair, and thus can be used as an alternative of Redis.
 
 In addtion, `huststore` implements a distributed message queue by integrating a special `HA` module, features including message Push Stream, and message Publish-SubScribe, these features can be used as replacements of the corresponding features in rabbitmq and gearman.
 
@@ -49,6 +49,7 @@ In addition, `HA` cluster uses a distributed architecture design by incorporatin
 * [libevent2](http://libevent.org/)
 * [libevhtp](https://github.com/ellzey/libevhtp)
 * [zlog](https://github.com/HardySimpson/zlog)
+* [zlib](https://zlib.net/)
 
 ## Platforms ##
 
@@ -73,16 +74,15 @@ Above includes detailed documents of design, deployments, `API` usage and test s
 
 ### Environment ###
 
-    CPU: Intel(R) Xeon(R) CPU E5-2630 @ 2.30GHz (6cores x2)
-    Memory: 64G
-    Disk: Intel SSD DC S3500 Series (300GB, 2.5in SATA 6Gb/s, 20nm, MLC), x4, RAID10(softraid), SAS Controller: LSI Logic SAS2008 PCI-Express Fusion-MPT SAS-2
-    Network Adapter: Intel I350
-    OS: CentOS release 6.8 x86_64 (2.6.32-642.4.2.el6.x86_64)
+    CPU: Intel(R) Xeon(R) CPU E5-2683 v4 @ 2.10GHz (2socket*16cores)
+    Memory: 192G
+    Disk: Intel SSD DC S3520 Series (800GB, 2.5in SATA 6Gb/s, 3D1, MLC)
+    Network Adapter: Intel Ethernet 10G 2P X520 Adapter
+    OS: CentOS Linux release 7.2.1511 (3.10.0-327.el7.x86_64)
 
 ### Products ###
 
-* [redis 3.2.6](https://redis.io/)
-* [ssdb 1.9.4](http://ssdb.io)
+* [redis 4.0.9](https://redis.io/)
 * [hustdb](https://github.com/Qihoo360/huststore)
 
 ### Tools ###
@@ -92,14 +92,14 @@ Above includes detailed documents of design, deployments, `API` usage and test s
 
 ### Arguments ###
 
-abbr         |concurrency |value (bytes)
--------------|------------|--------------
-C1000-V256   |1000        |256
-C1000-V512   |1000        |512
-C1000-V1024  |1000        |1024
-C2000-V256   |2000        |256
-C2000-V512   |2000        |512
-C2000-V1024  |2000        |1024
+abbr       |concurrency |value (KB)
+-----------|------------|--------------
+C1000-1K   |1000        |1
+C1000-4K   |1000        |4
+C1000-16K  |1000        |16
+C2000-1K   |2000        |1
+C2000-4K   |2000        |4
+C2000-16K  |2000        |16
 
 ### Benchmark ###
 
@@ -115,7 +115,7 @@ See more details in [here](benchmark/README.md)
 
 ## LICENSE ##
 
-`huststore` is licensed under [New BSD License](https://opensource.org/licenses/BSD-3-Clause), a very flexible license to use.
+`huststore` is licensed under [LGPL-3.0](https://www.gnu.org/licenses/lgpl-3.0.en.html), a very flexible license to use.
 
 ## Authors ##
 

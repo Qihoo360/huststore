@@ -51,6 +51,7 @@ CentOS 6.x | 内核版本 >= 2.6.32 (GCC 4.4.7)
 * [libevent2](http://libevent.org/)
 * [libevhtp](https://github.com/ellzey/libevhtp)
 * [zlog](https://github.com/HardySimpson/zlog)
+* [zlib](https://zlib.net/)
 
 ## 快速入门 ##
 
@@ -67,16 +68,15 @@ CentOS 6.x | 内核版本 >= 2.6.32 (GCC 4.4.7)
 
 ### 测试环境 ###
 
-    CPU: Intel(R) Xeon(R) CPU E5-2630 @ 2.30GHz (6cores x2)
-    内存: 64G
-    磁盘: Intel SSD DC S3500 Series (300GB, 2.5in SATA 6Gb/s, 20nm, MLC), x4, RAID10(softraid), SAS Controller: LSI Logic SAS2008 PCI-Express Fusion-MPT SAS-2
-    网卡: Intel I350
-    系统: CentOS release 6.8 x86_64 (2.6.32-642.4.2.el6.x86_64)
+    CPU: Intel(R) Xeon(R) CPU E5-2683 v4 @ 2.10GHz (2socket*16cores)
+    内存: 192G
+    磁盘: Intel SSD DC S3520 Series (800GB, 2.5in SATA 6Gb/s, 3D1, MLC)
+    网卡: Intel Ethernet 10G 2P X520 Adapter
+    系统: CentOS Linux release 7.2.1511 (3.10.0-327.el7.x86_64)
 
 ### 测试产品 ###
 
-* [redis 3.2.6](https://redis.io/)
-* [ssdb 1.9.4](http://ssdb.io)
+* [redis 4.0.9](https://redis.io/)
 * [hustdb](https://github.com/Qihoo360/huststore)
 
 ### 测试工具 ###
@@ -86,14 +86,14 @@ CentOS 6.x | 内核版本 >= 2.6.32 (GCC 4.4.7)
 
 ### 测试参数 ###
 
-缩写          |并发数      |数据大小 (bytes)
--------------|------------|--------------
-C1000-V256   |1000        |256
-C1000-V512   |1000        |512
-C1000-V1024  |1000        |1024
-C2000-V256   |2000        |256
-C2000-V512   |2000        |512
-C2000-V1024  |2000        |1024
+缩写        |并发数      |数据大小 (KB)
+-----------|------------|--------------
+C1000-1K   |1000        |1
+C1000-4K   |1000        |4
+C1000-16K  |1000        |16
+C2000-1K   |2000        |1
+C2000-4K   |2000        |4
+C2000-16K  |2000        |16
 
 ### Benchmark ###
 
@@ -109,7 +109,7 @@ C2000-V1024  |2000        |1024
 
 ## LICENSE ##
 
-`huststore` is licensed under [New BSD License](https://opensource.org/licenses/BSD-3-Clause), a very flexible license to use.
+`huststore` is licensed under [LGPL-3.0](https://www.gnu.org/licenses/lgpl-3.0.en.html), a very flexible license to use.
 
 ## Authors ##
 

@@ -342,10 +342,9 @@ void hustdb_keys_handler(hustdb_keys_ctx_t& args, evhtp_request_t * request, hus
 
 void hustdb_stat_handler(hustdb_stat_ctx_t& args, evhtp_request_t * request, hustdb_network_ctx_t * ctx)
 {
-    int count = 0;
-    int r = ctx->db->hustdb_stat(args.tb.data, args.tb.len, count);
-    std::string tmp = evhtp::to_string(count);
-    evhtp::send_reply(ctx->db->errno_int_status(r), tmp.c_str(), tmp.size(), request);
+    std::string stats;
+    int r = ctx->db->hustdb_stat(args.tb.data, args.tb.len, stats);
+    evhtp::send_reply(ctx->db->errno_int_status(r), stats.c_str(), stats.size(), request);
 }
 
 void hustdb_stat_all_handler(evhtp_request_t * request, hustdb_network_ctx_t * ctx)

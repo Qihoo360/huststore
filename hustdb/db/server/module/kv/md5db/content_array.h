@@ -80,9 +80,9 @@ namespace md5db
 
         typedef std::vector< content2_t * > container_t;
 
-        bool        m_ok;
-        atomic_t    m_token;
-        container_t m_contents;
+        bool            m_ok;
+        atomic_uint32_t m_token;
+        container_t     m_contents;
 
     private:
         // disable

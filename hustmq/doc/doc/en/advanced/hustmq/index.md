@@ -55,6 +55,9 @@ hustmq
     memory.system.threshold         = 0             //System memory limit, if exceed, all write operations, except del, will be disabled.
 
     [store]
+    # UNIT GB, default 512
+    db.disk.storage_capacity        = 512           //DB, disk storage restrictions for hustdb, if above this threshold, it means disable write operation
+
     # UNIT Minute, 1 ~ 255
     mq.redelivery.timeout           = 5             //MQ, the default message process time 
 
@@ -98,8 +101,8 @@ hustmq
     disable_compression             = true
 
     [contentdb]
-    # enable if count large than 0, default 256
-    count                           = 256           //CONTENTDB, advise to enable, especially to large value, number of instance of db (Modification is forbidden after initialization).
+    # must be enabled, default 256
+    count                           = 256           //CONTENTDB, number of instance of db (Modification is forbidden after initialization).
 
     [conflictdb]
     # 1 ~ 10, default 2

@@ -8,7 +8,7 @@ namespace md5db
 
     content_array_t::content_array_t ( )
     : m_contents ( )
-    , m_token ( 0 )
+    , m_token ( )
     , m_ok ( false )
     {
     }
@@ -48,7 +48,7 @@ namespace md5db
                         storage_conf );
             return false;
         }
-        int count = G_APPINI->ini_get_int ( ini, "contentdb", "count", 0 );
+        int count = G_APPINI->ini_get_int ( ini, "contentdb", "count", 256 );
         G_APPINI->ini_destroy ( ini );
 
         return count > 0;
@@ -86,7 +86,7 @@ namespace md5db
                                  ini_t &         ini
                                  )
     {
-        int count = G_APPINI->ini_get_int ( & ini, "contentdb", "count", 0 );
+        int count = G_APPINI->ini_get_int ( & ini, "contentdb", "count", 256 );
 
         return open ( path, count );
     }
@@ -302,8 +302,8 @@ namespace md5db
         
         for ( int i = 0; i < size; i ++ )
         {
-            atomic_fetch_add ( 1, & m_token );
-            file_id = abs ( m_token ) % size;
+            m_token.increment ();
+            file_id = m_token.get () % size;
 
             p = m_contents[ file_id ];
             

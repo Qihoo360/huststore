@@ -8,7 +8,6 @@
 #include <sstream>
 #include <iostream>
 
-#define PAGE                         1024
 #define FREE_BLOCK_PAGE              8192
 #define FREE_BLOCK_INCR              8388608
 #define FREE_BLOCK_FILE_MAX_SIZE     2147483648

@@ -55,6 +55,9 @@ hustmq
     memory.system.threshold         = 0             //系统内存限制（%），超出阈值，禁止除del外所有写操作
 
     [store]
+    # UNIT GB, default 512
+    db.disk.storage_capacity        = 512           //DB, hustdb的磁盘存储限制, 如果高于该阈值，即禁止写操作
+
     # UNIT Minute, 1 ~ 255
     mq.redelivery.timeout           = 5             //MQ，message默认处理超时时间
 
@@ -98,8 +101,8 @@ hustmq
     disable_compression             = true
 
     [contentdb]
-    # enable if count large than 0, default 256
-    count                           = 256           //CONTENTDB，建议启用，尤其针对大value数据，db实例数（首次初始化后，禁止修改）
+    # must be enabled, default 256
+    count                           = 256           //CONTENTDB，db实例数（首次初始化后，禁止修改）
 
     [conflictdb]
     # 1 ~ 10, default 2

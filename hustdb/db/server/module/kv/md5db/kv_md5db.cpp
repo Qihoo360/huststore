@@ -289,6 +289,7 @@ bool kv_md5db_t::open ( )
     else
     {
         LOG_INFO ( "[md5db][db][open]contents disabled" );
+        return false;
     }
 
     // bucket
@@ -513,8 +514,6 @@ int kv_md5db_t::add_data_to_content_db (
     }
 
     content_id_t content_id;
-    memset ( & content_id, 0, sizeof ( content_id_t ) );
-
     content_id.set ( ( byte_t ) content_file_id, content_data_id, ( uint32_t ) tmp_ctxt->value.size ()  );
     b = bucket.get_fullkey ()->set_content_id ( block_id, content_id );
     if ( ! b )
@@ -1308,8 +1307,6 @@ int kv_md5db_t::get_data_from_content_db (
     tmp_ctxt = & m_inner->m_query_ctxts[ conn.worker_id ];
 
     content_id_t content_id;
-    memset ( & content_id, 0, sizeof ( content_id_t ) );
-
     b = bucket.get_fullkey ()->get_content_id ( block_id, content_id );
     if ( ! b || content_id.data_len () == 0 )
     {
@@ -1712,6 +1709,8 @@ int kv_md5db_t::delete_conflict_data (
         return r;
     }
 
+    ctxt->kv_data.ttl = content_id.data_len ();  //return data length for delete operation
+
     tmp_ctxt = & m_inner->m_query_ctxts[ conn.worker_id ];
 
     if ( m_inner->m_contents.is_open () )
@@ -1908,14 +1907,14 @@ int kv_md5db_t::delete_direct_data (
     if ( m_inner->m_contents.is_open () )
     {
         content_id_t content_id;
-        memset ( & content_id, 0, sizeof ( content_id_t ) );
-
         b = fullkey->get_content_id ( block_id, content_id );
         if ( ! b || content_id.data_len () == 0 )
         {
             LOG_ERROR ( "[md5db][db][delete_direct_data]fullkey.get_content_id failed" );
             return EFAULT;
         }
+
+        ctxt->kv_data.ttl = content_id.data_len ();  //return data length for delete operation
 
         {
             scope_perf_target_t perf ( m_perf_content_del );
@@ -2075,7 +2074,7 @@ int kv_md5db_t::del_inner (
     }
 
     char        inner_key[ 16 ];
-    size_t      inner_key_len    = 16;
+    size_t      inner_key_len = 16;
 
     if ( unlikely ( ! check_user_key ( user_key, user_key_len ) ) )
     {
@@ -3331,8 +3330,6 @@ static void export_md5db_record_callback (
     if ( db->get_inner ()->m_contents.is_open () )
     {
         md5db::content_id_t content_id;
-        memset ( & content_id, 0, sizeof ( content_id_t ) );
-
         bool b = db->get_inner ()->m_fullkeys.item ( block_id->bucket_id () ).get_content_id ( * block_id, content_id );
         if ( ! b || content_id.data_len () == 0 )
         {

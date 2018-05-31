@@ -5,7 +5,7 @@
 #include <string>
 #include <map>
 
-#include "atomic2.h"
+#include "atomic.h"
 #include "mutex.h"
 
 class queue_t;
@@ -17,7 +17,10 @@ class thread_t;
 struct binlog_status_t
 {
 
-    binlog_status_t ( ) : status ( 0 ), remain ( ), silence ( )
+    binlog_status_t ( ) 
+    : status ( 0 )
+    , remain ( )
+    , silence ( )
     {
     }
 

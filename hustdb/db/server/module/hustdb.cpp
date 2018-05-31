@@ -168,6 +168,13 @@ bool hustdb_t::open ( )
         LOG_ERROR ( "[hustdb][open]./DATA/DATA create failed" );
         return false;
     }
+
+    m_apptool->make_dir ( DB_META_INDEX_DIR );
+    if ( ! m_apptool->is_dir ( DB_META_INDEX_DIR ) )
+    {
+        LOG_ERROR ( "[hustdb][open]./DATA/meta_index create failed" );
+        return false;
+    }
     
     if ( ! check_invariant_config () )
     {
@@ -339,6 +346,15 @@ bool hustdb_t::init_server_config ( )
                     m_server_conf.memory_system_threshold );
         return false;
     }
+
+    m_store_conf.db_disk_storage_capacity = m_appini->ini_get_int ( m_ini, "store", "db.disk.storage_capacity", 512 );
+    if ( m_store_conf.db_disk_storage_capacity <= 0 || m_store_conf.db_disk_storage_capacity > 60000 )
+    {
+        LOG_ERROR ( "[hustdb][init_server_config][disk.storage_capacity=%d]store db.disk.storage_capacity invalid", 
+                    m_store_conf.db_disk_storage_capacity );
+        return false;
+    }
+    m_store_conf.db_disk_storage_capacity *= 1024 * 1024 * 1024;
 
     m_store_conf.mq_redelivery_timeout = m_appini->ini_get_int ( m_ini, "store", "mq.redelivery.timeout", 5 );
     if ( m_store_conf.mq_redelivery_timeout <= 0 || m_store_conf.mq_redelivery_timeout > 255 )
@@ -540,8 +556,8 @@ bool hustdb_t::init_hash_config ( )
     FILE *         fp_hash_conf;
 
     if ( m_apptool->is_file ( DB_HASH_CONFIG ) && 
-         m_apptool->is_file ( HUSTMQ_INDEX ) && 
-         m_apptool->is_file ( HUSTTABLE_INDEX ) && 
+         m_apptool->is_file ( HUSTMQ_QUEUE ) && 
+         m_apptool->is_file ( HUSTDB_TABLE ) && 
          m_apptool->is_dir ( DB_FULLKEY_DIR ) &&
          m_apptool->is_dir ( DB_BUCKETS_DIR ) && 
          m_apptool->is_dir ( DB_CONFLICT_DIR ) && 
@@ -671,7 +687,7 @@ bool hustdb_t::init_data_engine ( )
 bool hustdb_t::init_queue_index ( )
 {
     char ph[ 260 ] = { };
-    fast_memcpy ( ph, HUSTMQ_INDEX, sizeof ( HUSTMQ_INDEX ) );
+    fast_memcpy ( ph, HUSTMQ_QUEUE, sizeof ( HUSTMQ_QUEUE ) );
 
     if ( ! m_apptool->is_file ( ph ) )
     {
@@ -767,7 +783,7 @@ bool hustdb_t::init_queue_index ( )
 bool hustdb_t::init_table_index ( )
 {
     char ph[ 260 ] = { };
-    fast_memcpy ( ph, HUSTTABLE_INDEX, sizeof ( HUSTTABLE_INDEX ) );
+    fast_memcpy ( ph, HUSTDB_TABLE, sizeof ( HUSTDB_TABLE ) );
 
     if ( ! m_apptool->is_file ( ph ) )
     {
@@ -839,7 +855,7 @@ bool hustdb_t::init_table_index ( )
     }
 
     table_stat_t * tstat = NULL;
-    for ( uint32_t i = TABLE_STAT_LEN; i < TABLE_INDEX_FILE_LEN; i += TABLE_STAT_LEN )
+    for ( uint32_t i = TABLE_STAT_LEN * 2; i < TABLE_INDEX_FILE_LEN; i += TABLE_STAT_LEN )
     {
         tstat = ( table_stat_t * ) ( m_table_index.ptr + i );
 
@@ -857,20 +873,19 @@ bool hustdb_t::worth_to_compress (
                                     uint32_t val_len 
                                     )
 {
-    uint32_t page     = 1024;
     uint32_t data_len = key_len + val_len + sizeof ( kv_data_item_t );
 
-    if ( data_len <= page || 
+    if ( data_len <= PAGE || 
          m_store_conf.db_post_compression_ratio == 100 
         )
     {
         return false;
     }
 
-    uint32_t org_size = data_len / page + ( data_len % page > 0 ? 1 : 0 );
+    uint32_t org_size = data_len / PAGE + ( data_len % PAGE > 0 ? 1 : 0 );
     val_len           = val_len * m_store_conf.db_post_compression_ratio / 100;        
     data_len          = key_len + val_len + sizeof ( kv_data_item_t );
-    uint32_t new_size = data_len / page + ( data_len % page > 0 ? 1 : 0 );
+    uint32_t new_size = data_len / PAGE + ( data_len % PAGE > 0 ? 1 : 0 );
 
     return org_size - new_size >= 1;
 }
@@ -881,12 +896,11 @@ bool hustdb_t::check_from_compress (
                                         uint32_t compressed_len
                                     )
 {
-    uint32_t page     = 1024;
     uint32_t data_len = key_len + val_len + sizeof ( kv_data_item_t );
     
-    uint32_t org_size = data_len / page + ( data_len % page > 0 ? 1 : 0 );
+    uint32_t org_size = data_len / PAGE + ( data_len % PAGE > 0 ? 1 : 0 );
     data_len          = key_len + compressed_len + sizeof ( kv_data_item_t );
-    uint32_t new_size = data_len / page + ( data_len % page > 0 ? 1 : 0 );
+    uint32_t new_size = data_len / PAGE + ( data_len % PAGE > 0 ? 1 : 0 );
 
     return org_size - new_size >= 1;
 }
@@ -1094,7 +1108,7 @@ int hustdb_t::find_table_offset (
 
     scope_wlock_t tb_locker ( m_tb_locker );
 
-    for ( i = TABLE_STAT_LEN; i < TABLE_INDEX_FILE_LEN; i += TABLE_STAT_LEN )
+    for ( i = TABLE_STAT_LEN * 2; i < TABLE_INDEX_FILE_LEN; i += TABLE_STAT_LEN )
     {
         tstat = ( table_stat_t * ) ( m_table_index.ptr + i );
 
@@ -1104,7 +1118,7 @@ int hustdb_t::find_table_offset (
         }
     }
 
-    for ( i = TABLE_STAT_LEN; i < TABLE_INDEX_FILE_LEN; i += TABLE_STAT_LEN )
+    for ( i = TABLE_STAT_LEN * 2; i < TABLE_INDEX_FILE_LEN; i += TABLE_STAT_LEN )
     {
         tstat = ( table_stat_t * ) ( m_table_index.ptr + i );
 
@@ -1125,17 +1139,39 @@ int hustdb_t::find_table_offset (
     return - 1;
 }
 
-void hustdb_t::set_table_size (
-                                int offset,
-                                int atomic
+void hustdb_t::set_table_meta (
+                                int      offset,
+                                int64_t  count,
+                                int64_t  size
                                 )
 {
-    table_stat_t * tstat = NULL;
+    int64_t        abs_size = 0;
+    int64_t        capacity = 0;
+    table_stat_t * tstat    = ( table_stat_t * ) m_table_index.ptr;
+
+    if ( size != 0 )
+    {
+        abs_size = abs ( size );
+        capacity = ( abs_size / PAGE + ( abs_size % PAGE > 0 ? 1 : 0 ) ) * PAGE * ( size > 0 ? 1 : - 1 );
+    }
+
+    __sync_add_and_fetch ( & tstat->count, count );
+    if ( size != 0 )
+    {
+        __sync_add_and_fetch ( & tstat->size, size );
+        __sync_add_and_fetch ( & tstat->capacity, capacity );
+    }
 
     tstat = ( table_stat_t * ) ( m_table_index.ptr + offset );
-    atomic_fetch_add ( atomic, & tstat->size );
 
-    if ( tstat->size <= 0 && offset > 0 )
+    __sync_add_and_fetch ( & tstat->count, count );
+    if ( size != 0 )
+    {
+        __sync_add_and_fetch ( & tstat->size, size );
+        __sync_add_and_fetch ( & tstat->capacity, capacity );
+    }
+
+    if ( tstat->count <= 0 && offset >= TABLE_STAT_LEN * 2 )
     {
         scope_wlock_t tb_locker ( m_tb_locker );
 
@@ -1147,35 +1183,6 @@ void hustdb_t::set_table_size (
 
         memset ( tstat, 0, TABLE_STAT_LEN );
     }
-}
-
-int hustdb_t::get_table_size (
-                               const char * table,
-                               size_t       table_len
-                               )
-{
-    table_stat_t * tstat = NULL;
-
-    if ( ! table )
-    {
-        tstat = ( table_stat_t * ) m_table_index.ptr;
-        return tstat->size;
-    }
-    else
-    {
-        std::string inner_table ( table, table_len );
-
-        scope_rlock_t tb_locker ( m_tb_locker );
-        
-        table_map_t::iterator it = m_table_map.find ( inner_table );
-        if ( it != m_table_map.end () )
-        {
-            tstat = ( table_stat_t * ) ( m_table_index.ptr + it->second );
-            return tstat->size;
-        }
-    }
-
-    return - 1;
 }
 
 uint32_t hustdb_t::clac_real_item (
@@ -1310,6 +1317,7 @@ void hustdb_t::hustdb_memory_threshold ( )
     FILE *          fp          = NULL;
     FILE *          meminfo_fp  = NULL;
     long            mem[4]      = { 0L };
+    table_stat_t *  tstat       = ( table_stat_t * ) m_table_index.ptr;
 
     if ( ( meminfo_fp = fopen ("/proc/meminfo", "r") ) == NULL )
     {
@@ -1330,7 +1338,8 @@ void hustdb_t::hustdb_memory_threshold ( )
     uint64_t totalram = mem[0] * 1024;
 
     if ( m_server_conf.memory_system_threshold > 0 &&
-         ( 100 * freeram / totalram ) < ( 100 - m_server_conf.memory_system_threshold )
+         ( 100 * freeram / totalram ) < ( 100 - m_server_conf.memory_system_threshold ) &&
+         tstat->capacity < m_store_conf.db_disk_storage_capacity
          )
     {
         m_over_threshold = true;
@@ -1351,7 +1360,8 @@ void hustdb_t::hustdb_memory_threshold ( )
 
     size_t process_total = ( size_t ) rss * ( size_t ) sysconf (_SC_PAGESIZE);
     if ( m_server_conf.memory_process_threshold > 0 &&
-         ( 100 * process_total / totalram ) > m_server_conf.memory_process_threshold
+         ( 100 * process_total / totalram ) > m_server_conf.memory_process_threshold &&
+         tstat->capacity < m_store_conf.db_disk_storage_capacity
          )
     {
         m_over_threshold = true;
@@ -1498,7 +1508,8 @@ int hustdb_t::hustdb_get (
 
                 if ( ! ctxt->is_version_error )
                 {
-                    set_table_size ( 0, - 1 );
+                    int64_t data_size = ( ( int64_t ) ctxt->kv_data.ttl ) * - 1;
+                    set_table_meta ( TABLE_STAT_LEN, - 1, data_size );
                 }
 
                 return ENOENT;
@@ -1592,7 +1603,8 @@ int hustdb_t::hustdb_put (
 
     if ( ctxt->kv_type == NEW_KV && ! ctxt->is_version_error )
     {
-        set_table_size ( 0, 1 );
+        int64_t data_size = key_len + val_len + sizeof ( kv_data_item_t );
+        set_table_meta ( TABLE_STAT_LEN, 1, data_size );
     }
 
     if ( ( ! is_dup && ver > 1 || is_dup && user_ver == ver && ! ctxt->is_version_error ) && m_mdb_ok && key_len < MDB_KEY_LEN )
@@ -1660,7 +1672,8 @@ int hustdb_t::hustdb_del (
 
     if ( ! ctxt->is_version_error )
     {
-        set_table_size ( 0, - 1 );
+        int64_t data_size = ( ( int64_t ) ctxt->kv_data.ttl ) * - 1;
+        set_table_meta ( TABLE_STAT_LEN, - 1, data_size );
     }
 
     if ( ! ctxt->is_version_error && m_mdb_ok && key_len < MDB_KEY_LEN )
@@ -1732,9 +1745,9 @@ int hustdb_t::hustdb_keys (
 }
 
 int hustdb_t::hustdb_stat (
-                            const char * table,
-                            size_t       table_len,
-                            int &        count
+                            const char *  table,
+                            size_t        table_len,
+                            std::string & stats
                             )
 {
     if ( unlikely ( table &&
@@ -1747,17 +1760,59 @@ int hustdb_t::hustdb_stat (
         return EKEYREJECTED;
     }
 
+    char    stat[ 256 ]  = { };
+    table_stat_t * tstat = NULL;
+
     if ( table && table_len > 0 )
     {
-        count = get_table_size ( table, table_len );
-        if ( unlikely ( count < 0 ) )
+        std::string inner_table ( table, table_len );
+
+        scope_rlock_t tb_locker ( m_tb_locker );
+        
+        table_map_t::iterator it = m_table_map.find ( inner_table );
+        if ( it != m_table_map.end () )
         {
-            return EPERM;
+            tstat    = ( table_stat_t * ) ( m_table_index.ptr + it->second );
+            memset ( stat, 0, sizeof ( stat ) );
+            sprintf ( stat,
+                      "{\"table\":\"%s\",\"type\":\"%c\",\"count\":%lld,\"size\":%lld,\"capacity\":%lld}",
+                      tstat->table,
+                      real_table_type ( tstat->type ),
+                      tstat->count,
+                      tstat->size, 
+                      tstat->capacity
+                    );
+            stats = stat;
+        }
+        else
+        {
+            return ENOENT;
         }
     }
     else
     {
-        count = get_table_size ( NULL, 0 );
+        stats.resize ( 0 );
+        stats.reserve ( 1024 );
+
+        tstat = ( table_stat_t * ) m_table_index.ptr;
+        memset ( stat, 0, sizeof ( stat ) );
+        sprintf ( stat,
+                  "[{\"type\":\"TOTAL\",\"count\":%lld,\"size\":%lld,\"capacity\":%lld},",
+                  tstat->count, 
+                  tstat->size, 
+                  tstat->capacity
+                );
+        stats += stat;
+
+        tstat = ( table_stat_t * ) ( m_table_index.ptr + TABLE_STAT_LEN );
+        memset ( stat, 0, sizeof ( stat ) );
+        sprintf ( stat,
+                  "{\"type\":\"KV\",\"count\":%lld,\"size\":%lld,\"capacity\":%lld}]",
+                  tstat->count, 
+                  tstat->size, 
+                  tstat->capacity
+                );
+        stats += stat;
     }
 
     return 0;
@@ -1767,31 +1822,45 @@ void hustdb_t::hustdb_stat_all (
                                  std::string & stats
                                  )
 {
-    char stat[ 128 ] = { };
+    char    stat[ 256 ]  = { };
+    table_stat_t * tstat = NULL;
 
     stats.resize ( 0 );
     stats.reserve ( 1048576 );
-    stats += "[";
 
+    tstat = ( table_stat_t * ) m_table_index.ptr;
+    memset ( stat, 0, sizeof ( stat ) );
     sprintf ( stat,
-             "{\"table\":\"\",\"type\":\"\",\"size\":%d},",
-             get_table_size ( NULL, 0 )
+              "[{\"type\":\"TOTAL\",\"count\":%lld,\"size\":%lld,\"capacity\":%lld},",
+              tstat->count, 
+              tstat->size, 
+              tstat->capacity
              );
+    stats += stat;
 
+    tstat = ( table_stat_t * ) ( m_table_index.ptr + TABLE_STAT_LEN );
+    memset ( stat, 0, sizeof ( stat ) );
+    sprintf ( stat,
+              "{\"type\":\"KV\",\"count\":%lld,\"size\":%lld,\"capacity\":%lld},",
+              tstat->count, 
+              tstat->size,
+              tstat->capacity
+             );
     stats += stat;
 
     scope_rlock_t tb_locker ( m_tb_locker );
     
     for ( table_map_t::iterator it = m_table_map.begin (); it != m_table_map.end (); it ++ )
     {
-        table_stat_t * tstat = ( table_stat_t * ) ( m_table_index.ptr + it->second );
-
+        tstat = ( table_stat_t * ) ( m_table_index.ptr + it->second );
         memset ( stat, 0, sizeof ( stat ) );
         sprintf ( stat,
-                 "{\"table\":\"%s\",\"type\":\"%c\",\"size\":%d},",
-                 tstat->table,
-                 real_table_type ( tstat->type ),
-                 tstat->size
+                  "{\"table\":\"%s\",\"type\":\"%c\",\"count\":%lld,\"size\":%lld,\"capacity\":%lld},",
+                  tstat->table,
+                  real_table_type ( tstat->type ),
+                  tstat->count,
+                  tstat->size, 
+                  tstat->capacity
                  );
         stats += stat;
     }
@@ -2108,7 +2177,8 @@ int hustdb_t::hustdb_hget (
 
                 if ( ! ctxt->is_version_error )
                 {
-                    set_table_size ( offset, - 1 );
+                    int64_t data_size = ( ( int64_t ) ctxt->kv_data.ttl ) * - 1;
+                    set_table_meta ( offset, - 1, data_size );
                 }
 
                 return ENOENT;
@@ -2217,7 +2287,8 @@ int hustdb_t::hustdb_hset (
 
     if ( ctxt->kv_type == NEW_KV && ! ctxt->is_version_error )
     {
-        set_table_size ( offset, 1 );
+        int64_t data_size = key_len + val_len + sizeof ( kv_data_item_t );
+        set_table_meta ( offset, 1, data_size );
     }
 
     if ( ( ! is_dup && ver > 1 || is_dup && user_ver == ver && ! ctxt->is_version_error ) && m_mdb_ok && table_len + key_len + 2 < MDB_KEY_LEN )
@@ -2374,7 +2445,8 @@ int hustdb_t::hustdb_hincrby (
 
     if ( ctxt->kv_type == NEW_KV && ! ctxt->is_version_error )
     {
-        set_table_size ( offset, 1 );
+        int64_t data_size = key_len + val_len + sizeof ( kv_data_item_t );
+        set_table_meta ( offset, 1, data_size );
     }
 
     if ( ( ! is_dup && ver > 1 || is_dup && user_ver == ver && ! ctxt->is_version_error ) && m_mdb_ok && table_len + key_len + 2 < MDB_KEY_LEN )
@@ -2474,7 +2546,8 @@ int hustdb_t::hustdb_hdel (
 
     if ( ! ctxt->is_version_error )
     {
-        set_table_size ( offset, - 1 );
+        int64_t data_size = ( ( int64_t ) ctxt->kv_data.ttl ) * - 1;
+        set_table_meta ( offset, - 1, data_size );
     }
 
     if ( ! ctxt->is_version_error && m_mdb_ok && table_len + key_len + 2 < MDB_KEY_LEN )
@@ -2681,7 +2754,7 @@ int hustdb_t::hustdb_sadd (
 
     if ( ctxt->kv_type == NEW_KV && ! ctxt->is_version_error )
     {
-        set_table_size ( offset, 1 );
+        set_table_meta ( offset, 1 );
     }
 
     return 0;
@@ -2740,7 +2813,7 @@ int hustdb_t::hustdb_srem (
 
     if ( ! ctxt->is_version_error )
     {
-        set_table_size ( offset, - 1 );
+        set_table_meta ( offset, - 1 );
     }
 
     return 0;
@@ -3013,7 +3086,7 @@ int hustdb_t::hustdb_zadd (
 
     if ( ctxt->kv_type == NEW_KV && ! ctxt->is_version_error )
     {
-        set_table_size ( offset, 1 );
+        set_table_meta ( offset, 1 );
     }
     
     if ( ( ! is_dup && ver > 1 || is_dup && user_ver == ver && ! ctxt->is_version_error ) && m_mdb_ok && table_len + key_len + 2 < MDB_KEY_LEN )
@@ -3252,7 +3325,7 @@ int hustdb_t::hustdb_zrem (
 
     if ( ! ctxt->is_version_error )
     {
-        set_table_size ( offset, - 1 );
+        set_table_meta ( offset, - 1 );
     }
     
     if ( ! ctxt->is_version_error && m_mdb_ok && table_len + key_len + 2 < MDB_KEY_LEN )

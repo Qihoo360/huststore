@@ -72,7 +72,7 @@ typedef struct invariant_s
 
 } invariant_t;
 
-typedef struct queue_stat_s
+struct queue_stat_s
 {
     uint32_t    sp;
     uint32_t    ep;
@@ -90,7 +90,8 @@ typedef struct queue_stat_s
     uint32_t    ctime;
 
     char        qname [ MAX_QUEUE_NAME_LEN ];
-} queue_stat_t;
+} __attribute__ ( ( aligned ( 64 ) ) );
+typedef struct queue_stat_s queue_stat_t;
 
 typedef std::map < std::string, uint32_t >      worker_t;
 typedef std::map < std::string, uint32_t >      unacked_t;
@@ -106,16 +107,19 @@ typedef struct queue_info_s
 
 typedef std::map < std::string, queue_info_t > queue_map_t;
 
-typedef struct table_stat_s
+struct table_stat_s
 {
-    atomic_t size;
+    volatile int64_t  count;
+    volatile int64_t  size;
+    volatile int64_t  capacity;
 
-    uint32_t flag : 1;
-    uint32_t type : 8;
-    uint32_t _reserved : 23;
+    uint32_t          flag : 1;
+    uint32_t          type : 8;
+    uint32_t          _reserved : 23;
 
-    char table [ MAX_QUEUE_NAME_LEN + 2 ];
-} table_stat_t;
+    char              table [ MAX_QUEUE_NAME_LEN + 2 ];
+} __attribute__ ( ( aligned ( 64 ) ) );
+typedef struct table_stat_s table_stat_t;
 
 typedef std::map< std::string, uint32_t > table_map_t;
 
@@ -164,6 +168,7 @@ typedef struct server_conf_s
 
 typedef struct store_conf_s
 {
+    int64_t db_disk_storage_capacity;
     int32_t mq_redelivery_timeout;
     int32_t mq_ttl_maximum;
     int32_t db_ttl_maximum;
@@ -178,7 +183,8 @@ typedef struct store_conf_s
     int32_t db_ttl_scan_count;
     
     store_conf_s ( )
-    : mq_redelivery_timeout ( 0 )
+    : db_disk_storage_capacity ( 0 )
+    , mq_redelivery_timeout ( 0 )
     , mq_ttl_maximum ( 0 )
     , db_ttl_maximum ( 0 )
     , db_ttl_scan_interval ( 0 )
@@ -321,63 +327,63 @@ public:
     int hustdb_file_count ( );
 
     int hustdb_exist (
-                       const char * key,
-                       size_t key_len,
-                       uint32_t & ver,
-                       conn_ctxt_t conn,
+                       const char *    key,
+                       size_t          key_len,
+                       uint32_t &      ver,
+                       conn_ctxt_t     conn,
                        item_ctxt_t * & ctxt
                        );
 
     int hustdb_get (
-                     const char * key,
-                     size_t key_len,
+                     const char *    key,
+                     size_t          key_len,
                      std::string * & rsp,
-                     int & rsp_len,
-                     uint32_t & ver,
-                     conn_ctxt_t conn,
+                     int &           rsp_len,
+                     uint32_t &      ver,
+                     conn_ctxt_t     conn,
                      item_ctxt_t * & ctxt
                      );
 
     int hustdb_put (
-                     const char * key,
-                     size_t key_len,
-                     const char * val,
-                     size_t val_len,
-                     uint32_t & ver,
-                     uint32_t ttl,
-                     bool is_dup,
-                     conn_ctxt_t conn,
+                     const char *    key,
+                     size_t          key_len,
+                     const char *    val,
+                     size_t          val_len,
+                     uint32_t &      ver,
+                     uint32_t        ttl,
+                     bool            is_dup,
+                     conn_ctxt_t     conn,
                      item_ctxt_t * & ctxt
                      );
 
     int hustdb_del (
-                     const char * key,
-                     size_t key_len,
-                     uint32_t & ver,
-                     bool is_dup,
-                     conn_ctxt_t conn,
+                     const char *    key,
+                     size_t          key_len,
+                     uint32_t &      ver,
+                     bool            is_dup,
+                     conn_ctxt_t     conn,
                      item_ctxt_t * & ctxt
                      );
 
     int hustdb_keys (
-                      int offset,
-                      int size,
-                      int file_id,
-                      int start,
-                      int end,
-                      bool async,
-                      bool noval,
-                      uint32_t & hits,
-                      uint32_t & total,
+                      int             offset,
+                      int             size,
+                      int             file_id,
+                      int             start,
+                      int             end,
+                      bool            async,
+                      bool            noval,
+                      uint32_t &      hits,
+                      uint32_t &      total,
                       std::string * & rsp,
-                      conn_ctxt_t conn,
+                      conn_ctxt_t     conn,
                       item_ctxt_t * & ctxt
                       );
 
     int hustdb_stat (
-                      const char * table,
-                      size_t table_len,
-                      int & count
+                      const char *  table,
+                      size_t        table_len,
+                      std::string & stats
                       );
 
     void hustdb_stat_all (
@@ -386,15 +392,15 @@ public:
 
     int hustdb_export (
                         const char * table,
-                        size_t table_len,
-                        int offset,
-                        int size,
-                        int file_id,
-                        int start,
-                        int end,
-                        bool cover,
-                        bool noval,
-                        void * & token
+                        size_t       table_len,
+                        int          offset,
+                        int          size,
+                        int          file_id,
+                        int          start,
+                        int          end,
+                        bool         cover,
+                        bool         noval,
+                        void * &     token
                         );
 
     int hustdb_ttl_scan ( );
@@ -404,203 +410,203 @@ public:
 public:
 
     int hustdb_hexist (
-                        const char * table,
-                        size_t table_len,
-                        const char * key,
-                        size_t key_len,
-                        uint32_t & ver,
-                        conn_ctxt_t conn,
+                        const char *    table,
+                        size_t          table_len,
+                        const char *    key,
+                        size_t          key_len,
+                        uint32_t &      ver,
+                        conn_ctxt_t     conn,
                         item_ctxt_t * & ctxt
                         );
 
     int hustdb_hget (
-                      const char * table,
-                      size_t table_len,
-                      const char * key,
-                      size_t key_len,
+                      const char *    table,
+                      size_t          table_len,
+                      const char *    key,
+                      size_t          key_len,
                       std::string * & rsp,
-                      int & rsp_len,
-                      uint32_t & ver,
-                      conn_ctxt_t conn,
+                      int &           rsp_len,
+                      uint32_t &      ver,
+                      conn_ctxt_t     conn,
                       item_ctxt_t * & ctxt
                       );
 
     int hustdb_hset (
-                      const char * table,
-                      size_t table_len,
-                      const char * key,
-                      size_t key_len,
-                      const char * val,
-                      size_t val_len,
-                      uint32_t & ver,
-                      uint32_t ttl,
-                      bool is_dup,
-                      conn_ctxt_t conn,
+                      const char *    table,
+                      size_t          table_len,
+                      const char *    key,
+                      size_t          key_len,
+                      const char *    val,
+                      size_t          val_len,
+                      uint32_t &      ver,
+                      uint32_t        ttl,
+                      bool            is_dup,
+                      conn_ctxt_t     conn,
                       item_ctxt_t * & ctxt
                       );
 
     int hustdb_hincrby (
-                         const char * table,
-                         size_t table_len,
-                         const char * key,
-                         size_t key_len,
-                         int64_t score,
-                         const char * host,
-                         size_t host_len,
+                         const char *    table,
+                         size_t          table_len,
+                         const char *    key,
+                         size_t          key_len,
+                         int64_t         score,
+                         const char *    host,
+                         size_t          host_len,
                          std::string * & rsp,
-                         int & rsp_len,
-                         uint32_t & ver,
-                         uint32_t ttl,
-                         bool is_dup,
-                         conn_ctxt_t conn,
+                         int &           rsp_len,
+                         uint32_t &      ver,
+                         uint32_t        ttl,
+                         bool            is_dup,
+                         conn_ctxt_t     conn,
                          item_ctxt_t * & ctxt
                          );
 
     int hustdb_hdel (
-                      const char * table,
-                      size_t table_len,
-                      const char * key,
-                      size_t key_len,
-                      uint32_t & ver,
-                      bool is_dup,
-                      conn_ctxt_t conn,
+                      const char *    table,
+                      size_t          table_len,
+                      const char *    key,
+                      size_t          key_len,
+                      uint32_t &      ver,
+                      bool            is_dup,
+                      conn_ctxt_t     conn,
                       item_ctxt_t * & ctxt
                       );
 
     int hustdb_hkeys (
-                       const char * table,
-                       size_t table_len,
-                       int offset,
-                       int size,
-                       int start,
-                       int end,
-                       bool async,
-                       bool noval,
-                       uint32_t & hits,
-                       uint32_t & total,
+                       const char *    table,
+                       size_t          table_len,
+                       int             offset,
+                       int             size,
+                       int             start,
+                       int             end,
+                       bool            async,
+                       bool            noval,
+                       uint32_t &      hits,
+                       uint32_t &      total,
                        std::string * & rsp,
-                       conn_ctxt_t conn,
+                       conn_ctxt_t     conn,
                        item_ctxt_t * & ctxt
                        );
 
 public:
 
     int hustdb_sismember (
-                           const char * table,
-                           size_t table_len,
-                           const char * key,
-                           size_t key_len,
-                           uint32_t & ver,
-                           conn_ctxt_t conn,
+                           const char *    table,
+                           size_t          table_len,
+                           const char *    key,
+                           size_t          key_len,
+                           uint32_t &      ver,
+                           conn_ctxt_t     conn,
                            item_ctxt_t * & ctxt
                            );
 
     int hustdb_sadd (
-                      const char * table,
-                      size_t table_len,
-                      const char * key,
-                      size_t key_len,
-                      uint32_t & ver,
-                      uint32_t ttl,
-                      bool is_dup,
-                      conn_ctxt_t conn,
+                      const char *    table,
+                      size_t          table_len,
+                      const char *    key,
+                      size_t          key_len,
+                      uint32_t &      ver,
+                      uint32_t        ttl,
+                      bool            is_dup,
+                      conn_ctxt_t     conn,
                       item_ctxt_t * & ctxt
                       );
 
     int hustdb_srem (
-                      const char * table,
-                      size_t table_len,
-                      const char * key,
-                      size_t key_len,
-                      uint32_t & ver,
-                      bool is_dup,
-                      conn_ctxt_t conn,
+                      const char *    table,
+                      size_t          table_len,
+                      const char *    key,
+                      size_t          key_len,
+                      uint32_t &      ver,
+                      bool            is_dup,
+                      conn_ctxt_t     conn,
                       item_ctxt_t * & ctxt
                       );
 
     int hustdb_smembers (
-                          const char * table,
-                          size_t table_len,
-                          int offset,
-                          int size,
-                          int start,
-                          int end,
-                          bool async,
-                          bool noval,
-                          uint32_t & hits,
-                          uint32_t & total,
+                          const char *    table,
+                          size_t          table_len,
+                          int             offset,
+                          int             size,
+                          int             start,
+                          int             end,
+                          bool            async,
+                          bool            noval,
+                          uint32_t &      hits,
+                          uint32_t &      total,
                           std::string * & rsp,
-                          conn_ctxt_t conn,
+                          conn_ctxt_t     conn,
                           item_ctxt_t * & ctxt
                           );
 
 public:
 
     int hustdb_zismember (
-                           const char * table,
-                           size_t table_len,
-                           const char * key,
-                           size_t key_len,
-                           uint32_t & ver,
-                           conn_ctxt_t conn,
+                           const char *    table,
+                           size_t          table_len,
+                           const char *    key,
+                           size_t          key_len,
+                           uint32_t &      ver,
+                           conn_ctxt_t     conn,
                            item_ctxt_t * & ctxt
                            );
 
     int hustdb_zadd (
-                      const char * table,
-                      size_t table_len,
-                      const char * key,
-                      size_t key_len,
-                      int64_t score,
+                      const char *    table,
+                      size_t          table_len,
+                      const char *    key,
+                      size_t          key_len,
+                      int64_t         score,
                       std::string * & rsp,
-                      int & rsp_len,
-                      int opt,
-                      uint32_t & ver,
-                      uint32_t ttl,
-                      bool is_dup,
-                      conn_ctxt_t conn,
-                      bool & is_version_error
+                      int &           rsp_len,
+                      int             opt,
+                      uint32_t &      ver,
+                      uint32_t        ttl,
+                      bool            is_dup,
+                      conn_ctxt_t     conn,
+                      bool &          is_version_error
                       );
 
     int hustdb_zscore (
-                        const char * table,
-                        size_t table_len,
-                        const char * key,
-                        size_t key_len,
+                        const char *    table,
+                        size_t          table_len,
+                        const char *    key,
+                        size_t          key_len,
                         std::string * & rsp,
-                        int & rsp_len,
-                        uint32_t & ver,
-                        conn_ctxt_t conn,
+                        int &           rsp_len,
+                        uint32_t &      ver,
+                        conn_ctxt_t     conn,
                         item_ctxt_t * & ctxt
                         );
 
     int hustdb_zrem (
-                      const char * table,
-                      size_t table_len,
-                      const char * key,
-                      size_t key_len,
-                      uint32_t & ver,
-                      bool is_dup,
-                      conn_ctxt_t conn,
+                      const char *    table,
+                      size_t          table_len,
+                      const char *    key,
+                      size_t          key_len,
+                      uint32_t &      ver,
+                      bool            is_dup,
+                      conn_ctxt_t     conn,
                       item_ctxt_t * & ctxt
                       );
 
     int hustdb_zrange (
-                        const char * table,
-                        size_t table_len,
-                        int64_t min,
-                        int64_t max,
-                        int offset,
-                        int size,
-                        int start,
-                        int end,
-                        bool async,
-                        bool noval,
-                        bool byscore,
-                        uint32_t & hits,
-                        uint32_t & total,
+                        const char *    table,
+                        size_t          table_len,
+                        int64_t         min,
+                        int64_t         max,
+                        int             offset,
+                        int             size,
+                        int             start,
+                        int             end,
+                        bool            async,
+                        bool            noval,
+                        bool            byscore,
+                        uint32_t &      hits,
+                        uint32_t &      total,
                         std::string * & rsp,
-                        conn_ctxt_t conn,
+                        conn_ctxt_t     conn,
                         item_ctxt_t * & ctxt
                         );
     
@@ -608,60 +614,60 @@ public:
 
     int hustdb_binlog (
                         const char * table,
-                        size_t table_len,
+                        size_t       table_len,
                         const char * key,
-                        size_t key_len,
+                        size_t       key_len,
                         const char * host,
-                        size_t host_len,
-                        uint8_t cmd_type,
-                        conn_ctxt_t conn
+                        size_t       host_len,
+                        uint8_t      cmd_type,
+                        conn_ctxt_t  conn
                         );
 
 public:
 
     int hustmq_put (
                      const char * queue,
-                     size_t queue_len,
+                     size_t       queue_len,
                      const char * item,
-                     size_t item_len,
-                     uint32_t priori,
-                     conn_ctxt_t conn
+                     size_t       item_len,
+                     uint32_t     priori,
+                     conn_ctxt_t  conn
                      );
 
     int hustmq_get (
-                     const char * queue,
-                     size_t queue_len,
-                     const char * worker,
-                     size_t worker_len,
-                     bool is_ack,
-                     std::string & ack,
-                     std::string & unacked,
+                     const char *    queue,
+                     size_t          queue_len,
+                     const char *    worker,
+                     size_t          worker_len,
+                     bool            is_ack,
+                     std::string &   ack,
+                     std::string &   unacked,
                      std::string * & rsp,
-                     conn_ctxt_t conn
+                     conn_ctxt_t     conn
                      );
 
     int hustmq_ack_inner (
                            std::string & ack,
-                           conn_ctxt_t conn
+                           conn_ctxt_t   conn
                            );
 
     int hustmq_ack (
                      const char * queue,
-                     size_t queue_len,
+                     size_t       queue_len,
                      const char * ack,
-                     size_t ack_len,
-                     conn_ctxt_t conn
+                     size_t       ack_len,
+                     conn_ctxt_t  conn
                      );
     
     int hustmq_worker (
-                        const char * queue,
-                        size_t queue_len,
+                        const char *  queue,
+                        size_t        queue_len,
                         std::string & workers
                         );
 
     int hustmq_stat (
-                      const char * queue,
-                      size_t queue_len,
+                      const char *  queue,
+                      size_t        queue_len,
                       std::string & stat
                       );
 
@@ -671,47 +677,47 @@ public:
 
     int hustmq_max (
                      const char * queue,
-                     size_t queue_len,
-                     uint32_t max
+                     size_t       queue_len,
+                     uint32_t     max
                      );
 
     int hustmq_lock (
                       const char * queue,
-                      size_t queue_len,
-                      uint8_t lock
+                      size_t       queue_len,
+                      uint8_t      lock
                       );
 
     int hustmq_timeout (
                          const char * queue,
-                         size_t queue_len,
-                         uint8_t timeout
+                         size_t       queue_len,
+                         uint8_t      timeout
                          );
 
     int hustmq_purge (
                        const char * queue,
-                       size_t queue_len,
-                       uint32_t priori,
-                       conn_ctxt_t conn
+                       size_t       queue_len,
+                       uint32_t     priori,
+                       conn_ctxt_t  conn
                        );
 
     int hustmq_pub (
                      const char * queue,
-                     size_t queue_len,
+                     size_t       queue_len,
                      const char * item,
-                     size_t item_len,
-                     uint32_t idx,
-                     uint32_t wttl,
-                     conn_ctxt_t conn
+                     size_t       item_len,
+                     uint32_t     idx,
+                     uint32_t     wttl,
+                     conn_ctxt_t  conn
                      );
 
     int hustmq_sub (
-                     const char * queue,
-                     size_t queue_len,
-                     uint32_t idx,
-                     uint32_t & sp,
-                     uint32_t & ep,
+                     const char *    queue,
+                     size_t          queue_len,
+                     uint32_t        idx,
+                     uint32_t &      sp,
+                     uint32_t &      ep,
                      std::string * & rsp,
-                     conn_ctxt_t conn
+                     conn_ctxt_t     conn
                      );
 
 public:
@@ -746,36 +752,32 @@ private:
     bool init_table_index ( );
 
     bool generate_hash_conf (
-                              int file_count,
-                              int copy_count,
+                              int           file_count,
+                              int           copy_count,
                               std::string & hash_conf
                               );
 
     bool tb_name_check (
                        const char * qname,
-                       const int qname_len
+                       const int    qname_len
                        );
 
     int find_table_type (
                           std::string & table,
-                          uint8_t & type
+                          uint8_t &     type
                           );
     
     int find_table_offset (
                             std::string & table,
-                            bool create,
-                            uint8_t type
+                            bool          create,
+                            uint8_t       type
                             );
 
-    void set_table_size (
-                          int offset,
-                          int atomic
+    void set_table_meta (
+                          int      offset,
+                          int64_t  count,
+                          int64_t  size = 0
                           );
-
-    int get_table_size (
-                         const char * table,
-                         size_t table_len
-                         );
 
     uint32_t clac_real_item (
                               const uint32_t start,
@@ -783,52 +785,52 @@ private:
                               );
 
     int find_queue_offset (
-                            std::string & queue,
-                            bool create,
-                            uint8_t type,
+                            std::string &    queue,
+                            bool             create,
+                            uint8_t          type,
                             queue_info_t * & queue_info,
-                            const char * worker = NULL,
-                            size_t worker_len = 0
+                            const char *     worker = NULL,
+                            size_t           worker_len = 0
                             );
     
 private:
 
-    ini_t * m_ini;
+    ini_t *            m_ini;
 
-    apptool_t * m_apptool;
-    appini_t * m_appini;
+    apptool_t *        m_apptool;
+    appini_t *         m_appini;
 
-    volatile time_t m_current_timestamp;
+    volatile time_t    m_current_timestamp;
     
-    bool m_over_threshold;
+    bool               m_over_threshold;
     
-    i_server_kv_t * m_storage;
-    bool m_storage_ok;
+    i_server_kv_t *    m_storage;
+    bool               m_storage_ok;
     
-    mdb_t * m_mdb;
-    bool m_mdb_ok;
+    mdb_t *            m_mdb;
+    bool               m_mdb_ok;
     
-    rdb_t * m_rdb;
-    bool m_rdb_ok;
+    rdb_t *            m_rdb;
+    bool               m_rdb_ok;
     
-    hustdb::timer_t m_timer;
+    hustdb::timer_t    m_timer;
     
     slow_task_thread_t m_slow_tasks;
 
-    fmap_t m_invariant;
+    fmap_t             m_invariant;
     
-    fmap_t m_queue_index;
-    queue_map_t m_queue_map;
-    rwlockable_t m_mq_locker;
+    fmap_t             m_queue_index;
+    queue_map_t        m_queue_map;
+    rwlockable_t       m_mq_locker;
     
-    wrlocker_vec_t m_lockers;
+    wrlocker_vec_t     m_lockers;
 
-    fmap_t m_table_index;
-    table_map_t m_table_map;
-    rwlockable_t m_tb_locker;
+    fmap_t             m_table_index;
+    table_map_t        m_table_map;
+    rwlockable_t       m_tb_locker;
 
-    server_conf_t m_server_conf;
-    store_conf_t m_store_conf;
+    server_conf_t      m_server_conf;
+    store_conf_t       m_store_conf;
 
 private:
     // disable

@@ -20,19 +20,22 @@
 
 #define HUSTDB_EXPORT_DIR               "./EXPORT"
 
-#define HUSTMQ_INDEX                    "./DATA/HUSTMQ"
-#define HUSTTABLE_INDEX                 "./DATA/HUSTTABLE"
-#define HUSTSTORE_INVARIANT             "./DATA/HUSTSTORE_INVARIANT"
-
 #define DB_DATA_ROOT                    "./DATA"
 #define DB_DATA_DIR                     "./DATA/DATA"
-#define DB_CONTENTS_DIR                 "./DATA/contents"
-#define DB_FULLKEY_DIR                  "./DATA/fullkeys"
-#define DB_BUCKETS_DIR                  "./DATA/buckets"
-#define DB_CONFLICT_DIR                 "./DATA/conflict"
-#define DB_FAST_CONFLICT_DIR            "./DATA/fast_conflict"
+#define DB_META_INDEX_DIR               "./DATA/meta_index"
+#define DB_CONTENTS_DIR                 "./DATA/contentdb"
+#define DB_FULLKEY_DIR                  "./DATA/fullkey"
+#define DB_BUCKETS_DIR                  "./DATA/bucket"
+#define DB_CONFLICT_DIR                 "./DATA/conflictdb"
+#define DB_FAST_CONFLICT_DIR            "./DATA/fast_conflictdb"
 #define DB_HASH_CONFIG                  "./DATA/DATA/hash.conf"
 #define DB_DATA_FILE                    "./DATA/DATA/$(FILE_ID).db"
+
+#define HUSTMQ_QUEUE                    "./DATA/meta_index/mq_queue"
+#define HUSTDB_TABLE                    "./DATA/meta_index/db_table"
+#define HUSTSTORE_INVARIANT             "./DATA/meta_index/invariant"
+
+#define PAGE                            1024
 
 #define CONFLICT_CACHE_M                256
 #define CONFLICT_WRITE_BUFFER_M         256

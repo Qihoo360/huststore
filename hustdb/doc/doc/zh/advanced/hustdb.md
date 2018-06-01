@@ -56,7 +56,7 @@ hustdb
 
     [store]
     # UNIT GB, default 512
-    db.disk.storage_capacity        = 512           //DB, hustdb的磁盘存储限制, 如果高于该阈值，即禁止写操作
+    db.disk.storage_capacity        = 512           //DB, hustdb的磁盘存储限制, 如果高于该阈值，即禁止写入操作
 
     # UNIT Minute, 1 ~ 255
     mq.redelivery.timeout           = 5             //MQ，message默认处理超时时间

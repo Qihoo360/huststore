@@ -56,7 +56,7 @@ hustmq
 
     [store]
     # UNIT GB, default 512
-    db.disk.storage_capacity        = 512           //DB, disk storage restrictions for hustdb, if above this threshold, it means disable write operation
+    db.disk.storage_capacity        = 512           //DB, disk storage restrictions for hustdb, if above this threshold, it means disable insert operation
 
     # UNIT Minute, 1 ~ 255
     mq.redelivery.timeout           = 5             //MQ, the default message process time 

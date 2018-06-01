@@ -310,7 +310,7 @@ public:
 
 public:
 
-    void hustdb_memory_threshold ( );
+    void hustdb_threshold ( );
     
     void slow_task_info (
                           std::string & info

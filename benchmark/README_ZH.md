@@ -329,16 +329,22 @@
 `redis-benchmark` 的相关参数如下：
 
     # "redis" 的测试命令,请使用真实的 IP 和 Port 替换 "0.0.0.0" 和 "6379"
+    redis-benchmark -e -h 0.0.0.0 -p 6379 -c 1000 -n 1000000 -d 512 -t set,get
     redis-benchmark -e -h 0.0.0.0 -p 6379 -c 1000 -n 1000000 -d 976 -t set,get
     redis-benchmark -e -h 0.0.0.0 -p 6379 -c 1000 -n 1000000 -d 4048 -t set,get
-    redis-benchmark -e -h 0.0.0.0 -p 6379 -c 1000 -n 1000000 -d 16336 -t set,get
+    redis-benchmark -e -h 0.0.0.0 -p 6379 -c 2000 -n 1000000 -d 512 -t set,get
     redis-benchmark -e -h 0.0.0.0 -p 6379 -c 2000 -n 1000000 -d 976 -t set,get
     redis-benchmark -e -h 0.0.0.0 -p 6379 -c 2000 -n 1000000 -d 4048 -t set,get
-    redis-benchmark -e -h 0.0.0.0 -p 6379 -c 2000 -n 1000000 -d 16336 -t set,get
 
 [回顶部](#id_top)
 
 <h3 id="id_appendix_result">性能测试结果</h3>
+
+#### C1000-512B ####
+
+![C1000_512B](../res/benchmark/C1000_512B.png)
+
+[回顶部](#id_top)
 
 #### C1000-1K ####
 
@@ -352,9 +358,9 @@
 
 [回顶部](#id_top)
 
-#### C1000-16K ####
+#### C2000-512B ####
 
-![C1000_16K](../res/benchmark/C1000_16K.png)
+![C2000_512B](../res/benchmark/C2000_512B.png)
 
 [回顶部](#id_top)
 
@@ -367,12 +373,6 @@
 #### C2000-4K ####
 
 ![C2000_4K](../res/benchmark/C2000_4K.png)
-
-[回顶部](#id_top)
-
-#### C2000-16K ####
-
-![C2000_16K](../res/benchmark/C2000_16K.png)
 
 [回顶部](#id_top)
 

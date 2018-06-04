@@ -80,28 +80,189 @@ Above includes detailed documents of design, deployments, `API` usage and test s
     Network Adapter: Intel Ethernet 10G 2P X520 Adapter
     OS: CentOS Linux release 7.2.1511 (3.10.0-327.el7.x86_64)
 
-### Products ###
+### Test 1 -  Worker ###
+
+#### Purpose ####
+
+With different number of hustdb worker threads, we test hustdb's max QPS.
+
+#### Condition ####
+
+db.disk.storage_capacity : 512G  
+
+concurrency : 1000  
+
+value : **1KB**  
+
+L2 cache : **disabled**  
+
+data compression : **disabled**  
+
+Threads are not bound to CPU cores.  
+
+#### Result ####
+
+Description : Horizontal axis is the number of worker threads; Vertical axis is the QPS. The value size is **1KB** .
+
+![benchmark_workers](res/benchmark_workers.png)
+
+#### Conclusion ####
+
+The best hustdb worker threads number is 28-32.  
+
+### Test 2 -  RTT ###
+
+#### Purpose ####
+
+With the optimal worker threads number, we test hustdb's round-trip time.  
+
+#### Condition ####
+
+db.disk.storage_capacity : 512G  
+
+value : 200 bytes  
+
+#### Result ####
+
+    # GET
+    24 threads and 200 connections
+    Thread Stats   Avg      Stdev     Max   +/- Stdev
+        Latency   238.94us   95.42us   9.33ms   81.03%
+        Req/Sec    31.44k     1.09k   36.30k    63.68%
+    Latency Distribution
+        50%  220.00us
+        75%  288.00us
+        90%  343.00us
+        99%  482.00us
+    11333230 requests in 15.10s, 11.10GB read
+    Requests/sec: 750635.81
+    Transfer/sec:    752.65MB
+    --------------------------------------------------
+    [Latency Distribution]  0.01%  0.07ms
+    [Latency Distribution]   0.1%  0.07ms
+    [Latency Distribution]   0.5%  0.09ms
+    [Latency Distribution]     1%  0.09ms
+    [Latency Distribution]     3%  0.12ms
+    [Latency Distribution]     5%  0.13ms
+    [Latency Distribution]    10%  0.15ms
+    [Latency Distribution]    20%  0.17ms
+    [Latency Distribution]    30%  0.19ms
+    [Latency Distribution]    40%  0.20ms
+    [Latency Distribution]    50%  0.22ms
+    [Latency Distribution]    60%  0.25ms
+    [Latency Distribution]    70%  0.28ms
+    [Latency Distribution]    80%  0.30ms
+    [Latency Distribution]    90%  0.34ms
+    [Latency Distribution]    91%  0.35ms
+    [Latency Distribution]    92%  0.36ms
+    [Latency Distribution]    93%  0.37ms
+    [Latency Distribution]  93.5%  0.37ms
+    [Latency Distribution]    94%  0.38ms
+    [Latency Distribution]  94.5%  0.38ms
+    [Latency Distribution]    95%  0.39ms
+    [Latency Distribution]  95.5%  0.39ms
+    [Latency Distribution]    96%  0.40ms
+    [Latency Distribution]  96.5%  0.40ms
+    [Latency Distribution]    97%  0.41ms
+    [Latency Distribution]  97.5%  0.42ms
+    [Latency Distribution]    98%  0.43ms
+    [Latency Distribution]  98.5%  0.45ms
+    [Latency Distribution]    99%  0.48ms
+    [Latency Distribution]  99.1%  0.49ms
+    [Latency Distribution]  99.2%  0.50ms
+    [Latency Distribution]  99.3%  0.51ms
+    [Latency Distribution]  99.4%  0.52ms
+    [Latency Distribution]  99.5%  0.53ms
+    [Latency Distribution]  99.6%  0.56ms
+    [Latency Distribution]  99.7%  0.59ms
+    [Latency Distribution]  99.8%  0.64ms
+    [Latency Distribution]  99.9%  0.76ms
+    [Latency Distribution]  99.99%  1.85ms
+    [Latency Distribution]  99.999%  4.07ms
+
+    # PUT
+    24 threads and 200 connections
+    Thread Stats   Avg      Stdev     Max   +/- Stdev
+        Latency   495.13us  393.71us  21.29ms   93.06%
+        Req/Sec    16.37k     1.33k   23.72k    74.26%
+    Latency Distribution
+        50%  447.00us
+        75%  623.00us
+        90%  815.00us
+        99%    1.28ms
+    17628712 requests in 45.10s, 1.53GB read
+    Socket errors: connect 0, read 192, write 0, timeout 0
+    Requests/sec: 390880.11
+    Transfer/sec:     34.67MB
+    --------------------------------------------------
+    [Latency Distribution]  0.01%  0.09ms
+    [Latency Distribution]   0.1%  0.10ms
+    [Latency Distribution]   0.5%  0.12ms
+    [Latency Distribution]     1%  0.12ms
+    [Latency Distribution]     3%  0.14ms
+    [Latency Distribution]     5%  0.17ms
+    [Latency Distribution]    10%  0.20ms
+    [Latency Distribution]    20%  0.26ms
+    [Latency Distribution]    30%  0.33ms
+    [Latency Distribution]    40%  0.39ms
+    [Latency Distribution]    50%  0.45ms
+    [Latency Distribution]    60%  0.51ms
+    [Latency Distribution]    70%  0.58ms
+    [Latency Distribution]    80%  0.67ms
+    [Latency Distribution]    90%  0.81ms
+    [Latency Distribution]    91%  0.84ms
+    [Latency Distribution]    92%  0.86ms
+    [Latency Distribution]    93%  0.89ms
+    [Latency Distribution]  93.5%  0.90ms
+    [Latency Distribution]    94%  0.92ms
+    [Latency Distribution]  94.5%  0.93ms
+    [Latency Distribution]    95%  0.95ms
+    [Latency Distribution]  95.5%  0.97ms
+    [Latency Distribution]    96%  0.99ms
+    [Latency Distribution]  96.5%  1.02ms
+    [Latency Distribution]    97%  1.05ms
+    [Latency Distribution]  97.5%  1.08ms
+    [Latency Distribution]    98%  1.13ms
+    [Latency Distribution]  98.5%  1.19ms
+    [Latency Distribution]    99%  1.28ms
+    [Latency Distribution]  99.1%  1.30ms
+    [Latency Distribution]  99.2%  1.33ms
+    [Latency Distribution]  99.3%  1.37ms
+    [Latency Distribution]  99.4%  1.41ms
+    [Latency Distribution]  99.5%  1.47ms
+    [Latency Distribution]  99.6%  1.56ms
+    [Latency Distribution]  99.7%  1.73ms
+    [Latency Distribution]  99.8%  2.24ms
+    [Latency Distribution]  99.9%  4.23ms
+    [Latency Distribution]  99.99%  7.22ms
+    [Latency Distribution]  99.999%  9.62ms
+
+#### Conclusion ####
+
+* 99.99% get RTT are below 2ms  
+* 99.7% put RTT are below 2ms  
+
+### Test 3 -  vs Redis ###
+
+#### Version ####
 
 * [redis 4.0.9](https://redis.io/)
-* [hustdb](https://github.com/Qihoo360/huststore)
 
-### Tools ###
+#### Tools ####
 
 * [redis-benchmark](https://redis.io/topics/benchmarks)
 * [wrk](https://github.com/wg/wrk)
 
-### Arguments ###
+#### Arguments ####
 
-abbr       |concurrency |value (KB)
+abbr       |concurrency |value
 -----------|------------|--------------
-C1000-1K   |1000        |1
-C1000-4K   |1000        |4
-C1000-16K  |1000        |16
-C2000-1K   |2000        |1
-C2000-4K   |2000        |4
-C2000-16K  |2000        |16
-
-### Benchmark ###
+C1000-512B |1000        |512B
+C1000-1K   |1000        |1K
+C1000-4K   |1000        |4K
+C2000-512B |2000        |512B
+C2000-1K   |2000        |1K
+C2000-4K   |2000        |4K
 
 #### PUT ####
 

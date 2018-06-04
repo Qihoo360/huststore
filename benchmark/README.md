@@ -330,16 +330,22 @@ Please configure the "srv" tag by your specific test environment.
 redis-benchmark arguments as following:
 
     # For "redis", please replace "0.0.0.0" & "6379" by the specific IP & Port
+    redis-benchmark -e -h 0.0.0.0 -p 6379 -c 1000 -n 1000000 -d 512 -t set,get
     redis-benchmark -e -h 0.0.0.0 -p 6379 -c 1000 -n 1000000 -d 976 -t set,get
     redis-benchmark -e -h 0.0.0.0 -p 6379 -c 1000 -n 1000000 -d 4048 -t set,get
-    redis-benchmark -e -h 0.0.0.0 -p 6379 -c 1000 -n 1000000 -d 16336 -t set,get
+    redis-benchmark -e -h 0.0.0.0 -p 6379 -c 2000 -n 1000000 -d 512 -t set,get
     redis-benchmark -e -h 0.0.0.0 -p 6379 -c 2000 -n 1000000 -d 976 -t set,get
     redis-benchmark -e -h 0.0.0.0 -p 6379 -c 2000 -n 1000000 -d 4048 -t set,get
-    redis-benchmark -e -h 0.0.0.0 -p 6379 -c 2000 -n 1000000 -d 16336 -t set,get
 
 [Back to top](#id_top)
 
 <h3 id="id_appendix_result">Benchmark Result</h3>
+
+#### C1000-512B ####
+
+![C1000_512B](../res/benchmark/C1000_512B.png)
+
+[Back to top](#id_top)
 
 #### C1000-1K ####
 
@@ -353,9 +359,9 @@ redis-benchmark arguments as following:
 
 [Back to top](#id_top)
 
-#### C1000-16K ####
+#### C2000-512B ####
 
-![C1000_16K](../res/benchmark/C1000_16K.png)
+![C2000_512B](../res/benchmark/C2000_512B.png)
 
 [Back to top](#id_top)
 
@@ -368,12 +374,6 @@ redis-benchmark arguments as following:
 #### C2000-4K ####
 
 ![C2000_4K](../res/benchmark/C2000_4K.png)
-
-[Back to top](#id_top)
-
-#### C2000-16K ####
-
-![C2000_16K](../res/benchmark/C2000_16K.png)
 
 [Back to top](#id_top)
 

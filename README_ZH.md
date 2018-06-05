@@ -3,13 +3,13 @@
 # huststore - 高性能分布式存储服务 #
 ![huststore logo](res/logo.png)
 
-`huststore` 是一个高性能的分布式存储服务，不但提供了 **`100 thousand QPS`** 级别的 `kv` 存储的功能，还提供了 `hash`、`set`、`sort set` 等一系列数据结构的支持，并且支持 **二进制** 的 kv 存储，可以替代 `Redis` 相关的功能。此外，`huststore` 还结合特有的 `HA` 模块实现了分布式消息队列的功能，包括消息的流式推送，以及消息的 `发布-订阅` 等功能，可以替代 `rabbitmq or gearman` 相关的功能。
+`huststore` 是一个高性能的分布式存储服务，不但提供了 **`数十万 QPS`** 级别的 `kv` 存储的功能，还提供了 `hash`、`set`、`sort set` 等一系列数据结构的支持，并且支持 **二进制** 的 kv 存储，可以替代 `Redis` 相关的功能。此外，`huststore` 还结合特有的 `HA` 模块实现了分布式消息队列的功能，包括消息的流式推送，以及消息的 `发布-订阅` 等功能。
 
 ## 特性 ##
 `huststore` 分为 `hustdb` 以及 `HA` 模块两大部分。`hustdb`是自主研发的存储引擎。`HA` 以 `nginx` 模块的方式开发。`nginx` 是工业级的 `http server` 标准，得益于此，`huststore` 具备以下特性：
   
 * 高吞吐量  
-`hustdb` 的网络层采用了开源的 [libevhtp](https://github.com/ellzey/libevhtp) 来实现，结合自主研发的高性能存储引擎，性能测试 `QPS` 在 **数十万** 以。
+`hustdb` 的网络层采用了开源的 [libevhtp](https://github.com/ellzey/libevhtp) 来实现，结合自主研发的高性能存储引擎，性能测试 `QPS` 在 **数十万** 以上。
 * 高并发  
 参考 `nginx` 的并发能力。  
 * 高可用性  
@@ -127,7 +127,6 @@ data compression : **禁用**
 #### 测试结果 ####
 
     # GET
-    24 threads and 200 connections
     Thread Stats   Avg      Stdev     Max   +/- Stdev
         Latency   238.94us   95.42us   9.33ms   81.03%
         Req/Sec    31.44k     1.09k   36.30k    63.68%
@@ -183,7 +182,6 @@ data compression : **禁用**
     [Latency Distribution]  99.999%  4.07ms
 
     # PUT
-    24 threads and 200 connections
     Thread Stats   Avg      Stdev     Max   +/- Stdev
         Latency   495.13us  393.71us  21.29ms   93.06%
         Req/Sec    16.37k     1.33k   23.72k    74.26%

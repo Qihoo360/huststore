@@ -3,9 +3,9 @@
 # huststore - High-performance Distributed Storage #
 ![huststore logo](res/logo.png)
 
-`huststore` is a open source high performance distributed database system. It not only provides key-value storage service with extremely high performance, up to **100 thousand QPS**, but also supports data structures like `hash`, `set`, `sorted set`, etc. Also, it can store **binary** data as value from a key-value pair, and thus can be used as an alternative of Redis.
+`huststore` is a open source high performance distributed database system. It not only provides key-value storage service with extremely high performance, up to **hundreds of thousands QPS**, but also supports data structures like `hash`, `set`, `sorted set`, etc. Also, it can store **binary** data as value from a key-value pair, and thus can be used as an alternative of Redis.
 
-In addtion, `huststore` implements a distributed message queue by integrating a special `HA` module, features including message Push Stream, and message Publish-SubScribe, these features can be used as replacements of the corresponding features in rabbitmq and gearman.
+In addtion, `huststore` implements a distributed message queue by integrating a special `HA` module, features including message Push Stream, and message Publish-SubScribe.
 
 ## Features ##
 `huststore` has two core components, `hustdb` and `HA`. `hustdb` is a database engine developed by our own, in the fundamental architecture. `HA` is implemented as a `nginx` module. It is well-known that `nginx` is a industry-proven high quality code base, thus by inheriting it `huststore` gains the below advantages:
@@ -133,7 +133,6 @@ Threads are not bound to CPU cores.
 #### Result ####
 
     # GET
-    24 threads and 200 connections
     Thread Stats   Avg      Stdev     Max   +/- Stdev
         Latency   238.94us   95.42us   9.33ms   81.03%
         Req/Sec    31.44k     1.09k   36.30k    63.68%
@@ -189,7 +188,6 @@ Threads are not bound to CPU cores.
     [Latency Distribution]  99.999%  4.07ms
 
     # PUT
-    24 threads and 200 connections
     Thread Stats   Avg      Stdev     Max   +/- Stdev
         Latency   495.13us  393.71us  21.29ms   93.06%
         Req/Sec    16.37k     1.33k   23.72k    74.26%

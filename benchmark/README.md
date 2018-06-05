@@ -30,20 +30,11 @@ A complete example of configuration file:
     {
         "wrk":
         {
-            "threads": 12,
-            "connections": 1000,
-            "duration": "10s",
+            "threads": 24,
+            "connections": 2000,
+            "duration": "45s",
             "timeout": "10s",
-            "loop": 30
-        },
-        "data":
-        {
-            "256B": 256,
-            "512B": 512,
-            "1KB": 1024,
-            "4KB": 4096,
-            "16KB": 16384,
-            "64KB": 65536
+            "loop": 5
         },
         "srv":
         {
@@ -58,6 +49,15 @@ A complete example of configuration file:
         {
             "loop_file": "loop.txt",
             "status_file": "status.txt"
+        },
+        "data":
+        {
+            "256B": 256,
+            "512B": 512,
+            "1KB": 950,
+            "4KB": 4000,
+            "16KB": 16000,
+            "64KB": 65000
         },
         "outputs":
         [
@@ -291,15 +291,9 @@ The configuration of Huststore Benchmark:
         {
             "threads": 24,
             "connections": 2000,
-            "duration": "30s",
+            "duration": "45s",
             "timeout": "10s",
-            "loop": 10
-        },
-        "data":
-        {
-            "1KB": 976,
-            "4KB": 4048,
-            "16KB": 16336
+            "loop": 5
         },
         "srv":
         {
@@ -317,6 +311,13 @@ The configuration of Huststore Benchmark:
         {
             "loop_file": "loop.txt",
             "status_file": "status.txt"
+        },
+        "data":
+        {
+            "256B": 256,
+            "512B": 512,
+            "1KB": 950,
+            "4KB": 4000
         },
         "outputs":
         [

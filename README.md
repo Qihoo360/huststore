@@ -11,7 +11,7 @@ In addtion, `huststore` implements a distributed message queue by integrating a 
 `huststore` has two core components, `hustdb` and `HA`. `hustdb` is a database engine developed by our own, in the fundamental architecture. `HA` is implemented as a `nginx` module. It is well-known that `nginx` is a industry-proven high quality code base, thus by inheriting it `huststore` gains the below advantages:
 
 * High Throughput  
-`hustdb` uses [libevhtp](https://github.com/ellzey/libevhtp), a open source network library, as the inner network communication system, by incorporating it with high-performance storage engine, `hustdb` achieves a extremely high performance, the benchmark shows that `QPS` hits **100 thousand** and even more.
+`hustdb` uses [libevhtp](https://github.com/ellzey/libevhtp), a open source network library, as the inner network communication system, by incorporating it with high-performance storage engine, `hustdb` achieves a extremely high performance, the benchmark shows that `QPS` hits **hundreds of thousands** and even more.
 
 * High Concurrency  
 Please refer to concurrency report of `nginx` for more details.
@@ -55,9 +55,9 @@ In addition, `HA` cluster uses a distributed architecture design by incorporatin
 
 Tested platforms so far:
 
-Platform   | Description
------------|----------------------------------------------------------
-CentOS 6.x | kernel >= 2.6.32 (GCC 4.4.7)
+Platform         | Description
+-----------------|----------------------------------------------------------
+CentOS 6.x & 7.x | kernel >= 2.6.32 (GCC 4.4.7)
 
 ## Quick Start ##
 
@@ -88,17 +88,17 @@ With different number of hustdb worker threads, we test hustdb's max QPS.
 
 #### Condition ####
 
-db.disk.storage_capacity : 512G  
+storage capacity : 512GB  
 
-concurrency : 1000  
+concurrent connection : 1000
 
-value : **1KB**  
+value : **1KB**
 
-L2 cache : **disabled**  
+md5db cache : **disabled**  
 
 data compression : **disabled**  
 
-Threads are not bound to CPU cores.  
+Threads are not bound to CPU cores.
 
 #### Result ####
 
@@ -108,7 +108,7 @@ Description : Horizontal axis is the number of worker threads; Vertical axis is 
 
 #### Conclusion ####
 
-The best hustdb worker threads number is 28-32.  
+The best hustdb worker threads number is 36-40.  
 
 ### Test 2 -  RTT ###
 
@@ -118,9 +118,17 @@ With the optimal worker threads number, we test hustdb's round-trip time.
 
 #### Condition ####
 
-db.disk.storage_capacity : 512G  
+storage capacity : 512GB  
 
-value : 200 bytes  
+concurrent connection : 200
+
+value : **1KB**
+
+md5db cache : **disabled**  
+
+data compression : **disabled**  
+
+Threads are not bound to CPU cores.
 
 #### Result ####
 
@@ -237,10 +245,6 @@ value : 200 bytes
     [Latency Distribution]  99.99%  7.22ms
     [Latency Distribution]  99.999%  9.62ms
 
-#### Conclusion ####
-
-* 99.99% get RTT are below 2ms  
-* 99.7% put RTT are below 2ms  
 
 ### Test 3 -  vs Redis ###
 
@@ -253,16 +257,26 @@ value : 200 bytes
 * [redis-benchmark](https://redis.io/topics/benchmarks)
 * [wrk](https://github.com/wg/wrk)
 
+#### Condition ####
+
+storage capacity : 512GB  
+
+md5db cache : **disabled**  
+
+data compression : **disabled**  
+
+Threads are not bound to CPU cores.
+
 #### Arguments ####
 
-abbr       |concurrency |value
------------|------------|--------------
-C1000-512B |1000        |512B
-C1000-1K   |1000        |1K
-C1000-4K   |1000        |4K
-C2000-512B |2000        |512B
-C2000-1K   |2000        |1K
-C2000-4K   |2000        |4K
+abbr       |concurrent connection |value
+-----------|----------------------|--------------
+C1000-512B |1000                  |512B
+C1000-1K   |1000                  |1KB
+C1000-4K   |1000                  |4KB
+C2000-512B |2000                  |512B
+C2000-1K   |2000                  |1KB
+C2000-4K   |2000                  |4KB
 
 #### PUT ####
 

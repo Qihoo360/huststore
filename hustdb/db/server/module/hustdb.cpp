@@ -220,7 +220,7 @@ bool hustdb_t::open ( )
     }
 
     if ( ! ( m_timer.register_task ( hustdb::timer_task_t ( 1, timestamp_cb, this ) ) &&
-             m_timer.register_task ( hustdb::timer_task_t ( 15, over_threshold_cb, this ) ) &&
+             m_timer.register_task ( hustdb::timer_task_t ( 5, over_threshold_cb, this ) ) &&
              m_timer.register_task ( hustdb::timer_task_t ( m_store_conf.db_ttl_scan_interval, ttl_scan_cb, this ) ) &&
              m_timer.register_task ( hustdb::timer_task_t ( m_store_conf.db_binlog_scan_interval, binlog_scan_cb, this ) ) &&
              m_timer.open ( )
@@ -1522,7 +1522,7 @@ int hustdb_t::hustdb_get (
 
                 if ( ! ctxt->is_version_error )
                 {
-                    int64_t data_size = ( ( int64_t ) ctxt->kv_data.ttl ) * - 1;
+                    int64_t data_size = ( ( int64_t ) ( ctxt->kv_data.ttl - sizeof ( kv_data_item_t ) ) ) * - 1;
                     set_table_meta ( 0, - 1, data_size );
                 }
 
@@ -1617,7 +1617,7 @@ int hustdb_t::hustdb_put (
 
     if ( ctxt->kv_type == NEW_KV && ! ctxt->is_version_error )
     {
-        int64_t data_size = key_len + val_len + sizeof ( kv_data_item_t );
+        int64_t data_size = key_len + val_len;
         set_table_meta ( 0, 1, data_size );
     }
 
@@ -1686,7 +1686,7 @@ int hustdb_t::hustdb_del (
 
     if ( ! ctxt->is_version_error )
     {
-        int64_t data_size = ( ( int64_t ) ctxt->kv_data.ttl ) * - 1;
+        int64_t data_size = ( ( int64_t ) ( ctxt->kv_data.ttl - sizeof ( kv_data_item_t ) ) ) * - 1;
         set_table_meta ( 0, - 1, data_size );
     }
 
@@ -2217,7 +2217,7 @@ int hustdb_t::hustdb_hget (
 
                 if ( ! ctxt->is_version_error )
                 {
-                    int64_t data_size = ( ( int64_t ) ctxt->kv_data.ttl ) * - 1;
+                    int64_t data_size = ( ( int64_t ) ( ctxt->kv_data.ttl - sizeof ( kv_data_item_t ) ) ) * - 1;
                     set_table_meta ( offset, - 1, data_size );
                 }
 
@@ -2327,7 +2327,7 @@ int hustdb_t::hustdb_hset (
 
     if ( ctxt->kv_type == NEW_KV && ! ctxt->is_version_error )
     {
-        int64_t data_size = key_len + val_len + sizeof ( kv_data_item_t );
+        int64_t data_size = key_len + val_len;
         set_table_meta ( offset, 1, data_size );
     }
 
@@ -2485,7 +2485,7 @@ int hustdb_t::hustdb_hincrby (
 
     if ( ctxt->kv_type == NEW_KV && ! ctxt->is_version_error )
     {
-        int64_t data_size = key_len + val_len + sizeof ( kv_data_item_t );
+        int64_t data_size = key_len + val_len;
         set_table_meta ( offset, 1, data_size );
     }
 
@@ -2586,7 +2586,7 @@ int hustdb_t::hustdb_hdel (
 
     if ( ! ctxt->is_version_error )
     {
-        int64_t data_size = ( ( int64_t ) ctxt->kv_data.ttl ) * - 1;
+        int64_t data_size = ( ( int64_t ) ( ctxt->kv_data.ttl - sizeof ( kv_data_item_t ) ) ) * - 1;
         set_table_meta ( offset, - 1, data_size );
     }
 

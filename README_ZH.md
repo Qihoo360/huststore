@@ -9,7 +9,7 @@
 `huststore` 分为 `hustdb` 以及 `HA` 模块两大部分。`hustdb`是自主研发的存储引擎。`HA` 以 `nginx` 模块的方式开发。`nginx` 是工业级的 `http server` 标准，得益于此，`huststore` 具备以下特性：
   
 * 高吞吐量  
-`hustdb` 的网络层采用了开源的 [libevhtp](https://github.com/ellzey/libevhtp) 来实现，结合自主研发的高性能存储引擎，性能测试 `QPS` 在 **10万** 以上。
+`hustdb` 的网络层采用了开源的 [libevhtp](https://github.com/ellzey/libevhtp) 来实现，结合自主研发的高性能存储引擎，性能测试 `QPS` 在 **数十万** 以。
 * 高并发  
 参考 `nginx` 的并发能力。  
 * 高可用性  
@@ -40,9 +40,9 @@
 
 目前测试通过的平台包括：
 
-平台       | 描述
------------|----------------------------------------------------------
-CentOS 6.x | 内核版本 >= 2.6.32 (GCC 4.4.7)
+平台             | 描述
+-----------------|----------------------------------------------------------
+CentOS 6.x & 7.x | 内核版本 >= 2.6.32 (GCC 4.4.7)
 
 ## 依赖 ##
 * [cmake](https://cmake.org/download/)
@@ -82,17 +82,17 @@ CentOS 6.x | 内核版本 >= 2.6.32 (GCC 4.4.7)
 
 #### 测试条件 ####
 
-db.disk.storage_capacity : 512G  
+storage capacity : 512GB  
 
-并发数 : 1000  
+concurrent connection : 1000
 
-value : **1KB**  
+value : **1KB**
 
-L2 cache: **禁用**  
+md5db cache : **禁用**  
 
-数据压缩: **禁用**  
+data compression : **禁用**  
 
-`CPU` 未绑定.  
+`CPU` 未绑定
 
 #### 测试结果 ####
 
@@ -102,19 +102,27 @@ L2 cache: **禁用**
 
 #### 结论 ####
 
-从以上测试图可以看出，`hustdb` 的 `worker` 线程数设置为28-32比较划算。
+从以上测试图可以看出，`hustdb` 的 `worker` 线程数设置为36-40比较划算。
 
 ### 测试场景 2 -  RTT ###
 
 #### 测试目的 ####
 
-测试在最佳 `worker` 线程数（28线程）下，`hustdb` 的 `RTT` 表现。  
+测试在最佳 `worker` 线程数（36）下，`hustdb` 的 `RTT` 表现。  
 
 #### 测试条件 ####
 
-db.disk.storage_capacity : 512G  
+storage capacity : 512GB  
 
-value : 200 字节  
+concurrent connection : 200
+
+value : **1KB**
+
+md5db cache : **禁用**  
+
+data compression : **禁用**  
+
+`CPU` 未绑定
 
 #### 测试结果 ####
 
@@ -231,10 +239,6 @@ value : 200 字节
     [Latency Distribution]  99.99%  7.22ms
     [Latency Distribution]  99.999%  9.62ms
 
-#### 结论 ####
-
-* get 响应时间 99.99%  在 2ms 以内  
-* put 响应时间 99.7%  在 2ms 以内  
 
 ### 测试场景 3 -  vs Redis ###
 
@@ -247,16 +251,26 @@ value : 200 字节
 * [redis-benchmark](https://redis.io/topics/benchmarks)
 * [wrk](https://github.com/wg/wrk)
 
-#### 测试参数 ####
+#### 测试条件 ####
 
-缩写        |并发数      |数据大小
+storage capacity : 512GB  
+
+md5db cache : **禁用**  
+
+data compression : **禁用**  
+
+`CPU` 未绑定
+
+#### 参数说明 ####
+
+缩写        |并发连接    |数据大小
 -----------|------------|--------------
 C1000-512B |1000        |512B
-C1000-1K   |1000        |1K
-C1000-4K   |1000        |4K
+C1000-1K   |1000        |1KB
+C1000-4K   |1000        |4KB
 C2000-512B |2000        |512B
-C2000-1K   |2000        |1K
-C2000-4K   |2000        |4K
+C2000-1K   |2000        |1KB
+C2000-4K   |2000        |4KB
 
 #### PUT ####
 

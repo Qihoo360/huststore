@@ -197,7 +197,6 @@ Threads are not bound to CPU cores.
         90%  815.00us
         99%    1.28ms
     17628712 requests in 45.10s, 1.53GB read
-    Socket errors: connect 0, read 192, write 0, timeout 0
     Requests/sec: 390880.11
     Transfer/sec:     34.67MB
     --------------------------------------------------

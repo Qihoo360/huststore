@@ -331,11 +331,11 @@
 
     # "redis" 的测试命令,请使用真实的 IP 和 Port 替换 "0.0.0.0" 和 "6379"
     redis-benchmark -e -h 0.0.0.0 -p 6379 -c 1000 -n 1000000 -d 512 -t set,get
-    redis-benchmark -e -h 0.0.0.0 -p 6379 -c 1000 -n 1000000 -d 976 -t set,get
-    redis-benchmark -e -h 0.0.0.0 -p 6379 -c 1000 -n 1000000 -d 4048 -t set,get
+    redis-benchmark -e -h 0.0.0.0 -p 6379 -c 1000 -n 1000000 -d 950 -t set,get
+    redis-benchmark -e -h 0.0.0.0 -p 6379 -c 1000 -n 1000000 -d 4000 -t set,get
     redis-benchmark -e -h 0.0.0.0 -p 6379 -c 2000 -n 1000000 -d 512 -t set,get
-    redis-benchmark -e -h 0.0.0.0 -p 6379 -c 2000 -n 1000000 -d 976 -t set,get
-    redis-benchmark -e -h 0.0.0.0 -p 6379 -c 2000 -n 1000000 -d 4048 -t set,get
+    redis-benchmark -e -h 0.0.0.0 -p 6379 -c 2000 -n 1000000 -d 950 -t set,get
+    redis-benchmark -e -h 0.0.0.0 -p 6379 -c 2000 -n 1000000 -d 4000 -t set,get
 
 [回顶部](#id_top)
 

@@ -1,3 +1,11 @@
+Changes with huststore release 1.9                                        6 Jun 2018
+
+    A summary of what is in this release since 1.8:
+    *) Modify storage engine for better performance, which is incompatible with previous version.  
+    *) Support data compression strategy.  
+    *) Update benchmark.  
+    *) Many other fixes and improvements, 70+ commits since 1.8.  
+
 Changes with huststore release 1.8                                        21 Apr 2017
 
     A summary of what is in this release since 1.7:

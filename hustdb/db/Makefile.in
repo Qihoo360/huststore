@@ -62,7 +62,7 @@ MODULE_OBJECTS=  					        \
 	$(BIN)kv_create_kv.o 				        \
 	$(BIN)kv_md5db_bucket.o			                \
 	$(BIN)kv_md5db_bucket_array.o		                \
-	$(BIN)kv_md5db_content.o			                \
+	$(BIN)kv_md5db_content2.o			                \
 	$(BIN)kv_md5db_content_array.o	                        \
 	$(BIN)kv_md5db_fast_conflict.o	                        \
 	$(BIN)kv_md5db_fast_conflict_array.o	                \
@@ -81,6 +81,7 @@ MODULE_OBJECTS=  					        \
 	$(BIN)module_appini.o        		                \
 	$(BIN)base_md5.o   			                \
 	$(BIN)base_timer.o   			                \
+	$(BIN)base_compression.o   			                \
 	$(BIN)tasks_slow_task_thread.o                          \
 	$(BIN)tasks_task_export.o                               \
 	$(BIN)tasks_task_ttl_scan.o                         \
@@ -137,7 +138,7 @@ BINLOG_OBJECTS =               \
 
 TARGET = ./hustdb
 INCS = $(INCLUDE)
-LIBS =	$(LIB) -levent -levent_pthreads -levent_openssl -levhtp -ldl -lz -ltcmalloc -lidn
+LIBS =	$(LIB) -levent -levent_pthreads -levent_openssl -levhtp -ldl -lz -ltcmalloc -lidn -lz
 
 all: $(MDB_OBJECTS) $(RDB_OBJECTS) $(BINLOG_OBJECTS) $(MODULE_OBJECTS) $(SVR_OBJECTS)
 
@@ -285,7 +286,7 @@ $(BIN)binlog.o: $(BINLOG_SRC)binlog.cpp $(BINLOG_SRC)binlog.h $(BINLOG_SRC)singl
 $(BIN)condition.o: $(BINLOG_SRC)condition.cpp $(BINLOG_SRC)condition.h
 	$(CPPC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
 
-$(BIN)host_info.o: $(BINLOG_SRC)host_info.cpp $(BINLOG_SRC)host_info.h $(BINLOG_SRC)queue.h $(BINLOG_SRC)task.h $(BINLOG_SRC)thread_pool.h $(BINLOG_SRC)husthttp.h $(BINLOG_SRC)thread.h $(BINLOG_SRC)singleton.h $(BINLOG_SRC)atomic2.h $(BINLOG_SRC)binlog_time.h
+$(BIN)host_info.o: $(BINLOG_SRC)host_info.cpp $(BINLOG_SRC)host_info.h $(BINLOG_SRC)queue.h $(BINLOG_SRC)task.h $(BINLOG_SRC)thread_pool.h $(BINLOG_SRC)husthttp.h $(BINLOG_SRC)thread.h $(BINLOG_SRC)singleton.h $(BINLOG_SRC)binlog_time.h
 	$(CPPC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
 
 $(BIN)http.o: $(BINLOG_SRC)http.cpp $(BINLOG_SRC)http.h
@@ -316,11 +317,10 @@ clean:
 	rm -fr $(TDB_OBJECTS) $(MDB_OBJECTS) $(RDB_OBJECTS) $(MODULE_OBJECTS) $(SVR_OBJECTS) $(BINLOG_OBJECTS)
 	rm -fr $(TARGET)
 
-install: $(TARGET) $(SERVER)module/hustdb.conf.db $(SERVER)module/hustdb.conf.mq
+install: $(TARGET) $(SERVER)module/hustdb.conf
 	#	$(INSTALL_PROGRAM) $(TARGET)									 $(DESTDIR)$(prefix)/
 	#	$(INSTALL_DATA)    $(SERVER)module/hustdb.conf $(DESTDIR)$(prefix)/
 	test -d $(DESTDIR)$(prefix) || mkdir -p		$(DESTDIR)$(prefix)
 	install -v -m 0755 $(TARGET)										$(DESTDIR)$(prefix)
-	install -v -m 0644 $(SERVER)module/hustdb.conf.db  $(DESTDIR)$(prefix)
-	install -v -m 0644 $(SERVER)module/hustdb.conf.mq  $(DESTDIR)$(prefix)
+	install -v -m 0644 $(SERVER)module/hustdb.conf $(DESTDIR)$(prefix)
 

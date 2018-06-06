@@ -27,71 +27,129 @@ enum kv_type_t
     ERROR_KV    = 3
 };
 
-struct conn_ctxt_t
+enum compress_type_t
 {
-    uint32_t worker_id : 8;
-    uint32_t _reserved : 24;
-
-    conn_ctxt_t ( )
-    : worker_id ( 0 )
-    , _reserved ( 0 )
-    {
-    }
+    NOCOMPRESS  = 0,
+    COMPREESED  = 1
 };
+
+#pragma pack( push, 1 )
+
+    struct conn_ctxt_t
+    {
+        uint32_t worker_id     : 8;
+        uint32_t compress_type : 2;
+        uint32_t _reserved     : 22;
+
+        conn_ctxt_t ( )
+        : worker_id ( 0 )
+        , compress_type ( NOCOMPRESS )
+        , _reserved ( 0 )
+        {
+        }
+    };
+
+    struct kv_data_item_t
+    {
+        kv_data_item_t ( )
+        {
+            reset ( );
+        }
+
+        void reset ( )
+        {
+            user_key_len  = 0;
+            compress_type = NOCOMPRESS;
+            _reserved     = 0;
+
+            ttl           = 0;
+            timestamp     = 0;
+        }
+
+        uint32_t    user_key_len  : 24;
+        uint32_t    compress_type : 2;
+        uint32_t    _reserved     : 6;
+
+        uint32_t    ttl;
+        uint32_t    timestamp;
+    };
+
+    struct mdb_data_item_t
+    {
+        mdb_data_item_t ( )
+        {
+            reset ();
+        }
+
+        void reset ( )
+        {
+            version       = 0;
+            compress_type = 0;
+            _reserved     = 0;
+        }
+
+        uint32_t version       : 22;
+        uint32_t compress_type : 2;
+        uint32_t _reserved     : 8;
+    };
+
+#pragma pack( pop )
 
 struct item_ctxt_t
 {
-    std::string key;
-    std::string value;
-    std::vector< int > hash_other_servers;
-    int inner_file_id;
-    int user_file_id;
-    bool is_version_error;
-    uint8_t kv_type;
+    std::string        key;
+    std::string        value;
+    int                inner_file_id;
+    int                user_file_id;
+    bool               is_version_error;
+    uint8_t            kv_type;
+    kv_data_item_t     kv_data;
 
     item_ctxt_t ( )
     : key ( )
     , value ( )
-    , hash_other_servers ( )
     , inner_file_id ( -1 )
     , user_file_id ( -1 )
     , is_version_error ( false )
     , kv_type ( ERROR_KV )
     {
         key.reserve ( HASH_TB_LEN );
+        kv_data.reset ();
     }
 
     void reset ( )
     {
         key.resize ( 0 );
         value.resize ( 0 );
-        hash_other_servers.resize ( 0 );
-        inner_file_id = -1;
-        user_file_id = -1;
+        inner_file_id    = -1;
+        user_file_id     = -1;
         is_version_error = false;
-        kv_type = ERROR_KV;
+        kv_type          = ERROR_KV;
+        kv_data.reset ();
     }
 
 } __attribute__ ( ( aligned ( 64 ) ) );
 
 typedef void ( * export_record_callback_t )(
-                                             void * param,
+                                             void *         param,
                                              const char * & key,
-                                             size_t & key_len,
+                                             size_t &       key_len,
                                              const char * & val,
-                                             size_t & val_len,
-                                             const char * table,
-                                             size_t table_len,
-                                             uint32_t & version,
-                                             uint32_t & ttl,
-                                             std::string & content,
-                                             bool * ignore_this_record,
-                                             bool * break_the_loop
+                                             size_t &       val_len,
+                                             const char *   table,
+                                             size_t         table_len,
+                                             uint32_t &     version,
+                                             uint32_t &     ttl,
+                                             uint32_t &     compress_type,
+                                             std::string &  content,
+                                             bool *         ignore_this_record,
+                                             bool *         break_the_loop
                                              );
 
 struct export_cb_param_t
 {
-    void * db;
+    void *   db;
+    void *   block_id;
     uint16_t start;
     uint16_t end;
     uint32_t offset;
@@ -99,10 +157,10 @@ struct export_cb_param_t
     uint32_t total;
     int64_t  min;
     int64_t  max;
-    int file_id;
-    bool noval;
-    bool async;
-    bool byscore;
+    int      file_id;
+    bool     noval;
+    bool     async;
+    bool     byscore;
 
 } __attribute__ ( ( aligned ( 64 ) ) );
 
@@ -207,6 +265,11 @@ public:
                         conn_ctxt_t conn,
                         item_ctxt_t * & ctxt
                         ) = 0;
+
+    virtual void get_item_buffer (
+                                    conn_ctxt_t conn,
+                                    item_ctxt_t * & ctxt
+                                    ) = 0;
 
     virtual int export_db (
                             int file_id,

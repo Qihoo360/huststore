@@ -12,7 +12,7 @@ i_kv_t * create_kv ( )
     }
     catch ( ... )
     {
-        LOG_ERROR ( "[kv]new kv_leveldb_t() exception" );
+        LOG_ERROR ( "[kv]new kv_leveldb_t exception" );
         return NULL;
     }
 
@@ -27,7 +27,7 @@ i_server_kv_t * create_server_kv ( )
     }
     catch ( ... )
     {
-        LOG_ERROR ( "[kv]new kv_md5db_t() exception" );
+        LOG_ERROR ( "[kv]new kv_md5db_t exception" );
         return NULL;
     }
 

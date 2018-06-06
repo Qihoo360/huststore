@@ -64,7 +64,6 @@ build_hustdb(){
   cd ${topdir}/hustdb/db && make -j$(nproc) && make prefix=${PREFIX_HUSTDB} install ;
   cp -v ${topdir}/hustdb/db/start.sh ${PREFIX_HUSTDB}
   cp -v ${topdir}/hustdb/db/stop.sh ${PREFIX_HUSTDB}
-  install -m 0644 ${PREFIX_HUSTDB}/hustdb.conf.db ${PREFIX_HUSTDB}/hustdb.conf
   mk_pkg ${HUSTSTORE_TOP} hustdb
 }
 
@@ -98,7 +97,7 @@ build_hustmq(){
   cp -a ${PREFIX_HUSTDB}/hustdb ${PREFIX_HUSTMQ}/
   cp -a ${PREFIX_HUSTDB}/hustdb.conf* ${PREFIX_HUSTMQ}/
   cp -a ${PREFIX_HUSTDB}/*.sh ${PREFIX_HUSTMQ}/
-  install -m 0644 ${PREFIX_HUSTMQ}/hustdb.conf.mq ${PREFIX_HUSTMQ}/hustdb.conf
+  install -m 0644 ${PREFIX_HUSTMQ}/hustdb.conf ${PREFIX_HUSTMQ}/hustdb.conf
   mk_pkg ${HUSTSTORE_TOP} hustmq
 }
 

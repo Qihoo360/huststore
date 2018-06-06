@@ -5,18 +5,6 @@
 namespace md5db
 {
 
-#pragma pack( push, 1 )
-
-    struct conflict_item_t
-    {
-        uint32_t    version     : 30;
-        uint32_t    _reserved   :  2;
-
-        block_id_t  block_id;
-    } ;
-
-#pragma pack( pop )
-
     conflict_t::conflict_t ( )
     : m_db ( NULL )
     {
@@ -36,20 +24,22 @@ namespace md5db
     {
         if ( m_db )
         {
-            LOG_ERROR ( "[md5db][conflict]already opened, %s", path );
+            LOG_ERROR ( "[md5db][conflict][open][file=%s]already opened", 
+                        path );
             return false;
         }
 
         m_db = create_kv ( );
         if ( NULL == m_db )
         {
-            LOG_ERROR ( "[md5db][conflict]create_kv failed" );
+            LOG_ERROR ( "[md5db][conflict][open]create_kv failed" );
             return false;
         }
 
         if ( ! m_db->open ( path, config, file_id ) )
         {
-            LOG_ERROR ( "[md5db][conflict]open( %s ) failed", path );
+            LOG_ERROR ( "[md5db][conflict][open][file=%s]open failed", 
+                        path );
             m_db->kill_me ();
             m_db = NULL;
             return false;
@@ -82,16 +72,19 @@ namespace md5db
                           uint32_t            version
                           )
     {
-        if ( 16 != inner_key_len || NULL == inner_key || version > BUCKET_DATA_MAX_VERSION )
+        if ( unlikely ( 16 != inner_key_len || 
+                        NULL == inner_key || 
+                        version > BUCKET_DATA_MAX_VERSION 
+                    ) 
+            )
         {
-            LOG_ERROR ( "[md5db][conflict]invalid params" );
+            LOG_ERROR ( "[md5db][conflict][put]invalid params" );
             return EINVAL;
         }
 
-        conflict_item_t data;
-        data._reserved  = 0;
-        data.version    = version;
-        data.block_id   = block_id;
+        bucket_data_item_t data;
+        data.set_version ( version );
+        data.m_block_id = block_id;
 
         int r = m_db->put ( inner_key, inner_key_len, & data, ( unsigned int ) sizeof ( data ) );
 
@@ -110,12 +103,16 @@ namespace md5db
 
         if ( unlikely ( NULL == m_db ) )
         {
-            LOG_ERROR ( "[md5db][conflict]m_db is NULL" );
+            LOG_ERROR ( "[md5db][conflict][get]db is NULL" );
             return EFAULT;
         }
-        if ( 16 != inner_key_len || NULL == inner_key )
+
+        if ( unlikely ( 16 != inner_key_len || 
+                        NULL == inner_key 
+                    ) 
+            )
         {
-            LOG_ERROR ( "[md5db][conflict]invalid key" );
+            LOG_ERROR ( "[md5db][conflict][get]invalid key" );
             return EINVAL;
         }
 
@@ -125,22 +122,25 @@ namespace md5db
         {
             if ( ENOENT != r )
             {
-                LOG_ERROR ( "[md5db][conflict]get return %d", r );
+                LOG_ERROR ( "[md5db][conflict][get][r=%d]", 
+                            r );
             }
             return r;
         }
-        if ( sizeof ( conflict_item_t ) != s.size () )
+        if ( sizeof ( bucket_data_item_t ) != s.size () )
         {
-            LOG_ERROR ( "[md5db][conflict]%d invalid size", ( int ) s.size () );
+            LOG_ERROR ( "[md5db][conflict][get][size=%d]invalid size", 
+                        ( int ) s.size () );
             return EFAULT;
         }
 
-        const conflict_item_t * item = ( const conflict_item_t * ) s.c_str ();
-        block_id = item->block_id;
-        version  = item->version;
+        const bucket_data_item_t * item = ( const bucket_data_item_t * ) s.c_str ();
+        block_id = item->m_block_id;
+        version  = item->version ();
         if ( version > BUCKET_DATA_MAX_VERSION )
         {
-            LOG_ERROR ( "[md5db][conflict]%u invalid version", version );
+            LOG_ERROR ( "[md5db][conflict][get][version=%u]invalid version", 
+                        version );
             return EFAULT;
         }
 

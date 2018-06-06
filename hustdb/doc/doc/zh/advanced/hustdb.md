@@ -43,18 +43,21 @@ hustdb
     tcp.recv_timeout                = 300           //单链接最长存活时间
     tcp.send_timeout                = 300           //单链接发送数据超时
 
-    tcp.worker_count                = 16            //worker线程数
+    tcp.worker_count                = 24            //worker线程数
 
     http.security.user              = huststore     //权限验证，user
     http.security.passwd            = huststore     //权限验证，password
 
     http.access.allow               = W.X.Y.Z       //IP限制；例如：(1)X.Y.Z.1-X.Y.Z.10；(2)X.Y.Z.1-X.Y.Z.10,X.Y.Z.22；(3)X.Y.Z.1-X.Y.Z.10,X.Y.Z.17,A.B.C.1-A.B.C.10
 
-    # UNIT Percentage
+    # UNIT Percentage(%)
     memory.process.threshold        = 0             //hustdb进程内存限制（%），超出阈值，禁止除del外所有写操作
     memory.system.threshold         = 0             //系统内存限制（%），超出阈值，禁止除del外所有写操作
 
     [store]
+    # UNIT GB, default 512
+    db.disk.storage_capacity        = 512           //DB, hustdb的磁盘存储限制, 如果高于该阈值，即禁止写入操作
+
     # UNIT Minute, 1 ~ 255
     mq.redelivery.timeout           = 5             //MQ，message默认处理超时时间
 
@@ -73,52 +76,49 @@ hustdb
     db.binlog.scan_interval         = 20            //DB，binlog扫描间隔，定期同步binlog的item
     db.binlog.task_timeout          = 950400        //DB，binlog任务超时时间
 
+    # UNIT Percentage(%), default 100
+    db.post_compression.ratio       = 100           //DB, (post compression ratio) = (compressed data size / raw data size), 默认设置100，即禁用压缩
+
     mq.queue.maximum                = 8192          //MQ，queue最大数量；当且仅当，数值修改：大→小，会造成尾部索引失效，改回原数值即可恢复
     db.table.maximum                = 8192          //DB，table最大数量；当且仅当，数值修改：大→小，会造成尾部索引失效，改回原数值即可恢复
 
     [cachedb]
-    # UNIT MB, default 512
-    cache                           = 8192          //CACHE，独立于DB，仅用于缓存
+    # UNIT MB, default 2048
+    cache                           = 2048          //CACHE，独立于DB，仅用于缓存
 
-    [fastdb]
+    [md5db]
     # 1 ~ 20, default 10
-    count                           = 10            //hustdb重要模块（没有之一），db实例数（首次初始化后，禁止修改）
+    count                           = 10            //hustdb重要模块，db实例数（首次初始化后，禁止修改）
     # UNIT MB, default 256
-    l1_cache                        = 512           //fastdb一级缓存
-    # UNIT MB, default 512
-    l2_cache                        = 8192          //fastdb二级缓存
-    # UNIT MB, default 512
-    write_buffer                    = 1024          //fastdb写操作缓存
+    l1_cache                        = 256           //md5db一级缓存
+    # UNIT MB, default 1024
+    l2_cache                        = 1024          //md5db二级缓存
+    # UNIT MB, default 1024
+    write_buffer                    = 1024          //md5db写操作缓存
     # default 0
     bloom_filter_bits               = 0
-    # default none
-    md5_bloom_filter                = none
-    # default false
-    disable_compression             = false
+    # default true
+    disable_compression             = true
+
+    [contentdb]
+    # must be enabled, default 256
+    count                           = 256           //CONTENTDB，db实例数（首次初始化后，禁止修改）
 
     [conflictdb]
     # 1 ~ 10, default 2
-    count                           = 2             //fastdb重要模块，db实例数（首次初始化后，禁止修改）
+    count                           = 2             //md5db重要模块，db实例数（首次初始化后，禁止修改）
     # UNIT MB, default 128
     cache                           = 128           //conflictdb缓存
     # UNIT MB, default 128
     write_buffer                    = 128           //conflictdb写操作缓存
-    # default 0
-    bloom_filter_bits               = 0
-    # default large
-    md5_bloom_filter                = large
+    # default 10
+    bloom_filter_bits               = 10
     # default true
     disable_compression             = true
 
     [fast_conflictdb]
     # 1 ~ 10, default 4
-    count                           = 4             //fastdb重要模块，单块缓存大小（首次初始化后，禁止修改）
-
-    [contentdb]
-    # enable if count large than 0
-    count                           = 0             //fastdb重要模块，db实例数，为0表示禁用；建议：仅用于MQ集群搭建（首次初始化后，禁止修改）
-    # UNIT MB, 16 ~ 128, default 64
-    cache                           = 64            //contentdb缓存
+    count                           = 4             //md5db重要模块，单块缓存大小（首次初始化后，禁止修改）
 
 [上一页](index.md)
 

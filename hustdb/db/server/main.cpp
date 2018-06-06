@@ -43,7 +43,7 @@ static bool parse_args(int argc, char *argv[], bool& daemon_mode)
         }
         else if (option == version)
         {
-            printf("huststore 1.7\n");
+            printf("huststore 1.9\n");
             return false;
         }
         else if (option == debug)

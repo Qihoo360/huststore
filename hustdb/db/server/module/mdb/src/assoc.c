@@ -162,8 +162,6 @@ int assoc_insert ( item *it, const uint32_t hv )
 {
     unsigned int oldbucket;
 
-    //    assert(assoc_find(ITEM_key(it), it->nkey) == 0);  /* shouldn't have duplicately named things defined */
-
     if ( expanding &&
          ( oldbucket = ( hv & hashmask (hashpower - 1) ) ) >= expand_bucket )
     {

@@ -63,7 +63,7 @@ def fetch_keys(func, host, block):
 
 def fetch(sess, host, block):
     def __fetch_keys(func, host, stat, block):
-        number_of_keys = stat['size']
+        number_of_keys = stat['TOTALIZE']['KVPAIR']['count']
         if number_of_keys < 1:
             return
         return fetch_keys(func, host, block)

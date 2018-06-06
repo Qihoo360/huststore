@@ -3,29 +3,32 @@
 
 #include "../../../include/i_server_kv.h"
 #include "../../perf_target.h"
+#include "../../hustdb.h"
 
 namespace md5db
 {
     class bucket_data_item_t;
     class bucket_t;
     class block_id_t;
+    class content_id_t;
 }
 
 using md5db::bucket_t;
 
 static void export_md5db_record_callback (
-                                           void * param,
+                                           void *         param,
                                            const char * & key,
-                                           size_t & key_len,
+                                           size_t &       key_len,
                                            const char * & val,
-                                           size_t & val_len,
-                                           const char * table,
-                                           size_t table_len,
-                                           uint32_t & version,
-                                           uint32_t & ttl,
-                                           std::string & content,
-                                           bool * ignore_this_record,
-                                           bool * break_the_loop
+                                           size_t &       val_len,
+                                           const char *   table,
+                                           size_t         table_len,
+                                           uint32_t &     version,
+                                           uint32_t &     ttl,
+                                           uint32_t &     compress_type,
+                                           std::string &  content,
+                                           bool *         ignore_this_record,
+                                           bool *         break_the_loop
                                            );
 
 static void check_alive_callback (
@@ -104,6 +107,11 @@ public:
                         conn_ctxt_t conn,
                         item_ctxt_t * & ctxt
                         );
+
+    virtual void get_item_buffer (
+                                    conn_ctxt_t conn,
+                                    item_ctxt_t * & ctxt
+                                    );
 
     virtual int export_db (
                             int file_id,
@@ -199,7 +207,7 @@ public:
 
     void destroy ( );
 
-    static void * operator new(
+    static void * operator new (
                                 size_t size
                                 )
     {
@@ -211,7 +219,7 @@ public:
         return p;
     }
 
-    static void operator delete(
+    static void operator delete (
                                  void * p
                                  )
     {
@@ -237,14 +245,14 @@ private:
                            );
 
     int delete_direct_data (
-                             bucket_t & bucket,
+                             md5db::bucket_t & bucket,
                              const md5db::block_id_t & block_id,
                              conn_ctxt_t conn,
                              item_ctxt_t * & ctxt
                              );
 
     int delete_conflict_data (
-                               bucket_t & bucket,
+                               md5db::bucket_t & bucket,
                                md5db::bucket_data_item_t * item,
                                const void * inner_key,
                                size_t inner_key_len,
@@ -255,17 +263,19 @@ private:
                                );
 
     int del_conflict_block_id (
-                                bucket_t & bucket,
+                                md5db::bucket_t & bucket,
                                 md5db::bucket_data_item_t * item,
                                 const void * inner_key,
                                 size_t inner_key_len,
                                 item_ctxt_t * & ctxt,
                                 md5db::block_id_t & deleted_block_id,
+                                md5db::content_id_t & deleted_content_id,
                                 uint32_t & deleted_version,
                                 bool from_binlog
                                 );
 
     int get_data (
+                   md5db::bucket_t & bucket,
                    const md5db::block_id_t & block_id,
                    const char * user_key,
                    size_t user_key_len,
@@ -274,16 +284,17 @@ private:
                    item_ctxt_t * & ctxt
                    );
 
-    int get_data_without_content_db (
-                                      const md5db::block_id_t & block_id,
-                                      const char * user_key,
-                                      size_t user_key_len,
-                                      conn_ctxt_t conn,
-                                      std::string * & rsp,
-                                      item_ctxt_t * & ctxt
-                                      );
+    int get_data_from_kv_array (
+                                const md5db::block_id_t & block_id,
+                                const char * user_key,
+                                size_t user_key_len,
+                                conn_ctxt_t conn,
+                                std::string * & rsp,
+                                item_ctxt_t * & ctxt
+                                 );
 
-    int get_data_with_content_db (
+    int get_data_from_content_db (
+                                   md5db::bucket_t & bucket,
                                    const md5db::block_id_t & block_id,
                                    const char * user_key,
                                    size_t user_key_len,
@@ -300,7 +311,7 @@ private:
                                 );
 
     int add_conflict_data (
-                            bucket_t & bucket,
+                            md5db::bucket_t & bucket,
                             md5db::bucket_data_item_t * item,
                             const char * inner_key,
                             size_t inner_key_len,
@@ -315,7 +326,7 @@ private:
                             );
 
     int set_conflict_data (
-                            bucket_t & bucket,
+                            md5db::bucket_t & bucket,
                             md5db::bucket_data_item_t * item,
                             const char * inner_key,
                             size_t inner_key_len,
@@ -331,6 +342,7 @@ private:
                             );
 
     int set_data (
+                   md5db::bucket_t & bucket,
                    const md5db::block_id_t & block_id,
                    const char * user_key,
                    size_t user_key_len,
@@ -340,7 +352,18 @@ private:
                    item_ctxt_t * & ctxt
                    );
 
-    int set_data_with_kv_array (
+    int set_data_to_kv_array (
+                               const md5db::block_id_t & block_id,
+                               const char * user_key,
+                               size_t user_key_len,
+                               const char * val,
+                               size_t val_len,
+                               conn_ctxt_t conn,
+                               item_ctxt_t * & ctxt
+                               );
+
+    int set_data_to_content_db (
+                                 md5db::bucket_t & bucket,
                                  const md5db::block_id_t & block_id,
                                  const char * user_key,
                                  size_t user_key_len,
@@ -350,28 +373,19 @@ private:
                                  item_ctxt_t * & ctxt
                                  );
 
-    int set_data_with_content_db (
-                                   const md5db::block_id_t & block_id,
-                                   const char * user_key,
-                                   size_t user_key_len,
-                                   const char * val,
-                                   size_t val_len,
-                                   conn_ctxt_t conn,
-                                   item_ctxt_t * & ctxt
-                                   );
-
-    int add_data_with_content_db (
-                                   const md5db::block_id_t & block_id,
-                                   const char * user_key,
-                                   size_t user_key_len,
-                                   const char * val,
-                                   size_t val_len,
-                                   conn_ctxt_t conn,
-                                   item_ctxt_t * & ctxt
-                                   );
+    int add_data_to_content_db (
+                                 md5db::bucket_t & bucket,
+                                 const md5db::block_id_t & block_id,
+                                 const char * user_key,
+                                 size_t user_key_len,
+                                 const char * val,
+                                 size_t val_len,
+                                 conn_ctxt_t conn,
+                                 item_ctxt_t * & ctxt
+                                 );
 
     int new_data (
-                   bucket_t & bucket,
+                   md5db::bucket_t & bucket,
                    md5db::bucket_data_item_t * item,
                    const char * inner_key,
                    size_t inner_key_len,
@@ -386,12 +400,10 @@ private:
                    );
 
     int check_same_key (
-                         bucket_t & bucket,
+                         md5db::bucket_t & bucket,
                          const md5db::block_id_t & block_id,
                          const char * inner_key,
-                         size_t inner_key_len,
-                         const char * user_key,
-                         size_t user_key_len
+                         size_t inner_key_len
                          );
 
     int put_inner (
@@ -427,15 +439,16 @@ private:
 
     struct inner;
 
-    inner * m_inner;
-    bool m_ok;
+    inner *       m_inner;
+    hustdb_t *    m_db;
+    bool          m_ok;
 
     perf_target_t m_perf_put_ok;
     perf_target_t m_perf_put_fail;
     perf_target_t m_perf_binlog_put_ok;
     perf_target_t m_perf_binlog_put_fail;
-    size_t m_count_put_wrong_version;
-    size_t m_count_binlog_put_wrong_version;
+    size_t        m_count_put_wrong_version;
+    size_t        m_count_binlog_put_wrong_version;
 
     perf_target_t m_perf_del_ok;
     perf_target_t m_perf_del_not_found;
@@ -443,8 +456,8 @@ private:
     perf_target_t m_perf_binlog_del_ok;
     perf_target_t m_perf_binlog_del_not_found;
     perf_target_t m_perf_binlog_del_fail;
-    size_t m_count_del_wrong_version;
-    size_t m_count_binlog_del_wrong_version;
+    size_t        m_count_del_wrong_version;
+    size_t        m_count_binlog_del_wrong_version;
 
     perf_target_t m_perf_get_ok;
     perf_target_t m_perf_get_not_found;

@@ -94,9 +94,13 @@ bool kv_leveldb_t::check_key (
                                unsigned int    key_len
                                )
 {
-    if ( NULL == key || 0 == key_len || key_len > 1024 )
+    if ( unlikely ( NULL == key || 
+                    0 == key_len || 
+                    key_len > 1024 
+                )
+        )
     {
-        LOG_INFO ( "[ldb]invalid key" );
+        LOG_ERROR ( "[ldb][check_key]invalid key" );
         return false;
     }
 
@@ -110,15 +114,18 @@ void kv_leveldb_t::destroy ( )
 
         if ( m_inner->db )
         {
-            LOG_INFO ( "[ldb]DB closing[path=%s]", m_path.c_str () );
+            LOG_INFO ( "[ldb][destroy][path=%s]DB closing", 
+                        m_path.c_str () );
             try
             {
                 delete m_inner->db;
-                LOG_INFO ( "[ldb]DB close OK[path=%s]", m_path.c_str () );
+                LOG_INFO ( "[ldb][destroy][path=%s]DB close OK", 
+                            m_path.c_str () );
             }
             catch ( ... )
             {
-                LOG_ERROR ( "[ldb]DB closeing exception[path=%s]", m_path.c_str () );
+                LOG_ERROR ( "[ldb][destroy][path=%s]DB closeing exception", 
+                            m_path.c_str () );
             }
             m_inner->db = NULL;
         }
@@ -131,7 +138,8 @@ void kv_leveldb_t::destroy ( )
             }
             catch ( ... )
             {
-                LOG_ERROR ( "[ldb]cache closeing exception[path=%s]", m_path.c_str () );
+                LOG_ERROR ( "[ldb][destroy][path=%s]cache closeing exception", 
+                            m_path.c_str () );
             }
             m_inner->cache = NULL;
         }
@@ -144,7 +152,8 @@ void kv_leveldb_t::destroy ( )
             }
             catch ( ... )
             {
-                LOG_ERROR ( "[ldb]bloom filter closeing exception[path=%s]", m_path.c_str () );
+                LOG_ERROR ( "[ldb][destroy][path=%s]bloom filter closeing exception", 
+                            m_path.c_str () );
             }
             m_inner->filter_policy = NULL;
         }
@@ -155,7 +164,7 @@ void kv_leveldb_t::destroy ( )
         }
         catch ( ... )
         {
-            LOG_ERROR ( "delete m_inner exception" );
+            LOG_ERROR ( "[ldb][destroy]delete inner exception" );
         }
         m_inner = NULL;
     }
@@ -166,11 +175,10 @@ void kv_leveldb_t::calc_my_bloom_filter_path ( const char * parent_dir, char * b
     strcpy ( bloom_filter_path, parent_dir );
     G_APPTOOL->path_to_os ( bloom_filter_path );
 
-    int len;
-    len = ( int ) strlen ( bloom_filter_path );
+    int len = ( int ) strlen ( bloom_filter_path );
     if ( len <= 0 )
     {
-        LOG_ERROR ( "parent_dir invalid" );
+        LOG_ERROR ( "[ldb][calc_my_bloom_filter_path]parent_dir invalid" );
         return;
     }
 
@@ -186,7 +194,7 @@ bool kv_leveldb_t::open ( const char * path, const kv_config_t & config, int fil
 {
     if ( NULL == path || '\0' == * path )
     {
-        LOG_ERROR ( "[ldb]empty path" );
+        LOG_ERROR ( "[ldb][open]empty path" );
         return false;
     }
 
@@ -198,7 +206,7 @@ bool kv_leveldb_t::open ( const char * path, const kv_config_t & config, int fil
         }
         catch ( ... )
         {
-            LOG_ERROR ( "[ldb]new inner() exception" );
+            LOG_ERROR ( "[ldb][open]new inner exception" );
             return false;
         }
     }
@@ -212,7 +220,7 @@ bool kv_leveldb_t::open ( const char * path, const kv_config_t & config, int fil
     }
     catch ( ... )
     {
-        LOG_ERROR ( "[ldb]bad_alloc" );
+        LOG_ERROR ( "[ldb][open]bad_alloc" );
         return false;
     }
 
@@ -257,16 +265,18 @@ bool kv_leveldb_t::open ( const char * path, const kv_config_t & config, int fil
         }
         catch ( ... )
         {
-            LOG_ERROR ( "[ldb][cache]exception" );
+            LOG_ERROR ( "[ldb][open]cache exception" );
             m_inner->cache = NULL;
         }
         if ( m_inner->cache )
         {
-            LOG_INFO ( "[ldb][cache]cache opened OK[path=%s]", path );
+            LOG_INFO ( "[ldb][open][file=%s]cache opened OK", 
+                        path );
         }
         else
         {
-            LOG_ERROR ( "[ldb][cache]cache open FAILED[path=%s]", path );
+            LOG_ERROR ( "[ldb][open][file=%s]cache open failed", 
+                        path );
             return false;
         }
         options.block_cache = ( leveldb::Cache * )m_inner->cache;
@@ -281,14 +291,15 @@ bool kv_leveldb_t::open ( const char * path, const kv_config_t & config, int fil
         }
         catch ( ... )
         {
-            LOG_ERROR ( "[ldb][bloom_filter]bloom filter open FAILED[path=%s]", path );
+            LOG_ERROR ( "[ldb][open][file=%s]bloom filter open failed", 
+                        path );
             return false;
         }
         options.filter_policy = m_inner->filter_policy;
     }
     else
     {
-        LOG_INFO ( "[ldb][bloom_filter]DISABLED google bloom filter." );
+        LOG_INFO ( "[ldb][open]disable google bloom filter" );
     }
 
     options.info_log = & m_inner->log;
@@ -301,34 +312,36 @@ bool kv_leveldb_t::open ( const char * path, const kv_config_t & config, int fil
         calc_my_bloom_filter_path ( path, bloom_filter_path );
         if ( '\0' == bloom_filter_path[ 0 ] )
         {
-            LOG_ERROR ( "[ldb][bloom_filter][type=%d]calc_my_bloom_filter_path FAILED. [parent_dir=%s]",
-                       config.my_bloom_filter_type, path );
+            LOG_ERROR ( "[ldb][open][type=%d][parent_dir=%s]calc_my_bloom_filter_path failed",
+                        config.my_bloom_filter_type, path );
             return false;
         }
         bool b = m_inner->my_bloom_filter.open ( bloom_filter_path, ( md5_bloom_mode_t ) config.my_bloom_filter_type );
         if ( ! b )
         {
-            LOG_ERROR ( "[ldb][bloom_filter][type=%d]hustdb_bloom_filter open FAILED. [path=%s]",
-                       config.my_bloom_filter_type, bloom_filter_path );
+            LOG_ERROR ( "[ldb][open][type=%d][file=%s]hustdb_bloom_filter open failed",
+                        config.my_bloom_filter_type, bloom_filter_path );
             return false;
         }
-        LOG_INFO ( "[ldb][bloom_filter][type=%d]hustdb_bloom_filter opened.",
-                  config.my_bloom_filter_type, bloom_filter_path );
+        LOG_INFO ( "[ldb][open][type=%d][file=%d]hustdb_bloom_filter opened",
+                   config.my_bloom_filter_type, bloom_filter_path );
     }
     else
     {
-        LOG_INFO ( "[ldb][bloom_filter]DISABLED hustdb_bloom_filter." );
+        LOG_INFO ( "[ldb][open]disable hustdb_bloom_filter" );
     }
 
     leveldb::Status status;
-    LOG_INFO ( "[ldb]DB opening[path=%s]", path );
+    LOG_INFO ( "[ldb][open][file=%s]DB opening", 
+                path );
     try
     {
         status = leveldb::DB::Open ( options, path, & m_inner->db );
     }
     catch ( ... )
     {
-        LOG_ERROR ( "[ldb]DB open exception[path=%s]", path );
+        LOG_ERROR ( "[ldb][open][file=%s]DB open exception", 
+                    path );
         if ( m_inner->cache )
         {
             delete m_inner->cache;
@@ -346,20 +359,24 @@ bool kv_leveldb_t::open ( const char * path, const kv_config_t & config, int fil
         catch ( ... )
         {
         }
-        LOG_INFO ( "[ldb]DB open FAILED: %s[path=%s]", s.c_str (), path );
+        LOG_INFO ( "[ldb][open][status=%s][file=%s]DB open failed", 
+                    s.c_str (), path );
         return false;
     }
 
 #if ENABLE_DEBUG
     if ( ! test () )
     {
-        LOG_ERROR ( "[ldb]DB test FAILED: [path=%s]", path );
+        LOG_ERROR ( "[ldb][open][file=%s]DB test failed", 
+                    path );
         return false;
     }
-    LOG_INFO ( "[ldb]DB test PASSED: [path=%s]", path );
+    LOG_INFO ( "[ldb][open][file=%s]DB test passed", 
+                path );
 #endif
 
-    LOG_INFO ( "[ldb]DB opened OK[path=%s]", path );
+    LOG_INFO ( "[ldb][open][file=%s]DB opened OK", 
+                path );
 
     return true;
 }
@@ -384,12 +401,12 @@ bool kv_leveldb_t::test ( )
     }
     catch ( ... )
     {
-        LOG_ERROR ( "[test] test failed" );
+        LOG_ERROR ( "[ldb][test]test failed" );
         return false;
     }
     if ( ! status.ok () )
     {
-        LOG_ERROR ( "[test] test failed" );
+        LOG_ERROR ( "[ldb][test]test failed" );
         return false;
     }
 
@@ -405,7 +422,7 @@ bool kv_leveldb_t::test ( )
     }
     catch ( ... )
     {
-        LOG_ERROR ( "[test] test failed" );
+        LOG_ERROR ( "[ldb][test]test failed" );
         return false;
     }
     if ( ! status.ok () )
@@ -418,12 +435,14 @@ bool kv_leveldb_t::test ( )
         catch ( ... )
         {
         }
-        LOG_ERROR ( "[test] test failed, key_len=%d, data_len=%d, msg=%s", key_len, data_len, msg.c_str () );
+        LOG_ERROR ( "[ldb][test][key_len=%d][data_len=%d][msg=%s]test failed", 
+                    key_len, data_len, msg.c_str () );
         return false;
     }
     if ( ! mem_equal ( value.c_str (), data, data_len ) )
     {
-        LOG_ERROR ( "[test] test failed, value.size()=%d, data_len=%d", ( int ) value.size (), data_len );
+        LOG_ERROR ( "[ldb][test][value.size=%d][data_len=%d]test failed", 
+                    ( int ) value.size (), data_len );
         return false;
     }
 
@@ -434,12 +453,12 @@ bool kv_leveldb_t::test ( )
     }
     catch ( ... )
     {
-        LOG_ERROR ( "[test] test failed" );
+        LOG_ERROR ( "[ldb][test]test failed" );
         return false;
     }
     if ( ! status.ok () )
     {
-        LOG_ERROR ( "[test] test failed" );
+        LOG_ERROR ( "[ldb][test]test failed" );
         return false;
     }
 
@@ -455,12 +474,12 @@ bool kv_leveldb_t::test ( )
     }
     catch ( ... )
     {
-        LOG_ERROR ( "[test] test failed" );
+        LOG_ERROR ( "[ldb][test]test failed" );
         return false;
     }
     if ( status.ok () || ! status.IsNotFound () )
     {
-        LOG_ERROR ( "[test] test failed" );
+        LOG_ERROR ( "[ldb][test]test failed" );
         return false;
     }
 
@@ -497,12 +516,14 @@ int kv_leveldb_t::del (
 {
     if ( ! check_key ( key, key_len ) )
     {
-        LOG_INFO ( "[ldb]invalid key[path=%s]", m_path.c_str () );
+        LOG_INFO ( "[ldb][del][file=%s]invalid key", 
+                    m_path.c_str () );
         return EINVAL;
     }
     if ( unlikely ( NULL == m_inner->db ) )
     {
-        LOG_INFO ( "[ldb]m_inner->db is NULL[path=%s]", m_path.c_str () );
+        LOG_INFO ( "[ldb][del][file=%s]inner->db is NULL", 
+                    m_path.c_str () );
         return EFAULT;
     }
 
@@ -516,7 +537,8 @@ int kv_leveldb_t::del (
     }
     catch ( ... )
     {
-        LOG_INFO ( "[ldb]db->Delete exception[path=%s]", m_path.c_str () );
+        LOG_INFO ( "[ldb][del][file=%s]db->Delete exception", 
+                    m_path.c_str () );
         return EFAULT;
     }
 
@@ -536,7 +558,9 @@ int kv_leveldb_t::del (
             catch ( ... )
             {
             }
-            LOG_INFO ( "[ldb]db->Delete error: %s[path=%s]", m_path.c_str (), msg.c_str () );
+            LOG_INFO ( "[ldb][del][file=%s][msg=%s]db->Delete error", 
+                        m_path.c_str (), msg.c_str () );
+
             return EFAULT;
         }
     }
@@ -553,17 +577,20 @@ int kv_leveldb_t::put (
 {
     if ( ! check_key ( key, key_len ) )
     {
-        LOG_INFO ( "[ldb]invalid key[path=%s]", m_path.c_str () );
+        LOG_INFO ( "[ldb][put][file=%s]invalid key", 
+                    m_path.c_str () );
         return EINVAL;
     }
-    if ( unlikely ( NULL == data || 0 == data_len ) )
+    if ( unlikely ( NULL == data ) )
     {
-        LOG_INFO ( "[ldb]invalid data[path=%s]", m_path.c_str () );
+        LOG_INFO ( "[ldb][put][file=%s]invalid data", 
+                    m_path.c_str () );
         return EINVAL;
     }
     if ( unlikely ( NULL == m_inner->db ) )
     {
-        LOG_INFO ( "[ldb]m_inner->db is NULL[path=%s]", m_path.c_str () );
+        LOG_INFO ( "[ldb][put][file=%s]inner->db is NULL", 
+                    m_path.c_str () );
         return EFAULT;
     }
 
@@ -583,7 +610,8 @@ int kv_leveldb_t::put (
     }
     catch ( ... )
     {
-        LOG_INFO ( "[ldb]db->Put exception[path=%s]", m_path.c_str () );
+        LOG_INFO ( "[ldb][put][file=%s]db->Put exception", 
+                    m_path.c_str () );
         return EFAULT;
     }
 
@@ -598,7 +626,8 @@ int kv_leveldb_t::put (
         catch ( ... )
         {
         }
-        LOG_INFO ( "[ldb]db->Put error: %s[path=%s]", m_path.c_str (), msg.c_str () );
+        LOG_INFO ( "[ldb][put][file=%s][msg=%s]db->Put error", 
+                    m_path.c_str (), msg.c_str () );
         return EFAULT;
     }
 
@@ -659,12 +688,14 @@ int kv_leveldb_t::get (
 
     if ( ! check_key ( ( const char * ) key, key_len ) )
     {
-        LOG_INFO ( "[ldb]invalid key[path=%s]", m_path.c_str () );
+        LOG_INFO ( "[ldb][get][file=%s]invalid key", 
+                    m_path.c_str () );
         return EINVAL;
     }
     if ( unlikely ( NULL == m_inner->db ) )
     {
-        LOG_INFO ( "[ldb]m_inner->db is NULL[path=%s]", m_path.c_str () );
+        LOG_INFO ( "[ldb][get][file=%s]inner->db is NULL", 
+                    m_path.c_str () );
         return EFAULT;
     }
 
@@ -692,7 +723,8 @@ int kv_leveldb_t::get (
     }
     catch ( ... )
     {
-        LOG_INFO ( "[ldb]db->Get exception[path=%s]", m_path.c_str () );
+        LOG_INFO ( "[ldb][get][file=%s]db->Get exception", 
+                    m_path.c_str () );
         value.resize ( 0 );
         return EFAULT;
     }
@@ -717,12 +749,14 @@ int kv_leveldb_t::get (
             catch ( ... )
             {
             }
-            LOG_INFO ( "[ldb]db->Get error: %s[path=%s]", msg.c_str (), m_path.c_str () );
+            LOG_INFO ( "[ldb][get][msg=%s][file=%s]db->Get error", 
+                        msg.c_str (), m_path.c_str () );
             return EFAULT;
         }
     }
 
     check_not_found.cancel ();
+
     return 0;
 }
 
@@ -731,7 +765,7 @@ i_iterator_t * kv_leveldb_t::iterator ( )
     kv_iterator_t * it = new kv_iterator_t ();
     if ( ! it->create ( * this ) )
     {
-        LOG_ERROR ( "[leveldb][iterator] create failed" );
+        LOG_ERROR ( "[ldb][iterator]create failed" );
         delete it;
         return NULL;
     }
@@ -741,9 +775,8 @@ i_iterator_t * kv_leveldb_t::iterator ( )
 
 struct kv_iterator_t::inner_t
 {
-    leveldb::Iterator * m_iterator;
-
     int                 m_status;
+    leveldb::Iterator * m_iterator;
 
     inner_t ( )
     : m_iterator ( NULL )
@@ -795,7 +828,7 @@ bool kv_iterator_t::create ( kv_leveldb_t & db )
         }
         catch ( ... )
         {
-            LOG_ERROR ( "[leveldb][iterator]bad_alloc" );
+            LOG_ERROR ( "[ldb][iterator]bad_alloc" );
             return false;
         }
     }
@@ -804,7 +837,7 @@ bool kv_iterator_t::create ( kv_leveldb_t & db )
     leveldb::DB * p = ( leveldb::DB * )db.get_internal_db ();
     if ( NULL == p )
     {
-        LOG_ERROR ( "[leveldb][iterator]db NULL" );
+        LOG_ERROR ( "[ldb][iterator]db NULL" );
         return false;
     }
 
@@ -812,7 +845,7 @@ bool kv_iterator_t::create ( kv_leveldb_t & db )
     m_inner->m_iterator = p->NewIterator ( options );
     if ( NULL == m_inner->m_iterator )
     {
-        LOG_ERROR ( "[leveldb][iterator]NewIterator return NULL" );
+        LOG_ERROR ( "[ldb][iterator]NewIterator return NULL" );
         return false;
     }
 
@@ -935,11 +968,13 @@ void kv_iterator_t::trans_errno ( const char * func_name )
         try
         {
             std::string s = r.ToString ();
-            LOG_ERROR ( "[leveldb][iterator][%s]%s", func_name, s.c_str () );
+            LOG_ERROR ( "[ldb][iterator][func_name=%s][status=%s]", 
+                        func_name, s.c_str () );
         }
         catch ( ... )
         {
-            LOG_ERROR ( "[leveldb][iterator][%s] !!!bad_alloc!!!", func_name );
+            LOG_ERROR ( "[ldb][iterator][func_name=%s]bad_alloc", 
+                        func_name );
         }
     }
 }

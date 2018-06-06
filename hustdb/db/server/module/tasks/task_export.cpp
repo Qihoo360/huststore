@@ -75,7 +75,7 @@ void task_export_t::process_export_db ( )
     {
         if ( m_file_id < 0 || m_path.empty () )
         {
-            LOG_ERROR ( "[slow_task][export]m_file_id < 0 or m_path empty" );
+            LOG_ERROR ( "[slow_task][export]file_id < 0 or m_path empty" );
             return;
         }
 
@@ -90,7 +90,7 @@ void task_export_t::process_export_db ( )
         i_server_kv_t * db = ( ( hustdb_t * ) G_APPTOOL->get_hustdb () )->get_storage ();
         if ( ! db )
         {
-            LOG_ERROR ( "[slow_task][export]get_storage() return NULL" );
+            LOG_ERROR ( "[slow_task][export]get_storage return NULL" );
             return;
         }
 
@@ -145,14 +145,17 @@ void task_export_t::process_export_db ( )
         int r = db->export_db ( m_file_id, m_path.c_str (), NULL, & cb_pm );
         if ( 0 != r )
         {
-            LOG_ERROR ( "[slow_task][export]export( %d, %s ) failed: %d", m_file_id, m_path.c_str (), r );
+            LOG_ERROR ( "[slow_task][export][file_id=%d][path=%s][r=%d]export failed", 
+                        m_file_id, m_path.c_str (), r );
             return;
         }
 
-        LOG_INFO ( "[slow_task][export]export( %d, %s ) OK", m_file_id, m_path.c_str () );
+        LOG_INFO ( "[slow_task][export][file_id=%d][path=%s]export OK", 
+                    m_file_id, m_path.c_str () );
     }
     catch ( ... )
     {
-        LOG_ERROR ( "[slow_task][export]export( %d, %s ) exception", m_file_id, m_path.c_str () );
+        LOG_ERROR ( "[slow_task][export][file_id=%d][path=%s]export exception", 
+                    m_file_id, m_path.c_str () );
     }
 }

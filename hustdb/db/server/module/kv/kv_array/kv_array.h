@@ -82,12 +82,19 @@ public:
         return 0;
     }
 
-    void hash (
-                const char * key,
-                size_t key_len,
-                conn_ctxt_t conn,
-                item_ctxt_t * & ctxt
-                );
+    virtual void hash (
+                        const char * user_key,
+                        size_t user_key_len,
+                        conn_ctxt_t conn,
+                        item_ctxt_t * & ctxt
+                        )
+    {
+    }
+
+    virtual void get_item_buffer (
+                                    conn_ctxt_t conn,
+                                    item_ctxt_t * & ctxt
+                                    );
 
     void info (
                 std::stringstream & ss
@@ -260,13 +267,13 @@ private:
     typedef std::vector< i_kv_t * > array_t;
     typedef std::vector< item_ctxt_t > get_buffers_t;
 
-    bool m_ok;
-    int m_file_count;
-    std::string m_ttl_seek;
+    bool          m_ok;
+    int           m_file_count;
+    std::string   m_ttl_seek;
     
-    array_t m_files;
-    key_hash_t * m_hash;
-    config_t m_config;
+    array_t       m_files;
+    key_hash_t *  m_hash;
+    config_t      m_config;
     get_buffers_t m_get_buffers;
 
 private:

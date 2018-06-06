@@ -1,20 +1,11 @@
 {
     "wrk":
     {
-        "threads": 16,
+        "threads": 24,
         "connections": 2000,
-        "duration": "10s",
+        "duration": "45s",
         "timeout": "10s",
-        "loop": 10
-    },
-    "data":
-    {
-        "256B": 256,
-        "512B": 512,
-        "1KB": 1024,
-        "4KB": 4096,
-        "16KB": 16384,
-        "64KB": 65536
+        "loop": 5
     },
     "srv":
     {
@@ -35,6 +26,15 @@
     {
         "loop_file": "loop.txt",
         "status_file": "status.txt"
+    },
+    "data":
+    {
+        "256B": 256,
+        "512B": 512,
+        "1KB": 950,
+        "4KB": 4000,
+        "16KB": 16000,
+        "64KB": 65000
     },
     "outputs":
     [

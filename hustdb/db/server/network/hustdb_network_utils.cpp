@@ -1,4 +1,5 @@
 #include "hustdb_network_utils.h"
+#include "../module/utils/compression.h"
 
 namespace hustdb_network {
 
@@ -169,6 +170,20 @@ bool can_access (struct sockaddr_in * addr, ip_allow_t * ip_allow_map)
     }
 
     return false;
+}
+
+} // hustdb_network
+
+namespace hustdb_network {
+
+int compress(evhtp::c_str_t src, evhtp::c_str_t * dst)
+{
+    return hustdb::compress(src.data, src.len, dst->data, dst->len);
+}
+
+int decompress(evhtp::c_str_t src, evhtp::c_str_t * dst)
+{
+    return hustdb::decompress(src.data, src.len, dst->data, dst->len);
 }
 
 } // hustdb_network

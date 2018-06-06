@@ -67,7 +67,7 @@ void task_ttl_scan_t::process_ttl_scan ( )
         int r = db->ttl_scan ( NULL, & cb_pm );
         if ( 0 != r )
         {
-            LOG_ERROR ( "[slow_task][ttl_scan]task failed: %d", r );
+            LOG_ERROR ( "[slow_task][ttl_scan][r=%d]task failed", r );
             return;
         }
     }

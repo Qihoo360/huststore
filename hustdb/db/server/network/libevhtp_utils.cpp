@@ -197,13 +197,27 @@ bool mutex_t::unlock()
     return __unlock(&mutex);
 }
 
-thread_dict_t::thread_dict_t(mutex_t& m) : mutex(m), id(0)
+buf_t::buf_t(uint32_t _id, size_t max_body_size) : id(_id), buf(0)
+{
+    buf = new char[max_body_size];
+}
+
+buf_t::~buf_t()
+{
+    if (buf)
+    {
+        delete [] buf;
+        buf = 0;
+    }
+}
+
+thread_buf_t::thread_buf_t(mutex_t& m) : mutex(m), id(0)
 {
 }
 
-thread_dict_t::~thread_dict_t()
+thread_buf_t::~thread_buf_t()
 {
-    for (std::map<evthr_t *, item_t *>::iterator it = dict.begin(); it != dict.end(); ++it)
+    for (std::map<evthr_t *, buf_t *>::iterator it = dict.begin(); it != dict.end(); ++it)
     {
         if (it->second)
         {
@@ -213,23 +227,23 @@ thread_dict_t::~thread_dict_t()
     }
 }
 
-void thread_dict_t::append(evthr_t * key, size_t max_body_size)
+void thread_buf_t::append(evthr_t * key, size_t max_size)
 {
     if (!key)
     {
         return;
     }
     locker_t locker(mutex);
-    dict[key] = new item_t(id, max_body_size);
+    dict[key] = new buf_t(id, max_size);
     ++id;
 }
 
-uint32_t thread_dict_t::get_id(evthr_t * key)
+uint32_t thread_buf_t::get_id(evthr_t * key)
 {
     return dict[key]->id;
 }
 
-char * thread_dict_t::get_buf(evthr_t * key)
+char * thread_buf_t::get_buf(evthr_t * key)
 {
     return dict[key]->buf;
 }
@@ -321,7 +335,9 @@ conf_t::conf_t()
       enable_nodelay(0),
       enable_defer_accept(0),
       auth(0),
-      dict(mutex)
+      buf_for_body(mutex_for_body),
+      buf_for_compress(mutex_for_compress),
+      buf_for_decompress(mutex_for_decompress)
 {
     memset(&recv_timeout, 0, sizeof(struct timeval));
     memset(&send_timeout, 0, sizeof(struct timeval));
@@ -333,7 +349,7 @@ uint32_t conf_t::get_id(evhtp_request_t * request)
     {
         return 0;
     }
-    return dict.get_id(request->conn->thread);
+    return buf_for_body.get_id(request->conn->thread);
 }
 
 c_str_t conf_t::get_body(evhtp_request_t * request)
@@ -348,7 +364,7 @@ c_str_t conf_t::get_body(evhtp_request_t * request)
     {
         return body;
     }
-    body.data = dict.get_buf(request->conn->thread);
+    body.data = buf_for_body.get_buf(request->conn->thread);
     if (!body.data)
     {
         return body;
@@ -358,13 +374,41 @@ c_str_t conf_t::get_body(evhtp_request_t * request)
     return body;
 }
 
+c_str_t conf_t::get_buf(thread_buf_t& thread_buf, evhtp_request_t * request)
+{
+    c_str_t buf = { 0, 0 };
+    if (!request || !request->conn || !request->conn->thread)
+    {
+        return buf;
+    }
+    buf.data = thread_buf.get_buf(request->conn->thread);
+    if (!buf.data)
+    {
+        return buf;
+    }
+    buf.len = max_body_size;
+    return buf;
+}
+
+c_str_t conf_t::get_compress_buf(evhtp_request_t * request)
+{
+    return get_buf(buf_for_compress, request);
+}
+
+c_str_t conf_t::get_decompress_buf(evhtp_request_t * request)
+{
+    return get_buf(buf_for_decompress, request);
+}
+
 void conf_t::append(evthr_t * thr)
 {
     if (!thr)
     {
         return;
     }
-    dict.append(thr, max_body_size);
+    buf_for_body.append(thr, max_body_size);
+    buf_for_compress.append(thr, max_body_size);
+    buf_for_decompress.append(thr, max_body_size);
 }
 
 }

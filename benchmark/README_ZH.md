@@ -30,20 +30,11 @@
     {
         "wrk":
         {
-            "threads": 12,
-            "connections": 1000,
-            "duration": "10s",
+            "threads": 24,
+            "connections": 2000,
+            "duration": "45s",
             "timeout": "10s",
-            "loop": 30
-        },
-        "data":
-        {
-            "256B": 256,
-            "512B": 512,
-            "1KB": 1024,
-            "4KB": 4096,
-            "16KB": 16384,
-            "64KB": 65536
+            "loop": 5
         },
         "srv":
         {
@@ -58,6 +49,15 @@
         {
             "loop_file": "loop.txt",
             "status_file": "status.txt"
+        },
+        "data":
+        {
+            "256B": 256,
+            "512B": 512,
+            "1KB": 950,
+            "4KB": 4000,
+            "16KB": 16000,
+            "64KB": 65000
         },
         "outputs":
         [
@@ -288,17 +288,11 @@
     {
         "wrk":
         {
-            "threads": 16,
+            "threads": 24,
             "connections": 2000,
-            "duration": "10s",
+            "duration": "45s",
             "timeout": "10s",
-            "loop": 10
-        },
-        "data":
-        {
-            "256B": 256,
-            "512B": 512,
-            "1KB": 1024
+            "loop": 5
         },
         "srv":
         {
@@ -317,6 +311,13 @@
             "loop_file": "loop.txt",
             "status_file": "status.txt"
         },
+        "data":
+        {
+            "256B": 256,
+            "512B": 512,
+            "1KB": 950,
+            "4KB": 4000
+        },
         "outputs":
         [
             "hustdb_put.lua",
@@ -329,57 +330,50 @@
 `redis-benchmark` 的相关参数如下：
 
     # "redis" 的测试命令,请使用真实的 IP 和 Port 替换 "0.0.0.0" 和 "6379"
-    redis-benchmark -e -h 0.0.0.0 -p 6379 -c 1000 -n 10000000 -r 100000000 -d 256 -t set,get
-    redis-benchmark -e -h 0.0.0.0 -p 6379 -c 1000 -n 10000000 -r 100000000 -d 512 -t set,get
-    redis-benchmark -e -h 0.0.0.0 -p 6379 -c 1000 -n 10000000 -r 100000000 -d 1024 -t set,get
-    redis-benchmark -e -h 0.0.0.0 -p 6379 -c 2000 -n 10000000 -r 100000000 -d 256 -t set,get
-    redis-benchmark -e -h 0.0.0.0 -p 6379 -c 2000 -n 10000000 -r 100000000 -d 512 -t set,get
-    redis-benchmark -e -h 0.0.0.0 -p 6379 -c 2000 -n 10000000 -r 100000000 -d 1024 -t set,get
-    # "ssdb" 的测试命令,请使用真实的 IP 和 Port 替换 "0.0.0.0" 和 "8888"
-    redis-benchmark -e -h 0.0.0.0 -p 8888 -c 1000 -n 10000000 -r 100000000 -d 256 -t set,get
-    redis-benchmark -e -h 0.0.0.0 -p 8888 -c 1000 -n 10000000 -r 100000000 -d 512 -t set,get
-    redis-benchmark -e -h 0.0.0.0 -p 8888 -c 1000 -n 10000000 -r 100000000 -d 1024 -t set,get
-    redis-benchmark -e -h 0.0.0.0 -p 8888 -c 2000 -n 10000000 -r 100000000 -d 256 -t set,get
-    redis-benchmark -e -h 0.0.0.0 -p 8888 -c 2000 -n 10000000 -r 100000000 -d 512 -t set,get
-    redis-benchmark -e -h 0.0.0.0 -p 8888 -c 2000 -n 10000000 -r 100000000 -d 1024 -t set,get
+    redis-benchmark -e -h 0.0.0.0 -p 6379 -c 1000 -n 1000000 -d 512 -t set,get
+    redis-benchmark -e -h 0.0.0.0 -p 6379 -c 1000 -n 1000000 -d 950 -t set,get
+    redis-benchmark -e -h 0.0.0.0 -p 6379 -c 1000 -n 1000000 -d 4000 -t set,get
+    redis-benchmark -e -h 0.0.0.0 -p 6379 -c 2000 -n 1000000 -d 512 -t set,get
+    redis-benchmark -e -h 0.0.0.0 -p 6379 -c 2000 -n 1000000 -d 950 -t set,get
+    redis-benchmark -e -h 0.0.0.0 -p 6379 -c 2000 -n 1000000 -d 4000 -t set,get
 
 [回顶部](#id_top)
 
 <h3 id="id_appendix_result">性能测试结果</h3>
 
-#### C1000-V256 ####
+#### C1000-512B ####
 
-![C1000_V256](../res/benchmark/C1000_V256.png)
-
-[回顶部](#id_top)
-
-#### C1000-V512 ####
-
-![C1000_V512](../res/benchmark/C1000_V512.png)
+![C1000_512B](../res/benchmark/C1000_512B.png)
 
 [回顶部](#id_top)
 
-#### C1000-V1024 ####
+#### C1000-1K ####
 
-![C1000_V1024](../res/benchmark/C1000_V1024.png)
-
-[回顶部](#id_top)
-
-#### C2000-V256 ####
-
-![C2000_V256](../res/benchmark/C2000_V256.png)
+![C1000_1K](../res/benchmark/C1000_1K.png)
 
 [回顶部](#id_top)
 
-#### C2000-V512 ####
+#### C1000-4K ####
 
-![C2000_V512](../res/benchmark/C2000_V512.png)
+![C1000_4K](../res/benchmark/C1000_4K.png)
 
 [回顶部](#id_top)
 
-#### C2000-V1024 ####
+#### C2000-512B ####
 
-![C2000_V1024](../res/benchmark/C2000_V1024.png)
+![C2000_512B](../res/benchmark/C2000_512B.png)
+
+[回顶部](#id_top)
+
+#### C2000-1K ####
+
+![C2000_1K](../res/benchmark/C2000_1K.png)
+
+[回顶部](#id_top)
+
+#### C2000-4K ####
+
+![C2000_4K](../res/benchmark/C2000_4K.png)
 
 [回顶部](#id_top)
 

@@ -2,6 +2,9 @@
 #include <poll.h>
 #include <time.h>
 #include <stdint.h>
+#include <stdio.h>
+#include <unistd.h>
+
 #include <cstring>
 #include <cstdio>
 #include <vector>

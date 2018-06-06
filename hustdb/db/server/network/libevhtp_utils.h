@@ -50,33 +50,24 @@ private:
     mutex_t& locker;
 };
 
-struct thread_dict_t
+struct buf_t
 {
-    thread_dict_t(mutex_t& m);
-    ~thread_dict_t();
-    void append(evthr_t * key, size_t max_body_size);
+    uint32_t id;
+    char * buf;
+    buf_t(uint32_t _id, size_t max_body_size);
+    ~buf_t();
+};
+
+struct thread_buf_t
+{
+    thread_buf_t(mutex_t& m);
+    ~thread_buf_t();
+    void append(evthr_t * key, size_t max_size);
     uint32_t get_id(evthr_t * key);
     char * get_buf(evthr_t * key);
 private:
-    struct item_t
-    {
-        uint32_t id;
-        char * buf;
-        item_t(uint32_t _id, size_t max_body_size) : id(_id), buf(0)
-        {
-            buf = new char[max_body_size];
-        }
-        ~item_t()
-        {
-            if (buf)
-            {
-                delete [] buf;
-                buf = 0;
-            }
-        }
-    };
     mutex_t& mutex;
-    std::map<evthr_t *, item_t *> dict;
+    std::map<evthr_t *, buf_t *> dict;
     uint32_t id;
 };
 
@@ -101,10 +92,20 @@ struct conf_t
 
     uint32_t get_id(evhtp_request_t * request);
     c_str_t get_body(evhtp_request_t * request);
+    c_str_t get_compress_buf(evhtp_request_t * request);
+    c_str_t get_decompress_buf(evhtp_request_t * request);
     void append(evthr_t * thr);
 private:
-    mutex_t mutex;
-    thread_dict_t dict;
+    c_str_t get_buf(thread_buf_t& thread_buf, evhtp_request_t * request);
+private:
+    mutex_t mutex_for_body;
+    thread_buf_t buf_for_body;
+
+    mutex_t  mutex_for_compress;
+    thread_buf_t buf_for_compress;
+
+    mutex_t  mutex_for_decompress;
+    thread_buf_t buf_for_decompress;
 };
 
 struct http_basic_auth_t

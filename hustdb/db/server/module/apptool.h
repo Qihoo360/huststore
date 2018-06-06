@@ -56,6 +56,12 @@ typedef enum
 
 #define G_APPTOOL                apptool_t::get_apptool ()
 
+#define ENDIAN32(A)              ( S_LITTLE_ENDIAN ? A : \
+                                 ( ( A  & 0x000000FFU ) << 24 ) | \
+                                 ( ( A  & 0x0000FF00U ) << 8 ) | \
+                                 ( ( A  & 0x00FF0000U ) >> 8 ) | \
+                                 ( ( A  & 0xFF000000U ) >> 24 ) )
+
 class apptool_t
 {
 public:
@@ -69,6 +75,8 @@ public:
 
     void set_hustdb ( void * db );
     void * get_hustdb ( );
+    
+    bool if_little_endian ( );
 
 public:
 
@@ -247,9 +255,12 @@ public:
                char * digest
                );
 
+    bool check_endian ( );
+
 private:
 
-    void * m_hustdb;
+    void *             m_hustdb;
+    bool               m_little_endian;
     static apptool_t * m_apptool;
 
 private:

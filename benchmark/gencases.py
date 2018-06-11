@@ -120,6 +120,13 @@ def gen_http_post(loop_file, status_file, distribution, uri, tpl_key):
         gen_set_done(loop_file, distribution)
         )
 
+def get_duration(uri, wrk):
+    if not 'special_duration' in wrk:
+        return wrk['wrk']['duration']
+    if uri in wrk['special_duration']:
+        return wrk['special_duration'][uri]
+    return wrk['wrk']['duration']
+
 def gen(wrk, out):
     items = json.loads(tpls['uri_table'].template)
     SRV = 0
@@ -150,7 +157,7 @@ def gen(wrk, out):
         write_file(os.path.join(out, script), 'wrk -t%d -c%d -d%s -T%s --latency -s "%s" "http://%s"' % (
             wrk['wrk']['threads'], 
             wrk['wrk']['connections'], 
-            wrk['wrk']['duration'], 
+            get_duration(item[URI], wrk), 
             wrk['wrk']['timeout'], 
             item[OUT], 
             wrk['srv'][item[SRV]]))

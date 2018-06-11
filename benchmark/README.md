@@ -36,6 +36,10 @@ A complete example of configuration file:
             "timeout": "10s",
             "loop": 5
         },
+        "special_duration": 
+        {
+            "hustdb/get": "15s"
+        },
         "srv":
         {
             "hustdb": "192.168.1.101:8085",
@@ -71,9 +75,10 @@ A complete example of configuration file:
 * `wrk`  
     * `threads`: number of threads to use, **the cpu cores at most recommended**  
     * `connections`: connections to keep open  
-    * `duration`: duration of test for each loop, recommended value: `[3s, 30s]`  
+    * `duration`: duration of test for each loop, recommended value: `[3s, 60s]`  
     * `timeout`: socket/request timeout, the value of `duration` at most recommended
     * `loop`: number of rounds of each test  
+* `special_duration`: duration of test for special uri, recommended value: `[3s, 60s]`  
 * `data`: to specify the data size of request, key as the name of folder where cases are generated, value as the size of data  
 * `srv`: to specify the addresses of huststore's services, please configure by your specific test environment  
 * `latency_distribution`: for the latency statistics, each of item shows the percentage  
@@ -294,6 +299,10 @@ The configuration of Huststore Benchmark:
             "duration": "45s",
             "timeout": "10s",
             "loop": 5
+        },
+        "special_duration": 
+        {
+            "hustdb/get": "15s"
         },
         "srv":
         {

@@ -36,6 +36,10 @@
             "timeout": "10s",
             "loop": 5
         },
+        "special_duration": 
+        {
+            "hustdb/get": "15s"
+        },
         "srv":
         {
             "hustdb": "192.168.1.101:8085",
@@ -71,9 +75,10 @@
 * `wrk`  
     * `threads`: 使用的线程数量，建议 **不要超过机器 `CPU` 的核心数量**  
     * `connections`: 开启的并发连接数  
-    * `duration`: 单个用例持续的时间，建议的值：`[3s, 30s]`  
+    * `duration`: 单个用例持续的时间，建议的值：`[3s, 60s]`  
     * `timeout`: 单个请求的超时时间，该值应不大于 `duration`  
     * `loop`: 单个用例执行的轮数  
+* `special_duration`: 特定 `uri` 对应的用例持续的时间，建议的值：`[3s, 60s]`  
 * `data`: 用于配置请求的数据大小，键作为用例目录的名字，值作为请求数据的大小  
 * `srv`: 用于配置 `huststore` 各个服务的地址，请根据实际的测试环境进行配置  
 * `latency_distribution`: 用于统计请求的延时分布，每项的值表示百分比  
@@ -293,6 +298,10 @@
             "duration": "45s",
             "timeout": "10s",
             "loop": 5
+        },
+        "special_duration": 
+        {
+            "hustdb/get": "15s"
         },
         "srv":
         {
